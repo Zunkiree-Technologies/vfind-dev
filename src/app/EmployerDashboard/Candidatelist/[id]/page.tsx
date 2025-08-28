@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   FileText,
   Lock,
+  Heart,
 } from "lucide-react";
 import Loader from "../../../../../components/loading";
 
@@ -64,21 +65,143 @@ export default function CandidateDetailPage() {
   const [nurseId, setNurseId] = useState<number | null>(null);
   const [employerId, setEmployerId] = useState<number | null>(null);
 
-  // Ensure employerId is loaded from localStorage
+  // Wishlist state
+  const [wishlisted, setWishlisted] = useState(false);
+
+  // Load employerId from localStorage
   useEffect(() => {
     if (!employerId && typeof window !== "undefined") {
       const storedEmployerId = localStorage.getItem("employerId");
-      // console.log("Loaded employerId from localStorage:", storedEmployerId);
       if (storedEmployerId) setEmployerId(Number(storedEmployerId));
     }
   }, [employerId]);
+
+  // Load wishlist state from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined" && id) {
+      const stored = localStorage.getItem(`wishlist-${id}`);
+      setWishlisted(stored === "true");
+    }
+  }, [id]);
+
+// Check if this candidate is already in wishlist
+useEffect(() => {
+  const fetchWishlistStatus = async () => {
+    if (!nurseId || !employerId) return;
+
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    try {
+      const res = await fetch(
+        `https://x8ki-letl-twmt.n7.xano.io/api:P9j60cGD/wishlist?employer_profiles_id=${employerId}&nurse_profiles_id=${nurseId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Failed to fetch wishlist status:", text);
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data.length > 0) {
+        setWishlisted(true);
+      } else {
+        setWishlisted(false);
+      }
+    } catch (err) {
+      console.error("Error fetching wishlist status:", err);
+    }
+  };
+
+  fetchWishlistStatus();
+}, [nurseId, employerId]);
+
+
+  const handleWishlistToggle = async () => {
+    if (!nurseId || !employerId) return;
+
+    const token = localStorage.getItem("authToken");
+    if (!token) return alert("Unauthorized: Please log in");
+
+    try {
+      if (!wishlisted) {
+        // Add to wishlist
+        const res = await fetch(
+          "https://x8ki-letl-twmt.n7.xano.io/api:P9j60cGD/wishlist",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              nurse_profiles_id: nurseId,
+              employer_profiles_id: employerId,
+            }),
+          }
+        );
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Failed to add wishlist:", text);
+          return alert("Failed to add to wishlist");
+        }
+
+        setWishlisted(true);
+      } else {
+        // Remove from wishlist
+        // First, get the wishlist ID for this combination
+        const fetchRes = await fetch(
+          `https://x8ki-letl-twmt.n7.xano.io/api:P9j60cGD/wishlist?employer_profiles_id=${employerId}&nurse_profiles_id=${nurseId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (!fetchRes.ok) {
+          const text = await fetchRes.text();
+          console.error("Failed to fetch wishlist:", text);
+          return alert("Failed to remove from wishlist");
+        }
+
+        const data = await fetchRes.json();
+
+        if (data.length === 0) return; // Nothing to delete
+
+        const wishlistId = data[0].id;
+
+        const deleteRes = await fetch(
+          `https://x8ki-letl-twmt.n7.xano.io/api:P9j60cGD/wishlist/${wishlistId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!deleteRes.ok) {
+          const text = await deleteRes.text();
+          console.error("Failed to remove wishlist:", text);
+          return alert("Failed to remove from wishlist");
+        }
+
+        setWishlisted(false);
+      }
+    } catch (err) {
+      console.error("Error handling wishlist:", err);
+      alert("An error occurred while updating wishlist");
+    }
+  };
 
   // Fetch candidate details
   useEffect(() => {
     const fetchCandidate = async () => {
       setLoading(true);
       setError(null);
-      // console.log("Fetching candidate details for id:", id);
 
       try {
         if (!id) {
@@ -91,7 +214,6 @@ export default function CandidateDetailPage() {
           typeof window !== "undefined"
             ? localStorage.getItem("authToken")
             : null;
-        // console.log("Auth token for candidate fetch:", token);
         if (!token) {
           setError("Unauthorized: Please log in.");
           setLoading(false);
@@ -108,8 +230,6 @@ export default function CandidateDetailPage() {
           }
         );
 
-        // console.log("Candidate fetch response status:", res.status);
-
         if (!res.ok) {
           const errorText = await res.text();
           setError(
@@ -120,8 +240,6 @@ export default function CandidateDetailPage() {
         }
 
         const data: CandidateDetail = await res.json();
-        // console.log("Candidate data:", data);
-
         if (!data || Object.keys(data).length === 0) {
           setError("Candidate not found.");
           setCandidate(null);
@@ -141,32 +259,21 @@ export default function CandidateDetailPage() {
     fetchCandidate();
   }, [id]);
 
-  // Check connection using new API
+  // Check connection
   const checkConnection = useCallback(async () => {
-    if (!id || !employerId) {
-      // console.log("Skipping checkConnection: missing id or employerId");
-      return;
-    }
+    if (!id || !employerId) return;
 
     try {
       const token = localStorage.getItem("authToken");
-      if (!token) {
-        // console.log("No token found, skipping checkConnection");
-        return;
-      }
+      if (!token) return;
 
-      // console.log("Checking connection with sendStatus API...");
       const connRes = await fetch(
         `https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/sendStatus?employer_profiles_id=${employerId}&nurse_profiles_id=${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // console.log("sendStatus response status:", connRes.status);
-
       if (connRes.ok) {
         const connData = await connRes.json();
-        // console.log("sendStatus response data:", connData);
-
         if (connData.length > 0) {
           setConnectionStatus(connData[0].status);
         } else {
@@ -182,7 +289,7 @@ export default function CandidateDetailPage() {
     checkConnection();
   }, [checkConnection]);
 
-  // Handle Send Connection
+  // Send connection
   const handleSendConnection = async () => {
     if (connectionStatus !== "none" || !nurseId || !employerId) return;
 
@@ -196,7 +303,6 @@ export default function CandidateDetailPage() {
       if (!token) return alert("Unauthorized: Please log in");
 
       setSendingConnection(true);
-      // console.log("Sending connection request...");
 
       const res = await fetch(
         `https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/sendConnection`,
@@ -214,8 +320,6 @@ export default function CandidateDetailPage() {
         }
       );
 
-      // console.log("Send connection response status:", res.status);
-
       if (!res.ok) {
         const text = await res.text();
         console.error("Failed to send connection:", text);
@@ -223,7 +327,6 @@ export default function CandidateDetailPage() {
       }
 
       setConnectionStatus("pending");
-      // console.log("Connection request sent successfully");
     } catch (err) {
       console.error("Error sending connection request:", err);
       alert("Error sending connection request.");
@@ -273,7 +376,19 @@ export default function CandidateDetailPage() {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       {/* Top Row: Profile Info */}
-      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-8 mb-8">
+      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-8 mb-8 relative">
+        {/* Wishlist Button Top Right */}
+        <button
+          onClick={handleWishlistToggle}
+          className={`absolute top-6 right-6 p-2 rounded-full shadow-md transition-all duration-200 ${wishlisted ? "bg-blue-600" : "bg-white"
+            }`}
+        >
+          <Heart
+            className={`w-6 h-6 transition-colors duration-200 ${wishlisted ? "text-white" : "text-blue-600"
+              }`}
+          />
+        </button>
+
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
           {/* Profile Image */}
           <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200 flex-shrink-0">

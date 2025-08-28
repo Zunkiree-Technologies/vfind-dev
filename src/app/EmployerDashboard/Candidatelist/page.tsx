@@ -350,6 +350,8 @@ export default function CandidateList() {
                 key={candidate.id}
                 className="relative rounded-2xl p-6 bg-white shadow-lg hover:shadow-xl transition-all duration-300 w-full"
               >
+
+
                 {/* Photo */}
                 <div className="absolute top-6 right-6 h-20 w-20 bg-gray-200 rounded-lg overflow-hidden">
                   {profileImageUrl ? (
@@ -357,8 +359,8 @@ export default function CandidateList() {
                       src={profileImageUrl}
                       alt={candidate.fullName}
                       className="h-full w-full object-cover"
-                      width={20}
-                      height={20}
+                      width={80}
+                      height={80}
                     />
                   ) : (
                     <div className="h-full w-full bg-gray-300" />
@@ -375,7 +377,9 @@ export default function CandidateList() {
                 <div className="space-y-2 text-gray-700 text-sm">
                   <div className="flex items-center gap-2">
                     <MapPin size={18} className="text-blue-600" />
-                    <span>{candidate.currentResidentialLocation || "Location not specified"}</span>
+                    <span>
+                      {candidate.currentResidentialLocation || "Location not specified"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Briefcase size={18} className="text-blue-600" />
@@ -383,7 +387,12 @@ export default function CandidateList() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock size={18} className="text-blue-600" />
-                    <span>{candidate.maxWorkHours ? `${candidate.maxWorkHours}/hr Per Week` : "Hourly pay not specified"}</span>
+                    <span>
+                      {candidate.maxWorkHours
+                        ? `${candidate.maxWorkHours}/hr Per Week`
+                        : "Hourly pay not specified"}
+                    </span>
+                    
                   </div>
                 </div>
 
@@ -395,7 +404,6 @@ export default function CandidateList() {
                 >
                   View details
                 </Link>
-
               </div>
             );
           })}

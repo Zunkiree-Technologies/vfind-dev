@@ -22,8 +22,8 @@ export default function NotificationSidebar() {
   const [hasNew, setHasNew] = useState(false);
 
   // toast state
-  const [toastMessage, setToastMessage] = useState<string>("");
-  const [toastType, setToastType] = useState<"success" | "error">("success");
+  const [, setToastMessage] = useState<string>("");
+  const [, setToastType] = useState<"success" | "error">("success");
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fetchNotifications = async (silent = false) => {
@@ -210,18 +210,6 @@ export default function NotificationSidebar() {
         <div className="fixed inset-0 bg-black/10 z-40" onClick={() => setIsOpen(false)} />
       )}
 
-      {/* Toast */}
-      {toastMessage && (
-        <div
-          className={`fixed top-5 right-5 z-[9999] px-4 py-3 rounded-lg shadow-lg text-sm transition-all duration-300 transform ${
-            toastType === "success"
-              ? "bg-green-100 text-green-800 border border-green-300"
-              : "bg-red-100 text-red-800 border border-red-300"
-          }`}
-        >
-          {toastMessage}
-        </div>
-      )}
     </>
   );
 }

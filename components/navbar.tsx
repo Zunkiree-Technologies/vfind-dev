@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ChevronDown, Menu, X } from "lucide-react";
 
@@ -7,6 +7,10 @@ export default function Navbar() {
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
   const [isForEmployersDropdownOpen, setIsForEmployersDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Refs for detecting outside clicks
+  const authRef = useRef<HTMLDivElement>(null);
+  const employerRef = useRef<HTMLDivElement>(null);
 
   const toggleAuthDropdown = () => {
     setIsAuthDropdownOpen(!isAuthDropdownOpen);
@@ -23,6 +27,26 @@ export default function Navbar() {
     setIsAuthDropdownOpen(false);
     setIsForEmployersDropdownOpen(false);
   };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        authRef.current &&
+        !authRef.current.contains(event.target as Node) &&
+        employerRef.current &&
+        !employerRef.current.contains(event.target as Node)
+      ) {
+        setIsAuthDropdownOpen(false);
+        setIsForEmployersDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="shadow-md px-4 py-2 bg-white dark:bg-gray-900 transition-colors duration-300">
@@ -47,33 +71,67 @@ export default function Navbar() {
           </Link>
 
           {/* For Seekers Dropdown */}
-          <div className="relative">
-            <button onClick={toggleAuthDropdown} className="flex items-center text-black px-4 py-2 text-sm font-medium">
+          <div className="relative" ref={authRef}>
+            <button
+              onClick={toggleAuthDropdown}
+              className="flex items-center text-black px-4 py-2 text-sm font-medium"
+            >
               For Seekers
-              <ChevronDown className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${isAuthDropdownOpen ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${
+                  isAuthDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
             {isAuthDropdownOpen && (
               <div className="absolute right-0 mt-2 w-45 bg-white rounded-md shadow-lg border z-50">
                 <ul className="py-2 text-sm text-gray-700">
-                  <li><Link href="/signin" className="block px-4 py-2 hover:bg-gray-100">Login</Link></li>
-                  <li><Link href="/signup" className="block px-4 py-2 hover:bg-gray-100">Create an Account</Link></li>
+                  <li>
+                    <Link href="/signin" className="block px-4 py-2 hover:bg-gray-100">
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/signup" className="block px-4 py-2 hover:bg-gray-100">
+                      Create an Account
+                    </Link>
+                  </li>
                 </ul>
               </div>
             )}
           </div>
 
           {/* For Employers Dropdown */}
-          <div className="relative">
-            <button onClick={toggleEmployersDropdown} className="flex items-center text-black px-4 py-2 rounded-md text-sm font-medium cursor-pointer">
+          <div className="relative" ref={employerRef}>
+            <button
+              onClick={toggleEmployersDropdown}
+              className="flex items-center text-black px-4 py-2 rounded-md text-sm font-medium cursor-pointer"
+            >
               For Employers
-              <ChevronDown className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${isForEmployersDropdownOpen ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${
+                  isForEmployersDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
             {isForEmployersDropdownOpen && (
               <div className="absolute right-0 w-48 bg-white rounded-md shadow-lg border z-50 mt-2">
                 <ul className="py-2 text-sm text-gray-700">
-                  <li><Link href="/employerloginpage" className="block px-4 py-2 hover:bg-gray-100">Login</Link></li>
-                  <li><Link href="/foremployer" className="block px-4 py-2 hover:bg-gray-100">Create an Account</Link></li>
-                  <li><Link href="/foremployer" className="block px-4 py-2 hover:bg-gray-100">Post a Free Job</Link></li>
+                  <li>
+                    <Link href="/employerloginpage" className="block px-4 py-2 hover:bg-gray-100">
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/foremployer" className="block px-4 py-2 hover:bg-gray-100">
+                      Create an Account
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/foremployer" className="block px-4 py-2 hover:bg-gray-100">
+                      Post a Free Job
+                    </Link>
+                  </li>
                 </ul>
               </div>
             )}
@@ -91,35 +149,75 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden px-4 pb-4 space-y-2 border-t">
-          <Link href="/blogs" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">Resources</Link>
-          <Link href="/about" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">About</Link>
-          <Link href="/contact" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">Contact Us</Link>
+          <Link href="/blogs" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
+            Resources
+          </Link>
+          <Link href="/about" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
+            About
+          </Link>
+          <Link href="/contact" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
+            Contact Us
+          </Link>
 
           {/* Mobile For Seekers */}
           <div className="relative">
-            <button onClick={toggleAuthDropdown} className="flex justify-between w-full items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">
+            <button
+              onClick={toggleAuthDropdown}
+              className="flex justify-between w-full items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded"
+            >
               For Seekers
-              <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isAuthDropdownOpen ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`w-4 h-4 transition-transform duration-300 ${
+                  isAuthDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
             {isAuthDropdownOpen && (
               <ul className="pl-4 mt-1 space-y-1">
-                <li><Link href="/signin" className="block px-3 py-2 hover:bg-gray-100 rounded">Login</Link></li>
-                <li><Link href="/signup" className="block px-3 py-2 hover:bg-gray-100 rounded">Create an Account</Link></li>
+                <li>
+                  <Link href="/signin" className="block px-3 py-2 hover:bg-gray-100 rounded">
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/signup" className="block px-3 py-2 hover:bg-gray-100 rounded">
+                    Create an Account
+                  </Link>
+                </li>
               </ul>
             )}
           </div>
 
           {/* Mobile For Employers */}
           <div className="relative">
-            <button onClick={toggleEmployersDropdown} className="flex justify-between w-full items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded">
+            <button
+              onClick={toggleEmployersDropdown}
+              className="flex justify-between w-full items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded"
+            >
               For Employers
-              <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isForEmployersDropdownOpen ? "rotate-180" : ""}`} />
+              <ChevronDown
+                className={`w-4 h-4 transition-transform duration-300 ${
+                  isForEmployersDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
             {isForEmployersDropdownOpen && (
               <ul className="pl-4 mt-1 space-y-1">
-                <li><Link href="/employerloginpage" className="block px-3 py-2 hover:bg-gray-100 rounded">Login</Link></li>
-                <li><Link href="/foremployer" className="block px-3 py-2 hover:bg-gray-100 rounded">Create an Account</Link></li>
-                <li><Link href="/foremployer" className="block px-3 py-2 hover:bg-gray-100 rounded">Post a Free Job</Link></li>
+                <li>
+                  <Link href="/employerloginpage" className="block px-3 py-2 hover:bg-gray-100 rounded">
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/foremployer" className="block px-3 py-2 hover:bg-gray-100 rounded">
+                    Create an Account
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/foremployer" className="block px-3 py-2 hover:bg-gray-100 rounded">
+                    Post a Free Job
+                  </Link>
+                </li>
               </ul>
             )}
           </div>

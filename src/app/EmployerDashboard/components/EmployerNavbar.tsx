@@ -54,6 +54,12 @@ export default function EmployerNavbar({ companyName }: NavbarProps) {
             >
               Post Job
             </button>
+             <button
+              onClick={() => router.push("/EmployerDashboard/Wishlist")}
+              className="text-gray-700 hover:text-blue-600 font-medium"
+            >
+              WishList
+            </button>
           </div>
           <button
             onClick={toggleProfileMenu}
@@ -94,7 +100,8 @@ export default function EmployerNavbar({ companyName }: NavbarProps) {
               </button>
                 <button
               onClick={() => router.push("/EmployerDashboard/status")}
-              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 md:hidden"
+
             >
              Candidate Request
             </button>
