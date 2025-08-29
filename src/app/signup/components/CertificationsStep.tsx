@@ -10,7 +10,7 @@ export function CertificationsStep({ formData, handleCheckboxChange, handleChang
     "Manual Handling",
     "Vaccination / Immunisation",
     "NDIS Worker Screening",
-    "Photo ID Card",
+    // "Photo ID Card",
   ];
 
   const allSelected = allCertifications.every(cert => formData.certifications.includes(cert));

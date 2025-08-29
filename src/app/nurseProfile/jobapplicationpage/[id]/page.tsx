@@ -87,7 +87,7 @@ export default function JobApplicationPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`, // use token from state
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({
             jobs_id: job.id,

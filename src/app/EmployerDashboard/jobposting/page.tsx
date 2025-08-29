@@ -235,7 +235,7 @@ function JobPostingContent() {
       </div>
 
       {/* Form */}
-      <div className="bg-white rounded-lg shadow-lg p-8 w-[570px] h-[550px] max-w-4xl overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-[570px] h-[550px] h-fit max-w-4xl overflow-y-auto">
         {step === 1 && (
           <>
             <div className="mb-4">
@@ -450,16 +450,16 @@ function JobPostingContent() {
               />
             </div> */}
 
-            <div className="mt-4 border-t pt-4">
+            <div className="mt-4  pt-4">
               <h2 className="text-lg font-semibold mb-2">Job Description</h2>
 
 
               <RichTextEditor
                 value={formData.description}
-                 onChange={(content) =>
-          setFormData((prev) => ({ ...prev, description: content }))
-        }
-      />
+                onChange={(content) =>
+                  setFormData((prev) => ({ ...prev, description: content }))
+                }
+              />
             </div>
 
           </>

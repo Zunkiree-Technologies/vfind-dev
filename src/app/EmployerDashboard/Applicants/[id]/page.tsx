@@ -43,6 +43,7 @@ const JobApplicationsPage = () => {
         );
         const data = await res.json();
         setApplications(data);
+        console.log(data)
       } catch (err) {
         console.error("Error fetching applications:", err);
       } finally {
@@ -217,12 +218,8 @@ const JobApplicationsPage = () => {
                           <Calendar className="w-3 h-3" />
                           <span>Applied: {new Date(app.applied_date).toLocaleDateString()}</span>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <span>Job ID: {app.jobs_id}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <span>Profile ID: {app.nurse_profiles_id}</span>
-                        </div>
+
+
                       </div>
                     </div>
                   </div>
@@ -238,12 +235,14 @@ const JobApplicationsPage = () => {
                     </span>
 
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                      <button
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        onClick={() => router.push(`/EmployerDashboard/Candidatelist/${app.nurse_profiles_id}`)}
+                      >
                         View Profile
                       </button>
-                      <button className="text-gray-600 hover:text-gray-800 text-sm font-medium">
-                        Contact
-                      </button>
+
+
                     </div>
                   </div>
                 </div>

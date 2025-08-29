@@ -2,8 +2,16 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import {
-  Bold, Italic, Underline, Strikethrough,
-  List, ListOrdered, AlignLeft, AlignCenter, AlignRight
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  List,
+  ListOrdered,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
 } from "lucide-react";
 
 interface RichTextEditorProps {
@@ -13,182 +21,106 @@ interface RichTextEditorProps {
 
 export default function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const [isClient, setIsClient] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
 
-  useEffect(() => {
-    setIsClient(true);
+  const updateCounts = useCallback((html: string) => {
+    const text = html.replace(/<[^>]+>/g, "").trim();
+    setWordCount(text ? text.split(/\s+/).length : 0);
+    setCharCount(text.length);
   }, []);
 
-  const updateCounts = useCallback(() => {
-    if (editorRef.current) {
-      const text = editorRef.current.innerText || "";
-      setWordCount(text.trim() ? text.trim().split(/\s+/).length : 0);
-      setCharCount(text.length);
-    }
-  }, []);
-
-  // 🔑 Sync content with parent
   useEffect(() => {
     if (!editorRef.current) return;
-
-    if (value) {
-      // set fetched or parent-provided value
-      if (editorRef.current.innerHTML !== value) {
-        editorRef.current.innerHTML = value;
-        updateCounts();
-      }
-    } else if (!value && editorRef.current.innerHTML.trim() === "") {
-      // only set demo text if completely empty (first load)
-      const demoContent = `<p>Job Description</p>`;
-      editorRef.current.innerHTML = demoContent;
-      onChange(demoContent);
-      updateCounts();
+    if (editorRef.current.innerHTML.trim() === "" && value) {
+      editorRef.current.innerHTML = value;
+      updateCounts(value);
     }
-  }, [value, onChange, updateCounts]);
+  }, [value, updateCounts]);
 
-  const handleInput = useCallback(() => {
+  const handleInput = () => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-      updateCounts();
+      const html = editorRef.current.innerHTML;
+      onChange(html);
+      updateCounts(html);
     }
-  }, [onChange, updateCounts]);
+  };
 
-  const execCommand = useCallback(
-    (command: string, value: string | boolean = false) => {
-      document.execCommand(command, false, value as string);
-      editorRef.current?.focus();
-      handleInput();
-    },
-    [handleInput]
-  );
+  const execCommand = (command: string, value?: string) => {
+    document.execCommand(command, false, value);
 
-  const insertList = useCallback(
-    (type: "ul" | "ol") => {
-      document.execCommand(
-        type === "ul" ? "insertUnorderedList" : "insertOrderedList",
-        false
-      );
-      const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        let node = sel.anchorNode as HTMLElement | null;
-        while (node && node.nodeName !== type.toUpperCase()) {
-          node = node.parentElement;
-        }
-        if (node) {
-          node.style.listStyleType = type === "ul" ? "disc" : "decimal";
-          node.style.margin = "1em 0";
-          node.style.paddingLeft = "2em";
-        }
-      }
-      editorRef.current?.focus();
-      handleInput();
-    },
-    [handleInput]
-  );
+    // Apply proper list styling
+    if (editorRef.current) {
+      editorRef.current.querySelectorAll("ul").forEach((ul) => {
+        (ul as HTMLUListElement).style.listStyleType = "disc";
+        (ul as HTMLUListElement).style.margin = "0.5em 0";
+        (ul as HTMLUListElement).style.paddingLeft = "1.5em";
+      });
+      editorRef.current.querySelectorAll("ol").forEach((ol) => {
+        (ol as HTMLOListElement).style.listStyleType = "decimal";
+        (ol as HTMLOListElement).style.margin = "0.5em 0";
+        (ol as HTMLOListElement).style.paddingLeft = "1.5em";
+      });
 
-  const isCommandActive = useCallback((command: string): boolean => {
-    return document.queryCommandState(command);
-  }, []);
-
-  if (!isClient) {
-    return (
-      <div className="border border-gray-200 rounded-lg bg-gray-50 animate-pulse">
-        <div className="h-[400px] flex items-center justify-center">
-          <div className="text-gray-400">Loading editor...</div>
-        </div>
-      </div>
-    );
-  }
-
-  const ToolbarButton = ({
-    onClick,
-    isActive,
-    children,
-    title,
-    size = "sm",
-  }: {
-    onClick: () => void;
-    isActive?: boolean;
-    children: React.ReactNode;
-    title: string;
-    size?: "sm" | "md";
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`
-        flex items-center justify-center transition-colors duration-150
-        ${size === "sm" ? "w-8 h-8" : "px-3 h-8"}
-        ${isActive ? "bg-gray-200 text-gray-900" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}
-        rounded border-0 text-sm
-      `}
-    >
-      {children}
-    </button>
-  );
+      const html = editorRef.current.innerHTML;
+      onChange(html);
+      updateCounts(html);
+    }
+  };
 
   return (
-    <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm relative">
+    <div className="w-full max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-md h-150">
       {/* Toolbar */}
-      <div className="bg-gray-50 px-3 py-2 border-b border-gray-200 flex flex-wrap gap-1 items-center sticky top-0 z-50">
-        <ToolbarButton onClick={() => execCommand("bold")} isActive={isCommandActive("bold")} title="Bold"><Bold size={16} /></ToolbarButton>
-        <ToolbarButton onClick={() => execCommand("italic")} isActive={isCommandActive("italic")} title="Italic"><Italic size={16} /></ToolbarButton>
-        <ToolbarButton onClick={() => execCommand("underline")} isActive={isCommandActive("underline")} title="Underline"><Underline size={16} /></ToolbarButton>
-        <ToolbarButton onClick={() => execCommand("strikeThrough")} isActive={isCommandActive("strikeThrough")} title="Strikethrough"><Strikethrough size={16} /></ToolbarButton>
+      <div className="flex flex-wrap gap-2 mb-3 border-b pb-2">
+        <button onClick={() => execCommand("bold")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <Bold className="w-4 h-4" />
+        </button>
+        <button onClick={() => execCommand("italic")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <Italic className="w-4 h-4" />
+        </button>
+        <button onClick={() => execCommand("underline")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <Underline className="w-4 h-4" />
+        </button>
+        <button onClick={() => execCommand("strikeThrough")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <Strikethrough className="w-4 h-4" />
+        </button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+        <button onClick={() => execCommand("insertUnorderedList")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <List className="w-4 h-4" />
+        </button>
+        <button onClick={() => execCommand("insertOrderedList")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <ListOrdered className="w-4 h-4" />
+        </button>
 
-        <ToolbarButton onClick={() => insertList("ul")} isActive={isCommandActive("insertUnorderedList")} title="Bullet List"><List size={16} /></ToolbarButton>
-        <ToolbarButton onClick={() => insertList("ol")} isActive={isCommandActive("insertOrderedList")} title="Numbered List"><ListOrdered size={16} /></ToolbarButton>
-
-        <div className="w-px h-6 bg-gray-300 mx-1"></div>
-
-        <ToolbarButton onClick={() => execCommand("justifyLeft")} title="Align Left"><AlignLeft size={16} /></ToolbarButton>
-        <ToolbarButton onClick={() => execCommand("justifyCenter")} title="Align Center"><AlignCenter size={16} /></ToolbarButton>
-        <ToolbarButton onClick={() => execCommand("justifyRight")} title="Align Right"><AlignRight size={16} /></ToolbarButton>
+        {/* Alignments */}
+        <button onClick={() => execCommand("justifyLeft")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <AlignLeft className="w-4 h-4" />
+        </button>
+        <button onClick={() => execCommand("justifyCenter")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <AlignCenter className="w-4 h-4" />
+        </button>
+        <button onClick={() => execCommand("justifyRight")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <AlignRight className="w-4 h-4" />
+        </button>
+        <button onClick={() => execCommand("justifyFull")} className="p-2 hover:bg-gray-100 rounded-lg">
+          <AlignJustify className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Editor */}
-      <div className="relative bg-white">
-        <div
-          ref={editorRef}
-          contentEditable
-          onInput={handleInput}
-          className="min-h-[300px] p-4 outline-none focus:ring-0"
-          suppressContentEditableWarning
-        />
-      </div>
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        className="min-h-[450px] p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
 
-      {/* Status Bar */}
-      <div className="bg-gray-50 px-4 py-2 border-t border-gray-200 flex gap-4 text-sm text-gray-500">
+      {/* Status */}
+      <div className="flex justify-between items-center mt-3 text-sm text-gray-500 border-t pt-2">
         <span>{wordCount} words</span>
         <span>{charCount} characters</span>
       </div>
-
-      {/* Styles */}
-      <style jsx>{`
-        [contenteditable] p { margin:0.5em 0; line-height:1.6; color:#374151; }
-        [contenteditable] ul {
-          list-style-type: disc !important;
-          list-style-position: outside !important;
-          padding-left: 2em;
-          margin: 1em 0;
-        }
-        [contenteditable] ol {
-          list-style-type: decimal !important;
-          list-style-position: outside !important;
-          padding-left: 2em;
-          margin: 1em 0;
-        }
-        [contenteditable] li { margin:0.25em 0; line-height:1.5; }
-        [contenteditable] strong { font-weight:700; }
-        [contenteditable] em { font-style:italic; }
-        [contenteditable] u { text-decoration:underline; }
-        [contenteditable] s { text-decoration:line-through; }
-      `}</style>
     </div>
   );
 }

@@ -120,6 +120,14 @@
     background-position: var(--width);
   }
 }
+a {
+  cursor: pointer;
+  text-decoration: none; /* optional */
+}
+
+button {
+  cursor: pointer;
+}
 /* .border{
   border-width: 0px;
 } */

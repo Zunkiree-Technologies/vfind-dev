@@ -6,7 +6,9 @@ import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
 
 
+
 interface Job {
+  created_at: string;
   id: number;
   title: string;
   location: string;
@@ -207,7 +209,7 @@ export default function EmployerDashboard() {
                   <tr className=" text-gray-600">
                     <th className="py-2 px-3">Job Title</th>
                     <th className="py-2 px-3">Created By</th>
-                    <th className="py-2 px-3">Modified On</th>
+                    <th className="py-2 px-3">Created  On</th>
                     <th className="py-2 px-3">Applicants</th>
                     <th className="py-2 px-3">Actions</th>
                   </tr>
@@ -219,17 +221,18 @@ export default function EmployerDashboard() {
                         <td className="py-2 px-3">{job.title}</td>
                         <td className="py-2 px-3">{employer.email}</td>
                         <td className="py-2 px-3">
-                          {new Date(job.updated_at).toLocaleDateString()}
+                          {job.created_at ? new Date(Number(job.created_at)).toLocaleDateString() : "-"}
                         </td>
+
                         <td className="py-2 px-3">
-                            <a
-                              href={`/EmployerDashboard/Applicants/${job.id}`}
-                              className="text-blue-600 hover:underline"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              View
-                            </a>
+                          <a
+                            href={`/EmployerDashboard/Applicants/${job.id}`}
+                            className="text-blue-600 hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View
+                          </a>
 
 
                         </td>

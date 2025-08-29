@@ -31,7 +31,7 @@ export function JobTypesStep({ formData, handleChange }: StepProps) {
             </div>
 
             {formData.jobTypes && formData.jobTypes !== "Open to any" && (
-                <div className="mt-6 border-t pt-4">
+                <div className="mt-6  pt-4">
                     <h3 className="text-md font-semibold mb-2">
                         Would you be open to other job types if the opportunity fits your needs?
                     </h3>

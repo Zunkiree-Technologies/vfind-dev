@@ -6,7 +6,7 @@ import ThemeWrapper from "./ThemeWrapper";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], // Regular to Bold
+  weight: ["400", "500", "600", "700"], 
   variable: "--font-poppins",
 });
 
