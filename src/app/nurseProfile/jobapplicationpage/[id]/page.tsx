@@ -17,6 +17,8 @@ interface Job {
   experienceMin: string;
   experienceMax: string;
   updated_at: string;
+  certifications: string[];
+
   company?: string;
   shift?: string;
   contact_email?: string;
@@ -92,7 +94,7 @@ export default function JobApplicationPage() {
           body: JSON.stringify({
             jobs_id: job.id,
             status: "applied",
-            applied_date: new Date().toISOString(), 
+            applied_date: new Date().toISOString(),
             email: emailInput,
           }),
 
@@ -174,14 +176,45 @@ export default function JobApplicationPage() {
             </div>
           </div>
 
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Job Description</h2>
-            <div className="prose prose-sm max-w-none text-gray-700">
-              {job.description.split("\n").map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+          <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 shadow-lg">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                Job Description
+              </h3>
+              {job.type && (
+                <span className="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full dark:bg-blue-800 dark:text-blue-200">
+                  {job.type}
+                </span>
+              )}
             </div>
+
+            {/* Raw description */}
+            <div
+              dangerouslySetInnerHTML={{ __html: job.description }}
+            />
+
+            {/* Certifications / Highlights */}
+            {job.certifications?.length > 0 && (
+              <div className="mt-4">
+                <h2 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  Certifications
+                </h2>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {job.certifications.map((cert) => (
+                    <span
+                      key={cert}
+                      className="text-xs font-semibold px-2 py-1 bg-blue-50 text-blue-700 rounded-full dark:bg-blue-800 dark:text-blue-200"
+                    >
+                      {cert}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
+
 
           {job.requirements && job.requirements.length > 0 && (
             <div>

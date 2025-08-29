@@ -191,6 +191,7 @@ export default function JobPreviewPage() {
               {job.certifications?.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {job.certifications.map((cert) => (
+  
                     <span
                       key={cert}
                       className="text-xs font-semibold px-2 py-1 bg-blue-50 text-blue-700 rounded-full dark:bg-blue-800 dark:text-blue-200"
