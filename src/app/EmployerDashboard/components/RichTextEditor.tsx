@@ -49,7 +49,6 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   const execCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);
 
-    // Apply proper list styling
     if (editorRef.current) {
       editorRef.current.querySelectorAll("ul").forEach((ul) => {
         (ul as HTMLUListElement).style.listStyleType = "disc";
@@ -69,9 +68,9 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-md h-150">
-      {/* Toolbar */}
-      <div className="flex flex-wrap gap-2 mb-3 border-b pb-2">
+    <div className="w-full  rounded-lg flex flex-col h-[400px]">
+      {/* Toolbar (fixed inside editor box) */}
+      <div className="flex flex-wrap gap-2 p-2 border-b sticky top-0 bg-white z-10">
         <button onClick={() => execCommand("bold")} className="p-2 hover:bg-gray-100 rounded-lg">
           <Bold className="w-4 h-4" />
         </button>
@@ -84,15 +83,12 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         <button onClick={() => execCommand("strikeThrough")} className="p-2 hover:bg-gray-100 rounded-lg">
           <Strikethrough className="w-4 h-4" />
         </button>
-
         <button onClick={() => execCommand("insertUnorderedList")} className="p-2 hover:bg-gray-100 rounded-lg">
           <List className="w-4 h-4" />
         </button>
         <button onClick={() => execCommand("insertOrderedList")} className="p-2 hover:bg-gray-100 rounded-lg">
           <ListOrdered className="w-4 h-4" />
         </button>
-
-        {/* Alignments */}
         <button onClick={() => execCommand("justifyLeft")} className="p-2 hover:bg-gray-100 rounded-lg">
           <AlignLeft className="w-4 h-4" />
         </button>
@@ -107,17 +103,17 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         </button>
       </div>
 
-      {/* Editor */}
+      {/* Scrollable Editor */}
       <div
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}
-        className="min-h-[450px] p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="flex-1 overflow-y-auto p-3 focus:outline-none"
       />
 
-      {/* Status */}
-      <div className="flex justify-between items-center mt-3 text-sm text-gray-500 border-t pt-2">
+      {/* Status bar */}
+      <div className="flex justify-between items-center px-3 py-1 text-xs text-gray-500 border-t">
         <span>{wordCount} words</span>
         <span>{charCount} characters</span>
       </div>
