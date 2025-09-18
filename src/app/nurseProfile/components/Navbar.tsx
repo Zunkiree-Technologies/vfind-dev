@@ -27,13 +27,13 @@ export const Navbar = () => {
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 flex-wrap">
-          {/* Browse Jobs */}
+          {/* Browse Jobs
           <Link
             href="/browse-jobs"
             className="hidden md:inline-block ml-2 text-blue-600 font-semibold hover:text-blue-800 transition"
           >
             Browse Jobs
-          </Link>
+          </Link> */}
 
           {/* Search Bar */}
           <form
@@ -87,15 +87,16 @@ export const Navbar = () => {
               Search
             </button>
           </form>
-          <Link
+         
+
+          {/* Profile & Dropdown */}
+          <div className="relative flex items-center">
+             <Link
             href="/nurseProfile/connectedstatus"
             className="hidden md:inline-block ml-2 text-blue-600 font-semibold hover:text-blue-800 transition"
           >
             Connected Request
           </Link>
-
-          {/* Profile & Dropdown */}
-          <div className="relative flex items-center">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center space-x-2 cursor-pointer ml-4"

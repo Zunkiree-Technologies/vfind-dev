@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { MapPin, Briefcase, Clock, DollarSign } from "lucide-react";
 import Loader from "../../../../components/loading";
-import { Briefcase, MapPin, DollarSign, Clock } from "lucide-react";
 
 interface Job {
   id: number;
@@ -28,18 +28,18 @@ export default function JobData() {
   const [error, setError] = useState<string | null>(null);
 
   // Filters
-  const [locationFilter, setLocationFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
-  const [minExperience, setMinExperience] = useState("");
+  const [search, setSearch] = useState("");
+  const [location, setLocation] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
+  const [shifts, setShifts] = useState<string[]>([]);
+  const [experience, setExperience] = useState<string[]>([]);
 
   // Fetch Jobs
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/jobs"
-        );
+        const res = await fetch("https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/jobs");
         if (!res.ok) throw new Error("Failed to fetch jobs");
         const data = await res.json();
         setJobs(data);
@@ -50,151 +50,197 @@ export default function JobData() {
         setLoading(false);
       }
     };
-
     fetchJobs();
   }, []);
 
-  // View Job Details
-  const handleViewDetails = (job: Job) => {
-    const url = `/nurseProfile/jobapplicationpage/${job.id}`;
-    window.open(url, "_blank");
-  };
-
   // Apply Filters
-  useEffect(() => {
+  const applyFilters = useCallback(() => {
     let temp = [...jobs];
 
-    if (locationFilter) {
+    if (search.trim()) {
       temp = temp.filter((job) =>
-        job.location.toLowerCase().includes(locationFilter.toLowerCase())
+        [job.title, job.company, job.description]
+          .join(" ")
+          .toLowerCase()
+          .includes(search.toLowerCase())
       );
     }
 
-    if (typeFilter) {
-      temp = temp.filter((job) => job.type === typeFilter);
+    if (location.trim()) {
+      temp = temp.filter((job) =>
+        job.location.toLowerCase().includes(location.toLowerCase())
+      );
     }
 
-    if (minExperience) {
-      temp = temp.filter(
-        (job) => parseInt(job.experienceMin) >= parseInt(minExperience)
-      );
+    if (typeFilter.length > 0) {
+      temp = temp.filter((job) => typeFilter.includes(job.type));
+    }
+
+    if (shifts.length > 0) {
+      temp = temp.filter((job) => job.shift && shifts.includes(job.shift));
+    }
+
+    if (experience.length > 0) {
+      temp = temp.filter((job) => {
+        const exp = parseInt(job.experienceMin);
+        if (experience.includes("0-1 Year")) return exp <= 1;
+        if (experience.includes("1-3 Years")) return exp >= 1 && exp <= 3;
+        if (experience.includes("3-5 Years")) return exp >= 3 && exp <= 5;
+        if (experience.includes("5+ Years")) return exp > 5;
+        return true;
+      });
     }
 
     setFilteredJobs(temp);
-  }, [locationFilter, typeFilter, minExperience, jobs]);
+  }, [jobs, search, location, typeFilter, shifts, experience]);
 
-  if (loading) return <Loader loading={true} />;
-  if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
+  useEffect(() => {
+    const debounce = setTimeout(() => applyFilters(), 300);
+    return () => clearTimeout(debounce);
+  }, [search, location, typeFilter, shifts, experience, applyFilters]);
+
+  const handleCheckboxChange = (
+    value: string,
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    setter((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+  };
+
+  const clearFilters = () => {
+    setSearch("");
+    setLocation("");
+    setTypeFilter([]);
+    setShifts([]);
+    setExperience([]);
+    setFilteredJobs(jobs);
+  };
+
+  if (loading) return <Loader />;
+  if (error)
+    return <div className="flex justify-center items-center h-screen text-red-600">{error}</div>;
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 px-6 py-10 container mx-auto">
-      {/* Sidebar Filters */}
-      <div className="md:w-1/4 w-full h-fit bg-white/80 backdrop-blur-md rounded-2xl shadow-md p-6 border border-gray-100">
-        <h2 className="text-lg font-semibold mb-6 text-gray-800">Filter Jobs</h2>
+    <div className="p-6 min-h-screen mx-auto container bg-[#F5F6FA]">
+    
 
-        <div className="space-y-4">
+      <div className="flex gap-6 mt-6 items-start">
+        {/* Filters Sidebar */}
+        <div className="hidden md:block w-64 bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
+          <h2 className="font-semibold text-gray-800 flex justify-between">
+            All Filters
+            <button onClick={clearFilters} className="text-sm text-blue-600">
+              Clear All
+            </button>
+          </h2>
+          <div className="h-0.5 bg-gray-300" />
+
+          {/* Job Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-600">Location</label>
-            <input
-              type="text"
-              placeholder="Enter location"
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-              className="mt-1 w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500"
-            />
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
+            {["Full-time", "Part-time", "Contract", "Casual"].map((type) => (
+              <div key={type} className="flex items-center gap-2 text-sm mb-1">
+                <input
+                  type="checkbox"
+                  checked={typeFilter.includes(type)}
+                  onChange={() => handleCheckboxChange(type, setTypeFilter)}
+                  className="rounded"
+                />
+                <label>{type}</label>
+              </div>
+            ))}
           </div>
+          <div className="h-0.5 bg-gray-300" />
 
+          {/* Shift */}
           <div>
-            <label className="block text-sm font-medium text-gray-600">Job Type</label>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="mt-1 w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All</option>
-              <option value="Full-time">Full-time</option>
-              <option value="Part-time">Part-time</option>
-              <option value="Contract">Contract</option>
-              <option value="Casual">Open to any</option>
-            </select>
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Shift</h3>
+            {["Morning ", "Afternoon", "Night "].map((shift) => (
+              <div key={shift} className="flex items-center gap-2 text-sm mb-1">
+                <input
+                  type="checkbox"
+                  checked={shifts.includes(shift)}
+                  onChange={() => handleCheckboxChange(shift, setShifts)}
+                  className="rounded"
+                />
+                <label>{shift}</label>
+              </div>
+            ))}
           </div>
+          <div className="h-0.5 bg-gray-300" />
 
+          {/* Experience */}
           <div>
-            <label className="block text-sm font-medium text-gray-600">
-              Minimum Experience (Years)
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={minExperience}
-              onChange={(e) => setMinExperience(e.target.value)}
-              className="mt-1 w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500"
-            />
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Experience</h3>
+            {["0-1 Year", "1-3 Years", "3-5 Years", "5+ Years"].map((exp) => (
+              <div key={exp} className="flex items-center gap-2 text-sm mb-1">
+                <input
+                  type="checkbox"
+                  checked={experience.includes(exp)}
+                  onChange={() => handleCheckboxChange(exp, setExperience)}
+                  className="rounded"
+                />
+                <label>{exp}</label>
+              </div>
+            ))}
           </div>
-
-          <button
-            onClick={() => {
-              setLocationFilter("");
-              setTypeFilter("");
-              setMinExperience("");
-            }}
-            className="w-full bg-gray-100 hover:bg-gray-200 rounded-lg p-2 mt-2 text-sm font-medium transition"
-          >
-            Clear Filters
-          </button>
         </div>
-      </div>
 
-      {/* Job Cards */}
-      <div className="md:w-3/4 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredJobs.length === 0 ? (
-          <div className="col-span-full flex flex-col items-center justify-center text-gray-500 py-12 border border-dashed rounded-lg">
-            <Briefcase className="w-12 h-12 mb-2" />
-            <p>No jobs match the selected filters.</p>
-          </div>
-        ) : (
-          filteredJobs.map((job) => (
-            <div
-              key={job.id}
-              className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 p-5 flex flex-col justify-between"
-            >
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">{job.title}</h2>
-                <p className="text-gray-500">{job.company || "Healthcare Facility"}</p>
+        {/* Job Cards */}
+        <div className="flex-1 max-w-4xl mx-4">
+          <div className="grid grid-cols-1 gap-4">
+            {filteredJobs.map((job) => (
+              <div
+                key={job.id}
+                className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2"
+              >
+                {/* Left side */}
+                <div className="flex-1">
+                  <h2 className="font-semibold text-lg text-blue-600 mb-1">{job.title}</h2>
+                  <p className="text-gray-600 text-sm mb-3">{job.company || "Healthcare Facility"}</p>
 
-                <div className="mt-3 space-y-2 text-sm text-gray-600">
-                  <p className="flex items-center gap-2">
-                    <MapPin size={16} /> {job.location}
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <DollarSign size={16} /> ${job.minPay} - ${job.maxPay}/hr
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <Clock size={16} /> {job.experienceMin}+ years experience
-                  </p>
+                  <div className="flex flex-wrap gap-6 text-gray-600 text-sm">
+                    <div className="flex items-center gap-1">
+                      <MapPin size={16} className="text-blue-500" />
+                      <span>{job.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Briefcase size={16} className="text-blue-500" />
+                      <span>{job.type}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock size={16} className="text-blue-500" />
+                      <span>{job.experienceMin}+ years</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <DollarSign size={16} className="text-blue-500" />
+                      <span>${job.minPay} - ${job.maxPay}/hr</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
-                    {job.type}
-                  </span>
-                  {job.shift && (
-                    <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">
-                      {job.shift}
-                    </span>
-                  )}
+                {/* Right side - Button */}
+                <div className="flex items-center gap-4 ml-6 flex-col">
+                  <button
+                    onClick={() =>
+                      window.open(`/nurseProfile/jobapplicationpage/${job.id}`, "_blank")
+                    }
+                    className="px-4 py-2 bg-blue-400 text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
+            ))}
+          </div>
 
-              <button
-                onClick={() => handleViewDetails(job)}
-                className="mt-5 w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-2 rounded-xl hover:opacity-90 transition"
-              >
-                View Details & Apply
-              </button>
+          {filteredJobs.length === 0 && (
+            <div className="text-center text-gray-500 mt-8">
+              No jobs found matching your criteria.
             </div>
-          ))
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

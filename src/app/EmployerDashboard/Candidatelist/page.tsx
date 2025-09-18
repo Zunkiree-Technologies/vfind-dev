@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Cookies from "js-cookie";
-import { MapPin, Briefcase, Clock } from "lucide-react";
+import { MapPin, Briefcase, Clock, Search } from "lucide-react";
 import Loader from "../../../../components/loading";
 import Link from "next/link";
 
@@ -36,35 +36,42 @@ export default function CandidateList() {
 
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
-  const [employmentTypes, setEmploymentTypes] = useState<string[]>([]);
-  const [licenses, setLicenses] = useState<string[]>([]);
+
+  // Updated filter states to match new layout
+  const [jobTypes, setJobTypes] = useState<string[]>([]);
   const [shifts, setShifts] = useState<string[]>([]);
-  const [payRange, setPayRange] = useState<number>(0);
+  const [roleCategories, setRoleCategories] = useState<string[]>([]);
+  const [experience, setExperience] = useState<string[]>([]);
+  const [payRate, setPayRate] = useState<number>(0);
+  const [radius, setRadius] = useState<number>(0);
   const [, setEmployerId] = useState<string | null>(null);
 
   // Load cookies and employerId
   useEffect(() => {
     const savedSearch = Cookies.get("search") || "";
     const savedLocation = Cookies.get("location") || "";
-    const savedEmployment = Cookies.get("employmentTypes");
-    const savedLicenses = Cookies.get("licenses");
+    const savedJobTypes = Cookies.get("jobTypes");
     const savedShifts = Cookies.get("shifts");
-    const savedPay = Cookies.get("payRange");
+    const savedRoleCategories = Cookies.get("roleCategories");
+    const savedExperience = Cookies.get("experience");
+    const savedPayRate = Cookies.get("payRate");
+    const savedRadius = Cookies.get("radius");
 
     const storedEmployerId =
       typeof window !== "undefined" ? localStorage.getItem("employerId") : null;
 
     if (storedEmployerId) {
       setEmployerId(storedEmployerId);
-      // console.log("Employer ID in CandidateList:", storedEmployerId);
     }
 
     setSearch(savedSearch);
     setLocation(savedLocation);
-    if (savedEmployment) setEmploymentTypes(JSON.parse(savedEmployment));
-    if (savedLicenses) setLicenses(JSON.parse(savedLicenses));
+    if (savedJobTypes) setJobTypes(JSON.parse(savedJobTypes));
     if (savedShifts) setShifts(JSON.parse(savedShifts));
-    if (savedPay && !isNaN(Number(savedPay))) setPayRange(Number(savedPay));
+    if (savedRoleCategories) setRoleCategories(JSON.parse(savedRoleCategories));
+    if (savedExperience) setExperience(JSON.parse(savedExperience));
+    if (savedPayRate && !isNaN(Number(savedPayRate))) setPayRate(Number(savedPayRate));
+    if (savedRadius && !isNaN(Number(savedRadius))) setRadius(Number(savedRadius));
   }, []);
 
   // Fetch candidates
@@ -128,25 +135,17 @@ export default function CandidateList() {
         );
       }
 
-      if (employmentTypes.length > 0 && !employmentTypes.includes("Other")) {
+      if (jobTypes.length > 0) {
         filtered = filtered.filter((c) => {
           try {
             const jobTypesArray = c.jobTypes ? JSON.parse(c.jobTypes) : [];
             return jobTypesArray.some((jt: string) =>
-              employmentTypes.some((et) => jt.toLowerCase().includes(et.toLowerCase()))
+              jobTypes.some((et) => jt.toLowerCase().includes(et.toLowerCase()))
             );
           } catch {
             return false;
           }
         });
-      }
-
-      if (licenses.length > 0) {
-        filtered = filtered.filter((c) =>
-          licenses.some((lic) =>
-            (c.qualification || "").toLowerCase().includes(lic.toLowerCase())
-          )
-        );
       }
 
       if (shifts.length > 0) {
@@ -162,10 +161,18 @@ export default function CandidateList() {
         });
       }
 
-      if (payRange > 0) {
+      if (roleCategories.length > 0) {
+        filtered = filtered.filter((c) =>
+          roleCategories.some((role) =>
+            (c.qualification || "").toLowerCase().includes(role.toLowerCase())
+          )
+        );
+      }
+
+      if (payRate > 0) {
         filtered = filtered.filter((c) => {
           const rate = parseFloat(c.maxWorkHours || "0");
-          return !isNaN(rate) && rate >= payRange;
+          return !isNaN(rate) && rate >= payRate;
         });
       }
 
@@ -174,19 +181,21 @@ export default function CandidateList() {
       if (!instant) {
         Cookies.set("search", search, { expires: 7 });
         Cookies.set("location", location, { expires: 7 });
-        Cookies.set("employmentTypes", JSON.stringify(employmentTypes), { expires: 7 });
-        Cookies.set("licenses", JSON.stringify(licenses), { expires: 7 });
+        Cookies.set("jobTypes", JSON.stringify(jobTypes), { expires: 7 });
         Cookies.set("shifts", JSON.stringify(shifts), { expires: 7 });
-        Cookies.set("payRange", String(payRange), { expires: 7 });
+        Cookies.set("roleCategories", JSON.stringify(roleCategories), { expires: 7 });
+        Cookies.set("experience", JSON.stringify(experience), { expires: 7 });
+        Cookies.set("payRate", String(payRate), { expires: 7 });
+        Cookies.set("radius", String(radius), { expires: 7 });
       }
     },
-    [candidates, search, location, employmentTypes, licenses, shifts, payRange]
+    [candidates, search, location, jobTypes, shifts, roleCategories, experience, payRate, radius]
   );
 
   useEffect(() => {
     const debounce = setTimeout(() => applyFilters(true), 300);
     return () => clearTimeout(debounce);
-  }, [search, location, employmentTypes, licenses, shifts, payRange, applyFilters]);
+  }, [search, location, jobTypes, shifts, roleCategories, experience, payRate, radius, applyFilters]);
 
   const handleCheckboxChange = (
     value: string,
@@ -200,17 +209,23 @@ export default function CandidateList() {
   const clearFilters = () => {
     setSearch("");
     setLocation("");
-    setEmploymentTypes([]);
-    setLicenses([]);
+    setJobTypes([]);
     setShifts([]);
-    setPayRange(0);
+    setRoleCategories([]);
+    setExperience([]);
+    setPayRate(0);
+    setRadius(0);
     setFilteredCandidates(candidates);
+
+    // Clear all cookies
     Cookies.remove("search");
     Cookies.remove("location");
-    Cookies.remove("employmentTypes");
-    Cookies.remove("licenses");
+    Cookies.remove("jobTypes");
     Cookies.remove("shifts");
-    Cookies.remove("payRange");
+    Cookies.remove("roleCategories");
+    Cookies.remove("experience");
+    Cookies.remove("payRate");
+    Cookies.remove("radius");
   };
 
   if (loading) return <Loader />;
@@ -222,191 +237,262 @@ export default function CandidateList() {
     );
 
   return (
-    <div className="p-6 min-h-screen mx-auto container">
+    <div className="p-6 min-h-screen mx-auto container bg-[#F5F6FA]">
+
       {/* Top Search Bar */}
-      <div className="flex justify-center items-center mb-6">
-        <div className="flex gap-2 w-[950px]">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            type="text"
-            placeholder="Search by keyword, specialty, job title"
-            className="w-full border border-blue-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400"
-          />
-          <input
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            type="text"
-            placeholder="City, State or ZIP code"
-            className="w-1/2 border border-blue-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400"
-          />
+      <div className="flex justify-center items-center sticky top-0 z-50 bg-[#F5F6FA] ">
+        <div className="flex items-center w-[950px] border border-gray-300 rounded-lg bg-white overflow-hidden p-1">
+          {/* Search input with icon */}
+          <div className="flex items-center px-3 w-1/2">
+            <Search className="text-gray-400 mr-2" size={18} />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              type="text"
+              placeholder="Search by keyword, designation, company name"
+              className="w-full outline-none py-2"
+            />
+          </div>
+
+          {/* Divider */}
+          <div className="w-px h-6 bg-gray-300" />
+
+          {/* Location input with icon */}
+          <div className="flex items-center px-3 w-1/3">
+            <MapPin className="text-gray-400 mr-2" size={18} />
+            <input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              type="text"
+              placeholder="City, State or ZIP code"
+              className="w-full outline-none py-2"
+            />
+          </div>
+
+          {/* Search button */}
           <button
             onClick={() => applyFilters()}
-            className="px-6 py-2 w-[150px] bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-600 rounded-[10px]"
           >
             Search
           </button>
         </div>
       </div>
 
-      <div className="flex gap-6">
+
+
+      <div className="flex gap-6 mt-6 items-start">
         {/* Left Filters */}
-        <div className="w-64 bg-white h-fit rounded-lg p-4 shadow-sm space-y-4">
-          <h2 className="font-semibold text-gray-800 flex justify-between">
+        <div className="hidden md:block w-64 bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
+          <h2 className="font-semibold text-gray-800 flex justify-between ">
             All Filters
             <button
               onClick={clearFilters}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-blue-600 "
             >
               Clear All
             </button>
           </h2>
+          <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Employment Type */}
+          {/* Job Type */}
           <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-1">
-              Employment Type
-            </h3>
-            {["Full-Time", "Part-Time", "Open to any", "Other"].map((type) => (
-              <div key={type} className="flex items-center gap-2 text-sm">
+            <h3 className="font-medium text-sm text-gray-700 mb-2 ">Job Type</h3>
+            {["Full-Time", "Part-Time", "Casual", "Open to any"].map((type) => (
+              <div key={type} className="flex items-center gap-2 text-sm mb-1">
                 <input
                   type="checkbox"
-                  checked={employmentTypes.includes(type)}
-                  onChange={() => handleCheckboxChange(type, setEmploymentTypes)}
-                />{" "}
-                {type}
+                  checked={jobTypes.includes(type)}
+                  onChange={() => handleCheckboxChange(type, setJobTypes)}
+                  className="rounded"
+                />
+                <label>{type}</label>
               </div>
             ))}
           </div>
+          <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* License */}
+          {/* Shift */}
           <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-1">License</h3>
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Shift</h3>
+            {["Morning shift", "Day Shift", "Evening Shift", "Night Shift"].map((shift) => (
+              <div key={shift} className="flex items-center gap-2 text-sm mb-1">
+                <input
+                  type="checkbox"
+                  checked={shifts.includes(shift)}
+                  onChange={() => handleCheckboxChange(shift, setShifts)}
+                  className="rounded"
+                />
+                <label>{shift}</label>
+              </div>
+            ))}
+          </div>
+          <div className="w-py h-0.5 bg-gray-300" />
+
+          {/* Role Category */}
+          <div>
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Role Category</h3>
             {[
               "Registered Nurse (RN)",
               "Clinical Lead / Manager",
               "Enrolled Nurse (EN)",
               "Licensed Practical Nurse (LPN)",
               "Certified Nursing Assistant (CNA)",
-              "Assistant in Nursing (AIN)",
-            ].map((lic) => (
-              <div key={lic} className="flex items-center gap-2 text-sm">
+              "Assistant in Nursing (AIN)"
+            ].map((role) => (
+              <div key={role} className="flex items-center gap-2 text-sm mb-1">
                 <input
                   type="checkbox"
-                  checked={licenses.includes(lic)}
-                  onChange={() => handleCheckboxChange(lic, setLicenses)}
-                />{" "}
-                {lic}
+                  checked={roleCategories.includes(role)}
+                  onChange={() => handleCheckboxChange(role, setRoleCategories)}
+                  className="rounded"
+                />
+                <label>{role}</label>
               </div>
             ))}
           </div>
+          <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Shift */}
+          {/* Experience */}
           <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-1">Shift</h3>
-            {["Day Shift", "Night Shift", "Evening Shift"].map((shift) => (
-              <div key={shift} className="flex items-center gap-2 text-sm">
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Experience</h3>
+            {["0-1 Year", "1-3 Years", "3-5 Years", "5+ Years"].map((exp) => (
+              <div key={exp} className="flex items-center gap-2 text-sm mb-1">
                 <input
                   type="checkbox"
-                  checked={shifts.includes(shift)}
-                  onChange={() => handleCheckboxChange(shift, setShifts)}
-                />{" "}
-                {shift}
+                  checked={experience.includes(exp)}
+                  onChange={() => handleCheckboxChange(exp, setExperience)}
+                  className="rounded"
+                />
+                <label>{exp}</label>
               </div>
             ))}
           </div>
+          <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Pay */}
+          {/* Pay Rate */}
           <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-1">Pay (Min $/hr)</h3>
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Pay Rate</h3>
             <input
               type="range"
               min="0"
-              max="100"
-              value={isNaN(payRange) ? 0 : payRange}
-              onChange={(e) => setPayRange(Number(e.target.value) || 0)}
+              max="10000"
+              value={isNaN(payRate) ? 0 : payRate}
+              onChange={(e) => setPayRate(Number(e.target.value) || 0)}
               className="w-full accent-blue-600"
             />
-            <p className="text-sm text-gray-600 mt-1">${payRange}/hr</p>
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>Any</span>
+              <span>${payRate}+</span>
+            </div>
+          </div>
+          <div className="w-py h-0.5 bg-gray-300" />
+
+          {/* Radius */}
+          <div>
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Radius</h3>
+            <input
+              type="range"
+              min="0"
+              max="50"
+              value={isNaN(radius) ? 0 : radius}
+              onChange={(e) => setRadius(Number(e.target.value) || 0)}
+              className="w-full accent-blue-600"
+            />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>Any</span>
+              <span>{radius} km</span>
+            </div>
           </div>
         </div>
 
         {/* Candidate Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
-          {filteredCandidates.map((candidate) => {
-            let jobTypesArray: string[] = [];
-            try {
-              if (candidate.jobTypes) jobTypesArray = JSON.parse(candidate.jobTypes);
-            } catch {
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              jobTypesArray = [];
-            }
-            const profileImageUrl = candidate.profileImage
-              ? BASE_IMAGE_URL + candidate.profileImage.path
-              : null;
+        <div className="flex-1 max-w-4xl mx-5">
+          <div className="grid grid-cols-1 gap-4">
+            {filteredCandidates.map((candidate) => {
+              let jobTypesArray: string[] = [];
+              try {
+                if (candidate.jobTypes) jobTypesArray = JSON.parse(candidate.jobTypes);
+              } catch {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                jobTypesArray = [];
+              }
+              const profileImageUrl = candidate.profileImage
+                ? BASE_IMAGE_URL + candidate.profileImage.path
+                : null;
 
-            return (
-              <div
-                key={candidate.id}
-                className="relative rounded-2xl p-6 bg-white shadow-lg hover:shadow-xl transition-all duration-300 w-full"
-              >
-
-
-                {/* Photo */}
-                <div className="absolute top-6 right-6 h-20 w-20 bg-gray-200 rounded-lg overflow-hidden">
-                  {profileImageUrl ? (
-                    <Image
-                      src={profileImageUrl}
-                      alt={candidate.fullName}
-                      className="h-full w-full object-cover"
-                      width={80}
-                      height={80}
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-gray-300" />
-                  )}
-                </div>
-
-                <h2 className="font-bold text-xl mb-1 text-blue-700">
-                  {candidate.fullName}
-                </h2>
-                <p className="text-gray-600 w-[150px] mb-4">
-                  {candidate.qualification || "Qualification not specified"}
-                </p>
-
-                <div className="space-y-2 text-gray-700 text-sm">
-                  <div className="flex items-center gap-2">
-                    <MapPin size={18} className="text-blue-600" />
-                    <span>
-                      {candidate.currentResidentialLocation || "Location not specified"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Briefcase size={18} className="text-blue-600" />
-                    <span>{candidate.jobTypes || "Job type not specified"}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock size={18} className="text-blue-600" />
-                    <span>
-                      {candidate.maxWorkHours
-                        ? `${candidate.maxWorkHours}/hr Per Week`
-                        : "Hourly pay not specified"}
-                    </span>
-                    
-                  </div>
-                </div>
-
-                <Link
-                  href={`/EmployerDashboard/Candidatelist/${candidate.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 w-full inline-block text-center"
+              return (
+                <div
+                  key={candidate.id}
+                  className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2"
                 >
-                  View details
-                </Link>
-              </div>
-            );
-          })}
+                  {/* Left side content */}
+                  <div className="flex-1">
+                    <h2 className="font-semibold text-lg text-blue-600 mb-1">
+                      {candidate.fullName}
+                    </h2>
+                    <p className="text-gray-600 text-sm mb-3">
+                      {candidate.qualification || "Qualification not specified"}
+                    </p>
+
+                    <div className="flex flex-wrap gap-6 text-gray-600 text-sm">
+                      <div className="flex items-center gap-1">
+                        <MapPin size={16} className="text-blue-500" />
+                        <span>
+                          {candidate.currentResidentialLocation || "Location not specified"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Briefcase size={16} className="text-blue-500" />
+                        <span>Full Time</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock size={16} className="text-blue-500" />
+                        <span>Day Shift</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right side - Photo and button */}
+                  <div className="flex items-center gap-4 ml-6 flex-col">
+                    {/* Circular Profile Image */}
+                    <div className="h-16 w-16 rounded-full overflow-hidden border flex-shrink-0">
+                      {profileImageUrl ? (
+                        <Image
+                          src={profileImageUrl}
+                          alt={candidate.fullName}
+                          className="h-full w-full object-cover"
+                          width={64}
+                          height={64}
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-gray-300 flex items-center justify-center text-gray-500 text-xs">
+                          No Photo
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Button */}
+                    <Link
+                      href={`/EmployerDashboard/Candidatelist/${candidate.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-blue-400 text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
+                    >
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+
+              );
+            })}
+          </div>
+
+          {filteredCandidates.length === 0 && (
+            <div className="text-center text-gray-500 mt-8">
+              No candidates found matching your criteria.
+            </div>
+          )}
         </div>
       </div>
     </div>

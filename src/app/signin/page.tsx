@@ -35,6 +35,7 @@ export default function LoginPage() {
 
       if (data.authToken) {
         localStorage.setItem("token", data.authToken);
+        localStorage.setItem("email", email);
 
         // console.log("Token saved:", localStorage.getItem("token"));
       }

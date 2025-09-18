@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Loader from "../../../../../components/loading";
-import { MapPin, DollarSignIcon, Clock, Briefcase } from "lucide-react";
+import { Building2 } from "lucide-react";
 
 interface Job {
   id: number;
@@ -18,7 +18,6 @@ interface Job {
   experienceMax: string;
   updated_at: string;
   certifications: string[];
-
   company?: string;
   shift?: string;
   contact_email?: string;
@@ -26,17 +25,20 @@ interface Job {
 
 export default function JobApplicationPage() {
   const router = useRouter();
-  const { id } = useParams(); // grab id from URL
+  const { id } = useParams();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [authToken, setAuthToken] = useState<string | null>(null); // state for token
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [nurseEmail, setNurseEmail] = useState<string | null>(null);
 
-  // Fetch token from localStorage on mount
+  // Fetch token & nurse email from localStorage
   useEffect(() => {
-    const token = localStorage.getItem("token"); // same key as login page
+    const token = localStorage.getItem("token");
+    const email = localStorage.getItem("email");
     if (token) setAuthToken(token);
+    if (email) setNurseEmail(email);
   }, []);
 
   useEffect(() => {
@@ -65,24 +67,19 @@ export default function JobApplicationPage() {
   const handleSubmitApplication = async () => {
     if (!job) return;
 
-    const emailInput = (document.querySelector(
-      'input[type="email"]'
-    ) as HTMLInputElement)?.value;
-
-    if (!emailInput) {
-      alert("Email is required");
+    if (!authToken) {
+      alert("You must be logged in to apply.");
       return;
     }
 
-    if (!authToken) {
-      alert("You must be logged in to apply.");
+    if (!nurseEmail) {
+      alert("Could not find your email. Please log in again.");
       return;
     }
 
     try {
       setSubmitting(true);
 
-      // Hit the applications API using the token
       const res = await fetch(
         "https://x8ki-letl-twmt.n7.xano.io/api:PX2mK6Kr/applications",
         {
@@ -95,14 +92,12 @@ export default function JobApplicationPage() {
             jobs_id: job.id,
             status: "applied",
             applied_date: new Date().toISOString(),
-            email: emailInput,
+            email: nurseEmail,
           }),
-
         }
       );
 
       const result = await res.json();
-
       if (!res.ok) throw new Error(result.message || "Failed to submit application");
 
       alert("Job application sent successfully!");
@@ -125,159 +120,187 @@ export default function JobApplicationPage() {
     );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0 bg-white bg-opacity-10 rounded-md p-3">
-              <Briefcase className="h-6 w-6 text-white" />
-            </div>
-            <div className="ml-4">
-              <h1 className="text-2xl font-bold text-white">{job.title}</h1>
-              <p className="text-blue-100">{job.company || "Healthcare Provider"}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-start">
-              <MapPin className="h-5 w-5 text-gray-400" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Location</p>
-                <p className="text-sm text-gray-500">{job.location}</p>
+    <div className="min-h-screen flex bg-white justify-around item-center gap-5 ">
+      {/* Main Content */}
+      <div className=" bg-[#F5F6FA] rounded-lg shadow-md">
+        {/* Main Content */}
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <div className="max-w-4xl">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+              <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  {job.company || "St. Mary's Aged Care Facility"}
+                </h1>
               </div>
             </div>
 
-            <div className="flex items-start">
-              <DollarSignIcon className="h-5 w-5 text-gray-400" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Salary Range</p>
-                <p className="text-sm text-gray-500">${job.minPay} - ${job.maxPay}/hr</p>
-              </div>
-            </div>
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+              {/* Left Content - Job Details */}
+              <div className="xl:col-span-2 space-y-6">
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                  {job.title}
+                </h3>
+                <div className="w-full h-0.5 bg-gray-300" />
 
-            <div className="flex items-start">
-              <Clock className="h-5 w-5 text-gray-400" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Job Type</p>
-                <p className="text-sm text-gray-500">{job.type}</p>
-              </div>
-            </div>
+                {/* Basic Info Card */}
+                <div className="p-4 sm:p-6">
+                  <div className="space-y-3">
 
-            <div className="flex items-start">
-              <Briefcase className="h-5 w-5 text-gray-400" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Experience Required</p>
-                <p className="text-sm text-gray-500">
-                  {job.experienceMin} - {job.experienceMax} years
-                </p>
-              </div>
-            </div>
-          </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                      <div className="w-full sm:w-24 flex-shrink-0">
+                        <span className="text-gray-900 font-medium">Industry</span>
+                      </div>
+                      <div className="hidden sm:flex flex-shrink-0 mx-4">
+                        <span className="text-gray-900">:</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-gray-900">Healthcare & Social Assistance</span>
+                      </div>
+                    </div>
 
-          <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 shadow-lg">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                Job Description
-              </h3>
-              {job.type && (
-                <span className="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full dark:bg-blue-800 dark:text-blue-200">
-                  {job.type}
-                </span>
-              )}
-            </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                      <div className="w-full sm:w-24 flex-shrink-0">
+                        <span className="text-gray-900 font-medium">Location</span>
+                      </div>
+                      <div className="hidden sm:flex flex-shrink-0 mx-4">
+                        <span className="text-gray-900">:</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-gray-900">{job.location}</span>
+                      </div>
+                    </div>
 
-            {/* Raw description */}
-            <div
-              dangerouslySetInnerHTML={{ __html: job.description }}
-            />
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                      <div className="w-full sm:w-24 flex-shrink-0">
+                        <span className="text-gray-900 font-medium">Salary</span>
+                      </div>
+                      <div className="hidden sm:flex flex-shrink-0 mx-4">
+                        <span className="text-gray-900">:</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-gray-900">AUD {job.minPay}-{job.maxPay}/hr</span>
+                      </div>
+                    </div>
 
-            {/* Certifications / Highlights */}
-            {job.certifications?.length > 0 && (
-              <div className="mt-4">
-                <h2 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  Certifications
-                </h2>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {job.certifications.map((cert) => (
-                    <span
-                      key={cert}
-                      className="text-xs font-semibold px-2 py-1 bg-blue-50 text-blue-700 rounded-full dark:bg-blue-800 dark:text-blue-200"
-                    >
-                      {cert}
-                    </span>
-                  ))}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                      <div className="w-full sm:w-24 flex-shrink-0">
+                        <span className="text-gray-900 font-medium">Job Type</span>
+                      </div>
+                      <div className="hidden sm:flex flex-shrink-0 mx-4">
+                        <span className="text-gray-900">:</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-gray-900">{job.type}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                      <div className="w-full sm:w-24 flex-shrink-0">
+                        <span className="text-gray-900 font-medium">Job Shift</span>
+                      </div>
+                      <div className="hidden sm:flex flex-shrink-0 mx-4">
+                        <span className="text-gray-900">:</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-gray-900">{job.shift || "Any"}</span>
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
-              </div>
-            )}
+                <div className="w-full h-0.5 bg-gray-300" />
 
-          </div>
+                {/* Candidate Preferences */}
+                <div className="p-4 sm:p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Candidate Preferences</h3>
+                  <div className="space-y-4">
 
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                      <div className="w-full sm:w-32 flex-shrink-0">
+                        <span className="text-gray-900 font-medium">Role Category</span>
+                      </div>
+                      <div className="hidden sm:flex flex-shrink-0 mx-4">
+                        <span className="text-gray-900">:</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-gray-900">{job.title}</span>
+                      </div>
+                    </div>
 
-          {job.requirements && job.requirements.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Requirements</h2>
-              <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                {job.requirements.map((req, i) => (
-                  <li key={i}>{req}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                      <div className="w-full sm:w-32 flex-shrink-0">
+                        <span className="text-gray-900 font-medium">Experience</span>
+                      </div>
+                      <div className="hidden sm:flex flex-shrink-0 mx-4">
+                        <span className="text-gray-900">:</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-gray-900">{job.experienceMin} - {job.experienceMax} years</span>
+                      </div>
+                    </div>
 
-          {job.benefits && job.benefits.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Benefits</h2>
-              <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                {job.benefits.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+                    <div>
+                      <div className="flex-shrink-0 mb-3">
+                        <span className="text-gray-900 font-medium">Preferred Qualifications</span>
+                      </div>
+                      <div className="space-y-2">
+                        {job.certifications?.map((cert, index) => (
+                          <div key={index} className="flex items-start">
+                            <div className="w-2 h-2 bg-blue-600 rounded-full mr-3 mt-2 flex-shrink-0"></div>
+                            <span className="text-sm text-gray-700 leading-relaxed">{cert}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Apply for this position</h2>
-            {job.contact_email ? (
-              <div className="bg-blue-50 rounded-lg p-4">
-                <p className="text-blue-800">
-                  To apply, send your resume to{" "}
-                  <a href={`mailto:${job.contact_email}`} className="font-medium underline">
-                    {job.contact_email}
-                  </a>
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    className="w-full rounded-md border-gray-300 shadow-sm p-2 focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="your@email.com"
+                  </div>
+                </div>
+                <div className="w-full h-0.5 bg-gray-300" />
+
+                {/* Job Description */}
+                <div className="p-4 sm:p-6  rounded-lg shadow-md ">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Description</h3>
+                  <div
+                    className="prose prose-sm max-w-none text-gray-700 leading-relaxed overflow-y-auto h-75"
+                    dangerouslySetInnerHTML={{ __html: job.description }}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Resume</label>
-                  <input
-                    type="file"
-                    className="w-full rounded-md border-gray-300 shadow-sm p-2 focus:border-blue-500 focus:ring-blue-500"
-                  />
+
+
+                {/* Apply Button */}
+                <div className="p-4 sm:p-6">
+                  <button
+                    onClick={handleSubmitApplication}
+                    disabled={submitting}
+                    className="w-full sm:w-auto bg-blue-400 text-white py-3 px-8 rounded-lg font-medium hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {submitting ? "Submitting Application..." : "Apply Now"}
+                  </button>
                 </div>
-                <button
-                  disabled={submitting}
-                  onClick={handleSubmitApplication}
-                  className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {submitting ? "Submitting..." : "Submit Application"}
-                </button>
               </div>
-            )}
+
+
+            </div>
+
           </div>
         </div>
       </div>
+
+      {/* ----About company-- */}
+      <div className="h-fit bg-[#F5F6FA] max-w-md p-6 rounded-lg shadow-md">
+        <h3 className="text-lg font-semibold text-gray-900">About Company</h3>
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Error deserunt, ipsam earum quo corporis nisi suscipit maiores illo eaque porro dolore eum culpa quos tempore molestiae sunt assumenda consequatur aliquam, sed sapiente quis dolores ipsa? Aliquid soluta, nam aut dolorem cumque aspernatur? Consectetur quam deserunt ipsa magnam ipsum. Repellendus illum praesentium vel deleniti, temporibus a iste perspiciatis voluptatem officiis, est autem impedit asperiores iusto nulla ipsum tempora hic dolorum laudantium tempore ab consectetur eius eligendi quod. Debitis totam ipsum excepturi sunt dolor aliquam optio adipisci praesentium veritatis voluptatibus ullam delectus explicabo ex enim sapiente beatae aspernatur, magni fugiat dolorum. Deserunt.
+        </p>
+
+
+      </div>
+
+
+
     </div>
   );
 }

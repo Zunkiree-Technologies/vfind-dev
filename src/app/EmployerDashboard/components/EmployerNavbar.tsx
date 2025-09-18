@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { FaUserCircle } from "react-icons/fa";
 import NotificationSidebar from "./NotificationSidebar";
+import { ChevronDown, Heart, Search, UserRound } from "lucide-react";
 
 interface NavbarProps {
   companyName?: string;
 }
 
-export default function EmployerNavbar({ companyName }: NavbarProps) {
+export default function EmployerNavbar({ }: NavbarProps) {
   const router = useRouter();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,46 +36,51 @@ export default function EmployerNavbar({ companyName }: NavbarProps) {
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => router.push("/EmployerDashboard")}
         >
-          <span className="font-semibold text-lg text-blue-800">
-            {companyName || "VFind"}
-          </span>
+          {/* Icon inside a rounded square */}
+          <div className="w-8 h-8 flex items-center justify-center bg-blue-400 rounded-[10px]">
+            <Search size={16} className="text-white" />
+          </div>
+
+          <span className="font-semibold text-lg text-black">VFind</span>
         </div>
+
 
         {/* Right: Profile Icon */}
         <div className="relative flex gap-5">
           <div className="hidden md:flex space-x-6">
             <button
               onClick={() => router.push("/EmployerDashboard/status")}
-              className="text-gray-700 hover:text-blue-600 font-medium"
+              className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-600 rounded-[10px]"
             >
-              Candidate Request
+              <p className="text-sm"> Candidate Request</p>
             </button>
-            <button
-              onClick={() => router.push("/EmployerDashboard")}
-              className="text-gray-700 hover:text-blue-600 font-medium"
-            >
-              Home
-            </button>
-            <button
-              onClick={() => router.push("/EmployerDashboard/jobposting")}
-              className="text-gray-700 hover:text-blue-600 font-medium"
-            >
-              Post Job
-            </button>
+
             <button
               onClick={() => router.push("/EmployerDashboard/Wishlist")}
               className="text-gray-700 hover:text-blue-600 font-medium"
             >
-              WishList
+              <Heart
+                className={`w-6 h-6 transition-colors duration-200
+             "text-white" : "text-blue-600"
+          }`}
+              />
             </button>
           </div>
 
           <button
             onClick={toggleProfileMenu}
-            className="flex items-center focus:outline-none"
+            className="flex items-center gap-1 focus:outline-none"
           >
-            <FaUserCircle size={24} className="text-gray-700 hover:text-blue-600" />
+            {/* User circle */}
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-blue-50">
+              <UserRound size={20} className="text-gray-700" />
+            </div>
+
+            {/* Dropdown arrow */}
+            <ChevronDown size={20} className="text-gray-700 hover:text-blue-600" />
           </button>
+
+
 
           <div>
             <NotificationSidebar />
@@ -84,7 +89,7 @@ export default function EmployerNavbar({ companyName }: NavbarProps) {
           {showProfileMenu && (
             <div
               ref={dropdownRef}
-              className="absolute right-0 mt-8 w-36 bg-white border rounded-md shadow-lg z-50"
+              className="absolute right-0 mt-15 w-36 bg-white border rounded-md shadow-lg z-50"
             >
               <button
                 onClick={() => {
