@@ -2,9 +2,8 @@
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Loading from "../../../components/loading";
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
-import { Briefcase, Calendar, CheckCircle, Clock, Mail, Phone, Search } from "lucide-react";
+import { Briefcase, Calendar, CheckCircle, Clock, Edit, Eye, Mail, Phone, Search, Trash } from "lucide-react";
 
 interface Job {
   created_at: string;
@@ -40,10 +39,10 @@ export default function EmployerDashboard() {
   const [loading, setLoading] = useState(true);
   const [showAllJobs, setShowAllJobs] = useState(false);
   const [mobileActionMenu, setMobileActionMenu] = useState<number | null>(null);
-const [companyProfileStep, setCompanyProfileStep] = useState<
-  "initial" | "editing" | "completed"
->("initial");
-const [companyDescription, setCompanyDescription] = useState<string>("");
+  const [companyProfileStep, setCompanyProfileStep] = useState<
+    "initial" | "editing" | "completed"
+  >("initial");
+  const [companyDescription, setCompanyDescription] = useState<string>("");
 
   // 🔹 Fetch employer + jobs
   useEffect(() => {
@@ -56,7 +55,7 @@ const [companyDescription, setCompanyDescription] = useState<string>("");
           "https://x8ki-letl-twmt.n7.xano.io/api:t5TlTxto/get_employer_profile",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-      console.log(token)
+        console.log(token)
 
         if (!res.ok) throw new Error("Failed to fetch employer profile");
         const data = await res.json();
@@ -125,14 +124,14 @@ const [companyDescription, setCompanyDescription] = useState<string>("");
       alert("Failed to delete the job. Please try again.");
     }
   };
- const handleSaveCompanyProfile = () => {
-  if (companyDescription.trim() === "") {
-    alert("Please provide a brief description before saving.");
-    return;
-  }
-  // you can add API call / localStorage here if needed
-  setCompanyProfileStep("completed");
-};
+  const handleSaveCompanyProfile = () => {
+    if (companyDescription.trim() === "") {
+      alert("Please provide a brief description before saving.");
+      return;
+    }
+    // you can add API call / localStorage here if needed
+    setCompanyProfileStep("completed");
+  };
 
   const toggleMobileActionMenu = (jobId: number) => {
     setMobileActionMenu(mobileActionMenu === jobId ? null : jobId);
@@ -142,7 +141,7 @@ const [companyDescription, setCompanyDescription] = useState<string>("");
   if (loading) return <Loading />;
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-[#F5F6FA] ">
       {/* 🔹 Navbar */}
       <EmployerNavbar />
 
@@ -151,78 +150,88 @@ const [companyDescription, setCompanyDescription] = useState<string>("");
 
         {/* 👉 Left section */}
         <div className="space-y-5">
-          {/* Welcome */}
-          <h1 className="text-xl font-semibold">
+          {/* <h1 className="text-xl font-semibold">
             Welcome,{" "}
             <span className="text-blue-600">
-              {employer.fullName || employer.company || employer.email}
+              { employer.company || ""}
             </span>
-          </h1>
+          </h1> */}
 
           {/* KYC Section */}
-        <div className="bg-white rounded-lg p-5 shadow-sm">
-  {companyProfileStep === "initial" && (
-    <>
-      <h2 className="font-semibold text-gray-800">
-        Complete Your Company Profile
-      </h2>
-      <p className="text-sm text-gray-600 mt-1">
-        Provide your company details to make your job postings stand out.
-      </p>
+          <div className="bg-white rounded-lg p-6 md:p-8 shadow-sm">
+            {/* Initial Step */}
+            {companyProfileStep === "initial" && (
+              <>
+                <h2 className="font-semibold text-gray-800 text-base md:text-lg">
+                  Complete Your Company Profile
+                </h2>
+                <p className="text-sm md:text-base text-gray-600 mt-1">
+                  Provide your company details to make your job postings stand out.
+                </p>
 
-      <button
-        onClick={() => setCompanyProfileStep("editing")}
-        className="mt-3 px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-600 text-sm md:text-base"
-      >
-        Complete Profile
-      </button>
-    </>
-  )}
+                <button
+                  onClick={() => setCompanyProfileStep("editing")}
+                  className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md 
+                   hover:bg-blue-600 text-sm md:text-base transition"
+                >
+                  Complete Profile
+                </button>
+              </>
+            )}
 
-  {companyProfileStep === "editing" && (
-    <>
-      <h2 className="font-semibold text-gray-800">
-        Complete Your Company Profile
-      </h2>
-      <p className="text-sm text-gray-600 mt-1">
-        Provide your company details to make your job postings stand out.
-      </p>
+            {/* Editing Step */}
+            {companyProfileStep === "editing" && (
+              <>
+                <h2 className="font-semibold text-gray-800 text-base md:text-lg">
+                  Complete Your Company Profile
+                </h2>
+                <p className="text-sm md:text-base text-gray-600 mt-1">
+                  Provide your company details to make your job postings stand out.
+                </p>
 
-      {/* Textarea */}
-      <textarea
-        placeholder="Provide a brief description of your company"
-        value={companyDescription}
-        onChange={(e) => setCompanyDescription(e.target.value)}
-        rows={4}
-        className="mt-3 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
-      />
+                {/* Textarea */}
+                <textarea
+                  placeholder="Provide a brief description of your company"
+                  value={companyDescription}
+                  onChange={(e) => setCompanyDescription(e.target.value)}
+                  rows={4}
+                  className="mt-4 w-full border border-gray-300 rounded-lg px-3 py-2 
+                   text-sm md:text-base text-gray-800 
+                   focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
+                />
 
-      {/* Save button */}
-      <button
-        onClick={handleSaveCompanyProfile}
-        className="mt-3 w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm md:text-base"
-      >
-        Save & Continue
-      </button>
+                {/* Save button */}
+                <button
+                  onClick={handleSaveCompanyProfile}
+                  className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md 
+                   hover:bg-blue-600 text-sm md:text-base transition"
+                >
+                  Save & Continue
+                </button>
 
-      <p className="mt-2 text-xs text-gray-500">
-        Your company description will appear on job postings.
-      </p>
-    </>
-  )}
+                <p className="mt-2 text-xs md:text-sm text-gray-500">
+                  Your company description will appear on job postings.
+                </p>
+              </>
+            )}
 
-  {companyProfileStep === "completed" && (
-    <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg p-4">
-      <CheckCircle className="text-green-600" size={22} />
-      <div>
-        <h2 className="font-semibold text-green-700">Company Profile Completed</h2>
-        <p className="mt-1 text-sm text-green-600">
-          Your company description has been saved successfully.
-        </p>
-      </div>
-    </div>
-  )}
-</div>
+            {/* Completed Step */}
+            {companyProfileStep === "completed" && (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 
+                    bg-green-50 border border-green-200 rounded-lg p-4">
+                <CheckCircle className="text-green-600 flex-shrink-0" size={22} />
+                <div>
+                  <h2 className="font-semibold text-green-700 text-sm md:text-base">
+                    Company Profile Completed
+                  </h2>
+                  <p className="mt-1 text-xs md:text-sm text-green-600">
+                    Your company description has been saved successfully.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
 
 
           {/* Talent Pool + Free Job Posting */}
@@ -272,8 +281,8 @@ const [companyDescription, setCompanyDescription] = useState<string>("");
         </div>
 
         {/* 👉 Right section */}
-        <div className="lg:w-80 lg:mt-12">
-          <div className="bg-white rounded-lg p-4 shadow-sm space-y-4">
+        <div className="hidden lg:block lg:w-80  ">
+          <div className="bg-white rounded-lg p-4 shadow-sm space-y-4 h-[325px]">
             <h2 className="font-semibold text-gray-800">Need Help?</h2>
 
             {/* Phone */}
@@ -322,7 +331,7 @@ const [companyDescription, setCompanyDescription] = useState<string>("");
 
       {/* 🔹 Job Postings Section */}
       <div className=" flex item-center justify-center h-fit overflow-x-auto  container mx-auto">
-        <div className="bg-white p-5 w-5xl rounded-lg  shadow-sm ">
+        <div className="bg-white p-5 w-[950px] rounded-lg  shadow-sm ">
           <h2 className="font-semibold text-gray-800">Job Postings</h2>
 
           {/* Desktop Table */}
@@ -361,21 +370,21 @@ const [companyDescription, setCompanyDescription] = useState<string>("");
                             className="text-gray-600 hover:text-blue-600 p-1 rounded cursor-pointer"
                             title="Preview"
                           >
-                            <FaEye size={16} />
+                            <Eye size={16} />
                           </a>
                           <button
                             onClick={() => handleEdit(job)}
                             className="text-gray-600 hover:text-blue-600 p-1 rounded cursor-pointer"
                             title="Edit"
                           >
-                            <FaEdit size={16} />
+                            <Edit size={16} />
                           </button>
                           <button
                             onClick={() => handleDelete(job.id)}
                             className="text-gray-600 hover:text-red-600 p-1 rounded cursor-pointer"
                             title="Delete"
                           >
-                            <FaTrash size={16} />
+                            <Trash size={16} />
                           </button>
                         </div>
                       </td>

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NotificationSidebar from "./NotificationSidebar";
+import { Search, UserRound } from "lucide-react";
 
 export const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,24 +28,31 @@ export const Navbar = () => {
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 flex-wrap">
-          {/* Browse Jobs
-          <Link
-            href="/browse-jobs"
-            className="hidden md:inline-block ml-2 text-blue-600 font-semibold hover:text-blue-800 transition"
+
+          {/* Left: Logo */}
+          <div
+            className="flex items-center space-x-2 cursor-pointer"
+            onClick={() => router.push("/nurseProfile")}
           >
-            Browse Jobs
-          </Link> */}
+            {/* Icon inside a rounded square */}
+            <div className="w-8 h-8 flex items-center justify-center bg-blue-400 rounded-[10px]">
+              <Search size={16} className="text-white" />
+            </div>
+
+            <span className="font-semibold text-lg text-black">VFind</span>
+          </div>
+
 
           {/* Search Bar */}
           <form
             onSubmit={handleSearchSubmit}
-            className="flex items-center flex-1 max-w-3xl bg-white rounded-full shadow border border-gray-300 px-3 py-2 gap-3"
+            className="flex items-center flex-1 max-w-3xl bg-white rounded-xl shadow border border-gray-300 px-2 py-1.5 gap-3" 
           >
             {/* Job Search */}
             <div className="flex items-center flex-1">
               <Image
-                width={20}
-                height={20}
+                width={18}
+                height={18}
                 src="/icons/search.png"
                 alt="search"
                 className="m-2"
@@ -59,13 +67,13 @@ export const Navbar = () => {
             </div>
 
             {/* Divider */}
-            <div className="w-px h-6 bg-gray-300"></div>
+            <div className="w-px h-5 bg-gray-300"></div>
 
             {/* Location Search */}
             <div className="flex items-center flex-1">
               <Image
-                width={20}
-                height={20}
+                width={18}
+                height={18}
                 src="/icons/location.png"
                 alt="location"
                 className="m-2"
@@ -82,33 +90,30 @@ export const Navbar = () => {
             {/* Search Button */}
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium transition text-sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-1.5 rounded-xl font-medium transition text-sm"
             >
               Search
             </button>
           </form>
-         
+
+
 
           {/* Profile & Dropdown */}
           <div className="relative flex items-center">
-             <Link
-            href="/nurseProfile/connectedstatus"
-            className="hidden md:inline-block ml-2 text-blue-600 font-semibold hover:text-blue-800 transition"
-          >
-            Connected Request
-          </Link>
+
+            <button
+              onClick={() => router.push("/nurseProfile/connectedstatus")}
+              className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
+            >
+              <p className="text-sm"> Connection Request</p>
+            </button>
+
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center space-x-2 cursor-pointer ml-4"
             >
-              <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-blue-500">
-                <Image
-                  src="/assets/profile.png"
-                  alt="Profile"
-                  fill
-                  style={{ objectFit: "cover" }}
-                  sizes="40px"
-                />
+              <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-400 hover:bg-gray-50">
+                <UserRound size={20} className="text-gray-700" />
               </div>
 
               <svg
@@ -159,12 +164,7 @@ export const Navbar = () => {
         {/* Mobile Menu */}
         {menuOpen && (
           <div className="md:hidden absolute top-16 left-0 w-full bg-white border-t border-gray-200 shadow-md z-40">
-            <Link
-              href="/browse-jobs"
-              className="block w-full text-left px-4 py-3 text-blue-600 font-semibold hover:bg-gray-100"
-            >
-              Browse Jobs
-            </Link>
+
 
 
 

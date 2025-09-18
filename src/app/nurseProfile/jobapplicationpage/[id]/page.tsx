@@ -120,187 +120,167 @@ export default function JobApplicationPage() {
     );
 
   return (
-    <div className="min-h-screen flex bg-white justify-around item-center gap-5 ">
-      {/* Main Content */}
-      <div className=" bg-[#F5F6FA] rounded-lg shadow-md">
-        {/* Main Content */}
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          <div className="max-w-4xl">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-              <div className="flex-shrink-0 bg-blue-100 rounded-lg p-3">
-                <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {job.company || "St. Mary's Aged Care Facility"}
-                </h1>
-              </div>
-            </div>
+    <div className="min-h-screen bg-white py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-              {/* Left Content - Job Details */}
-              <div className="xl:col-span-2 space-y-6">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                  {job.title}
-                </h3>
-                <div className="w-full h-0.5 bg-gray-300" />
+          {/* Left Column - Main Job Details */}
+          <div className="lg:col-span-2">
+            <div className="bg-[#F5F6FA] rounded-lg shadow-sm ">
 
-                {/* Basic Info Card */}
-                <div className="p-4 sm:p-6">
-                  <div className="space-y-3">
-
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-                      <div className="w-full sm:w-24 flex-shrink-0">
-                        <span className="text-gray-900 font-medium">Industry</span>
-                      </div>
-                      <div className="hidden sm:flex flex-shrink-0 mx-4">
-                        <span className="text-gray-900">:</span>
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-gray-900">Healthcare & Social Assistance</span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-                      <div className="w-full sm:w-24 flex-shrink-0">
-                        <span className="text-gray-900 font-medium">Location</span>
-                      </div>
-                      <div className="hidden sm:flex flex-shrink-0 mx-4">
-                        <span className="text-gray-900">:</span>
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-gray-900">{job.location}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-                      <div className="w-full sm:w-24 flex-shrink-0">
-                        <span className="text-gray-900 font-medium">Salary</span>
-                      </div>
-                      <div className="hidden sm:flex flex-shrink-0 mx-4">
-                        <span className="text-gray-900">:</span>
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-gray-900">AUD {job.minPay}-{job.maxPay}/hr</span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-                      <div className="w-full sm:w-24 flex-shrink-0">
-                        <span className="text-gray-900 font-medium">Job Type</span>
-                      </div>
-                      <div className="hidden sm:flex flex-shrink-0 mx-4">
-                        <span className="text-gray-900">:</span>
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-gray-900">{job.type}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-                      <div className="w-full sm:w-24 flex-shrink-0">
-                        <span className="text-gray-900 font-medium">Job Shift</span>
-                      </div>
-                      <div className="hidden sm:flex flex-shrink-0 mx-4">
-                        <span className="text-gray-900">:</span>
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-gray-900">{job.shift || "Any"}</span>
-                      </div>
-                    </div>
-
+              {/* Header Section */}
+              <div className="p-6 border-b">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-semibold text-gray-900">
+                      {job.company || "St. Mary's Aged Care Facility"}
+                    </h1>
                   </div>
                 </div>
-                <div className="w-full h-0.5 bg-gray-300" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{job.title}</h2>
+              </div>
 
-                {/* Candidate Preferences */}
-                <div className="p-4 sm:p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Candidate Preferences</h3>
-                  <div className="space-y-4">
+              {/* Basic Info Section */}
+            <div className="p-4 border-b border-gray-200">
+  <div className="flex flex-col gap-4 text-sm">
 
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-                      <div className="w-full sm:w-32 flex-shrink-0">
-                        <span className="text-gray-900 font-medium">Role Category</span>
-                      </div>
-                      <div className="hidden sm:flex flex-shrink-0 mx-4">
-                        <span className="text-gray-900">:</span>
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-gray-900">{job.title}</span>
-                      </div>
-                    </div>
+    <div className="flex justify-between items-center w-2/3">
+      <span className="font-medium text-gray-600">Industry</span>
+      <p className="text-gray-900">: Healthcare &amp; Social Assistance</p>
+    </div>
 
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-                      <div className="w-full sm:w-32 flex-shrink-0">
-                        <span className="text-gray-900 font-medium">Experience</span>
-                      </div>
-                      <div className="hidden sm:flex flex-shrink-0 mx-4">
-                        <span className="text-gray-900">:</span>
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-gray-900">{job.experienceMin} - {job.experienceMax} years</span>
-                      </div>
-                    </div>
+    <div className="flex justify-between items-center w-2/3">
+      <span className="font-medium text-gray-600">Location</span>
+      <p className="text-gray-900">: Melbourne, Victoria</p>
+    </div>
 
-                    <div>
-                      <div className="flex-shrink-0 mb-3">
-                        <span className="text-gray-900 font-medium">Preferred Qualifications</span>
-                      </div>
-                      <div className="space-y-2">
-                        {job.certifications?.map((cert, index) => (
-                          <div key={index} className="flex items-start">
-                            <div className="w-2 h-2 bg-blue-600 rounded-full mr-3 mt-2 flex-shrink-0"></div>
-                            <span className="text-sm text-gray-700 leading-relaxed">{cert}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+    <div className="flex justify-between items-center w-2/3">
+      <span className="font-medium text-gray-600">Salary</span>
+      <p className="text-gray-900">: AUD 14-16/hr</p>
+    </div>
 
+    <div className="flex justify-between items-center w-2/3">
+      <span className="font-medium text-gray-600">Job Type</span>
+      <p className="text-gray-900">: Full Time</p>
+    </div>
+
+    <div className="flex justify-between items-center w-2/3">
+      <span className="font-medium text-gray-600">Job Shift</span>
+      <p className="text-gray-900">: Not specified</p>
+    </div>
+
+    <div className="flex justify-between items-center w-2/3">
+      <span className="font-medium text-gray-600">Job Posted</span>
+      <p className="text-gray-900">: 1 Days Ago</p>
+    </div>
+
+  </div>
+</div>
+
+
+              {/* Candidate Preferences */}
+              <div className="p-6 border-b">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Candidate Preferences</h3>
+                <div className="space-y-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-600">Role Category</span>
+                    <p className="text-gray-900 mt-1">{job.title}</p>
                   </div>
-                </div>
-                <div className="w-full h-0.5 bg-gray-300" />
-
-                {/* Job Description */}
-                <div className="p-4 sm:p-6  rounded-lg shadow-md ">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Description</h3>
-                  <div
-                    className="prose prose-sm max-w-none text-gray-700 leading-relaxed overflow-y-auto h-75"
-                    dangerouslySetInnerHTML={{ __html: job.description }}
-                  />
-                </div>
-
-
-                {/* Apply Button */}
-                <div className="p-4 sm:p-6">
-                  <button
-                    onClick={handleSubmitApplication}
-                    disabled={submitting}
-                    className="w-full sm:w-auto bg-blue-400 text-white py-3 px-8 rounded-lg font-medium hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {submitting ? "Submitting Application..." : "Apply Now"}
-                  </button>
+                  <div>
+                    <span className="font-medium text-gray-600">Experience</span>
+                    <p className="text-gray-900 mt-1">{job.experienceMin} - {job.experienceMax} years</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Preferred Certifications</span>
+                    <div className="mt-2 space-y-1">
+                      {job.certifications?.map((cert, index) => (
+                        <div key={index} className="flex items-start">
+                          <span className="w-1 h-1 bg-gray-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                          <span className="text-gray-700">{cert}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 
+              {/* Job Description */}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Description</h3>
 
+                {/* Clinical Care Section */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-2">Clinical Care</h4>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Provide high-quality nursing care to residents</li>
+                    <li>• Administer medications per AHPRA standards</li>
+                    <li>• Develop and review care plans</li>
+                  </ul>
+                </div>
+
+                {/* Resident Wellbeing Section */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-2">Resident Wellbeing</h4>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Monitor physical and emotional health</li>
+                    <li>• Support daily living needs</li>
+                    <li>• Ensure dignity, respect, and compassion</li>
+                  </ul>
+                </div>
+
+                {/* Team Collaboration Section */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-2">Team Collaboration</h4>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Work with care staff & allied health professionals</li>
+                    <li>• Mentor junior staff</li>
+                    <li>• Participate in team meetings</li>
+                  </ul>
+                </div>
+
+                {/* Compliance & Safety Section */}
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-2">Compliance & Safety</h4>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Maintain accurate documentation</li>
+                    <li>• Follow infection control & WHS standards</li>
+                    <li>• Report incidents and improve quality</li>
+                  </ul>
+                </div>
+
+                <button
+                  onClick={handleSubmitApplication}
+                  disabled={submitting}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                >
+                  {submitting ? "Submitting..." : "Apply Now"}
+                </button>
+              </div>
             </div>
+          </div>
 
+          {/* Right Column - About Company */}
+          <div className="lg:col-span-1">
+            <div className="bg-[#F5F6FA] rounded-lg shadow-sm  p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">About Company</h3>
+              <div className="text-sm text-gray-700 leading-relaxed">
+                <p className="mb-4">
+                  St. Marys Aged Care Facility is committed to providing compassionate, high-quality care to our elderly residents in a safe, nurturing, and homelike environment. Our focus is on promoting dignity, independence, and quality of life through person-centered care for all of every resident.
+                </p>
+                <p className="mb-4">
+                  With a team of dedicated healthcare professionals, we ensure that residents receive not only exceptional clinical care but also emotional and social support to ensure they feel valued, respected, and at home.
+                </p>
+                <p>
+                  We are a close-knit community where both residents and staff can thrive, offering opportunities for professional growth while maintaining the highest standards of care.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* ----About company-- */}
-      <div className="h-fit bg-[#F5F6FA] max-w-md p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold text-gray-900">About Company</h3>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Error deserunt, ipsam earum quo corporis nisi suscipit maiores illo eaque porro dolore eum culpa quos tempore molestiae sunt assumenda consequatur aliquam, sed sapiente quis dolores ipsa? Aliquid soluta, nam aut dolorem cumque aspernatur? Consectetur quam deserunt ipsa magnam ipsum. Repellendus illum praesentium vel deleniti, temporibus a iste perspiciatis voluptatem officiis, est autem impedit asperiores iusto nulla ipsum tempora hic dolorum laudantium tempore ab consectetur eius eligendi quod. Debitis totam ipsum excepturi sunt dolor aliquam optio adipisci praesentium veritatis voluptatibus ullam delectus explicabo ex enim sapiente beatae aspernatur, magni fugiat dolorum. Deserunt.
-        </p>
-
-
-      </div>
-
-
-
     </div>
   );
 }

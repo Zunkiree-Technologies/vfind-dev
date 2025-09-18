@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Cookies from "js-cookie";
-import { MapPin, Briefcase, Clock, Search } from "lucide-react";
+import { MapPin, Briefcase, Clock, Search, Mail, DollarSign, Clock1 } from "lucide-react";
 import Loader from "../../../../components/loading";
 import Link from "next/link";
 
@@ -15,6 +15,10 @@ interface ProfileImage {
 }
 
 interface Candidate {
+  residencyStatus: string;
+  shiftPreferences: string[];
+  experience: string;
+  visaStatus: string;
   id: number;
   fullName: string;
   email?: string;
@@ -24,6 +28,7 @@ interface Candidate {
   phoneNumber?: string;
   qualification?: string;
   profileImage?: ProfileImage | null;
+
 }
 
 const BASE_IMAGE_URL = "https://x8ki-letl-twmt.n7.xano.io";
@@ -41,10 +46,14 @@ export default function CandidateList() {
   const [jobTypes, setJobTypes] = useState<string[]>([]);
   const [shifts, setShifts] = useState<string[]>([]);
   const [roleCategories, setRoleCategories] = useState<string[]>([]);
-  const [experience, setExperience] = useState<string[]>([]);
   const [payRate, setPayRate] = useState<number>(0);
   const [radius, setRadius] = useState<number>(0);
   const [, setEmployerId] = useState<string | null>(null);
+  const [experience, setExperience] = useState<string[]>([]);
+  ;
+  const [visaStatus, setVisaStatus] = useState<string[]>([]);
+
+
 
   // Load cookies and employerId
   useEffect(() => {
@@ -55,6 +64,7 @@ export default function CandidateList() {
     const savedRoleCategories = Cookies.get("roleCategories");
     const savedExperience = Cookies.get("experience");
     const savedPayRate = Cookies.get("payRate");
+    const savedVisaStatus = Cookies.get("visaStatus");
     const savedRadius = Cookies.get("radius");
 
     const storedEmployerId =
@@ -71,6 +81,7 @@ export default function CandidateList() {
     if (savedRoleCategories) setRoleCategories(JSON.parse(savedRoleCategories));
     if (savedExperience) setExperience(JSON.parse(savedExperience));
     if (savedPayRate && !isNaN(Number(savedPayRate))) setPayRate(Number(savedPayRate));
+    if (savedVisaStatus) setVisaStatus(JSON.parse(savedVisaStatus));
     if (savedRadius && !isNaN(Number(savedRadius))) setRadius(Number(savedRadius));
   }, []);
 
@@ -113,84 +124,145 @@ export default function CandidateList() {
     fetchCandidates();
   }, []);
 
-  const applyFilters = useCallback(
-    (instant = false) => {
-      let filtered = [...candidates];
 
-      if (search.trim()) {
-        filtered = filtered.filter((c) =>
-          [c.fullName, c.qualification, c.jobTypes]
-            .join(" ")
-            .toLowerCase()
-            .includes(search.toLowerCase())
-        );
-      }
+  const experienceRanges: Record<string, [number, number]> = {
+  "Less than 6 months": [0, 0.5],
+  "6 months – 1 year": [0.5, 1],
+  "1–3 years": [1, 3],
+  "3 - 5 years": [3, 5],
+  "Over 5 years": [5, Infinity],
+};
 
-      if (location.trim()) {
-        filtered = filtered.filter((c) =>
-          [c.currentResidentialLocation]
-            .join(" ")
-            .toLowerCase()
-            .includes(location.toLowerCase())
-        );
-      }
+function parseExperienceToYears(exp: string): number {
+  const normalized = exp.trim().toLowerCase().replace(/–/g, "-");
 
-      if (jobTypes.length > 0) {
-        filtered = filtered.filter((c) => {
-          try {
-            const jobTypesArray = c.jobTypes ? JSON.parse(c.jobTypes) : [];
-            return jobTypesArray.some((jt: string) =>
-              jobTypes.some((et) => jt.toLowerCase().includes(et.toLowerCase()))
-            );
-          } catch {
-            return false;
-          }
+  if (normalized.includes("less than 6 months")) return 0.25;
+  if (normalized.includes("6 months")) return 0.75;
+  if (normalized.includes("1-3 years")) return 2;
+  if (normalized.includes("3-5 years")) return 4;
+  if (normalized.includes("over 5 years") || normalized.includes("5+")) return 6;
+
+  return 0;
+}
+
+
+
+ const applyFilters = useCallback(
+  (instant = false) => {
+    let filtered = [...candidates];
+
+    // 🔹 SEARCH filter
+    if (search.trim()) {
+      filtered = filtered.filter((c) =>
+        [c.fullName, c.qualification, c.jobTypes]
+          .join(" ")
+          .toLowerCase()
+          .includes(search.toLowerCase())
+      );
+    }
+
+    // 🔹 LOCATION filter
+    if (location.trim()) {
+      filtered = filtered.filter((c) =>
+        [c.currentResidentialLocation]
+          .join(" ")
+          .toLowerCase()
+          .includes(location.toLowerCase())
+      );
+    }
+
+    // 🔹 JOB TYPE filter
+    if (jobTypes.length > 0) {
+      filtered = filtered.filter((c) => {
+        try {
+          const jobTypesArray = c.jobTypes ? JSON.parse(c.jobTypes) : [];
+          return jobTypesArray.some((jt: string) =>
+            jobTypes.some((et) => jt.toLowerCase().includes(et.toLowerCase()))
+          );
+        } catch {
+          return false;
+        }
+      });
+    }
+
+    // 🔹 SHIFT filter
+    if (shifts.length > 0) {
+      filtered = filtered.filter((c) =>
+        c.shiftPreferences?.some((pref: string) =>
+          shifts.some((s) => pref.toLowerCase().includes(s.toLowerCase()))
+        )
+      );
+    }
+
+    // 🔹 EXPERIENCE filter
+    if (experience.length > 0) {
+      filtered = filtered.filter((c) => {
+        if (!c.experience) return false;
+
+        const candidateYears = parseExperienceToYears(c.experience);
+
+        return experience.some((exp) => {
+          const [min, max] = experienceRanges[exp];
+          return candidateYears >= min && candidateYears < max;
         });
-      }
+      });
+    }
 
-      if (shifts.length > 0) {
-        filtered = filtered.filter((c) => {
-          try {
-            const jobTypesArray = c.jobTypes ? JSON.parse(c.jobTypes) : [];
-            return jobTypesArray.some((jt: string) =>
-              shifts.some((s) => jt.toLowerCase().includes(s.toLowerCase()))
-            );
-          } catch {
-            return false;
-          }
-        });
-      }
+    // 🔹 ROLE filter
+    if (roleCategories.length > 0) {
+      filtered = filtered.filter((c) =>
+        roleCategories.some((role) =>
+          (c.qualification || "").toLowerCase().includes(role.toLowerCase())
+        )
+      );
+    }
 
-      if (roleCategories.length > 0) {
-        filtered = filtered.filter((c) =>
-          roleCategories.some((role) =>
-            (c.qualification || "").toLowerCase().includes(role.toLowerCase())
-          )
-        );
-      }
+    // 🔹 VISA filter
+    if (visaStatus.length > 0) {
+      filtered = filtered.filter((c) =>
+        visaStatus.some((status) =>
+          (c.residencyStatus || "").toLowerCase().includes(status.toLowerCase())
+        )
+      );
+    }
 
-      if (payRate > 0) {
-        filtered = filtered.filter((c) => {
-          const rate = parseFloat(c.maxWorkHours || "0");
-          return !isNaN(rate) && rate >= payRate;
-        });
-      }
+    // 🔹 PAY RATE filter
+    if (payRate > 0) {
+      filtered = filtered.filter((c) => {
+        const rate = parseFloat(c.maxWorkHours || "0");
+        return !isNaN(rate) && rate >= payRate;
+      });
+    }
 
-      setFilteredCandidates(filtered);
+    setFilteredCandidates(filtered);
 
-      if (!instant) {
-        Cookies.set("search", search, { expires: 7 });
-        Cookies.set("location", location, { expires: 7 });
-        Cookies.set("jobTypes", JSON.stringify(jobTypes), { expires: 7 });
-        Cookies.set("shifts", JSON.stringify(shifts), { expires: 7 });
-        Cookies.set("roleCategories", JSON.stringify(roleCategories), { expires: 7 });
-        Cookies.set("experience", JSON.stringify(experience), { expires: 7 });
-        Cookies.set("payRate", String(payRate), { expires: 7 });
-        Cookies.set("radius", String(radius), { expires: 7 });
-      }
-    },
-    [candidates, search, location, jobTypes, shifts, roleCategories, experience, payRate, radius]
-  );
+    // Save cookies if not instant
+    if (!instant) {
+      Cookies.set("search", search, { expires: 7 });
+      Cookies.set("location", location, { expires: 7 });
+      Cookies.set("jobTypes", JSON.stringify(jobTypes), { expires: 7 });
+      Cookies.set("shifts", JSON.stringify(shifts), { expires: 7 });
+      Cookies.set("roleCategories", JSON.stringify(roleCategories), { expires: 7 });
+      Cookies.set("experience", JSON.stringify(experience), { expires: 7 }); // ✅ FIXED
+      Cookies.set("payRate", String(payRate), { expires: 7 });
+      Cookies.set("visaStatus", JSON.stringify(visaStatus), { expires: 7 });
+      Cookies.set("radius", String(radius), { expires: 7 });
+    }
+  },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [
+    candidates,
+    search,
+    location,
+    jobTypes,
+    shifts,
+    experience, 
+    roleCategories,
+    payRate,
+    radius,
+    visaStatus,
+  ]
+);
 
   useEffect(() => {
     const debounce = setTimeout(() => applyFilters(true), 300);
@@ -213,6 +285,7 @@ export default function CandidateList() {
     setShifts([]);
     setRoleCategories([]);
     setExperience([]);
+    setVisaStatus([]);
     setPayRate(0);
     setRadius(0);
     setFilteredCandidates(candidates);
@@ -225,6 +298,7 @@ export default function CandidateList() {
     Cookies.remove("roleCategories");
     Cookies.remove("experience");
     Cookies.remove("payRate");
+    Cookies.remove("visaStatus");
     Cookies.remove("radius");
   };
 
@@ -283,7 +357,7 @@ export default function CandidateList() {
 
       <div className="flex gap-6 mt-6 items-start">
         {/* Left Filters */}
-        <div className="hidden md:block w-64 bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
+        <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
           <h2 className="font-semibold text-gray-800 flex justify-between ">
             All Filters
             <button
@@ -315,7 +389,7 @@ export default function CandidateList() {
           {/* Shift */}
           <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Shift</h3>
-            {["Morning shift", "Day Shift", "Evening Shift", "Night Shift"].map((shift) => (
+            {["Morning", "Afternoon", "Night"].map((shift) => (
               <div key={shift} className="flex items-center gap-2 text-sm mb-1">
                 <input
                   type="checkbox"
@@ -333,12 +407,11 @@ export default function CandidateList() {
           <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Role Category</h3>
             {[
-              "Registered Nurse (RN)",
               "Clinical Lead / Manager",
+              "Registered Nurse (RN)",
               "Enrolled Nurse (EN)",
-              "Licensed Practical Nurse (LPN)",
-              "Certified Nursing Assistant (CNA)",
-              "Assistant in Nursing (AIN)"
+              "Assistant in Nursing (AIN)",
+              "Others"
             ].map((role) => (
               <div key={role} className="flex items-center gap-2 text-sm mb-1">
                 <input
@@ -356,7 +429,13 @@ export default function CandidateList() {
           {/* Experience */}
           <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Experience</h3>
-            {["0-1 Year", "1-3 Years", "3-5 Years", "5+ Years"].map((exp) => (
+            {[
+              "Less than 6 months",
+              "6 months – 1 year",
+              "1–3 years",
+              "3 - 5 years",
+              "Over 5 years",
+            ].map((exp) => (
               <div key={exp} className="flex items-center gap-2 text-sm mb-1">
                 <input
                   type="checkbox"
@@ -368,7 +447,34 @@ export default function CandidateList() {
               </div>
             ))}
           </div>
+
+
+
           <div className="w-py h-0.5 bg-gray-300" />
+          {/* visa status */}
+          <div>
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Visa Status</h3>
+            {[
+              "Australian Citizen / Permanent Resident",
+              "Temporary Resident",
+              "Student Visa Holder",
+              "Student Dependent Visa Holder",
+              "Working Visa Holder",
+              "Other",
+            ].map((status) => (
+              <div key={status} className="flex items-center gap-2 text-sm mb-1">
+                <input
+                  type="checkbox"
+                  checked={visaStatus.includes(status)}
+                  onChange={() => handleCheckboxChange(status, setVisaStatus)}
+                  className="rounded"
+                />
+                <label>{status}</label>
+              </div>
+            ))}
+          </div>
+          <div className="w-py h-0.5 bg-gray-300" />
+
 
           {/* Pay Rate */}
           <div>
@@ -376,7 +482,7 @@ export default function CandidateList() {
             <input
               type="range"
               min="0"
-              max="10000"
+              max="100"
               value={isNaN(payRate) ? 0 : payRate}
               onChange={(e) => setPayRate(Number(e.target.value) || 0)}
               className="w-full accent-blue-600"
@@ -389,7 +495,7 @@ export default function CandidateList() {
           <div className="w-py h-0.5 bg-gray-300" />
 
           {/* Radius */}
-          <div>
+          {/* <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Radius</h3>
             <input
               type="range"
@@ -403,11 +509,11 @@ export default function CandidateList() {
               <span>Any</span>
               <span>{radius} km</span>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Candidate Cards */}
-        <div className="flex-1 max-w-4xl mx-5">
+        <div className="flex-1 max-w-[983px] ">
           <div className="grid grid-cols-1 gap-4">
             {filteredCandidates.map((candidate) => {
               let jobTypesArray: string[] = [];
@@ -428,30 +534,72 @@ export default function CandidateList() {
                 >
                   {/* Left side content */}
                   <div className="flex-1">
-                    <h2 className="font-semibold text-lg text-blue-600 mb-1">
+                    <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
                       {candidate.fullName}
                     </h2>
-                    <p className="text-gray-600 text-sm mb-3">
+                    <p className=" text-regular  mb-3">
                       {candidate.qualification || "Qualification not specified"}
                     </p>
 
-                    <div className="flex flex-wrap gap-6 text-gray-600 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
+                      {/* Location */}
                       <div className="flex items-center gap-1">
-                        <MapPin size={16} className="text-blue-500" />
+                        <MapPin size={16} />
                         <span>
                           {candidate.currentResidentialLocation || "Location not specified"}
                         </span>
                       </div>
+
+                      {/* Email */}
                       <div className="flex items-center gap-1">
-                        <Briefcase size={16} className="text-blue-500" />
-                        <span>Full Time</span>
+                        <Mail size={16} />
+                        <span>{candidate.email || "Not specified"}</span>
                       </div>
+
+                      {/* Pay Rate */}
                       <div className="flex items-center gap-1">
-                        <Clock size={16} className="text-blue-500" />
-                        <span>Day Shift</span>
+                        <DollarSign size={16} />
+                        <span>
+                          {candidate.maxWorkHours
+                            ? `$${candidate.maxWorkHours}/hr`
+                            : "Not specified"}
+                        </span>
                       </div>
+
+                      {/* Experience */}
+                      <div className="flex items-center gap-1">
+                        <Clock1 size={16} className="text-blue-500" />
+                        <span>
+                          {candidate.experience || "Not specified"}
+                        </span>
+                      </div>
+
+
+                      {/* Job Type */}
+                      <div className="flex items-center gap-1">
+                        <Briefcase size={16} />
+                        <span>{candidate.jobTypes || "Not specified"}</span>
+
+                      </div>
+
+                      {/* Shift */}
+                      <div className="flex items-center gap-1">
+                        <Clock size={16} />
+                        <span>
+                          {candidate.shiftPreferences.length > 0
+                            ? candidate.shiftPreferences.join(", ")
+                            : "Not specified"}
+
+
+                        </span>
+                      </div>
+
+
                     </div>
+
+
                   </div>
+
 
                   {/* Right side - Photo and button */}
                   <div className="flex items-center gap-4 ml-6 flex-col">
@@ -477,7 +625,7 @@ export default function CandidateList() {
                       href={`/EmployerDashboard/Candidatelist/${candidate.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-blue-400 text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
+                      className="px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
                     >
                       View Details
                     </Link>

@@ -30,7 +30,7 @@ export default function EmployerNavbar({ }: NavbarProps) {
 
   return (
     <nav className="bg-white shadow-md w-full mx-auto container">
-      <div className="mx-auto container flex justify-between items-center px-4 md:px-6 py-3">
+      <div className="mx-auto container flex justify-around items-center px-4 md:px-6 py-3">
         {/* Left: Logo */}
         <div
           className="flex items-center space-x-2 cursor-pointer"
@@ -46,13 +46,13 @@ export default function EmployerNavbar({ }: NavbarProps) {
 
 
         {/* Right: Profile Icon */}
-        <div className="relative flex gap-5">
+        <div className="relative flex  gap-5">
           <div className="hidden md:flex space-x-6">
             <button
               onClick={() => router.push("/EmployerDashboard/status")}
-              className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-600 rounded-[10px]"
+              className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
             >
-              <p className="text-sm"> Candidate Request</p>
+              <p className="text-sm"> Connection Request</p>
             </button>
 
             <button
@@ -72,15 +72,13 @@ export default function EmployerNavbar({ }: NavbarProps) {
             className="flex items-center gap-1 focus:outline-none"
           >
             {/* User circle */}
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-blue-50">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-400 hover:bg-gray-50">
               <UserRound size={20} className="text-gray-700" />
             </div>
 
             {/* Dropdown arrow */}
             <ChevronDown size={20} className="text-gray-700 hover:text-blue-600" />
           </button>
-
-
 
           <div>
             <NotificationSidebar />

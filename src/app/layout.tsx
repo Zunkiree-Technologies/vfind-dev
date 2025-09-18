@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import ThemeWrapper from "./ThemeWrapper";
 
-
-const poppins = Poppins({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], 
-  variable: "--font-poppins",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${poppins.variable} antialiased`} style={{ fontFamily: "var(--font-poppins)" }}>
+      <body
+        className={`${inter.variable} antialiased`}
+        style={{ fontFamily: "var(--font-inter)" }}
+      >
         <ThemeWrapper>{children}</ThemeWrapper>
       </body>
     </html>
