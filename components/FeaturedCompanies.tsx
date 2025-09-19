@@ -17,7 +17,7 @@ const companies = [
 
 export const FeaturedCompanies = () => {
     return (
-        <section className="min-h-[746px] bg-white flex items-center justify-center">
+        <section className="min-h-[646px] bg-white flex items-center justify-center">
             <div className="container mx-auto px-4">
                 {/* Heading */}
                 <div className="text-center mb-16">

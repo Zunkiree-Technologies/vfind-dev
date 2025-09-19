@@ -6,9 +6,9 @@ import Image from "next/image";
 export const HeroSection = () => {
   return (
     <section
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#F8FAFD]"
+      className="relative min-h-[576px] flex items-center justify-center overflow-hidden bg-[#F8FAFD]"
     >
-      <div className="container mx-auto px-2 lg:px-1 flex flex-col lg:flex-row items-center justify-between ">
+      <div className="container mx-auto px-10 lg:px-1 flex flex-col lg:flex-row items-center justify-between ">
 
         {/* Left Content */}
         <div className="flex-1 text-center lg:text-left space-y-8 max-w-4xl h-[415px]  flex flex-col justify-center">

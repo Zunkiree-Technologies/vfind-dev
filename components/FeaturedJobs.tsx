@@ -45,7 +45,7 @@ export default function FeaturedJobs() {
   }, []);
 
   return (
-    <section className="min-h-[980px] bg-[#F8FAFD] flex items-center justify-center px-6 py-12 " id="Featurejobs">
+    <section className="min-h-[780px] bg-[#F8FAFD] flex items-center justify-center px-6 py-12 " id="Featurejobs">
       <div className="max-w-7xl w-full">
         {/* Header */}
         <div className="text-center mb-12 flex justify-center items-center flex-col">

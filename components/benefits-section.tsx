@@ -22,7 +22,7 @@ const benefits = [
 
 export const BenefitsSection = () => {
   return (
-        <section className="min-h-[746px] bg-white flex items-center justify-center">
+        <section className="min-h-[546px] bg-white flex items-center justify-center">
 
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 fade-in">
