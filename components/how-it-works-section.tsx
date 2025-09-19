@@ -25,7 +25,7 @@ const steps = [
 
 export const HowItWorksSection = () => {
   return (
-    <section className="min-h-[546px] bg-[#F8FAFD] flex items-center justify-center">
+    <section className="min-h-fit p-4 bg-[#F8FAFD] flex items-center justify-center">
       <div className="container mx-auto px-4">
         {/* Heading */}
         <div className="text-center mb-16 fade-in">

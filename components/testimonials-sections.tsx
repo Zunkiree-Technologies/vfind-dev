@@ -70,7 +70,7 @@ export const TestimonialsSection = () => {
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
-    <section className="py-20 bg-healthcare-gray-light overflow-hidden">
+    <section className="min-h-fit p-4 bg-healthcare-gray-light overflow-hidden">
    <div className="container mx-auto px-4 mb-16 text-center">
   <h2 className="text-3xl font-bold text-gray-700">
     Success Stories from Our Nurses

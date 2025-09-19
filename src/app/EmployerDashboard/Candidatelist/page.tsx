@@ -311,7 +311,7 @@ function parseExperienceToYears(exp: string): number {
     );
 
   return (
-    <div className="p-6 min-h-screen mx-auto container bg-[#F5F6FA]">
+    <div className="p-6 min-h-screen mx-auto  bg-[#F5F6FA]">
 
       {/* Top Search Bar */}
       <div className="flex justify-center items-center sticky top-0 z-50 bg-[#F5F6FA] ">
@@ -355,7 +355,7 @@ function parseExperienceToYears(exp: string): number {
 
 
 
-      <div className="flex gap-6 mt-6 items-start">
+      <div className="flex gap-6 mt-6 mx-auto container">
         {/* Left Filters */}
         <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
           <h2 className="font-semibold text-gray-800 flex justify-between ">
