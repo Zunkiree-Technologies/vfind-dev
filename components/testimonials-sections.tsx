@@ -71,14 +71,15 @@ export const TestimonialsSection = () => {
 
   return (
     <section className="py-20 bg-healthcare-gray-light overflow-hidden">
-      <div className="container mx-auto px-4 mb-16 text-center">
-        <h2 className="text-4xl md:text-5xl font-bold text-healthcare-navy mb-6">
-          Success Stories from Our Nurses
-        </h2>
-        <p className="text-xl text-healthcare-gray max-w-3xl mx-auto text-balance">
-          Join thousands of nurses who have successfully built their careers in Australia through our platform.
-        </p>
-      </div>
+   <div className="container mx-auto px-4 mb-16 text-center">
+  <h2 className="text-3xl font-bold text-gray-700">
+    Success Stories from Our Nurses
+  </h2>
+  <p className="text-xl text-gray-500 max-w-2xl mt-5 mx-auto text-center">
+    Join thousands of nurses who have successfully built their careers in Australia through our platform.
+  </p>
+</div>
+
 
       {/* Top Scrolling Testimonials */}
       <div className="relative overflow-hidden ">
@@ -142,8 +143,8 @@ export const TestimonialsSection = () => {
               </p>
               <div className="flex items-center">
                 <Image
-                  width={25}
-                  height={25}
+                  width={30}
+                  height={30}
                   src={t.image}
                   alt={t.name}
                   className="w-12 h-12 sm:w-10 sm:h-10 rounded-full object-cover mr-4"

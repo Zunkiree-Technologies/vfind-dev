@@ -1,6 +1,7 @@
 import { BenefitsSection } from "../../components/benefits-section";
-import { EarlyAccessSection } from "../../components/early-access-section";
-import { FooterSection } from "../../components/footer-section";
+import { FeaturedCompanies } from "../../components/FeaturedCompanies";
+import FeaturedJobs from "../../components/FeaturedJobs";
+import FooterSectionTwo from "../../components/Footer-section-two";
 import { HeroSection } from "../../components/hero-section";
 import { HowItWorksSection } from "../../components/how-it-works-section";
 import Navbar from "../../components/navbar";
@@ -26,14 +27,18 @@ export default function Home() {
       </section>
       
       <section aria-label="Early access signup">
-        <EarlyAccessSection />
+        <FeaturedCompanies />
+      </section>
+
+       <section aria-label="Feature jobs">
+        <FeaturedJobs />
       </section>
       
       <section aria-label="Success stories and testimonials">
         <TestimonialsSection />
       </section>
       
-      <FooterSection />
+      <FooterSectionTwo />
       
     </main>
   );

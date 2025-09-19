@@ -433,7 +433,7 @@ export default function CandidateDetailPage() {
                   Connected
                 </button>
                 <div className="px-6 py-2 border rounded-lg cursor-pointer hover:bg-gray-100">
-                  Hurray you are connected
+                  Connected
                 </div>
               </div>
             )}
@@ -684,7 +684,7 @@ export default function CandidateDetailPage() {
                   : "Not specified"}
               </p>
             </div>
-            
+
           </div>
 
 

@@ -1,69 +1,52 @@
-import React from 'react';
-import { Search, MapPin, Briefcase } from 'lucide-react';
-import { Button } from './button';
-import { Input } from './input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
+"use client";
+import React from "react";
+import { Search, MapPin, Briefcase, Clock } from "lucide-react";
+
 
 export const SearchBar = () => {
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-large p-6 max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-healthcare-navy">Job Title</label>
-          <div className="relative">
-            <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-healthcare-gray h-4 w-4" />
-            <Input 
-              placeholder="e.g. Registered Nurse" 
-              className="pl-10 h-12 border-healthcare-blue-light focus:ring-primary"
-            />
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-healthcare-navy">Location</label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-healthcare-gray h-4 w-4" />
-            <Select>
-              <SelectTrigger className="pl-10 h-12 border-healthcare-blue-light">
-                <SelectValue placeholder="Select city" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sydney">Sydney, NSW</SelectItem>
-                <SelectItem value="melbourne">Melbourne, VIC</SelectItem>
-                <SelectItem value="brisbane">Brisbane, QLD</SelectItem>
-                <SelectItem value="perth">Perth, WA</SelectItem>
-                <SelectItem value="adelaide">Adelaide, SA</SelectItem>
-                <SelectItem value="canberra">Canberra, ACT</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-healthcare-navy">Experience</label>
-          <Select>
-            <SelectTrigger className="h-12 border-healthcare-blue-light">
-              <SelectValue placeholder="Any level" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="new">Starting</SelectItem>
-
-              <SelectItem value="entry">Entry Level (0-2 years)</SelectItem>
-              <SelectItem value="mid">Mid Level (2-5 years)</SelectItem>
-              <SelectItem value="senior">Senior Level (5+ years)</SelectItem>
-              <SelectItem value="expert">Expert Level (10+ years)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <Button 
-          size="lg" 
-          className="h-12 bg-[#33A1E0] hover:scale-105 transition-bounce shadow-medium"
-        >
-          <Search className="mr-2 h-4 w-4" />
-          Search Jobs
-        </Button>
+    <div className="bg-white rounded-full  px-4 py-3 flex items-center gap-3 max-w-4xl mx-auto">
+      {/* Job Title */}
+     <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md flex-1 bg-white">
+        <Briefcase className="text-gray-400 h-4 w-4" />
+        <input
+          type="text"
+          placeholder="Job Title"
+          className="w-full text-sm bg-transparent outline-none placeholder-gray-400"
+        />
       </div>
+
+      {/* Location */}
+      <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md flex-1 bg-white">
+        <MapPin className="text-gray-400 h-4 w-4" />
+        <select className="w-full text-sm bg-transparent outline-none text-gray-600">
+          <option value="">City</option>
+          <option value="sydney">Sydney, NSW</option>
+          <option value="melbourne">Melbourne, VIC</option>
+          <option value="brisbane">Brisbane, QLD</option>
+          <option value="perth">Perth, WA</option>
+          <option value="adelaide">Adelaide, SA</option>
+          <option value="canberra">Canberra, ACT</option>
+        </select>
+      </div>
+
+    {/* Experience */}
+      <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md flex-1 bg-white">
+        <Clock className="text-gray-400 h-4 w-4" />
+        <select className="w-full text-sm bg-transparent outline-none text-gray-600">
+          <option value="">Experience</option>
+          <option value="new">Starting</option>
+          <option value="entry">Less than 1 year</option>
+          <option value="mid">1–3 years</option>
+          <option value="senior">3–5 years</option>
+          <option value="expert">More than 5 years</option>
+        </select>
+      </div>
+
+      {/* Search Button */}
+      <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#61A6FA] text-white hover:bg-blue-500 transition">
+        <Search className="h-4 w-4" />
+      </button>
     </div>
   );
 };

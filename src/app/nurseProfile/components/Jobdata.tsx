@@ -200,7 +200,7 @@ export default function JobData() {
 
       <div className="flex gap-6 mt-6 items-start">
         {/* Filters Sidebar (same wide set as CandidateList) */}
-        <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
+  <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-[60px]  overflow-y-auto scrollbar-hide">
           <h2 className="font-semibold text-gray-800 flex justify-between">
             All Filters
             <button onClick={clearFilters} className="text-sm text-blue-600">Clear All</button>
