@@ -3,14 +3,13 @@
 import React, { useEffect, useState, use } from "react";
 import { notFound, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/Badge";
-import { Separator } from "@/components/ui/Separator";
-import { User, Briefcase, Mail, Phone, ArrowLeft } from "lucide-react";
+import { Briefcase, Mail, Phone, ArrowLeft } from "lucide-react";
 import Loader from "../../../../../../components/loading";
 
 export default function NurseDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);  // ✅ match EmployerPage
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [nurse, setNurse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

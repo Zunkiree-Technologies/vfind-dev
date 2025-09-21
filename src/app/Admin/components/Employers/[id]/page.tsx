@@ -5,13 +5,8 @@ import { notFound, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Building2,
-  Mail,
-  Phone,
   MapPin,
-  Users,
   Briefcase,
-  Globe,
-  Hash,
   ArrowLeft,
   User,
   User2,
@@ -82,7 +77,7 @@ export default function EmployerPage({ params }: { params: Promise<{ id: string 
         </button>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-6">
+      <div className="max-w-[1182px] mx-auto px-6 py-6 container">
         {/* Header Section */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-start gap-4">
@@ -112,15 +107,17 @@ export default function EmployerPage({ params }: { params: Promise<{ id: string 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Personal Information */}
-          <Card className="bg-white shadow-sm ">
+          <Card className="bg-white shadow-sm border-0">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <User className="w-6 h-6 text-blue-400" />
-                <h2 className="text-base font-medium text-gray-900">Personal Information</h2>
+                <h2 className="text-base font-medium text-gray-900">
+                  Personal Information
+                </h2>
               </div>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
-              <div className="space-y-2">
+              <div className="space-y-5">
                 <div className="text-sm">
                   <span className="text-gray-500">Full Name</span>
                   <p className="text-gray-900 font-medium">{employer.fullName || "—"}</p>
@@ -141,15 +138,16 @@ export default function EmployerPage({ params }: { params: Promise<{ id: string 
             </CardContent>
           </Card>
 
+
           {/* Company Details */}
-          <Card className="bg-white shadow-sm">
+          <Card className="bg-white shadow-sm border-0">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-gray-500" />
+                <Building2 className="w-6 h-6 text-blue-400" />
                 <h2 className="text-base font-medium text-gray-900">Company Details</h2>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 pt-0">
+            <CardContent className="space-y-5 pt-0">
               <div className="space-y-2">
                 <div className="text-sm">
                   <span className="text-gray-500">Company Name</span>
@@ -159,19 +157,33 @@ export default function EmployerPage({ params }: { params: Promise<{ id: string 
                   <span className="text-gray-500">Number of Employees</span>
                   <p className="text-gray-900 font-medium">{employer.numberOfEmployees || "—"}</p>
                 </div>
+                <div className="text-sm">
+                  <span className="text-gray-500">Created At</span>
+                  <p className="text-gray-900 font-medium">
+                    {employer.created_at
+                      ? new Date(employer.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })
+                      : "—"
+                    }
+                  </p>
+                </div>
               </div>
             </CardContent>
+
           </Card>
 
           {/* Location Information */}
-          <Card className="bg-white shadow-sm border">
+          <Card className="bg-white shadow-sm border-0">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-gray-500" />
+                <MapPin className="w-6 h-6 text-blue-400" />
                 <h2 className="text-base font-medium text-gray-900">Location Information</h2>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 pt-0">
+            <CardContent className="space-y-5 pt-0">
               <div className="space-y-2">
                 <div className="text-sm">
                   <span className="text-gray-500">Country</span>
@@ -194,20 +206,20 @@ export default function EmployerPage({ params }: { params: Promise<{ id: string 
           </Card>
 
           {/* Account Summary */}
-          <Card className="bg-white shadow-sm border">
+          <Card className="bg-white shadow-sm border-0">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-gray-500" />
+                <Briefcase className="w-6 h-6 text-blue-400" />
                 <h2 className="text-base font-medium text-gray-900">Account Summary</h2>
               </div>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
-              <div className="space-y-2">
-                <div className="text-sm">
+              <div className="space-y-5">
+                <div className="text-sm flex flex-col">
                   <span className="text-gray-500">Account Type</span>
-                  <p className="text-gray-900 font-medium capitalize">
+                  <Badge className="bg-blue-50 text-blue-400 border-blue-200 text-xs px-2 py-1 w-fit">
                     {employer.creatingAccountAs || "—"}
-                  </p>
+                  </Badge>
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-500">Profile Status</span>
@@ -226,19 +238,7 @@ export default function EmployerPage({ params }: { params: Promise<{ id: string 
                     }
                   </p>
                 </div>
-                <div className="text-sm">
-                  <span className="text-gray-500">Created At</span>
-                  <p className="text-gray-900 font-medium">
-                    {employer.created_at
-                      ? new Date(employer.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })
-                      : "—"
-                    }
-                  </p>
-                </div>
+
               </div>
             </CardContent>
           </Card>

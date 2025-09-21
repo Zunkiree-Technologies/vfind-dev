@@ -5,10 +5,7 @@ import { parseValues } from "../utils/profileHelpers";
 import Loading from "../../../../components/loading";
 import Image from "next/image";
 import {
-  MapPin,
   GraduationCap,
-  Phone,
-  Mail,
   Calendar,
   User,
   UserRoundSearch,
