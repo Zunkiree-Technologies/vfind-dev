@@ -135,7 +135,7 @@ function RegistrationComponent() {
   setMessage("");
   try {
     const response = await fetch(
-      "https://x8ki-letl-twmt.n7.xano.io/api:5OnHwV4U/employerOnboarding",
+      "https://x76o-gnx4-xrav.a2.xano.io/api:5OnHwV4U/employerOnboarding",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -47,9 +47,9 @@ function JobPostingContent() {
     workEnvironment: "",
   });
 
-  const JOB_POST_ENDPOINT = "https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/jobs";
-  const JOB_EDIT_ENDPOINT = "https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/edit_job_details";
-  const JOB_LIST_ENDPOINT = "https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/get_job_details";
+  const JOB_POST_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs";
+  const JOB_EDIT_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/edit_job_details";
+  const JOB_LIST_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/get_job_details";
   const [isTypingOther, setIsTypingOther] = useState(false);
 
 

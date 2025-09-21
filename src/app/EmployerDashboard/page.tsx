@@ -52,7 +52,7 @@ export default function EmployerDashboard() {
     const fetchEmployer = async () => {
       try {
         const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:t5TlTxto/get_employer_profile",
+          "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/get_employer_profile",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         console.log(token)
@@ -75,7 +75,7 @@ export default function EmployerDashboard() {
     const fetchJobs = async () => {
       try {
         const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/get_job_details",
+          "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/get_job_details",
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -108,7 +108,7 @@ export default function EmployerDashboard() {
       }
 
       const res = await fetch(
-        `https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/jobs/${jobId}`,
+        `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${jobId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },

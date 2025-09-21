@@ -95,7 +95,7 @@ export default function CandidateDetailPage() {
 
       try {
         const res = await fetch(
-          `https://x8ki-letl-twmt.n7.xano.io/api:P9j60cGD/wishlist?employer_profiles_id=${employerId}&nurse_profiles_id=${nurseId}`,
+          `https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/wishlist?employer_profiles_id=${employerId}&nurse_profiles_id=${nurseId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -133,7 +133,7 @@ export default function CandidateDetailPage() {
       if (!wishlisted) {
         // Add to wishlist
         const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:P9j60cGD/wishlist",
+          "https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/wishlist",
           {
             method: "POST",
             headers: {
@@ -158,7 +158,7 @@ export default function CandidateDetailPage() {
         // Remove from wishlist
         // First, get the wishlist ID for this combination
         const fetchRes = await fetch(
-          `https://x8ki-letl-twmt.n7.xano.io/api:P9j60cGD/wishlist?employer_profiles_id=${employerId}&nurse_profiles_id=${nurseId}`,
+          `https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/wishlist?employer_profiles_id=${employerId}&nurse_profiles_id=${nurseId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -175,7 +175,7 @@ export default function CandidateDetailPage() {
         const wishlistId = data[0].id;
 
         const deleteRes = await fetch(
-          `https://x8ki-letl-twmt.n7.xano.io/api:P9j60cGD/wishlist/${wishlistId}`,
+          `https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/wishlist/${wishlistId}`,
           {
             method: "DELETE",
             headers: {
@@ -222,7 +222,7 @@ export default function CandidateDetailPage() {
         }
 
         const res = await fetch(
-          `https://x8ki-letl-twmt.n7.xano.io/api:MeLrTB-C/nurse_profiles/${id}`,
+          `https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/nurse_profiles/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -269,7 +269,7 @@ export default function CandidateDetailPage() {
       if (!token) return;
 
       const connRes = await fetch(
-        `https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/sendStatus?employer_profiles_id=${employerId}&nurse_profiles_id=${id}`,
+        `https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/sendStatus?employer_profiles_id=${employerId}&nurse_profiles_id=${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -306,7 +306,7 @@ export default function CandidateDetailPage() {
       setSendingConnection(true);
 
       const res = await fetch(
-        `https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/sendConnection`,
+        `https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/sendConnection`,
         {
           method: "POST",
           headers: {
@@ -371,7 +371,7 @@ export default function CandidateDetailPage() {
   const jobTypesArray = parseJsonArray(candidate.jobTypes);
 
   const profileImageUrl = candidate.profileImage?.path
-    ? `https://x8ki-letl-twmt.n7.xano.io${candidate.profileImage.path}`
+    ? `https://x76o-gnx4-xrav.a2.xano.io${candidate.profileImage.path}`
     : null;
 
   return (

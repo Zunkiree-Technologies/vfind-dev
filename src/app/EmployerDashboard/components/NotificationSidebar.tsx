@@ -32,7 +32,7 @@ export default function NotificationSidebar() {
       if (!token) throw new Error("Unauthorized: No token found");
 
       const res = await fetch(
-        "https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/getEmployerNotifications",
+        "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getEmployerNotifications",
         {
           headers: {
             Authorization: `Bearer ${token}`,

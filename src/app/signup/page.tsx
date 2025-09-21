@@ -182,7 +182,7 @@ export default function NurseSignup() {
         try {
             const res = await fetch(
                 process.env.NEXT_PUBLIC_SIGNUP_ENDPOINT ||
-                "https://x8ki-letl-twmt.n7.xano.io/api:YhrHeNAH/nurse_onboarding",
+                "https://x76o-gnx4-xrav.a2.xano.io/api:YhrHeNAH/nurse_onboarding",
                 { method: "POST", body: form }
             );
 

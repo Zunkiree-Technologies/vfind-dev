@@ -31,7 +31,7 @@ interface Candidate {
 
 }
 
-const BASE_IMAGE_URL = "https://x8ki-letl-twmt.n7.xano.io";
+const BASE_IMAGE_URL = "https://x76o-gnx4-xrav.a2.xano.io";
 
 export default function CandidateList() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -99,7 +99,7 @@ export default function CandidateList() {
         }
 
         const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:MeLrTB-C/get_nurse_for_employers",
+          "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_for_employers",
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

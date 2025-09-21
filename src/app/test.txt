@@ -39,7 +39,7 @@ export default function JobData() {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const res = await fetch("https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/jobs");
+        const res = await fetch("https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs");
         if (!res.ok) throw new Error("Failed to fetch jobs");
         const data = await res.json();
         setJobs(data);

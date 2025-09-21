@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MoreVertical, Search, Filter } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Nurse {
   id: number;
@@ -11,38 +12,51 @@ interface Nurse {
   startDate?: string;
 }
 
-
 export default function NursesPage() {
   const [nurses, setNurses] = useState<Nurse[]>([]);
   const [search, setSearch] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [actionOpen, setActionOpen] = useState<number | null>(null);
   const [selectedFilter, setSelectedFilter] = useState("All Time");
+  const actionMenuRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
- useEffect(() => {
-  async function fetchNurses() {
-    try {
-      const res = await fetch(
-        "https://x8ki-letl-twmt.n7.xano.io/api:t5TlTxto/nurse_profiles_admin"
-      );
-      const data = await res.json();
-      // console.log("Nurses API response:", data); 
-
-      if (Array.isArray(data)) {
-        setNurses(data);
-      } else if (Array.isArray(data.nurses)) {
-        setNurses(data.nurses);
-      } else {
-        console.error("Unexpected API response format", data);
-        setNurses([]); 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        actionMenuRef.current &&
+        !actionMenuRef.current.contains(e.target as Node)
+      ) {
+        setActionOpen(null);
       }
-    } catch (err) {
-      console.error(" Error fetching nurses:", err);
     }
-  }
-  fetchNurses();
-}, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
+  useEffect(() => {
+    async function fetchNurses() {
+      try {
+        const res = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/nurse_profiles_admin"
+        );
+        const data = await res.json();
+
+        if (Array.isArray(data)) {
+          setNurses(data);
+        } else if (Array.isArray(data.nurses)) {
+          setNurses(data.nurses);
+        } else {
+          console.error("Unexpected API response format", data);
+          setNurses([]);
+        }
+      } catch (err) {
+        console.error("Error fetching nurses:", err);
+      }
+    }
+    fetchNurses();
+  }, []);
 
   const applyDateFilter = (nurse: Nurse) => {
     if (!nurse.startDate) return false;
@@ -75,14 +89,15 @@ export default function NursesPage() {
     <div>
       <h1 className="text-xl font-semibold mb-6 mx-4 my-4">Nurses Overview</h1>
       <div className="px-5">
-        <div className="bg-white shadow rounded-lg p-4   mx-auto container">
+        <div className="bg-white shadow rounded-lg p-4 mx-auto container">
           {/* Header: Search + Filter */}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[18px]  font-bold text-gray-800 mb-4">
+            <h2 className="text-[18px] font-bold text-gray-800 mb-4">
               Registered Nurses
             </h2>
 
             <div className="flex item-center justify-around gap-4">
+              {/* Search */}
               <div className="flex items-center gap-2 border border-gray-400 rounded px-2 py-1 w-72">
                 <Search className="w-4 h-4 text-gray-400" />
                 <input
@@ -94,45 +109,50 @@ export default function NursesPage() {
                 />
               </div>
 
+              {/* Filter */}
               <div className="relative">
                 <button
                   onClick={() => setFilterOpen(!filterOpen)}
                   className="flex items-center gap-1 border border-gray-400 rounded px-3 py-1 text-sm"
                 >
-                  <Filter className="w-4 h-4" /> All Time
+                  <Filter className="w-4 h-4" /> {selectedFilter}
                 </button>
 
                 {filterOpen && (
                   <div className="absolute right-0 mt-2 bg-white shadow rounded w-40 text-sm">
-                    {["All Time", "Last 24 Hours", "Last 7 Days", "Last 30 Days", "Last 6 Months"].map(
-                      (option) => (
-                        <div
-                          key={option}
-                          className={`px-3 py-2 hover:bg-gray-100 cursor-pointer ${selectedFilter === option ? "bg-gray-50 font-medium" : ""
-                            }`}
-                          onClick={() => {
-                            setSelectedFilter(option);  
-                            setFilterOpen(false);
-                          }}
-                        >
-                          {option}
-                        </div>
-                      )
-                    )}
-
+                    {[
+                      "All Time",
+                      "Last 24 Hours",
+                      "Last 7 Days",
+                      "Last 30 Days",
+                      "Last 6 Months",
+                    ].map((option) => (
+                      <div
+                        key={option}
+                        className={`px-3 py-2 hover:bg-gray-100 cursor-pointer ${
+                          selectedFilter === option
+                            ? "bg-gray-50 font-medium"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setSelectedFilter(option);
+                          setFilterOpen(false);
+                        }}
+                      >
+                        {option}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
-
           </div>
 
           {/* Table */}
           <table className="w-full text-sm">
             <thead>
-              <tr className=" text-left border border-gray-400 rounded-tl-[10px] rounded-tr-[10px]">
-
-                <th className="p-2 font-medium">Nurse </th>
+              <tr className="text-left border border-gray-400 rounded-tl-[10px] rounded-tr-[10px]">
+                <th className="p-2 font-medium">Nurse</th>
                 <th className="p-2 font-medium">Email</th>
                 <th className="p-2 font-medium">Role</th>
                 <th className="p-2 font-medium">Created At</th>
@@ -144,7 +164,9 @@ export default function NursesPage() {
                 <tr key={nurse.id} className="border-t border-gray-300">
                   <td className="p-2 font-regular">{nurse.fullName || "—"}</td>
                   <td className="p-2 font-regular">{nurse.email || "—"}</td>
-                  <td className="p-2 font-regular">{nurse.qualification || "—"}</td>
+                  <td className="p-2 font-regular">
+                    {nurse.qualification || "—"}
+                  </td>
                   <td className="p-2 font-regular">
                     {nurse.startDate
                       ? new Date(nurse.startDate).toISOString().split("T")[0]
@@ -156,21 +178,49 @@ export default function NursesPage() {
                       onClick={() =>
                         setActionOpen(actionOpen === nurse.id ? null : nurse.id)
                       }
+                      className="p-1 hover:bg-gray-100 rounded"
                     >
                       <MoreVertical className="w-5 h-5 text-gray-500" />
                     </button>
 
                     {actionOpen === nurse.id && (
-                      <div className="absolute right-0 mt-2 bg-white shadow rounded w-28 text-sm">
+                      <div
+                        ref={actionMenuRef}
+                        className="absolute right-0 mt-2 bg-white shadow-lg rounded-md w-32 text-sm border border-gray-200 z-10"
+                      >
+                        {/* Preview */}
                         <div
                           className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => alert(`Preview nurse: ${nurse.fullName}`)}
+                          onClick={() => {
+                            router.push(`/Admin/components/Nurses/${nurse.id}`);
+                            setActionOpen(null);
+                          }}
                         >
                           Preview
                         </div>
+
+                        {/* Divider */}
+                        <div className="border-t border-gray-200"></div>
+
+                        {/* Delete */}
                         <div
                           className="px-3 py-2 text-red-600 hover:bg-red-50 cursor-pointer"
-                          onClick={() => alert(`Delete nurse: ${nurse.fullName}`)}
+                          onClick={async () => {
+                            if (confirm(`Delete nurse: ${nurse.fullName}?`)) {
+                              try {
+                                await fetch(
+                                  `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/nurse_profiles_admin/${nurse.id}`,
+                                  { method: "DELETE" }
+                                );
+                                setNurses((prev) =>
+                                  prev.filter((n) => n.id !== nurse.id)
+                                );
+                                setActionOpen(null);
+                              } catch (err) {
+                                console.error("Error deleting nurse:", err);
+                              }
+                            }
+                          }}
                         >
                           Delete
                         </div>

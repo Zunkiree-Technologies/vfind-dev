@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState } from "react";
 import { parseValues } from "../utils/profileHelpers";
@@ -9,11 +10,11 @@ import {
   Phone,
   Mail,
   Calendar,
-  Info,
-  HelpCircle,
-  FileText,
-  Lock,
+  User,
+  UserRoundSearch,
+  Award,
   Briefcase,
+  Clock,
   Shield,
   Edit,
   Check,
@@ -74,6 +75,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   const [tempValue, setTempValue] = useState(value || "");
 
   const handleSave = () => {
+    console.log("Editing field:", field, "with value:", tempValue);
     onSave(field, tempValue);
     setIsEditing(false);
   };
@@ -89,7 +91,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
         <span className="flex-1">{value || placeholder}</span>
         {!disabled && (
           <Edit
-            className="w-3 h- text-blue-600 cursor-pointer "
+            className="w-3 h-3 text-blue-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={() => {
               setTempValue(value || "");
               setIsEditing(true);
@@ -178,34 +180,26 @@ const EditableArrayField: React.FC<EditableArrayFieldProps> = ({
     return (
       <div className="space-y-2">
         {values.length > 0 ? (
-          <div className="space-y-2 group">
+          <div className="flex flex-wrap gap-2 group">
             {values.map((value, index) => (
-              <div
+              <span
                 key={index}
-                className="flex items-center justify-between bg-blue-50 p-4 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors"
+                className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
               >
                 {value}
-              </div>
+              </span>
             ))}
-            <div className="flex justify-end">
-              <Edit
-                className="w-3 h-3 text-blue-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => {
-                  setTempValues(values.join('\n'));
-                  setIsEditing(true);
-                }}
-              />
-            </div>
+            <Edit
+              className="w-3 h-3 text-blue-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => setIsEditing(true)}
+            />
           </div>
         ) : (
           <div className="flex items-center justify-between group">
-            <div className="text-gray-400 text-sm italic">{placeholder}</div>
+            <span className="text-gray-400 text-sm italic">{placeholder}</span>
             <Edit
               className="w-3 h-3 text-blue-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => {
-                setTempValues("");
-                setIsEditing(true);
-              }}
+              onClick={() => setIsEditing(true)}
             />
           </div>
         )}
@@ -262,7 +256,7 @@ export default function NurseProfilePage() {
         }
 
         const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:MeLrTB-C/get_nurse_profile",
+          "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_profile",
           {
             method: "GET",
             headers: {
@@ -271,11 +265,11 @@ export default function NurseProfilePage() {
             },
           }
         );
-
+        console.log(res)
         if (!res.ok) throw new Error("Failed to fetch profile");
         const data = await res.json();
+          console.log("Fetched Profile Data:", data);
         setProfile(data);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message || "Failed to fetch profile");
       } finally {
@@ -299,7 +293,7 @@ export default function NurseProfilePage() {
       const updatedProfile = { ...profile, [field]: newValue };
 
       const res = await fetch(
-        "https://x8ki-letl-twmt.n7.xano.io/api:MeLrTB-C/edit_nurse_profile",
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
         {
           method: "POST",
           headers: {
@@ -316,8 +310,8 @@ export default function NurseProfilePage() {
       }
 
       const updatedData = await res.json();
+         console.log("Profile Updated Successfully:", updatedData);
       setProfile(updatedData);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       alert(err.message || "Failed to update profile");
     }
@@ -352,17 +346,16 @@ export default function NurseProfilePage() {
   const certificationsArray = renderArray(profile.certifications);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      {/* Top Row: Profile Info */}
-      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-8 mb-8">
+    <div className="min-h-screen bg-[#F5F6FA] p-4">
+      {/* ================= Top Profile Section ================= */}
+      <div className="container mx-auto bg-white rounded-xl shadow-sm p-8 mb-8">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
           {/* Profile Image */}
-
           <div className="flex flex-col items-center">
-            {/* Profile Image */}
-            <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200">
+            <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200 flex-shrink-0">
               {profile.profileImage?.url ? (
                 <Image
+                  priority
                   src={profile.profileImage.url}
                   alt={profile.fullName}
                   width={96}
@@ -376,9 +369,9 @@ export default function NurseProfilePage() {
               )}
             </div>
 
-            {/* Edit Button Below */}
+            {/* Edit Profile Image Button */}
             <label className="mt-2 bg-blue-600 text-white text-xs px-3 py-1 rounded cursor-pointer hover:bg-blue-700">
-              Edit
+              Edit Photo
               <input
                 type="file"
                 accept="image/*"
@@ -388,18 +381,16 @@ export default function NurseProfilePage() {
                   const file = e.target.files[0];
 
                   const formData = new FormData();
-                  formData.append("profileImage", file); // send image as file
+                  formData.append("profileImage", file);
 
-                  // append other profile fields (if endpoint requires full profile)
                   Object.entries(profile).forEach(([key, value]) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     if (key !== "profileImage") formData.append(key, value as any);
                   });
 
                   const token = localStorage.getItem("token");
                   try {
                     const res = await fetch(
-                      "https://x8ki-letl-twmt.n7.xano.io/api:MeLrTB-C/edit_nurse_profile",
+                      "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
                       {
                         method: "POST",
                         headers: { Authorization: `Bearer ${token}` },
@@ -409,8 +400,7 @@ export default function NurseProfilePage() {
 
                     if (!res.ok) throw new Error("Failed to update profile image");
                     const updatedData = await res.json();
-                    setProfile(updatedData); // profileImage.url will update automatically
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    setProfile(updatedData);
                   } catch (err: any) {
                     alert(err.message || "Error uploading image");
                   }
@@ -419,53 +409,58 @@ export default function NurseProfilePage() {
             </label>
           </div>
 
-
-
           {/* Profile Info */}
           <div className="flex-1 space-y-2">
-            <h1 className="text-2xl  w-fit font-bold text-gray-900">
-              <EditableField             
+            <h1 className="text-2xl font-bold text-gray-900">
+              <EditableField
                 field="fullName"
                 value={profile.fullName}
                 placeholder="Full Name"
                 onSave={handleStringFieldSave}
-                
               />
             </h1>
-            <p className="text-gray-500 text-sm">
+            <div className="flex items-center gap-2 text-gray-500 text-sm">
+              <Calendar className="w-4 h-4 text-blue-700" />
               Profile last updated: {new Date().toLocaleDateString()}
-            </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-blue-700" />
+      {/* ================= Basic Info & Visa Section ================= */}
+      <div className="container mx-auto flex flex-col lg:flex-row justify-between gap-4 mb-5">
+        {/* Basic Information */}
+        <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <User className="w-6 h-6 text-blue-600" />
+            <h2 className="text-lg font-medium text-gray-900">Basic Information</h2>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Location</h3>
+              <p className="text-gray-900">
                 <EditableField
                   field="currentResidentialLocation"
                   value={profile.currentResidentialLocation}
                   placeholder="Location not specified"
                   onSave={handleStringFieldSave}
                 />
-              </div>
-              <div className="flex items-center gap-2">
-                <GraduationCap className="w-4 h-4 text-blue-700" />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Job Status</h3>
+              <p className="text-gray-900">
                 <EditableField
-                  field="qualification"
-                  value={profile.qualification}
-                  placeholder="Qualification not specified"
+                  field="jobSearchStatus"
+                  value={profile.jobSearchStatus}
+                  placeholder="Not specified"
                   onSave={handleStringFieldSave}
                 />
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-blue-700" />
-                <EditableField
-                  field="phoneNumber"
-                  value={profile.phoneNumber}
-                  placeholder="Phone Number"
-                  onSave={handleStringFieldSave}
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-blue-700" />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Email</h3>
+              <p className="text-gray-900">
                 <EditableField
                   field="email"
                   value={profile.email}
@@ -473,209 +468,197 @@ export default function NurseProfilePage() {
                   onSave={handleStringFieldSave}
                   disabled={true}
                 />
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-blue-700" />
-                Available: <EditableField
-                  field="startDate"
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Phone</h3>
+              <p className="text-gray-900">
+                <EditableField
+                  field="phoneNumber"
+                  value={profile.phoneNumber}
+                  placeholder="Phone number"
+                  onSave={handleStringFieldSave}
+                />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Availability</h3>
+              <p className="text-gray-900">
+                <EditableField
+                  field="startTime"
                   value={profile.startDate || profile.startTime}
                   placeholder="Not specified"
                   onSave={handleStringFieldSave}
                 />
-              </div>
-              <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-blue-700" />
-                Status: <EditableField
-                  field="jobSearchStatus"
-                  value={profile.jobSearchStatus}
-                  placeholder="Active"
-                  onSave={handleStringFieldSave}
-                />
-              </div>
+              </p>
             </div>
           </div>
-          
+        </div>
+
+        {/* Visa & Residency */}
+        <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <Shield className="w-6 h-6 text-blue-600" />
+            <h2 className="text-lg font-medium text-gray-900">Visa & Residency</h2>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
+              <p className="text-gray-900">
+                <EditableField
+                  field="residencyStatus"
+                  value={profile.residencyStatus}
+                  placeholder="Australian Citizen / Permanent Resident"
+                  onSave={handleStringFieldSave}
+                />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Visa Type</h3>
+              <p className="text-gray-900">
+                <EditableField
+                  field="visaType"
+                  value={profile.visaType}
+                  placeholder="Not Specified"
+                  onSave={handleStringFieldSave}
+                />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Duration</h3>
+              <p className="text-gray-900">
+                <EditableField
+                  field="visaDuration"
+                  value={profile.visaDuration}
+                  placeholder="Not Specified"
+                  onSave={handleStringFieldSave}
+                />
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 2-Column Grid Below Header */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Left Column */}
-        <div className="space-y-4">
-          {/* Quick Links */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="font-medium text-gray-900 mb-4">Quick links</h3>
-            <div className="space-y-3">
-              <button className="flex items-center space-x-3 text-blue-600 hover:text-blue-700 text-sm w-full text-left">
-                <HelpCircle className="w-4 h-4 text-blue-700" />
-                <span>Need support?</span>
-              </button>
-              
-            </div>
+      {/* ================= Job Search Preferences ================= */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-5 container mx-auto">
+        <div className="flex items-center space-x-2 mb-6">
+          <UserRoundSearch className="w-6 h-6 text-blue-600" />
+          <h2 className="text-lg font-medium text-gray-900">Job search preferences</h2>
+        </div>
+        <div className="flex justify-between gap-6">
+          {/* Preferred Work Locations */}
+          <div className="w-1/2 mb-6">
+            <h3 className="font-medium text-gray-700 mb-2">Preferred Work Locations</h3>
+            <EditableArrayField
+              field="preferredLocations"
+              values={preferredLocationsArray}
+              placeholder="No preferred locations specified"
+              onSave={handleArrayFieldSave}
+            />
           </div>
 
-          {/* Data Management */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="font-medium text-gray-900 mb-4">Data management</h3>
-            <div className="space-y-3">
-              <button className="flex items-center space-x-3 text-blue-600 hover:text-blue-700 text-sm w-full text-left">
-                <FileText className="w-4 h-4 text-blue-700" />
-                <span>View Terms of Use</span>
-              </button>
-              <button className="flex items-center space-x-3 text-blue-600 hover:text-blue-700 text-sm w-full text-left">
-                <Lock className="w-4 h-4 text-blue-700" />
-                <span>View Privacy Policy</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Visa & Residency Status */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-2 mb-4">
-              <h3 className="font-medium text-gray-900">Visa & Residency</h3>
-              <Shield className="w-4 h-4 text-blue-700" />
-            </div>
-            <div className="space-y-3 text-sm">
-              <div>
-                <span className="text-gray-500">Status:</span>
-                <span className="ml-2 font-medium">
-                  <EditableField
-                    field="residencyStatus"
-                    value={profile.residencyStatus}
-                    placeholder="Not specified"
-                    onSave={handleStringFieldSave}
-                  />
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-500">Visa Type:</span>
-                <span className="ml-2 font-medium">
-                  <EditableField
-                    field="visaType"
-                    value={profile.visaType}
-                    placeholder="Not specified"
-                    onSave={handleStringFieldSave}
-                  />
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-500">Duration:</span>
-                <span className="ml-2 font-medium">
-                  <EditableField
-                    field="visaDuration"
-                    value={profile.visaDuration}
-                    placeholder="Not specified"
-                    onSave={handleStringFieldSave}
-                  />
-                </span>
-              </div>
-            </div>
+          {/* Preferred Job Types */}
+          <div className="w-1/2 mb-6">
+            <h3 className="font-medium text-gray-700 mb-2">Preferred Job Types</h3>
+            <EditableArrayField
+              field="jobTypes"
+              values={jobTypesArray}
+              placeholder="No job types specified"
+              onSave={handleArrayFieldSave}
+            />
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Job Search Preferences */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-2 mb-6">
-              <h2 className="text-lg font-medium text-gray-900">
-                Job search preferences
-              </h2>
-            </div>
-
-            {/* Preferred Locations */}
-            <div className="mb-6">
-              <h3 className="font-medium text-gray-900 mb-3">
-                Preferred work locations
-              </h3>
-              <EditableArrayField
-                field="preferredLocations"
-                values={preferredLocationsArray}
-                placeholder="No preferred locations specified"
-                onSave={handleArrayFieldSave}
-              />
-            </div>
-
-            {/* Job Types */}
-            <div className="mb-6">
-              <h3 className="font-medium text-gray-900 mb-3">Preferred job types</h3>
-              <EditableArrayField
-                field="jobTypes"
-                values={jobTypesArray}
-                placeholder="No job types specified"
-                onSave={handleArrayFieldSave}
-              />
-              <div className="mt-2 text-sm text-gray-600">
-                <strong>Open to other types:</strong>
+        {/* Open To Other Types & Preferred Shift */}
+        <div className="flex justify-between gap-6">
+          {/* Open To Other Types */}
+          <div className="w-1/2 mb-6">
+            <h3 className="font-medium text-gray-700 mb-2">Open To Other Types</h3>
+            <div>
+              <span className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium">
                 <EditableField
                   field="openToOtherTypes"
                   value={profile.openToOtherTypes}
-                  placeholder="Not specified"
+                  placeholder="Not Specified"
                   onSave={handleStringFieldSave}
                 />
-              </div>
-            </div>
-
-            {/* Shift Preferences */}
-            <div className="mb-6">
-              <h3 className="font-medium text-gray-900 mb-3">Shift preferences</h3>
-              <EditableArrayField
-                field="shiftPreferences"
-                values={shiftPreferencesArray}
-                placeholder="No shift preferences specified"
-                onSave={handleArrayFieldSave}
-              />
-            </div>
-
-            {/* Available to start */}
-            <div>
-              <h3 className="font-medium text-gray-900 mb-3">Available to start</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between bg-blue-50 p-4 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">
-                  <EditableField
-                    field="startTime"
-                    value={profile.startDate || profile.startTime}
-                    placeholder="Not specified"
-                    onSave={handleStringFieldSave}
-                  />
-                </div>
-              </div>
+              </span>
             </div>
           </div>
 
-          {/* Qualifications & Certifications */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-2 mb-6">
-              <h2 className="text-lg font-medium text-gray-900">Qualifications & Certifications</h2>
-              <Info className="w-4 h-4 text-blue-700" />
-            </div>
+          {/* Preferred Shift */}
+          <div className="w-1/2 mb-6">
+            <h3 className="font-medium text-gray-700 mb-2">Preferred Shift</h3>
+            <EditableArrayField
+              field="shiftPreferences"
+              values={shiftPreferencesArray}
+              placeholder="No shift preferences specified"
+              onSave={handleArrayFieldSave}
+            />
+          </div>
+        </div>
 
-            {/* Education */}
-            <div className="mb-6">
-              <h3 className="font-medium text-gray-900 mb-3">Education</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between bg-blue-50 p-4 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">
-                  <EditableField
-                    field="qualification"
-                    value={profile.qualification}
-                    onSave={handleStringFieldSave}
-                  />
-                </div>
-                <div className="flex items-center justify-between bg-blue-50 p-4 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">
-                  <EditableField
-                    field="otherQualification"
-                    value={profile.otherQualification}
-                    placeholder="Other Qualification"
-                    onSave={handleStringFieldSave}
-                  />
-                </div>
-              
+        {/* Availability */}
+        <div className="flex items-center text-sm text-gray-600">
+          <Calendar className="w-4 h-4 text-blue-700 mr-2" />
+          Available To Start: <span className="ml-1">
+            <EditableField
+              field="startTime"
+              value={profile.startDate || profile.startTime}
+              placeholder="Not specified"
+              onSave={handleStringFieldSave}
+            />
+          </span>
+        </div>
+      </div>
+
+      {/* ================= Qualifications & Certificates ================= */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-5 container mx-auto">
+        <div className="flex items-center space-x-2 mb-6">
+          <GraduationCap className="w-6 h-6 text-blue-600" />
+          <h2 className="text-lg font-medium text-gray-900">Qualifications & Certificates</h2>
+        </div>
+
+        {/* Education */}
+        <div className="mb-6">
+          <h3 className="font-medium text-gray-700 mb-2">Education</h3>
+          <div className="flex flex-col gap-3 text-sm text-gray-800">
+            <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium w-fit">
+              <EditableField
+                field="qualification"
+                value={profile.qualification}
+                placeholder="Bachelor of Nursing"
+                onSave={handleStringFieldSave}
+              />
+            </div>
+            {profile.otherQualification && (
+              <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium w-fit">
+                <EditableField
+                  field="otherQualification"
+                  value={profile.otherQualification}
+                  placeholder="Other Qualification"
+                  onSave={handleStringFieldSave}
+                />
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
-            {/* Certifications */}
-            <div className="mb-6">
-              <h3 className="font-medium text-gray-900 mb-3">Certifications</h3>
+        {/* Certifications */}
+        <div>
+          <h3 className="font-medium text-gray-700 mb-2">Certifications</h3>
+          {certificationsArray.length > 0 ? (
+            <ul className="space-y-2 text-sm text-gray-800">
+              {certificationsArray.map((cert: string, index: number) => (
+                <li key={index} className="flex items-center gap-2">
+                  <Award className="w-4 h-4 text-blue-700" />
+                  {cert}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="group">
+              <span className="text-gray-400 text-sm italic">No certifications specified</span>
               <EditableArrayField
                 field="certifications"
                 values={certificationsArray}
@@ -683,89 +666,88 @@ export default function NurseProfilePage() {
                 onSave={handleArrayFieldSave}
               />
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* ================= Work Experience & Preferences ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 container mx-auto">
+        {/* Work Experience */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-6">
+            <Briefcase className="w-6 h-6 text-blue-600" />
+            <h2 className="text-lg font-medium text-gray-900">Work Experience</h2>
           </div>
 
-          {/* Work Experience */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-2 mb-6">
-              <h2 className="text-lg font-medium text-gray-900">Work experience</h2>
+          <div className="space-y-3 text-sm border-l-4 border-blue-500 pl-4">
+            <div>
+              <p className="text-gray-500">Healthcare Experience</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="experience"
+                  value={profile.experience}
+                  placeholder="No experience specified"
+                  onSave={handleStringFieldSave}
+                />
+              </p>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between bg-blue-50 p-4 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">
-                <div className="flex-1">
-                  <div className="font-medium text-sm text-gray-900">
-                    Healthcare Experience
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1 flex">
-                    <EditableField
-                      field="experience"
-                      value={profile.experience}
-                      onSave={handleStringFieldSave}
-                    /> | Currently working in healthcare: <EditableField
-                      field="workingInHealthcare"
-                      value={profile.workingInHealthcare}
-                      onSave={handleStringFieldSave}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center justify-between bg-blue-50 p-4 rounded-lg border border-blue-200 hover:border-blue-300 transition-colors">
-                <div className="flex-1">
-                  <div className="font-medium text-sm text-gray-900">
-                    Organization Name
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    <EditableField
-                      field="organisation"
-                      value={profile.organisation}
-                      placeholder="Not specified"
-                      onSave={handleStringFieldSave}
-                    />
-                  </div>
-                </div>
-              </div>
+            <div>
+              <p className="text-gray-500">Currently working in healthcare</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="workingInHealthcare"
+                  value={profile.workingInHealthcare}
+                  placeholder="Not specified"
+                  onSave={handleStringFieldSave}
+                />
+              </p>
+            </div>
+
+            <div>
+              <p className="text-gray-500">Organization Name</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="organisation"
+                  value={profile.organisation}
+                  placeholder="Not specified"
+                  onSave={handleStringFieldSave}
+                />
+              </p>
             </div>
           </div>
+        </div>
 
-          {/* Work Preferences */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center space-x-2 mb-6">
-              <h2 className="text-lg font-medium text-gray-900">Work preferences</h2>
+        {/* Work Preferences */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-6">
+            <Clock className="w-6 h-6 text-blue-600" />
+            <h2 className="text-lg font-medium text-gray-900">Work Preferences</h2>
+          </div>
+          <div className="space-y-3 text-sm">
+            <div>
+              <p className="text-gray-500">Maximum work hours</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="maxWorkHours"
+                  value={profile.maxWorkHours}
+                  placeholder="Not specified"
+                  onSave={handleStringFieldSave}
+                />
+              </p>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="font-medium text-sm text-gray-900 mb-1">
-                  Maximum work hours
-                </div>
-                <div className="text-sm text-gray-600">
-                  <EditableField
-                    field="maxWorkHours"
-                    value={profile.maxWorkHours}
-                    placeholder="Not specified"
-                    onSave={handleStringFieldSave}
-                  />
-                </div>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="font-medium text-sm text-gray-900 mb-1">
-                  Work hours restricted
-                </div>
-                <div className="text-sm text-gray-600">
-                  <EditableField
-                    field="workHoursRestricted"
-                    value={profile.workHoursRestricted}
-                    placeholder="Not specified"
-                    onSave={handleStringFieldSave}
-                  />
-                </div>
-              </div>
-
+            <div>
+              <p className="text-gray-500">Work hours restricted</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="workHoursRestricted"
+                  value={profile.workHoursRestricted}
+                  placeholder="No"
+                  onSave={handleStringFieldSave}
+                />
+              </p>
             </div>
           </div>
-
-          {/* ---end--- */}
         </div>
       </div>
     </div>

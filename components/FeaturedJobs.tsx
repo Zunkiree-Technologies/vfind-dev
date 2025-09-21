@@ -29,7 +29,7 @@ export default function FeaturedJobs() {
     const fetchJobs = async () => {
       try {
         const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/jobs"
+          "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs"
         );
         const data: Job[] = await res.json();
 

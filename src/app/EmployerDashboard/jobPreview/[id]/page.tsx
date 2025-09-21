@@ -38,7 +38,7 @@ export default function JobPreviewPage() {
       try {
         const token = localStorage.getItem("authToken");
         const res = await fetch(
-          `https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/get_job_details`,
+          `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/get_job_details`,
           {
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           }

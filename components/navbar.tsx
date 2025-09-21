@@ -52,18 +52,16 @@ export default function Navbar() {
   return (
     <nav className="shadow-md px-4 py-2 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
-       {/* Left: Logo */}
-          <div
-            className="flex items-center space-x-2 cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            {/* Icon inside a rounded square */}
-            <div className="w-8 h-8 flex items-center justify-center bg-blue-400 rounded-[10px]">
-              <Search size={16} className="text-white" />
-            </div>
+        {/* Left: Logo */}
 
-            <span className="font-bold text-lg text-black">VFind</span>
+        <Link href="/" className="flex items-center space-x-2 cursor-pointer">
+          <div className="w-8 h-8 flex items-center justify-center bg-blue-400 rounded-[10px]">
+            <Search size={16} className="text-white" />
           </div>
+
+          <span className="font-bold text-lg text-black">VFind</span>
+        </Link>
+
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex lg:items-center lg:space-x-6">
@@ -85,9 +83,8 @@ export default function Navbar() {
             >
               For Seekers
               <ChevronDown
-                className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${
-                  isAuthDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${isAuthDropdownOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
             {isAuthDropdownOpen && (
@@ -116,9 +113,8 @@ export default function Navbar() {
             >
               For Employers
               <ChevronDown
-                className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${
-                  isForEmployersDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${isForEmployersDropdownOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
             {isForEmployersDropdownOpen && (
@@ -143,12 +139,12 @@ export default function Navbar() {
               </div>
             )}
           </div>
-            <button
-              onClick={() => router.push("/")}
-              className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
-            >
-              <p className="text-sm"> Find Jobs</p>
-            </button>
+          <button
+            onClick={() => router.push("/")}
+            className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
+          >
+            <p className="text-sm"> Find Jobs</p>
+          </button>
         </div>
 
         {/* Mobile Hamburger */}
@@ -180,9 +176,8 @@ export default function Navbar() {
             >
               For Seekers
               <ChevronDown
-                className={`w-4 h-4 transition-transform duration-300 ${
-                  isAuthDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform duration-300 ${isAuthDropdownOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
             {isAuthDropdownOpen && (
@@ -209,9 +204,8 @@ export default function Navbar() {
             >
               For Employers
               <ChevronDown
-                className={`w-4 h-4 transition-transform duration-300 ${
-                  isForEmployersDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform duration-300 ${isForEmployersDropdownOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
             {isForEmployersDropdownOpen && (

@@ -50,7 +50,7 @@ export default function JobApplicationPage() {
     const fetchJob = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/jobs/${id}`);
+        const res = await fetch(`https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${id}`);
         if (!res.ok) throw new Error("Job not found");
         const data: Job = await res.json();
         setJob(data);
@@ -81,7 +81,7 @@ export default function JobApplicationPage() {
       setSubmitting(true);
 
       const res = await fetch(
-        "https://x8ki-letl-twmt.n7.xano.io/api:PX2mK6Kr/applications",
+        "https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/applications",
         {
           method: "POST",
           headers: {

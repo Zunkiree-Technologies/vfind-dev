@@ -40,10 +40,10 @@ export default function AdminDashboard() {
       try {
         // ✅ Fetch stats
         const [accepted, pending, rejected, connectionsCount] = await Promise.all([
-          fetch("https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/accepted_connections").then((res) => res.json()),
-          fetch("https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/pending_connections").then((res) => res.json()),
-          fetch("https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/rejected_connection").then((res) => res.json()),
-          fetch("https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/total_number_of_connections").then((res) => res.json()),
+          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/accepted_connections").then((res) => res.json()),
+          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/pending_connections").then((res) => res.json()),
+          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/rejected_connection").then((res) => res.json()),
+          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/total_number_of_connections").then((res) => res.json()),
         ]);
 
         setStats({
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
 
         // ✅ Fetch connections for table
         const conns = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/connections"
+          "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/connections"
         ).then((res) => res.json());
 
         setConnections(Array.isArray(conns) ? conns : []);

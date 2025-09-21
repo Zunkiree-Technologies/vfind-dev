@@ -64,7 +64,7 @@ export default function EmployerDetailPage() {
     const fetchEmployer = async () => {
       try {
         const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/getNurseNotifications",
+          "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Failed to fetch employer data");

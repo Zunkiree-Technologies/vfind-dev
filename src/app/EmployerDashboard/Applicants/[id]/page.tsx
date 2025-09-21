@@ -36,7 +36,7 @@ const JobApplicationsPage = () => {
     const fetchApplications = async () => {
       try {
         const res = await fetch(
-          `https://x8ki-letl-twmt.n7.xano.io/api:PX2mK6Kr/getAllNursesAppliedForJob?job_id=${id}`,
+          `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/getAllNursesAppliedForJob?job_id=${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

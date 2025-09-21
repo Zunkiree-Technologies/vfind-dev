@@ -93,7 +93,7 @@ const EmployerLoginPage = () => {
   // Function to send OTP (used for both initial send and resend)
   const sendOtp = async (authToken: string, userEmail: string) => {
     const otpRes = await fetch(
-      "https://x8ki-letl-twmt.n7.xano.io/api:0zPratjM/email_otp",
+      "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/email_otp",
       {
         method: "POST",
         headers: {
@@ -230,7 +230,7 @@ const EmployerLoginPage = () => {
       setIsLoading(true);
 
       const response = await fetch(
-        "https://x8ki-letl-twmt.n7.xano.io/api:0zPratjM/verify_otp",
+        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/verify_otp",
         {
           method: "POST",
           headers: {

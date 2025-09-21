@@ -143,7 +143,7 @@ export default function EmployerProfile() {
     const fetchEmployer = async () => {
       try {
         const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:t5TlTxto/get_employer_profile",
+          "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/get_employer_profile",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Failed to fetch employer profile");
@@ -167,7 +167,7 @@ export default function EmployerProfile() {
       const updatedData = { ...employer, [field]: newValue };
 
       const res = await fetch(
-        "https://x8ki-letl-twmt.n7.xano.io/api:t5TlTxto/edit_employer_profile",
+        "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/edit_employer_profile",
         {
           method: "POST", 
           headers: {

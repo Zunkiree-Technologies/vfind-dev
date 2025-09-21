@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       const response = await fetch(
-        "https://x8ki-letl-twmt.n7.xano.io/api:0zPratjM/auth/login",
+        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

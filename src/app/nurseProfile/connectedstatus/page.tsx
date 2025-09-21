@@ -37,7 +37,7 @@ export default function NurseStatusPage() {
     setLoading(true);
     try {
       const res = await fetch(
-        "https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/getNurseNotifications",
+        "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error("Failed to fetch requests");
@@ -70,7 +70,7 @@ export default function NurseStatusPage() {
 
     try {
       const res = await fetch(
-        `https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/connections/${requestId}`,
+        `https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/connections/${requestId}`,
         {
           method: "PATCH",
           headers: {

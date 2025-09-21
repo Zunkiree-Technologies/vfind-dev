@@ -16,7 +16,7 @@ interface NurseProfile {
   profileImage?: { path: string } | null;
 }
 
-const BASE_IMAGE_URL = "https://x8ki-letl-twmt.n7.xano.io";
+const BASE_IMAGE_URL = "https://x76o-gnx4-xrav.a2.xano.io";
 
 export default function WishlistNurses() {
   const [nurses, setNurses] = useState<NurseProfile[]>([]);
@@ -34,7 +34,7 @@ export default function WishlistNurses() {
         }
 
         const res = await fetch(
-          "https://x8ki-letl-twmt.n7.xano.io/api:P9j60cGD/getWishlistForSpecificEmployer",
+          "https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/getWishlistForSpecificEmployer",
           {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },

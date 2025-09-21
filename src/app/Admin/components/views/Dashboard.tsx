@@ -28,13 +28,13 @@ export default function DashboardPage() {
         rejected,
         connections,
       ] = await Promise.all([
-        fetch("https://x8ki-letl-twmt.n7.xano.io/api:MeLrTB-C/total_number_of_nurses").then((res) => res.json()),
-        fetch("https://x8ki-letl-twmt.n7.xano.io/api:t5TlTxto/total_number_of_employers").then((res) => res.json()),
-        fetch("https://x8ki-letl-twmt.n7.xano.io/api:W58sMfI8/total_number_of_jobs").then((res) => res.json()),
-        fetch("https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/accepted_connections").then((res) => res.json()),
-        fetch("https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/pending_connections").then((res) => res.json()),
-        fetch("https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/rejected_connection").then((res) => res.json()),
-        fetch("https://x8ki-letl-twmt.n7.xano.io/api:LP_rdOtV/total_number_of_connections").then((res) => res.json()),
+        fetch("https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/total_number_of_nurses").then((res) => res.json()),
+        fetch("https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/total_number_of_employers").then((res) => res.json()),
+        fetch("https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/total_number_of_jobs").then((res) => res.json()),
+        fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/accepted_connections").then((res) => res.json()),
+        fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/pending_connections").then((res) => res.json()),
+        fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/rejected_connection").then((res) => res.json()),
+        fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/total_number_of_connections").then((res) => res.json()),
       ]);
 
       // console.log("📊 Stats:", { nurses, employers, jobs, accepted, pending, rejected, connections });
