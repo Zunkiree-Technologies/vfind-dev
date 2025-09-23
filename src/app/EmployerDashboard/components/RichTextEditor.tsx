@@ -21,7 +21,7 @@ interface RichTextEditorProps {
 
 export default function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const [wordCount, setWordCount] = useState(0);
+  const [, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
 
   const updateCounts = useCallback((html: string) => {
@@ -114,7 +114,6 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
       {/* Status bar */}
       <div className="flex justify-between items-center px-3 py-1 text-xs text-gray-500 border-t">
-        <span>{wordCount} words</span>
         <span>{charCount} characters</span>
       </div>
     </div>

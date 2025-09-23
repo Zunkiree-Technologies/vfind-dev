@@ -87,7 +87,7 @@ export default function LoginPage() {
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-200 text-green-500 text-sm font-bold">
                   ✔
                 </span>
-                Know application status on applied jobs.
+                Get connection request from top companies.
               </li>
             </ul>
             <button

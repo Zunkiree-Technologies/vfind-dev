@@ -28,6 +28,7 @@ interface Employer {
   email?: string;
   company?: string;
   mobile?: string;
+  companyName?:string;
 }
 
 export default function EmployerDashboard() {
@@ -43,8 +44,12 @@ export default function EmployerDashboard() {
     "initial" | "editing" | "completed"
   >("initial");
   const [companyDescription, setCompanyDescription] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [existingCompanyData, setExistingCompanyData] = useState<any>(null);
+  const [isEditingExisting, setIsEditingExisting] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
-  // 🔹 Fetch employer + jobs
+  // 🔹 Fetch employer + jobs + company profile
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) return;
@@ -87,10 +92,89 @@ export default function EmployerDashboard() {
       }
     };
 
-    Promise.all([fetchEmployer(), fetchJobs()]).finally(() =>
+    const fetchCompanyProfile = async () => {
+      try {
+        const res = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.about_company) {
+            setExistingCompanyData(data);
+            setCompanyDescription(data.about_company);
+            setCompanyProfileStep("completed");
+          }
+        }
+        // If no company profile exists, we keep the initial state
+      } catch (err) {
+        console.error("Error fetching company profile:", err);
+        // Keep initial state if there's an error
+      }
+    };
+
+    Promise.all([fetchEmployer(), fetchJobs(), fetchCompanyProfile()]).finally(() =>
       setLoading(false)
     );
   }, []);
+
+  // 🔹 Company Profile API Functions
+  const createCompanyProfile = async (aboutCompany: string) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw new Error("No auth token");
+
+    const res = await fetch(
+      "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ about_company: aboutCompany })
+      }
+    );
+
+    if (!res.ok) throw new Error("Failed to create company profile");
+    return res.json();
+  };
+
+  const updateCompanyProfile = async (aboutCompany: string) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw new Error("No auth token");
+
+    const res = await fetch(
+      "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company",
+      {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ about_company: aboutCompany })
+      }
+    );
+
+    if (!res.ok) throw new Error("Failed to update company profile");
+    return res.json();
+  };
+
+  const deleteCompanyProfile = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw new Error("No auth token");
+
+    const res = await fetch(
+      "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company",
+      {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      }
+    );
+
+    if (!res.ok) throw new Error("Failed to delete company profile");
+    return res.json();
+  };
 
   // 🔹 Job actions
   const handleEdit = (job: Job) => {
@@ -124,13 +208,54 @@ export default function EmployerDashboard() {
       alert("Failed to delete the job. Please try again.");
     }
   };
-  const handleSaveCompanyProfile = () => {
+
+  const handleSaveCompanyProfile = async () => {
     if (companyDescription.trim() === "") {
       alert("Please provide a brief description before saving.");
       return;
     }
-    // you can add API call / localStorage here if needed
-    setCompanyProfileStep("completed");
+
+    setSaveLoading(true);
+    try {
+      if (existingCompanyData) {
+        // Update existing profile
+        await updateCompanyProfile(companyDescription);
+      } else {
+        // Create new profile
+        const newData = await createCompanyProfile(companyDescription);
+        setExistingCompanyData(newData);
+      }
+
+      setCompanyProfileStep("completed");
+      setIsEditingExisting(false);
+      alert("Company profile saved successfully!");
+    } catch (err) {
+      console.error("Error saving company profile:", err);
+      alert("Failed to save company profile. Please try again.");
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const handleEditCompanyProfile = () => {
+    setIsEditingExisting(true);
+    setCompanyProfileStep("editing");
+  };
+
+  const handleDeleteCompanyProfile = async () => {
+    if (!confirm("Are you sure you want to delete your company profile?")) return;
+
+    try {
+      await deleteCompanyProfile();
+      setExistingCompanyData(null);
+      setCompanyDescription("");
+      setCompanyProfileStep("initial");
+      setIsEditingExisting(false);
+      alert("Company profile deleted successfully.");
+    } catch (err) {
+      console.error("Error deleting company profile:", err);
+      alert("Failed to delete company profile. Please try again.");
+    }
   };
 
   const toggleMobileActionMenu = (jobId: number) => {
@@ -150,13 +275,6 @@ export default function EmployerDashboard() {
 
         {/* 👉 Left section */}
         <div className="space-y-5">
-          {/* <h1 className="text-xl font-semibold">
-            Welcome,{" "}
-            <span className="text-blue-600">
-              { employer.company || ""}
-            </span>
-          </h1> */}
-
           {/* KYC Section */}
           <div className="bg-white rounded-lg p-6 md:p-8 shadow-sm">
             {/* Initial Step */}
@@ -183,7 +301,7 @@ export default function EmployerDashboard() {
             {companyProfileStep === "editing" && (
               <>
                 <h2 className="font-semibold text-gray-800 text-base md:text-lg">
-                  Complete Your Company Profile
+                  {isEditingExisting ? "Edit Company Profile" : "Complete Your Company Profile"}
                 </h2>
                 <p className="text-sm md:text-base text-gray-600 mt-1">
                   Provide your company details to make your job postings stand out.
@@ -203,11 +321,25 @@ export default function EmployerDashboard() {
                 {/* Save button */}
                 <button
                   onClick={handleSaveCompanyProfile}
+                  disabled={saveLoading}
                   className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md 
-                   hover:bg-blue-600 text-sm md:text-base transition"
+                   hover:bg-blue-600 text-sm md:text-base transition disabled:opacity-50"
                 >
-                  Save & Continue
+                  {saveLoading ? "Saving..." : "Save & Continue"}
                 </button>
+
+                {isEditingExisting && (
+                  <button
+                    onClick={() => {
+                      setCompanyProfileStep("completed");
+                      setIsEditingExisting(false);
+                    }}
+                    className="mt-4 ml-2 w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded-md 
+                     hover:bg-gray-600 text-sm md:text-base transition"
+                  >
+                    Cancel
+                  </button>
+                )}
 
                 <p className="mt-2 text-xs md:text-sm text-gray-500">
                   Your company description will appear on job postings.
@@ -217,22 +349,47 @@ export default function EmployerDashboard() {
 
             {/* Completed Step */}
             {companyProfileStep === "completed" && (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 
-                    bg-green-50 border border-green-200 rounded-lg p-4">
-                <CheckCircle className="text-green-600 flex-shrink-0" size={22} />
-                <div>
-                  <h2 className="font-semibold text-green-700 text-sm md:text-base">
-                    Company Profile Completed
-                  </h2>
-                  <p className="mt-1 text-xs md:text-sm text-green-600">
-                    Your company description has been saved successfully.
-                  </p>
+              <>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 
+                      bg-green-50 border border-green-200 rounded-lg p-4">
+                  <CheckCircle className="text-green-600 flex-shrink-0" size={22} />
+                  <div className="flex-grow">
+                    <h2 className="font-semibold text-green-700 text-sm md:text-base">
+                      Company Profile Completed
+                    </h2>
+                    <p className="mt-1 text-xs md:text-sm text-green-600">
+                      Your company description has been saved successfully.
+                    </p>
+                  </div>
                 </div>
-              </div>
+                {/* Show company description
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                  <h3 className="font-medium text-gray-800 text-sm">Company Description:</h3>
+                  <p className="mt-1 text-sm text-gray-700">{companyDescription}</p>
+                </div> */}
+
+                {/* Action buttons */}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    onClick={handleEditCompanyProfile}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 
+                     text-sm transition flex items-center gap-2"
+                  >
+                    <Edit size={16} />
+                    Edit Profile
+                  </button>
+                  <button
+                    onClick={handleDeleteCompanyProfile}
+                    className="px-4 py-2 bg-red-400 text-white rounded-md hover:bg-red-500 
+                     text-sm transition flex items-center gap-2"
+                  >
+                    <Trash size={16} />
+                    Delete Profile
+                  </button>
+                </div>
+              </>
             )}
           </div>
-
-
 
           {/* Talent Pool + Free Job Posting */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -34,6 +34,8 @@ interface Job {
   id: number;
   title: string;
   location: string;
+  locality?: string;
+  companyName?: string; // Added as additional field
   type?: string;
   minPay?: string;
   maxPay?: string;
@@ -93,6 +95,12 @@ export default function JobData() {
     fetchJobs();
   }, []);
 
+  // Helper function to get company name
+  const getCompanyName = (job: Job): string => {
+    // Try multiple fields to get company name
+    return job.locality || job.companyName || job.company || "Healthcare Facility";
+  };
+
   // checkbox helper
   const handleCheckboxChange = (
     value: string,
@@ -124,7 +132,8 @@ export default function JobData() {
         (job) =>
           normalizeStr(job.title).includes(q) ||
           normalizeStr(job.description).includes(q) ||
-          normalizeStr(job.roleCategory).includes(q)
+          normalizeStr(job.roleCategory).includes(q) ||
+          normalizeStr(getCompanyName(job)).includes(q)
       );
     }
 
@@ -153,7 +162,6 @@ export default function JobData() {
         });
       });
     }
-
 
     if (roleCategories.length > 0) {
       temp = temp.filter((job) =>
@@ -222,8 +230,6 @@ export default function JobData() {
 
   return (
     <div className="p-6 min-h-screen mx-auto container bg-[#F5F6FA]">
-
-
       <div className="flex gap-6 mt-6 items-start">
         {/* Filters Sidebar (same wide set as CandidateList) */}
         <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-[60px] h-[calc(100vh-3rem)]  overflow-y-auto scrollbar-hide">
@@ -244,18 +250,6 @@ export default function JobData() {
             ))}
           </div>
           <div className="h-0.5 bg-gray-300" />
-
-          {/* Shift
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Shift</h3>
-            {["Morning", "Afternoon", "Night"].map((s) => (
-              <div key={s} className="flex items-center gap-2 text-sm mb-1">
-                <input type="checkbox" checked={shifts.includes(s)} onChange={() => handleCheckboxChange(s, setShifts)} className="rounded" />
-                <label>{s}</label>
-              </div>
-            ))}
-          </div>
-          <div className="h-0.5 bg-gray-300" /> */}
 
           {/* Role Category */}
           <div>
@@ -286,8 +280,6 @@ export default function JobData() {
             ))}
           </div>
           <div className="h-0.5 bg-gray-300" />
-
-
 
           {/* Pay Rate slider */}
           <div>
@@ -324,8 +316,10 @@ export default function JobData() {
                   <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
                     {job.title}
                   </h2>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {job.company || "Healthcare Facility"}
+
+                  {/* Updated company name display */}
+                  <p className="text-gray-600 text-sm mb-3 font-medium">
+                    {getCompanyName(job)}
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
@@ -368,13 +362,17 @@ export default function JobData() {
                 {/* CTA button */}
                 <div className="flex items-center gap-4 ml-6 flex-col">
                   <Link
-                    href={`/nurseProfile/jobapplicationpage/${job.id}`}
+                    href={{
+                      pathname: `/nurseProfile/jobapplicationpage/${job.id}`,
+                      query: { company: getCompanyName(job) }, 
+                    }}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
                   >
                     View Details
                   </Link>
+
                 </div>
               </div>
             ))}

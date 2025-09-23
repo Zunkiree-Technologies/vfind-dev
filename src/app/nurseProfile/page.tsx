@@ -1,20 +1,16 @@
-"use client";
+export const dynamic = "force-dynamic";
 
-import React from 'react'
-import { Navbar } from './components/Navbar'
-import Jobdata from './components/Jobdata';
+import React, { Suspense } from "react";
+import { Navbar } from "./components/Navbar";
+import Jobdata from "./components/Jobdata";
 
-
-const NurseDashboard = () => {
+export default function NurseDashboard() {
   return (
     <>
-     <Navbar/>
-     <Jobdata/>
-     
+      <Navbar />
+      <Suspense fallback={<div>Loading jobs...</div>}>
+        <Jobdata />
+      </Suspense>
     </>
-    
-  )
+  );
 }
-
-export default NurseDashboard
-

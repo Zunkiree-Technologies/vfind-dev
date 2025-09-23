@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+
 import Loader from "../../../../../components/loading";
 import { Building2 } from "lucide-react";
 
@@ -16,22 +17,38 @@ interface Job {
   benefits?: string[];
   experienceMin: string;
   experienceMax: string;
-  updated_at: string;
+  created_at: string;
   certifications: string[];
   company?: string;
-  shift?: string;
+  JobShift?: string;
   contact_email?: string;
+  employer_id?: number;
+}
+
+interface Company {
+  about_company: string;
+}
+
+interface Employer {
+  id: number;
+  companyName?: string;
+  fullName?: string;
+  company?: string;
 }
 
 export default function JobApplicationPage() {
   const router = useRouter();
   const { id } = useParams();
   const [job, setJob] = useState<Job | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [employer, setEmployer] = useState<Employer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [nurseEmail, setNurseEmail] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const companyFromQuery = searchParams.get("company");
 
   // Fetch token & nurse email from localStorage
   useEffect(() => {
@@ -41,6 +58,7 @@ export default function JobApplicationPage() {
     if (email) setNurseEmail(email);
   }, []);
 
+  // Fetch job details
   useEffect(() => {
     if (!id) {
       router.push("/nurseProfile");
@@ -50,10 +68,18 @@ export default function JobApplicationPage() {
     const fetchJob = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${id}`);
+        const res = await fetch(
+          `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${id}`
+        );
         if (!res.ok) throw new Error("Job not found");
         const data: Job = await res.json();
         setJob(data);
+
+        // After getting job data, fetch employer and company info
+        if (data.employer_id) {
+          await fetchEmployer(data.employer_id);
+          await fetchCompany(data.employer_id); // Use employer_id for company data
+        }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to fetch job");
       } finally {
@@ -63,6 +89,50 @@ export default function JobApplicationPage() {
 
     fetchJob();
   }, [id, router]);
+
+  // Fetch employer details
+  const fetchEmployer = async (employerId: number) => {
+    try {
+      const employerRes = await fetch(
+        `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/employers/${employerId}`
+      );
+
+      if (employerRes.ok) {
+        const employerData: Employer = await employerRes.json();
+        setEmployer(employerData);
+        console.log("Employer data:", employerData);
+      }
+    } catch (err) {
+      console.error("Error fetching employer data:", err);
+    }
+  };
+
+  // Fetch company about info using the employer ID
+  const fetchCompany = async (employerId: number) => {
+    try {
+      const companyRes = await fetch(
+        `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: employerId.toString()
+          })
+        }
+      );
+
+      if (companyRes.ok) {
+        const companyData = await companyRes.json();
+        // Extract only the about_company field
+        setCompany({ about_company: companyData.about_company });
+        console.log("Company about:", companyData.about_company);
+      }
+    } catch (err) {
+      console.error("Error fetching company data:", err);
+    }
+  };
 
   const handleSubmitApplication = async () => {
     if (!job) return;
@@ -119,6 +189,12 @@ export default function JobApplicationPage() {
       </div>
     );
 
+  const getCompanyName = () => {
+    if (companyFromQuery) return companyFromQuery;
+    if (employer?.companyName) return employer.companyName;
+    return "Healthcare Facility"; 
+  };
+
   return (
     <div className="min-h-screen bg-white py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -136,7 +212,7 @@ export default function JobApplicationPage() {
                   </div>
                   <div>
                     <h1 className="text-xl font-semibold text-gray-900">
-                      {job.company || "St. Mary's Aged Care Facility"}
+                      {getCompanyName()}
                     </h1>
                   </div>
                 </div>
@@ -147,52 +223,69 @@ export default function JobApplicationPage() {
               <div className="p-4 border-b border-gray-500">
                 <div className="flex flex-col gap-4 text-sm">
 
-                  
-
+                  {/* Location */}
                   <div className="flex justify-between items-center w-2/3 ">
                     <span className="font-medium text-gray-600">Location</span>
-                    <div className="flex justify-start items-center w-1/2  gap-10">
+                    <div className="flex justify-start items-center w-1/2 gap-10">
                       <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">Melbourne, Victoria</p>
+                      <p className="text-gray-900">{job.location || "Not specified"}</p>
                     </div>
                   </div>
 
+                  {/* Salary */}
                   <div className="flex justify-between items-center w-2/3 ">
                     <span className="font-medium text-gray-600">Salary</span>
                     <div className="flex justify-start gap-10 items-center w-1/2 ">
                       <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">AUD 14-16/hr</p>
+                      <p className="text-gray-900">
+                        {job.minPay && job.maxPay
+                          ? `AUD ${job.minPay}-${job.maxPay}/hr`
+                          : job.minPay
+                            ? `From AUD ${job.minPay}/hr`
+                            : job.maxPay
+                              ? `Up to AUD ${job.maxPay}/hr`
+                              : "Not specified"}
+                      </p>
                     </div>
                   </div>
 
+                  {/* Job Type */}
                   <div className="flex justify-between items-center w-2/3 ">
                     <span className="font-medium text-gray-600">Job Type</span>
                     <div className="flex justify-start gap-10 items-center w-1/2 ">
                       <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">Full Time</p>
+                      <p className="text-gray-900">{job.type || "Not specified"}</p>
                     </div>
                   </div>
 
+                  {/* Job Shift */}
                   <div className="flex justify-between items-center w-2/3 ">
                     <span className="font-medium text-gray-600">Job Shift</span>
                     <div className="flex justify-start gap-10 items-center w-1/2 ">
                       <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">Not specified</p>
+                      <p className="text-gray-900">{job.JobShift || "Not specified"}</p>
                     </div>
                   </div>
 
+                  {/* Job Posted */}
                   <div className="flex justify-between items-center w-2/3 ">
                     <span className="font-medium text-gray-600">Job Posted</span>
                     <div className="flex justify-start gap-10 items-center w-1/2 ">
                       <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">1 Days Ago</p>
+                      <p className="text-gray-900">
+                        {job.created_at
+                          ? new Date(job.created_at).toLocaleDateString("en-AU", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                          : "Not specified"}
+                      </p>
                     </div>
                   </div>
 
                 </div>
-
               </div>
-
 
               {/* Candidate Preferences */}
               <div className="p-6 border-b border-gray-500">
@@ -228,7 +321,7 @@ export default function JobApplicationPage() {
               </div>
 
               {/* Job Description */}
-            <div className="p-6  ">
+              <div className="p-6  ">
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Job Description</h2>
                 <div
                   className="prose prose-sm max-w-none text-gray-700  rounded-lg p-4 bg-gray-50 text-justify"
@@ -236,12 +329,16 @@ export default function JobApplicationPage() {
                 />
               </div>
 
-
-
-
             </div>
+
             <button
-              onClick={handleSubmitApplication}
+              onClick={() => {
+                if (!authToken || !nurseEmail) {
+                  router.push("/signup"); // redirect to signup
+                } else {
+                  handleSubmitApplication();
+                }
+              }}
               disabled={submitting}
               className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3"
             >
@@ -252,21 +349,20 @@ export default function JobApplicationPage() {
 
           {/* Right Column - About Company */}
           <div className="lg:col-span-1">
-            <div className="bg-[#F5F6FA] rounded-lg shadow-sm  p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">About Company</h3>
+            <div className="bg-[#F5F6FA] rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                About Company
+              </h3>
               <div className="text-sm text-gray-700 leading-relaxed">
-                <p className="mb-4">
-                  St. Marys Aged Care Facility is committed to providing compassionate, high-quality care to our elderly residents in a safe, nurturing, and homelike environment. Our focus is on promoting dignity, independence, and quality of life through person-centered care for all of every resident.
-                </p>
-                <p className="mb-4">
-                  With a team of dedicated healthcare professionals, we ensure that residents receive not only exceptional clinical care but also emotional and social support to ensure they feel valued, respected, and at home.
-                </p>
-                <p>
-                  We are a close-knit community where both residents and staff can thrive, offering opportunities for professional growth while maintaining the highest standards of care.
-                </p>
+                {company?.about_company ? (
+                  <p>{company.about_company}</p>
+                ) : (
+                  <p>No company information available.</p>
+                )}
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

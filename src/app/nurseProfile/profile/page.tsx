@@ -14,8 +14,10 @@ import {
   Clock,
   Shield,
   Edit,
-  Check,
+  Save,
   X,
+  Plus,
+  Minus,
 } from "lucide-react";
 
 interface ProfileImage {
@@ -56,7 +58,9 @@ interface EditableFieldProps {
   value: string | undefined;
   placeholder?: string;
   multiline?: boolean;
-  onSave: (field: keyof NurseProfile, value: string) => void;
+  isGlobalEdit: boolean;
+  editedData: Partial<NurseProfile>;
+  onFieldChange: (field: keyof NurseProfile, value: string) => void;
   disabled?: boolean;
 }
 
@@ -65,140 +69,122 @@ const EditableField: React.FC<EditableFieldProps> = ({
   value,
   placeholder = "Not specified",
   multiline = false,
-  onSave,
+  isGlobalEdit,
+  editedData,
+  onFieldChange,
   disabled = false,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempValue, setTempValue] = useState(value || "");
+  const currentValue = editedData[field] !== undefined ? editedData[field] as string : (value || "");
 
-  const handleSave = () => {
-    console.log("Editing field:", field, "with value:", tempValue);
-    onSave(field, tempValue);
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setTempValue(value || "");
-    setIsEditing(false);
-  };
-
-  if (!isEditing) {
-    return (
-      <div className="flex items-center gap-2 group">
-        <span className="flex-1">{value || placeholder}</span>
-        {!disabled && (
-          <Edit
-            className="w-3 h-3 text-blue-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={() => {
-              setTempValue(value || "");
-              setIsEditing(true);
-            }}
-          />
-        )}
-      </div>
+  if (isGlobalEdit && !disabled) {
+    return multiline ? (
+      <textarea
+        value={currentValue}
+        onChange={(e) => onFieldChange(field, e.target.value)}
+        className="w-full px-2 py-1 border border-blue-300 rounded text-sm resize-none"
+        rows={2}
+        placeholder={placeholder}
+      />
+    ) : (
+      <input
+        type="text"
+        value={currentValue}
+        onChange={(e) => onFieldChange(field, e.target.value)}
+        className="w-full px-2 py-1 border border-blue-300 rounded text-sm"
+        placeholder={placeholder}
+      />
     );
   }
 
-  return (
-    <div className="flex items-center gap-2">
-      {multiline ? (
-        <textarea
-          value={tempValue}
-          onChange={(e) => setTempValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && e.ctrlKey) {
-              handleSave();
-            }
-            if (e.key === "Escape") {
-              handleCancel();
-            }
-          }}
-          className="flex-1 px-2 py-1 border border-blue-300 rounded text-sm resize-none"
-          rows={2}
-          autoFocus
-        />
-      ) : (
-        <input
-          type="text"
-          value={tempValue}
-          onChange={(e) => setTempValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSave();
-            }
-            if (e.key === "Escape") {
-              handleCancel();
-            }
-          }}
-          className="flex-1 px-2 py-1 border border-blue-300 rounded text-sm"
-          autoFocus
-        />
-      )}
-      <Check
-        className="w-4 h-4 text-green-600 cursor-pointer hover:text-green-700"
-        onClick={handleSave}
-      />
-      <X
-        className="w-4 h-4 text-red-600 cursor-pointer hover:text-red-700"
-        onClick={handleCancel}
-      />
-    </div>
-  );
+  return <span>{currentValue || placeholder}</span>;
 };
 
 interface EditableArrayFieldProps {
   field: keyof NurseProfile;
   values: string[];
   placeholder?: string;
-  onSave: (field: keyof NurseProfile, values: string[]) => void;
+  isGlobalEdit: boolean;
+  editedData: Partial<NurseProfile>;
+  onFieldChange: (field: keyof NurseProfile, values: string[]) => void;
 }
 
 const EditableArrayField: React.FC<EditableArrayFieldProps> = ({
   field,
   values,
   placeholder = "None specified",
-  onSave,
+  isGlobalEdit,
+  editedData,
+  onFieldChange,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempValues, setTempValues] = useState(values.join('\n'));
+  const currentValues = editedData[field] !== undefined
+    ? (Array.isArray(editedData[field]) ? editedData[field] as string[] : [editedData[field] as string])
+    : values;
 
-  const handleSave = () => {
-    const newValues = tempValues.split('\n').filter(v => v.trim());
-    onSave(field, newValues);
-    setIsEditing(false);
+  const [newItem, setNewItem] = useState("");
+
+  const addItem = () => {
+    if (newItem.trim() && !currentValues.includes(newItem.trim())) {
+      const updatedValues = [...currentValues, newItem.trim()];
+      onFieldChange(field, updatedValues);
+      setNewItem("");
+    }
   };
 
-  const handleCancel = () => {
-    setTempValues(values.join('\n'));
-    setIsEditing(false);
+  const removeItem = (indexToRemove: number) => {
+    const updatedValues = currentValues.filter((_, index) => index !== indexToRemove);
+    onFieldChange(field, updatedValues);
   };
 
-  if (!isEditing) {
+  if (isGlobalEdit) {
     return (
-      <div className="space-y-2">
-        {values.length > 0 ? (
-          <div className="flex flex-wrap gap-2 group">
-            {values.map((value, index) => (
-              <span
-                key={index}
-                className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+      <div className="space-y-3">
+        {/* Display current items with remove buttons */}
+        <div className="flex flex-wrap gap-2">
+          {currentValues.map((value, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+            >
+              <span>{value}</span>
+              <button
+                onClick={() => removeItem(index)}
+                className="ml-1 text-red-500 hover:text-red-700 transition-colors"
+                type="button"
               >
-                {value}
-              </span>
-            ))}
-            <Edit
-              className="w-3 h-3 text-blue-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => setIsEditing(true)}
-            />
-          </div>
-        ) : (
-          <div className="flex items-center justify-between group">
-            <span className="text-gray-400 text-sm italic">{placeholder}</span>
-            <Edit
-              className="w-3 h-3 text-blue-600 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => setIsEditing(true)}
-            />
-          </div>
+                <Minus className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Add new item input */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newItem}
+            onChange={(e) => setNewItem(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addItem();
+              }
+            }}
+            className="flex-1 px-3 py-2 border border-blue-300 rounded text-sm"
+            placeholder="Add new item..."
+          />
+          <button
+            onClick={addItem}
+            disabled={!newItem.trim() || currentValues.includes(newItem.trim())}
+            className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            type="button"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Show placeholder when no items */}
+        {currentValues.length === 0 && (
+          <span className="text-gray-400 text-sm italic">{placeholder}</span>
         )}
       </div>
     );
@@ -206,33 +192,20 @@ const EditableArrayField: React.FC<EditableArrayFieldProps> = ({
 
   return (
     <div className="space-y-2">
-      <textarea
-        value={tempValues}
-        onChange={(e) => setTempValues(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && e.ctrlKey) {
-            handleSave();
-          }
-          if (e.key === "Escape") {
-            handleCancel();
-          }
-        }}
-        className="w-full px-3 py-2 border border-blue-300 rounded text-sm resize-none"
-        rows={Math.max(3, tempValues.split('\n').length)}
-        placeholder="Enter each item on a new line"
-        autoFocus
-      />
-      <div className="flex items-center gap-2 text-xs text-gray-500">
-        <span>Press Ctrl+Enter to save, Escape to cancel</span>
-        <Check
-          className="w-4 h-4 text-green-600 cursor-pointer hover:text-green-700"
-          onClick={handleSave}
-        />
-        <X
-          className="w-4 h-4 text-red-600 cursor-pointer hover:text-red-700"
-          onClick={handleCancel}
-        />
-      </div>
+      {currentValues.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {currentValues.map((value, index) => (
+            <span
+              key={index}
+              className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+            >
+              {value}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <span className="text-gray-400 text-sm italic">{placeholder}</span>
+      )}
     </div>
   );
 };
@@ -241,6 +214,9 @@ export default function NurseProfilePage() {
   const [profile, setProfile] = useState<NurseProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isGlobalEdit, setIsGlobalEdit] = useState(false);
+  const [editedData, setEditedData] = useState<Partial<NurseProfile>>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -262,10 +238,10 @@ export default function NurseProfilePage() {
             },
           }
         );
-        console.log(res)
+
         if (!res.ok) throw new Error("Failed to fetch profile");
         const data = await res.json();
-          console.log("Fetched Profile Data:", data);
+        console.log("Fetched Profile Data:", data);
         setProfile(data);
       } catch (err: any) {
         setError(err.message || "Failed to fetch profile");
@@ -277,9 +253,17 @@ export default function NurseProfilePage() {
     fetchProfile();
   }, []);
 
-  const handleFieldSave = async (field: keyof NurseProfile, newValue: string | string[]) => {
+  const handleFieldChange = (field: keyof NurseProfile, value: string | string[]) => {
+    setEditedData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSaveAll = async () => {
     if (!profile) return;
 
+    setSaving(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -287,7 +271,34 @@ export default function NurseProfilePage() {
         return;
       }
 
-      const updatedProfile = { ...profile, [field]: newValue };
+      // Merge original profile with edited data
+      const updatedProfile = { ...profile, ...editedData };
+
+      // Convert array fields to strings for API compatibility
+      const apiPayload = {
+        ...updatedProfile,
+        // Convert arrays to JSON strings for fields that might be arrays
+        jobTypes: Array.isArray(updatedProfile.jobTypes)
+          ? JSON.stringify(updatedProfile.jobTypes)
+          : updatedProfile.jobTypes,
+        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
+          ? JSON.stringify(updatedProfile.preferredLocations)
+          : updatedProfile.preferredLocations,
+        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
+          ? JSON.stringify(updatedProfile.shiftPreferences)
+          : updatedProfile.shiftPreferences,
+        licenses: Array.isArray(updatedProfile.licenses)
+          ? JSON.stringify(updatedProfile.licenses)
+          : updatedProfile.licenses,
+        certifications: Array.isArray(updatedProfile.certifications)
+          ? JSON.stringify(updatedProfile.certifications)
+          : updatedProfile.certifications,
+        education: Array.isArray(updatedProfile.education)
+          ? JSON.stringify(updatedProfile.education)
+          : updatedProfile.education,
+      };
+
+      console.log("API Payload:", apiPayload); // Debug log to see what's being sent
 
       const res = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
@@ -297,7 +308,7 @@ export default function NurseProfilePage() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(updatedProfile),
+          body: JSON.stringify(apiPayload),
         }
       );
 
@@ -307,19 +318,61 @@ export default function NurseProfilePage() {
       }
 
       const updatedData = await res.json();
-         console.log("Profile Updated Successfully:", updatedData);
+      console.log("Profile Updated Successfully:", updatedData);
       setProfile(updatedData);
+      setEditedData({});
+      setIsGlobalEdit(false);
     } catch (err: any) {
       alert(err.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleStringFieldSave = (field: keyof NurseProfile, value: string) => {
-    handleFieldSave(field, value);
+  const handleCancelEdit = () => {
+    setEditedData({});
+    setIsGlobalEdit(false);
   };
 
-  const handleArrayFieldSave = (field: keyof NurseProfile, values: string[]) => {
-    handleFieldSave(field, values);
+  const handleImageEdit = async (file: File) => {
+    if (!profile) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No authentication token found");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("profileImage", file);
+
+      // Add all profile fields to formData
+      Object.entries(profile).forEach(([key, value]) => {
+        if (key !== "profileImage" && value !== null && value !== undefined) {
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/image_edit",
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update profile image");
+      const updatedData = await res.json();
+      setProfile(updatedData);
+    } catch (err: any) {
+      alert(err.message || "Error uploading image");
+    }
   };
 
   if (loading) return <Loading />;
@@ -344,8 +397,46 @@ export default function NurseProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#F5F6FA] p-4">
+      {/* ================= Edit/Save Button Section ================= */}
+      <div className="container mx-auto mb-4">
+
+      </div>
+
       {/* ================= Top Profile Section ================= */}
-      <div className="container mx-auto bg-white rounded-xl shadow-sm p-8 mb-8">
+      <div className="container mx-auto bg-white rounded-xl shadow-sm p-8 mb-8 relative">
+        {/* Top-right buttons */}
+        <div className="absolute top-4 right-4 flex justify-end gap-2">
+          {!isGlobalEdit ? (
+            <button
+              onClick={() => setIsGlobalEdit(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Edit className="w-4 h-4" />
+              Edit Profile
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveAll}
+                disabled={saving}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" />
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                disabled={saving}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Profile Content */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
           {/* Profile Image */}
           <div className="flex flex-col items-center">
@@ -373,33 +464,9 @@ export default function NurseProfilePage() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={async (e) => {
-                  if (!e.target.files?.[0]) return;
-                  const file = e.target.files[0];
-
-                  const formData = new FormData();
-                  formData.append("profileImage", file);
-
-                  Object.entries(profile).forEach(([key, value]) => {
-                    if (key !== "profileImage") formData.append(key, value as any);
-                  });
-
-                  const token = localStorage.getItem("token");
-                  try {
-                    const res = await fetch(
-                      "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
-                      {
-                        method: "POST",
-                        headers: { Authorization: `Bearer ${token}` },
-                        body: formData,
-                      }
-                    );
-
-                    if (!res.ok) throw new Error("Failed to update profile image");
-                    const updatedData = await res.json();
-                    setProfile(updatedData);
-                  } catch (err: any) {
-                    alert(err.message || "Error uploading image");
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    handleImageEdit(e.target.files[0]);
                   }
                 }}
               />
@@ -408,12 +475,14 @@ export default function NurseProfilePage() {
 
           {/* Profile Info */}
           <div className="flex-1 space-y-2">
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 w-fit">
               <EditableField
                 field="fullName"
                 value={profile.fullName}
                 placeholder="Full Name"
-                onSave={handleStringFieldSave}
+                isGlobalEdit={isGlobalEdit}
+                editedData={editedData}
+                onFieldChange={handleFieldChange}
               />
             </h1>
             <div className="flex items-center gap-2 text-gray-500 text-sm">
@@ -424,10 +493,11 @@ export default function NurseProfilePage() {
         </div>
       </div>
 
+
       {/* ================= Basic Info & Visa Section ================= */}
       <div className="container mx-auto flex flex-col lg:flex-row justify-between gap-4 mb-5">
         {/* Basic Information */}
-        <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 ">
           <div className="flex items-center space-x-2 mb-4">
             <User className="w-6 h-6 text-blue-600" />
             <h2 className="text-lg font-medium text-gray-900">Basic Information</h2>
@@ -435,57 +505,67 @@ export default function NurseProfilePage() {
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Location</h3>
-              <p className="text-gray-900">
+              <p className="text-gray-900 w-fit">
                 <EditableField
                   field="currentResidentialLocation"
                   value={profile.currentResidentialLocation}
                   placeholder="Location not specified"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Job Status</h3>
-              <p className="text-gray-900">
+              <p className="text-gray-900 w-fit">
                 <EditableField
                   field="jobSearchStatus"
                   value={profile.jobSearchStatus}
                   placeholder="Not specified"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Email</h3>
-              <p className="text-gray-900">
+              <p className="text-gray-900 w-fit">
                 <EditableField
                   field="email"
                   value={profile.email}
                   placeholder="Email"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                   disabled={true}
                 />
               </p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Phone</h3>
-              <p className="text-gray-900">
+              <p className="text-gray-900 w-fit">
                 <EditableField
                   field="phoneNumber"
                   value={profile.phoneNumber}
                   placeholder="Phone number"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Availability</h3>
-              <p className="text-gray-900">
+              <p className="text-gray-900 w-fit">
                 <EditableField
                   field="startTime"
                   value={profile.startDate || profile.startTime}
                   placeholder="Not specified"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
@@ -501,34 +581,40 @@ export default function NurseProfilePage() {
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
-              <p className="text-gray-900">
+              <p className="text-gray-900 w-fit">
                 <EditableField
                   field="residencyStatus"
                   value={profile.residencyStatus}
                   placeholder="Australian Citizen / Permanent Resident"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Visa Type</h3>
-              <p className="text-gray-900">
+              <p className="text-gray-900 w-fit">
                 <EditableField
                   field="visaType"
                   value={profile.visaType}
                   placeholder="Not Specified"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Duration</h3>
-              <p className="text-gray-900">
+              <p className="text-gray-900 w-fit">
                 <EditableField
                   field="visaDuration"
                   value={profile.visaDuration}
                   placeholder="Not Specified"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
@@ -550,7 +636,9 @@ export default function NurseProfilePage() {
               field="preferredLocations"
               values={preferredLocationsArray}
               placeholder="No preferred locations specified"
-              onSave={handleArrayFieldSave}
+              isGlobalEdit={isGlobalEdit}
+              editedData={editedData}
+              onFieldChange={handleFieldChange}
             />
           </div>
 
@@ -561,7 +649,9 @@ export default function NurseProfilePage() {
               field="jobTypes"
               values={jobTypesArray}
               placeholder="No job types specified"
-              onSave={handleArrayFieldSave}
+              isGlobalEdit={isGlobalEdit}
+              editedData={editedData}
+              onFieldChange={handleFieldChange}
             />
           </div>
         </div>
@@ -571,15 +661,15 @@ export default function NurseProfilePage() {
           {/* Open To Other Types */}
           <div className="w-1/2 mb-6">
             <h3 className="font-medium text-gray-700 mb-2">Open To Other Types</h3>
-            <div>
-              <span className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium">
-                <EditableField
-                  field="openToOtherTypes"
-                  value={profile.openToOtherTypes}
-                  placeholder="Not Specified"
-                  onSave={handleStringFieldSave}
-                />
-              </span>
+            <div className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium inline-block">
+              <EditableField
+                field="openToOtherTypes"
+                value={profile.openToOtherTypes}
+                placeholder="Not Specified"
+                isGlobalEdit={isGlobalEdit}
+                editedData={editedData}
+                onFieldChange={handleFieldChange}
+              />
             </div>
           </div>
 
@@ -590,7 +680,9 @@ export default function NurseProfilePage() {
               field="shiftPreferences"
               values={shiftPreferencesArray}
               placeholder="No shift preferences specified"
-              onSave={handleArrayFieldSave}
+              isGlobalEdit={isGlobalEdit}
+              editedData={editedData}
+              onFieldChange={handleFieldChange}
             />
           </div>
         </div>
@@ -603,7 +695,9 @@ export default function NurseProfilePage() {
               field="startTime"
               value={profile.startDate || profile.startTime}
               placeholder="Not specified"
-              onSave={handleStringFieldSave}
+              isGlobalEdit={isGlobalEdit}
+              editedData={editedData}
+              onFieldChange={handleFieldChange}
             />
           </span>
         </div>
@@ -625,46 +719,56 @@ export default function NurseProfilePage() {
                 field="qualification"
                 value={profile.qualification}
                 placeholder="Bachelor of Nursing"
-                onSave={handleStringFieldSave}
+                isGlobalEdit={isGlobalEdit}
+                editedData={editedData}
+                onFieldChange={handleFieldChange}
               />
             </div>
-            {profile.otherQualification && (
+            {(profile.otherQualification || isGlobalEdit) && (
               <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium w-fit">
                 <EditableField
                   field="otherQualification"
                   value={profile.otherQualification}
                   placeholder="Other Qualification"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </div>
             )}
           </div>
         </div>
-
-        {/* Certifications */}
+        {/* Certification */}
         <div>
           <h3 className="font-medium text-gray-700 mb-2">Certifications</h3>
-          {certificationsArray.length > 0 ? (
-            <ul className="space-y-2 text-sm text-gray-800">
-              {certificationsArray.map((cert: string, index: number) => (
-                <li key={index} className="flex items-center gap-2">
-                  <Award className="w-4 h-4 text-blue-700" />
-                  {cert}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="group">
-              <span className="text-gray-400 text-sm italic">No certifications specified</span>
-              <EditableArrayField
-                field="certifications"
-                values={certificationsArray}
-                placeholder="No certifications specified"
-                onSave={handleArrayFieldSave}
-              />
-            </div>
+          <div className="flex flex-col gap-2">
+            {certificationsArray && certificationsArray.length > 0 ? (
+              certificationsArray.map((cert, idx) => (
+                <div key={idx} className="flex items-center gap-2 text-gray-800">
+                  <Award className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span>{cert}</span>
+                </div>
+              ))
+            ) : (
+              <span className="text-gray-500 text-sm">
+                No certifications specified
+              </span>
+            )}
+          </div>
+
+          {/* Editable mode */}
+          {isGlobalEdit && (
+            <EditableArrayField
+              field="certifications"
+              values={certificationsArray}
+              placeholder="Add certification"
+              isGlobalEdit={isGlobalEdit}
+              editedData={editedData}
+              onFieldChange={handleFieldChange}
+            />
           )}
         </div>
+
       </div>
 
       {/* ================= Work Experience & Preferences ================= */}
@@ -684,7 +788,9 @@ export default function NurseProfilePage() {
                   field="experience"
                   value={profile.experience}
                   placeholder="No experience specified"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
@@ -696,7 +802,9 @@ export default function NurseProfilePage() {
                   field="workingInHealthcare"
                   value={profile.workingInHealthcare}
                   placeholder="Not specified"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
@@ -708,7 +816,9 @@ export default function NurseProfilePage() {
                   field="organisation"
                   value={profile.organisation}
                   placeholder="Not specified"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
@@ -729,7 +839,9 @@ export default function NurseProfilePage() {
                   field="maxWorkHours"
                   value={profile.maxWorkHours}
                   placeholder="Not specified"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>
@@ -740,7 +852,9 @@ export default function NurseProfilePage() {
                   field="workHoursRestricted"
                   value={profile.workHoursRestricted}
                   placeholder="No"
-                  onSave={handleStringFieldSave}
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
               </p>
             </div>

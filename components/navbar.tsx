@@ -1,8 +1,10 @@
 "use client";
+
+
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ChevronDown, Menu, Search, X } from "lucide-react";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [isAuthDropdownOpen, setIsAuthDropdownOpen] = useState(false);
@@ -12,6 +14,7 @@ export default function Navbar() {
   // Refs for detecting outside clicks
   const authRef = useRef<HTMLDivElement>(null);
   const employerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const toggleAuthDropdown = () => {
     setIsAuthDropdownOpen(!isAuthDropdownOpen);
@@ -66,7 +69,7 @@ export default function Navbar() {
         {/* Desktop Menu */}
         <div className="hidden lg:flex lg:items-center lg:space-x-6">
           <Link href="/blogs" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">
-            Blogs
+            Resources
           </Link>
           <Link href="/about" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">
             About
@@ -140,10 +143,10 @@ export default function Navbar() {
             )}
           </div>
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/joblist")}
             className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
           >
-            <p className="text-sm"> Find Jobs</p>
+            <p className="text-sm">Find Jobs</p>
           </button>
         </div>
 
@@ -159,7 +162,7 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="lg:hidden px-4 pb-4 space-y-2 border-t">
           <Link href="/blogs" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
-            Blogs
+            Resources
           </Link>
           <Link href="/about" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
             About

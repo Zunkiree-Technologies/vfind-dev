@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { MapPin, DollarSign, Clock, Briefcase } from "lucide-react";
 
 interface Job {
@@ -24,6 +25,7 @@ interface Job {
 
 export default function FeaturedJobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -45,12 +47,17 @@ export default function FeaturedJobs() {
   }, []);
 
   return (
-    <section className="min-h-fit bg-[#F8FAFD] flex items-center justify-center px-6 py-12 " id="Featurejobs">
+    <section
+      className="min-h-fit bg-[#F8FAFD] flex items-center justify-center px-6 py-12"
+      id="Featurejobs"
+    >
       <div className="max-w-7xl w-full">
         {/* Header */}
         <div className="text-center mb-12 flex justify-center items-center flex-col">
-          <h2 className="text-3xl sm:text-3xl md:text-5xl lg:text-4xl font-bold text-black text-healthcare-navy  mb-6">Featured Jobs</h2>
-          <p className="text-gray-500 ">
+          <h2 className="text-3xl sm:text-3xl md:text-5xl lg:text-4xl font-bold text-black text-healthcare-navy mb-6">
+            Featured Jobs
+          </h2>
+          <p className="text-gray-500">
             Discover your next career opportunity with Australia’s top healthcare
             employers
           </p>
@@ -110,7 +117,10 @@ export default function FeaturedJobs() {
                     ? new Date(job.updated_at).toLocaleDateString()
                     : "Recently posted"}
                 </p>
-                <button className="bg-blue-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-500 transition">
+                <button
+                  className="bg-blue-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-500 transition"
+                  onClick={() => router.push(`/nurseProfile/jobapplicationpage/${job.id}`)}
+                >
                   View Details
                 </button>
               </div>

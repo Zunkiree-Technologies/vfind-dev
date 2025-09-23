@@ -1,249 +1,765 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
-import { MapPin, Briefcase, Clock, DollarSign } from "lucide-react";
-import Loader from "../../../../components/loading";
+import { useEffect, useState } from "react";
+import { parseValues } from "../utils/profileHelpers";
+import Loading from "../../../../components/loading";
+import Image from "next/image";
+import {
+  GraduationCap,
+  Calendar,
+  User,
+  UserRoundSearch,
+  Award,
+  Briefcase,
+  Clock,
+  Shield,
+  Edit,
+  Save,
+  X,
+} from "lucide-react";
 
-interface Job {
-  id: number;
-  title: string;
-  location: string;
-  type: string;
-  minPay: string;
-  maxPay: string;
-  description: string;
-  requirements?: string[];
-  benefits?: string[];
-  experienceMin: string;
-  experienceMax: string;
-  updated_at: string;
-  company?: string;
-  shift?: string;
-  contact_email?: string;
+interface ProfileImage {
+  url: string;
 }
 
-export default function JobData() {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
+interface NurseProfile {
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  qualification: string;
+  otherQualification?: string;
+  experience: string;
+  workingInHealthcare: string;
+  jobTypes: string[] | string;
+  openToOtherTypes?: string;
+  startDate: string;
+  startTime: string;
+  jobSearchStatus: string;
+  preferredLocations: string[];
+  shiftPreferences: string[] | string;
+  licenses?: string[] | string;
+  certifications?: string[] | string;
+  education?: string[] | string;
+  residencyStatus?: string;
+  visaType?: string;
+  visaDuration?: string;
+  maxWorkHours?: string;
+  workHoursRestricted?: string;
+  postcode?: string;
+  organisation?: string;
+  currentResidentialLocation?: string;
+  profileImage?: ProfileImage | null;
+}
+
+interface EditableFieldProps {
+  field: keyof NurseProfile;
+  value: string | undefined;
+  placeholder?: string;
+  multiline?: boolean;
+  isGlobalEdit: boolean;
+  editedData: Partial<NurseProfile>;
+  onFieldChange: (field: keyof NurseProfile, value: string) => void;
+  disabled?: boolean;
+}
+
+const EditableField: React.FC<EditableFieldProps> = ({
+  field,
+  value,
+  placeholder = "Not specified",
+  multiline = false,
+  isGlobalEdit,
+  editedData,
+  onFieldChange,
+  disabled = false,
+}) => {
+  const currentValue = editedData[field] !== undefined ? editedData[field] as string : (value || "");
+
+  if (isGlobalEdit && !disabled) {
+    return multiline ? (
+      <textarea
+        value={currentValue}
+        onChange={(e) => onFieldChange(field, e.target.value)}
+        className="w-full px-2 py-1 border border-blue-300 rounded text-sm resize-none"
+        rows={2}
+        placeholder={placeholder}
+      />
+    ) : (
+      <input
+        type="text"
+        value={currentValue}
+        onChange={(e) => onFieldChange(field, e.target.value)}
+        className="w-full px-2 py-1 border border-blue-300 rounded text-sm"
+        placeholder={placeholder}
+      />
+    );
+  }
+
+  return <span>{currentValue || placeholder}</span>;
+};
+
+interface EditableArrayFieldProps {
+  field: keyof NurseProfile;
+  values: string[];
+  placeholder?: string;
+  isGlobalEdit: boolean;
+  editedData: Partial<NurseProfile>;
+  onFieldChange: (field: keyof NurseProfile, values: string[]) => void;
+}
+
+const EditableArrayField: React.FC<EditableArrayFieldProps> = ({
+  field,
+  values,
+  placeholder = "None specified",
+  isGlobalEdit,
+  editedData,
+  onFieldChange,
+}) => {
+  const currentValues = editedData[field] !== undefined
+    ? (Array.isArray(editedData[field]) ? editedData[field] as string[] : [editedData[field] as string])
+    : values;
+
+  const textValue = currentValues.join('\n');
+
+  if (isGlobalEdit) {
+    return (
+      <textarea
+        value={textValue}
+        onChange={(e) => {
+          const newValues = e.target.value.split('\n').filter(v => v.trim());
+          onFieldChange(field, newValues);
+        }}
+        className="w-full px-3 py-2 border border-blue-300 rounded text-sm resize-none"
+        rows={Math.max(3, textValue.split('\n').length)}
+        placeholder="Enter each item on a new line"
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {currentValues.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {currentValues.map((value, index) => (
+            <span
+              key={index}
+              className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+            >
+              {value}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <span className="text-gray-400 text-sm italic">{placeholder}</span>
+      )}
+    </div>
+  );
+};
+
+export default function NurseProfilePage() {
+  const [profile, setProfile] = useState<NurseProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isGlobalEdit, setIsGlobalEdit] = useState(false);
+  const [editedData, setEditedData] = useState<Partial<NurseProfile>>({});
+  const [saving, setSaving] = useState(false);
 
-  // Filters
-  const [search, setSearch] = useState("");
-  const [location, setLocation] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string[]>([]);
-  const [shifts, setShifts] = useState<string[]>([]);
-  const [experience, setExperience] = useState<string[]>([]);
-
-  // Fetch Jobs
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchProfile = async () => {
       try {
-        setLoading(true);
-        const res = await fetch("https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs");
-        if (!res.ok) throw new Error("Failed to fetch jobs");
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("No authentication token found");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_profile",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch profile");
         const data = await res.json();
-        setJobs(data);
-        setFilteredJobs(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load jobs");
+        console.log("Fetched Profile Data:", data);
+        setProfile(data);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch profile");
       } finally {
         setLoading(false);
       }
     };
-    fetchJobs();
+
+    fetchProfile();
   }, []);
 
-  // Apply Filters
-  const applyFilters = useCallback(() => {
-    let temp = [...jobs];
+  const handleFieldChange = (field: keyof NurseProfile, value: string | string[]) => {
+    setEditedData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-    if (search.trim()) {
-      temp = temp.filter((job) =>
-        [job.title, job.company, job.description]
-          .join(" ")
-          .toLowerCase()
-          .includes(search.toLowerCase())
+  const handleSaveAll = async () => {
+    if (!profile) return;
+
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No authentication token found");
+        return;
+      }
+
+      // Merge original profile with edited data
+      const updatedProfile = { ...profile, ...editedData };
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedProfile),
+        }
       );
-    }
 
-    if (location.trim()) {
-      temp = temp.filter((job) =>
-        job.location.toLowerCase().includes(location.toLowerCase())
-      );
-    }
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to update profile: ${res.status} ${errorText}`);
+      }
 
-    if (typeFilter.length > 0) {
-      temp = temp.filter((job) => typeFilter.includes(job.type));
+      const updatedData = await res.json();
+      console.log("Profile Updated Successfully:", updatedData);
+      setProfile(updatedData);
+      setEditedData({});
+      setIsGlobalEdit(false);
+    } catch (err: any) {
+      alert(err.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
     }
+  };
 
-    if (shifts.length > 0) {
-      temp = temp.filter((job) => job.shift && shifts.includes(job.shift));
-    }
-    
+  const handleCancelEdit = () => {
+    setEditedData({});
+    setIsGlobalEdit(false);
+  };
 
-    if (experience.length > 0) {
-      temp = temp.filter((job) => {
-        const exp = parseInt(job.experienceMin);
-        if (experience.includes("0-1 Year")) return exp <= 1;
-        if (experience.includes("1-3 Years")) return exp >= 1 && exp <= 3;
-        if (experience.includes("3-5 Years")) return exp >= 3 && exp <= 5;
-        if (experience.includes("5+ Years")) return exp > 5;
-        return true;
+  const handleImageEdit = async (file: File) => {
+    if (!profile) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No authentication token found");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("profileImage", file);
+
+      // Add all profile fields to formData
+      Object.entries(profile).forEach(([key, value]) => {
+        if (key !== "profileImage" && value !== null && value !== undefined) {
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
       });
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/image_edit",
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update profile image");
+      const updatedData = await res.json();
+      setProfile(updatedData);
+    } catch (err: any) {
+      alert(err.message || "Error uploading image");
     }
-
-    setFilteredJobs(temp);
-  }, [jobs, search, location, typeFilter, shifts, experience]);
-
-  useEffect(() => {
-    const debounce = setTimeout(() => applyFilters(), 300);
-    return () => clearTimeout(debounce);
-  }, [search, location, typeFilter, shifts, experience, applyFilters]);
-
-  const handleCheckboxChange = (
-    value: string,
-    setter: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    setter((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-    );
   };
 
-  const clearFilters = () => {
-    setSearch("");
-    setLocation("");
-    setTypeFilter([]);
-    setShifts([]);
-    setExperience([]);
-    setFilteredJobs(jobs);
-  };
+  if (loading) return <Loading />;
+  if (error) return (
+    <div className="flex justify-center items-center h-screen text-red-600 font-semibold">
+      {error}
+    </div>
+  );
+  if (!profile) return (
+    <div className="flex justify-center items-center h-screen text-gray-600">
+      No profile data found
+    </div>
+  );
 
-  if (loading) return <Loader />;
-  if (error)
-    return <div className="flex justify-center items-center h-screen text-red-600">{error}</div>;
+  const renderArray = (value: string[] | string | undefined) =>
+    parseValues(value) || [];
+
+  const preferredLocationsArray = renderArray(profile.preferredLocations);
+  const jobTypesArray = renderArray(profile.jobTypes);
+  const shiftPreferencesArray = renderArray(profile.shiftPreferences);
+  const certificationsArray = renderArray(profile.certifications);
 
   return (
-    <div className="p-6 min-h-screen mx-auto container bg-[#F5F6FA]">
+    <div className="min-h-screen bg-[#F5F6FA] p-4">
+      {/* ================= Edit/Save Button Section ================= */}
+      <div className="container mx-auto mb-4">
 
-      <div className="flex gap-6 mt-6 items-start">
-        {/* 🔹 Sidebar Filters */}
-        <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
-          <h2 className="font-semibold text-gray-800 flex justify-between">
-            All Filters
-            <button onClick={clearFilters} className="text-sm text-blue-600">
-              Clear All
+      </div>
+
+      {/* ================= Top Profile Section ================= */}
+      <div className="container mx-auto bg-white rounded-xl shadow-sm p-8 mb-8 relative">
+        {/* Top-right buttons */}
+        <div className="absolute top-4 right-4 flex justify-end gap-2">
+          {!isGlobalEdit ? (
+            <button
+              onClick={() => setIsGlobalEdit(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Edit className="w-4 h-4" />
+              Edit Profile
             </button>
-          </h2>
-          <div className="h-0.5 bg-gray-300" />
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveAll}
+                disabled={saving}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" />
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                disabled={saving}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
 
-          {/* Job Type */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
-            {["Full-time", "Part-time", "Contract", "Casual"].map((type) => (
-              <div key={type} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={typeFilter.includes(type)}
-                  onChange={() => handleCheckboxChange(type, setTypeFilter)}
-                  className="rounded"
+        {/* Profile Content */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+          {/* Profile Image */}
+          <div className="flex flex-col items-center">
+            <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200 flex-shrink-0">
+              {profile.profileImage?.url ? (
+                <Image
+                  priority
+                  src={profile.profileImage.url}
+                  alt={profile.fullName}
+                  width={96}
+                  height={96}
+                  className="object-cover w-full h-full"
                 />
-                <label>{type}</label>
-              </div>
-            ))}
+              ) : (
+                <div className="h-full w-full bg-blue-500 flex items-center justify-center text-white text-lg font-semibold">
+                  {profile.fullName?.charAt(0) || "N"}
+                </div>
+              )}
+            </div>
+
+            {/* Edit Profile Image Button */}
+            <label className="mt-2 bg-blue-600 text-white text-xs px-3 py-1 rounded cursor-pointer hover:bg-blue-700">
+              Edit Photo
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    handleImageEdit(e.target.files[0]);
+                  }
+                }}
+              />
+            </label>
           </div>
-          <div className="h-0.5 bg-gray-300" />
 
-          {/* Shift */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Shift</h3>
-            {["Morning", "Afternoon", "Night"].map((shift) => (
-              <div key={shift} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={shifts.includes(shift)}
-                  onChange={() => handleCheckboxChange(shift, setShifts)}
-                  className="rounded"
-                />
-                <label>{shift}</label>
-              </div>
-            ))}
+          {/* Profile Info */}
+          <div className="flex-1 space-y-2">
+            <h1 className="text-2xl font-bold text-gray-900 w-fit">
+              <EditableField
+                field="fullName"
+                value={profile.fullName}
+                placeholder="Full Name"
+                isGlobalEdit={isGlobalEdit}
+                editedData={editedData}
+                onFieldChange={handleFieldChange}
+              />
+            </h1>
+            <div className="flex items-center gap-2 text-gray-500 text-sm">
+              <Calendar className="w-4 h-4 text-blue-700" />
+              Profile last updated: {new Date().toLocaleDateString()}
+            </div>
           </div>
-          <div className="h-0.5 bg-gray-300" />
+        </div>
+      </div>
 
-          {/* Experience */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Experience</h3>
-            {["0-1 Year", "1-3 Years", "3-5 Years", "5+ Years"].map((exp) => (
-              <div key={exp} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={experience.includes(exp)}
-                  onChange={() => handleCheckboxChange(exp, setExperience)}
-                  className="rounded"
+
+      {/* ================= Basic Info & Visa Section ================= */}
+      <div className="container mx-auto flex flex-col lg:flex-row justify-between gap-4 mb-5">
+        {/* Basic Information */}
+        <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 ">
+          <div className="flex items-center space-x-2 mb-4">
+            <User className="w-6 h-6 text-blue-600" />
+            <h2 className="text-lg font-medium text-gray-900">Basic Information</h2>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Location</h3>
+              <p className="text-gray-900 w-fit">
+                <EditableField
+                  field="currentResidentialLocation"
+                  value={profile.currentResidentialLocation}
+                  placeholder="Location not specified"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
                 />
-                <label>{exp}</label>
-              </div>
-            ))}
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Job Status</h3>
+              <p className="text-gray-900 w-fit">
+                <EditableField
+                  field="jobSearchStatus"
+                  value={profile.jobSearchStatus}
+                  placeholder="Not specified"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Email</h3>
+              <p className="text-gray-900 w-fit">
+                <EditableField
+                  field="email"
+                  value={profile.email}
+                  placeholder="Email"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                  disabled={true}
+                />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Phone</h3>
+              <p className="text-gray-900 w-fit">
+                <EditableField
+                  field="phoneNumber"
+                  value={profile.phoneNumber}
+                  placeholder="Phone number"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Availability</h3>
+              <p className="text-gray-900 w-fit">
+                <EditableField
+                  field="startTime"
+                  value={profile.startDate || profile.startTime}
+                  placeholder="Not specified"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* 🔹 Job Cards */}
-        <div className="flex-1 max-w-[983px]">
-          <div className="grid grid-cols-1 gap-4">
-            {filteredJobs.map((job) => (
-              <div
-                key={job.id}
-                className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2"
-              >
-                {/* Left side */}
-                <div className="flex-1">
-                  <h2 className="font-semibold text-lg text-[#61A6FA] mb-1">
-                    {job.title}
-                  </h2>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {job.company || "Healthcare Facility"}
-                  </p>
+        {/* Visa & Residency */}
+        <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <Shield className="w-6 h-6 text-blue-600" />
+            <h2 className="text-lg font-medium text-gray-900">Visa & Residency</h2>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
+              <p className="text-gray-900 w-fit">
+                <EditableField
+                  field="residencyStatus"
+                  value={profile.residencyStatus}
+                  placeholder="Australian Citizen / Permanent Resident"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Visa Type</h3>
+              <p className="text-gray-900 w-fit">
+                <EditableField
+                  field="visaType"
+                  value={profile.visaType}
+                  placeholder="Not Specified"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Duration</h3>
+              <p className="text-gray-900 w-fit">
+                <EditableField
+                  field="visaDuration"
+                  value={profile.visaDuration}
+                  placeholder="Not Specified"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
-                    <div className="flex items-center gap-1">
-                      <MapPin size={16} />
-                      <span>{job.location}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Briefcase size={16} />
-                      <span>{job.type}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={16} />
-                      <span>{job.experienceMin}+ years</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <DollarSign size={16} />
-                      <span>${job.minPay} - ${job.maxPay}/hr</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right side */}
-                <div className="flex items-center gap-4 ml-6 flex-col">
-                  <button
-                    onClick={() =>
-                      window.open(`/nurseProfile/jobapplicationpage/${job.id}`, "_blank")
-                    }
-                    className="px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
-            ))}
+      {/* ================= Job Search Preferences ================= */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-5 container mx-auto">
+        <div className="flex items-center space-x-2 mb-6">
+          <UserRoundSearch className="w-6 h-6 text-blue-600" />
+          <h2 className="text-lg font-medium text-gray-900">Job search preferences</h2>
+        </div>
+        <div className="flex justify-between gap-6">
+          {/* Preferred Work Locations */}
+          <div className="w-1/2 mb-6">
+            <h3 className="font-medium text-gray-700 mb-2">Preferred Work Locations</h3>
+            <EditableArrayField
+              field="preferredLocations"
+              values={preferredLocationsArray}
+              placeholder="No preferred locations specified"
+              isGlobalEdit={isGlobalEdit}
+              editedData={editedData}
+              onFieldChange={handleFieldChange}
+            />
           </div>
 
-          {filteredJobs.length === 0 && (
-            <div className="text-center text-gray-500 mt-8">
-              No jobs found matching your criteria.
+          {/* Preferred Job Types */}
+          <div className="w-1/2 mb-6">
+            <h3 className="font-medium text-gray-700 mb-2">Preferred Job Types</h3>
+            <EditableArrayField
+              field="jobTypes"
+              values={jobTypesArray}
+              placeholder="No job types specified"
+              isGlobalEdit={isGlobalEdit}
+              editedData={editedData}
+              onFieldChange={handleFieldChange}
+            />
+          </div>
+        </div>
+
+        {/* Open To Other Types & Preferred Shift */}
+        <div className="flex justify-between gap-6">
+          {/* Open To Other Types */}
+          <div className="w-1/2 mb-6">
+            <h3 className="font-medium text-gray-700 mb-2">Open To Other Types</h3>
+            <div className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium inline-block">
+              <EditableField
+                field="openToOtherTypes"
+                value={profile.openToOtherTypes}
+                placeholder="Not Specified"
+                isGlobalEdit={isGlobalEdit}
+                editedData={editedData}
+                onFieldChange={handleFieldChange}
+              />
             </div>
-          )}
+          </div>
+
+          {/* Preferred Shift */}
+          <div className="w-1/2 mb-6">
+            <h3 className="font-medium text-gray-700 mb-2">Preferred Shift</h3>
+            <EditableArrayField
+              field="shiftPreferences"
+              values={shiftPreferencesArray}
+              placeholder="No shift preferences specified"
+              isGlobalEdit={isGlobalEdit}
+              editedData={editedData}
+              onFieldChange={handleFieldChange}
+            />
+          </div>
+        </div>
+
+        {/* Availability */}
+        <div className="flex items-center text-sm text-gray-600">
+          <Calendar className="w-4 h-4 text-blue-700 mr-2" />
+          Available To Start: <span className="ml-1">
+            <EditableField
+              field="startTime"
+              value={profile.startDate || profile.startTime}
+              placeholder="Not specified"
+              isGlobalEdit={isGlobalEdit}
+              editedData={editedData}
+              onFieldChange={handleFieldChange}
+            />
+          </span>
+        </div>
+      </div>
+
+      {/* ================= Qualifications & Certificates ================= */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-5 container mx-auto">
+        <div className="flex items-center space-x-2 mb-6">
+          <GraduationCap className="w-6 h-6 text-blue-600" />
+          <h2 className="text-lg font-medium text-gray-900">Qualifications & Certificates</h2>
+        </div>
+
+        {/* Education */}
+        <div className="mb-6">
+          <h3 className="font-medium text-gray-700 mb-2">Education</h3>
+          <div className="flex flex-col gap-3 text-sm text-gray-800">
+            <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium w-fit">
+              <EditableField
+                field="qualification"
+                value={profile.qualification}
+                placeholder="Bachelor of Nursing"
+                isGlobalEdit={isGlobalEdit}
+                editedData={editedData}
+                onFieldChange={handleFieldChange}
+              />
+            </div>
+            {(profile.otherQualification || isGlobalEdit) && (
+              <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium w-fit">
+                <EditableField
+                  field="otherQualification"
+                  value={profile.otherQualification}
+                  placeholder="Other Qualification"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Certifications */}
+        <div>
+          <h3 className="font-medium text-gray-700 mb-2">Certifications</h3>
+          <EditableArrayField
+            field="certifications"
+            values={certificationsArray}
+            placeholder="No certifications specified"
+            isGlobalEdit={isGlobalEdit}
+            editedData={editedData}
+            onFieldChange={handleFieldChange}
+          />
+        </div>
+      </div>
+
+      {/* ================= Work Experience & Preferences ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 container mx-auto">
+        {/* Work Experience */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-6">
+            <Briefcase className="w-6 h-6 text-blue-600" />
+            <h2 className="text-lg font-medium text-gray-900">Work Experience</h2>
+          </div>
+
+          <div className="space-y-3 text-sm border-l-4 border-blue-500 pl-4">
+            <div>
+              <p className="text-gray-500">Healthcare Experience</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="experience"
+                  value={profile.experience}
+                  placeholder="No experience specified"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+
+            <div>
+              <p className="text-gray-500">Currently working in healthcare</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="workingInHealthcare"
+                  value={profile.workingInHealthcare}
+                  placeholder="Not specified"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+
+            <div>
+              <p className="text-gray-500">Organization Name</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="organisation"
+                  value={profile.organisation}
+                  placeholder="Not specified"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Work Preferences */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-6">
+            <Clock className="w-6 h-6 text-blue-600" />
+            <h2 className="text-lg font-medium text-gray-900">Work Preferences</h2>
+          </div>
+          <div className="space-y-3 text-sm">
+            <div>
+              <p className="text-gray-500">Maximum work hours</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="maxWorkHours"
+                  value={profile.maxWorkHours}
+                  placeholder="Not specified"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Work hours restricted</p>
+              <p className="font-medium text-gray-900">
+                <EditableField
+                  field="workHoursRestricted"
+                  value={profile.workHoursRestricted}
+                  placeholder="No"
+                  isGlobalEdit={isGlobalEdit}
+                  editedData={editedData}
+                  onFieldChange={handleFieldChange}
+                />
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -4,9 +4,6 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import RichTextEditor from "../components/RichTextEditor";
 
-
-
-
 interface Job {
   id: number;
   title: string;
@@ -19,9 +16,15 @@ interface Job {
   roleCategory: string;
   experienceMin: string;
   certifications: string[];
-  languageRequirements?: string;
+  JobShift?: string;
   keyResponsibilities: string;
   workEnvironment?: string;
+  created_at?: string;   
+}
+
+
+interface Employer {
+  companyName?: string;
 }
 
 function JobPostingContent() {
@@ -29,6 +32,7 @@ function JobPostingContent() {
   const searchParams = useSearchParams();
   const jobId = searchParams.get("jobId");
   const [error, setError] = useState("");
+  const [employer, setEmployer] = useState<Employer>({});
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Omit<Job, "id">>({
@@ -41,7 +45,7 @@ function JobPostingContent() {
     description: "",
     roleCategory: "",
     experienceMin: "",
-    languageRequirements: "",
+    JobShift: "",
     certifications: [],
     keyResponsibilities: "",
     workEnvironment: "",
@@ -50,10 +54,35 @@ function JobPostingContent() {
   const JOB_POST_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs";
   const JOB_EDIT_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/edit_job_details";
   const JOB_LIST_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/get_job_details";
+  const EMPLOYER_PROFILE_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/get_employer_profile";
   const [isTypingOther, setIsTypingOther] = useState(false);
 
+  // Fetch employer profile to get company name
+  useEffect(() => {
+    const fetchEmployerProfile = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
 
+        const res = await fetch(EMPLOYER_PROFILE_ENDPOINT, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch employer profile");
+        const data = await res.json();
 
+        setEmployer(data?.data || data);
+
+        // Set the company name in formData
+        const companyName = data?.data?.companyName || data?.companyName || "";
+        setFormData(prev => ({ ...prev, locality: companyName }));
+
+      } catch (err) {
+        console.error("Error fetching employer profile:", err);
+      }
+    };
+
+    fetchEmployerProfile();
+  }, []);
 
   // Fetch job details if editing
   useEffect(() => {
@@ -73,14 +102,14 @@ function JobPostingContent() {
             setFormData({
               title: job.title || "",
               location: job.location || "",
-              locality: job.locality || "",
+              locality: job.locality || employer.companyName || "",
               type: job.type || "",
               minPay: job.minPay || "",
               maxPay: job.maxPay || "",
               description: job.description || "",
               roleCategory: job.roleCategory || "",
               experienceMin: job.experienceMin || "",
-              languageRequirements: job.languageRequirements || "",
+              JobShift: job.JobShift || "",
               certifications: job.certifications || [],
               keyResponsibilities: job.keyResponsibilities || "",
               workEnvironment: job.workEnvironment || "",
@@ -92,10 +121,9 @@ function JobPostingContent() {
       }
     };
     fetchJobDetails();
-  }, [jobId]);
+  }, [jobId, employer.companyName]);
 
   // --min-max function---
-
   const onMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const min = Number(e.target.value);
     const max = Number(formData.maxPay);
@@ -125,7 +153,6 @@ function JobPostingContent() {
       setError("");
     }
   };
-
 
   // Handle all field changes including certification logic
   const handleChange = (
@@ -261,15 +288,16 @@ function JobPostingContent() {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Company Name </label>
+              <label className="block text-sm font-medium mb-1">Company Name</label>
               <input
                 type="text"
                 name="locality"
-                placeholder="Sunrise Aged Care Facility"
                 value={formData.locality}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
+                readOnly
+                className="w-full border rounded p-2 bg-gray-100 cursor-not-allowed"
+                placeholder={employer.companyName || "Company name will be loaded..."}
               />
+
             </div>
 
             <div className="mb-4">
@@ -424,35 +452,28 @@ function JobPostingContent() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm mb-1">Language Requirements (Optional)</label>
-              <input
-                type="text"
-                name="languageRequirements"
-                placeholder="English, Nepali ,Hindi"
-                value={formData.languageRequirements || ""}
+              <label className="block text-sm mb-1">Job Shift</label>
+              <select
+                name="JobShift"
+                value={formData.JobShift || ""}
                 onChange={handleChange}
                 className="w-full border rounded p-2"
-              />
+              >
+                <option value="">Select a shift</option>
+                <option value="Morning">Morning</option>
+                <option value="Afternoon">Afternoon</option>
+                <option value="Evening">Evening</option>
+                <option value="Night">Night</option>
+              </select>
             </div>
+
           </div>
         )}
 
         {step === 3 && (
           <>
-            {/* <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Job Description</label>
-              <textarea
-                name="description"
-                placeholder="We are seeking compassionate and experienced RNs to join our aged care facility in Sydney. You’ll work with a supportive team and flexible rosters"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full h-[150px] border rounded p-2 text-justify"
-              />
-            </div> */}
-
             <div className="mt-4  pt-4">
               <h2 className="text-lg font-semibold mb-2">Job Description</h2>
-
 
               <RichTextEditor
                 value={formData.description}
@@ -461,7 +482,6 @@ function JobPostingContent() {
                 }
               />
             </div>
-
           </>
         )}
 

@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: "https",
+        hostname: "x76o-gnx4-xrav.a2.xano.io",
+        pathname: "/**", 
+      },
       
     ],
   },
