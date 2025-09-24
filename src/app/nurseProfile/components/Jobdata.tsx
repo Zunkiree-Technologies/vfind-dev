@@ -284,7 +284,7 @@ export default function JobData() {
           {/* Pay Rate slider */}
           <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Pay Rate</h3>
-            <input type="range" min={0} max={1000} value={isNaN(payRate) ? 0 : payRate} onChange={(e) => setPayRate(Number(e.target.value) || 0)} className="w-full accent-blue-600" />
+            <input type="range" min={0} max={100} value={isNaN(payRate) ? 0 : payRate} onChange={(e) => setPayRate(Number(e.target.value) || 0)} className="w-full accent-blue-600" />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>Any</span>
               <span>${payRate}+</span>
@@ -292,7 +292,7 @@ export default function JobData() {
           </div>
           <div className="h-0.5 bg-gray-300" />
 
-          {/* Radius (placeholder control) */}
+          {/* Radius (placeholder control)
           <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Radius</h3>
             <input type="range" min={0} max={100} value={isNaN(radius) ? 0 : radius} onChange={(e) => setRadius(Number(e.target.value) || 0)} className="w-full accent-blue-600" />
@@ -300,7 +300,7 @@ export default function JobData() {
               <span>Any</span>
               <span>{radius} km</span>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Job Cards */}
@@ -347,7 +347,7 @@ export default function JobData() {
                       <DollarSign size={16} />
                       <span>
                         {job.minPay || job.maxPay
-                          ? `$${job.minPay || "0"} - $${job.maxPay || "0"}/hr`
+                          ? `${job.minPay || "0"} - ${job.maxPay || "0"}/hr`
                           : "Not specified"}
                       </span>
                     </div>

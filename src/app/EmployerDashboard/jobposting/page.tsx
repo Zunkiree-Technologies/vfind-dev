@@ -462,7 +462,6 @@ function JobPostingContent() {
                 <option value="">Select a shift</option>
                 <option value="Morning">Morning</option>
                 <option value="Afternoon">Afternoon</option>
-                <option value="Evening">Evening</option>
                 <option value="Night">Night</option>
               </select>
             </div>

@@ -14,6 +14,8 @@ interface Job {
   maxPay: string;
   description: string;
   requirements?: string[];
+  roleCategory: string;
+
   benefits?: string[];
   experienceMin: string;
   experienceMax: string;
@@ -22,7 +24,7 @@ interface Job {
   company?: string;
   JobShift?: string;
   contact_email?: string;
-  employer_id?: number;
+  user_id?: number;
 }
 
 interface Company {
@@ -58,27 +60,31 @@ export default function JobApplicationPage() {
     if (email) setNurseEmail(email);
   }, []);
 
-  // Fetch job details
+  // Fetch job details and automatically get company info
   useEffect(() => {
     if (!id) {
       router.push("/nurseProfile");
       return;
     }
 
-    const fetchJob = async () => {
+    const fetchJobAndCompanyData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(
+        
+        // Step 1: Fetch job details
+        const jobRes = await fetch(
           `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${id}`
         );
-        if (!res.ok) throw new Error("Job not found");
-        const data: Job = await res.json();
-        setJob(data);
-
-        // After getting job data, fetch employer and company info
-        if (data.employer_id) {
-          await fetchEmployer(data.employer_id);
-          await fetchCompany(data.employer_id); // Use employer_id for company data
+        
+        if (!jobRes.ok) throw new Error("Job not found");
+        
+        const jobData: Job = await jobRes.json();
+        setJob(jobData);
+        
+        // Step 2: Automatically fetch company info using user_id from job
+        if (jobData.user_id) {
+          await fetchCompanyInfo(jobData.user_id);
+          await fetchEmployerDetails(jobData.user_id);
         }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to fetch job");
@@ -87,52 +93,61 @@ export default function JobApplicationPage() {
       }
     };
 
-    fetchJob();
+    fetchJobAndCompanyData();
   }, [id, router]);
 
-  // Fetch employer details
-  const fetchEmployer = async (employerId: number) => {
-    try {
-      const employerRes = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/employers/${employerId}`
-      );
-
-      if (employerRes.ok) {
-        const employerData: Employer = await employerRes.json();
-        setEmployer(employerData);
-        console.log("Employer data:", employerData);
-      }
-    } catch (err) {
-      console.error("Error fetching employer data:", err);
-    }
-  };
-
-  // Fetch company about info using the employer ID
-  const fetchCompany = async (employerId: number) => {
+  // Fetch company information using user_id
+  const fetchCompanyInfo = async (userId: number) => {
     try {
       const companyRes = await fetch(
         `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company`,
         {
-          method: 'GET',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            id: employerId.toString()
+            id: userId 
           })
         }
       );
 
       if (companyRes.ok) {
         const companyData = await companyRes.json();
-        // Extract only the about_company field
-        setCompany({ about_company: companyData.about_company });
-        console.log("Company about:", companyData.about_company);
+        
+        if (companyData && companyData.about_company) {
+          setCompany({ about_company: companyData.about_company });
+        } else {
+          setCompany({ about_company: "No company information available." });
+        }
+      } else {
+        setCompany({ about_company: "Failed to load company information." });
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      console.error("Error fetching company data:", err);
+      setCompany({ about_company: "Error loading company information." });
     }
   };
+
+  // Fetch employer details (for company name) using user_id
+  const fetchEmployerDetails = async (employerId: number) => {
+  try {
+    const employerRes = await fetch(
+      `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/employers/${employerId}`
+    );
+
+    if (!employerRes.ok) {
+      setEmployer(null);
+      return;
+    }
+
+    const employerData: Employer = await employerRes.json();
+    setEmployer(employerData);
+  } catch {
+    setEmployer(null);
+  }
+};
+
 
   const handleSubmitApplication = async () => {
     if (!job) return;
@@ -295,7 +310,7 @@ export default function JobApplicationPage() {
                     <span className="font-medium text-gray-600">Role Category</span>
                     <div className="flex justify-start gap-10 items-center w-1/2 ">
                       <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">{job.title}</p>
+                      <p className="text-gray-900">{job.roleCategory}</p>
                     </div>
                   </div>
 
@@ -357,9 +372,11 @@ export default function JobApplicationPage() {
                 {company?.about_company ? (
                   <p>{company.about_company}</p>
                 ) : (
-                  <p>No company information available.</p>
+                  <p>Loading company information...</p>
                 )}
               </div>
+              
+            
             </div>
           </div>
 
