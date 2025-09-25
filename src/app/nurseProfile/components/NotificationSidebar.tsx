@@ -152,7 +152,7 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
 
       {/* Sidebar */}
       <div
-        className={`fixed top-5 right-5 h-[75%] w-[360px] bg-white rounded-xl shadow-2xl transform transition-transform duration-500 z-50 overflow-hidden ${
+        className={`fixed top-5 right-1 h-[75%] w-[360px] bg-white rounded-xl shadow-2xl transform transition-transform duration-500 z-50 overflow-hidden ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

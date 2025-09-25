@@ -266,12 +266,12 @@ export default function EmployerDashboard() {
   if (loading) return <Loading />;
 
   return (
-    <div className="bg-[#F5F6FA] ">
+    <div className="  bg-[#F5F6FA] min-h-screen">
       {/* 🔹 Navbar */}
       <EmployerNavbar />
 
       {/* 🔹 Main container */}
-      <div className="p-4 mt-5 md:p-6  h-fit flex flex-col lg:flex-row gap-6 mx-auto container justify-center">
+      <div className="p-4 mt-5 md:p-6   flex flex-col lg:flex-row gap-6 mx-auto container justify-center ">
 
         {/* 👉 Left section */}
         <div className="space-y-5">
@@ -487,7 +487,7 @@ export default function EmployerDashboard() {
       </div>
 
       {/* 🔹 Job Postings Section */}
-      <div className=" flex item-center justify-center h-fit overflow-x-auto  container mx-auto">
+      <div className=" flex item-center justify-center   container mx-auto ">
         <div className="bg-white p-5 w-[950px] rounded-lg  shadow-sm ">
           <h2 className="font-semibold text-gray-800">Job Postings</h2>
 

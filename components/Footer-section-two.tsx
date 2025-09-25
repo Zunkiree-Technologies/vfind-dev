@@ -3,7 +3,7 @@ import { Linkedin, Instagram, Search } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1F3C88] text-gray-200 min-h-fit p-4">
+    <footer className="bg-[#1F3C88] text-gray-200 min-h-fit p-4 mt-4">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 grid grid-cols-1 md:grid-cols-[500px_1fr_1fr_1fr] gap-10">
         {/* Logo & About */}
         <div>
@@ -48,7 +48,7 @@ export default function Footer() {
 
         {/* Resources */}
         <div>
-          <h4 className="text-white font-semibold mb-4">Importatnt Links</h4>
+          <h4 className="text-white font-semibold mb-4">Important Links</h4>
           <ul className="space-y-2 text-sm">
             <li><a href="blogs" className="hover:text-white">Resources</a></li>
             <li><a href="#" className="hover:text-white">Privacy Policy</a></li>

@@ -2,7 +2,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Cookies from "js-cookie";
-import { MapPin, Briefcase, Clock, Search, Mail, DollarSign, Clock1 } from "lucide-react";
+import {
+  MapPin,
+  Briefcase,
+  Clock,
+  Search,
+  Mail,
+  DollarSign,
+  Clock1,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import Loader from "../../../../components/loading";
 import Link from "next/link";
 
@@ -28,16 +38,125 @@ interface Candidate {
   phoneNumber?: string;
   qualification?: string;
   profileImage?: ProfileImage | null;
-
 }
 
+// ✅ Pagination props typing
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+// Pagination Component
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range: (number | string)[] = [];
+    const rangeWithDots: (number | string)[] = [];
+
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, "...");
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push("...", totalPages);
+    } else if (totalPages > 1) {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="flex items-center justify-center gap-2 mt-8 mb-6">
+      {/* Previous Button */}
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
+            ? "text-gray-400 cursor-not-allowed"
+            : "text-gray-600 hover:bg-gray-100"
+          }`}
+      >
+        <ChevronLeft size={16} />
+        Previous
+      </button>
+
+      {/* Page Numbers */}
+      <div className="flex items-center gap-1">
+        {getVisiblePages().map((page, index) => (
+          <React.Fragment key={index}>
+            {page === "..." ? (
+              <span className="px-3 py-2 text-gray-400">...</span>
+            ) : (
+              <button
+                onClick={() => onPageChange(page as number)}
+                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                  }`}
+              >
+                {page}
+              </button>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Next Button */}
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
+            ? "text-gray-400 cursor-not-allowed"
+            : "text-gray-600 hover:bg-gray-100"
+          }`}
+      >
+        Next
+        <ChevronRight size={16} />
+      </button>
+    </div>
+  );
+};
+
 const BASE_IMAGE_URL = "https://x76o-gnx4-xrav.a2.xano.io";
+
+// ✅ moved outside to avoid eslint warning
+const experienceRanges: Record<string, [number, number]> = {
+  "Less than 6 months": [0, 0.5],
+  "6 months – 1 year": [0.5, 1],
+  "1–3 years": [1, 3],
+  "3 - 5 years": [3, 5],
+  "Over 5 years": [5, Infinity],
+};
 
 export default function CandidateList() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
@@ -50,10 +169,13 @@ export default function CandidateList() {
   const [radius, setRadius] = useState<number>(0);
   const [, setEmployerId] = useState<string | null>(null);
   const [experience, setExperience] = useState<string[]>([]);
-  ;
   const [visaStatus, setVisaStatus] = useState<string[]>([]);
 
-
+  // Calculate pagination values
+  const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCandidates = filteredCandidates.slice(startIndex, endIndex);
 
   // Load cookies and employerId
   useEffect(() => {
@@ -80,9 +202,11 @@ export default function CandidateList() {
     if (savedShifts) setShifts(JSON.parse(savedShifts));
     if (savedRoleCategories) setRoleCategories(JSON.parse(savedRoleCategories));
     if (savedExperience) setExperience(JSON.parse(savedExperience));
-    if (savedPayRate && !isNaN(Number(savedPayRate))) setPayRate(Number(savedPayRate));
+    if (savedPayRate && !isNaN(Number(savedPayRate)))
+      setPayRate(Number(savedPayRate));
     if (savedVisaStatus) setVisaStatus(JSON.parse(savedVisaStatus));
-    if (savedRadius && !isNaN(Number(savedRadius))) setRadius(Number(savedRadius));
+    if (savedRadius && !isNaN(Number(savedRadius)))
+      setRadius(Number(savedRadius));
   }, []);
 
   // Fetch candidates
@@ -90,7 +214,9 @@ export default function CandidateList() {
     const fetchCandidates = async () => {
       try {
         const token =
-          typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+          typeof window !== "undefined"
+            ? localStorage.getItem("authToken")
+            : null;
 
         if (!token) {
           setError("Unauthorized: Please log in.");
@@ -124,150 +250,156 @@ export default function CandidateList() {
     fetchCandidates();
   }, []);
 
+  function parseExperienceToYears(exp: string): number {
+    const normalized = exp.trim().toLowerCase().replace(/–/g, "-");
 
-  const experienceRanges: Record<string, [number, number]> = {
-  "Less than 6 months": [0, 0.5],
-  "6 months – 1 year": [0.5, 1],
-  "1–3 years": [1, 3],
-  "3 - 5 years": [3, 5],
-  "Over 5 years": [5, Infinity],
-};
+    if (normalized.includes("less than 6 months")) return 0.25;
+    if (normalized.includes("6 months")) return 0.75;
+    if (normalized.includes("1-3 years")) return 2;
+    if (normalized.includes("3-5 years")) return 4;
+    if (normalized.includes("over 5 years") || normalized.includes("5+"))
+      return 6;
 
-function parseExperienceToYears(exp: string): number {
-  const normalized = exp.trim().toLowerCase().replace(/–/g, "-");
+    return 0;
+  }
 
-  if (normalized.includes("less than 6 months")) return 0.25;
-  if (normalized.includes("6 months")) return 0.75;
-  if (normalized.includes("1-3 years")) return 2;
-  if (normalized.includes("3-5 years")) return 4;
-  if (normalized.includes("over 5 years") || normalized.includes("5+")) return 6;
+  const applyFilters = useCallback(
+    (instant = false) => {
+      let filtered = [...candidates];
 
-  return 0;
-}
+      // 🔹 SEARCH filter
+      if (search.trim()) {
+        filtered = filtered.filter((c) =>
+          [c.fullName, c.qualification, c.jobTypes]
+            .join(" ")
+            .toLowerCase()
+            .includes(search.toLowerCase())
+        );
+      }
 
+      // 🔹 LOCATION filter
+      if (location.trim()) {
+        filtered = filtered.filter((c) =>
+          [c.currentResidentialLocation]
+            .join(" ")
+            .toLowerCase()
+            .includes(location.toLowerCase())
+        );
+      }
 
-
- const applyFilters = useCallback(
-  (instant = false) => {
-    let filtered = [...candidates];
-
-    // 🔹 SEARCH filter
-    if (search.trim()) {
-      filtered = filtered.filter((c) =>
-        [c.fullName, c.qualification, c.jobTypes]
-          .join(" ")
-          .toLowerCase()
-          .includes(search.toLowerCase())
-      );
-    }
-
-    // 🔹 LOCATION filter
-    if (location.trim()) {
-      filtered = filtered.filter((c) =>
-        [c.currentResidentialLocation]
-          .join(" ")
-          .toLowerCase()
-          .includes(location.toLowerCase())
-      );
-    }
-
-    // 🔹 JOB TYPE filter
-    if (jobTypes.length > 0) {
-      filtered = filtered.filter((c) => {
-        try {
-          const jobTypesArray = c.jobTypes ? JSON.parse(c.jobTypes) : [];
-          return jobTypesArray.some((jt: string) =>
-            jobTypes.some((et) => jt.toLowerCase().includes(et.toLowerCase()))
-          );
-        } catch {
-          return false;
-        }
-      });
-    }
-
-    // 🔹 SHIFT filter
-    if (shifts.length > 0) {
-      filtered = filtered.filter((c) =>
-        c.shiftPreferences?.some((pref: string) =>
-          shifts.some((s) => pref.toLowerCase().includes(s.toLowerCase()))
-        )
-      );
-    }
-
-    // 🔹 EXPERIENCE filter
-    if (experience.length > 0) {
-      filtered = filtered.filter((c) => {
-        if (!c.experience) return false;
-
-        const candidateYears = parseExperienceToYears(c.experience);
-
-        return experience.some((exp) => {
-          const [min, max] = experienceRanges[exp];
-          return candidateYears >= min && candidateYears < max;
+      // 🔹 JOB TYPE filter
+      if (jobTypes.length > 0) {
+        filtered = filtered.filter((c) => {
+          try {
+            const jobTypesArray = c.jobTypes ? JSON.parse(c.jobTypes) : [];
+            return jobTypesArray.some((jt: string) =>
+              jobTypes.some((et) => jt.toLowerCase().includes(et.toLowerCase()))
+            );
+          } catch {
+            return false;
+          }
         });
-      });
-    }
+      }
 
-    // 🔹 ROLE filter
-    if (roleCategories.length > 0) {
-      filtered = filtered.filter((c) =>
-        roleCategories.some((role) =>
-          (c.qualification || "").toLowerCase().includes(role.toLowerCase())
-        )
-      );
-    }
+      // 🔹 SHIFT filter
+      if (shifts.length > 0) {
+        filtered = filtered.filter((c) =>
+          c.shiftPreferences?.some((pref: string) =>
+            shifts.some((s) => pref.toLowerCase().includes(s.toLowerCase()))
+          )
+        );
+      }
 
-    // 🔹 VISA filter
-    if (visaStatus.length > 0) {
-      filtered = filtered.filter((c) =>
-        visaStatus.some((status) =>
-          (c.residencyStatus || "").toLowerCase().includes(status.toLowerCase())
-        )
-      );
-    }
+      // 🔹 EXPERIENCE filter
+      if (experience.length > 0) {
+        filtered = filtered.filter((c) => {
+          if (!c.experience) return false;
 
-    // 🔹 PAY RATE filter
-    if (payRate > 0) {
-      filtered = filtered.filter((c) => {
-        const rate = parseFloat(c.maxWorkHours || "0");
-        return !isNaN(rate) && rate >= payRate;
-      });
-    }
+          const candidateYears = parseExperienceToYears(c.experience);
 
-    setFilteredCandidates(filtered);
+          return experience.some((exp) => {
+            const [min, max] = experienceRanges[exp];
+            return candidateYears >= min && candidateYears < max;
+          });
+        });
+      }
 
-    // Save cookies if not instant
-    if (!instant) {
-      Cookies.set("search", search, { expires: 7 });
-      Cookies.set("location", location, { expires: 7 });
-      Cookies.set("jobTypes", JSON.stringify(jobTypes), { expires: 7 });
-      Cookies.set("shifts", JSON.stringify(shifts), { expires: 7 });
-      Cookies.set("roleCategories", JSON.stringify(roleCategories), { expires: 7 });
-      Cookies.set("experience", JSON.stringify(experience), { expires: 7 }); // ✅ FIXED
-      Cookies.set("payRate", String(payRate), { expires: 7 });
-      Cookies.set("visaStatus", JSON.stringify(visaStatus), { expires: 7 });
-      Cookies.set("radius", String(radius), { expires: 7 });
-    }
-  },
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  [
-    candidates,
-    search,
-    location,
-    jobTypes,
-    shifts,
-    experience, 
-    roleCategories,
-    payRate,
-    radius,
-    visaStatus,
-  ]
-);
+      // 🔹 ROLE filter
+      if (roleCategories.length > 0) {
+        filtered = filtered.filter((c) =>
+          roleCategories.some((role) =>
+            (c.qualification || "")
+              .toLowerCase()
+              .includes(role.toLowerCase())
+          )
+        );
+      }
+
+      // 🔹 VISA filter
+      if (visaStatus.length > 0) {
+        filtered = filtered.filter((c) =>
+          visaStatus.some((status) =>
+            (c.residencyStatus || "")
+              .toLowerCase()
+              .includes(status.toLowerCase())
+          )
+        );
+      }
+
+      // 🔹 PAY RATE filter
+      if (payRate > 0) {
+        filtered = filtered.filter((c) => {
+          const rate = parseFloat(c.maxWorkHours || "0");
+          return !isNaN(rate) && rate >= payRate;
+        });
+      }
+
+      setFilteredCandidates(filtered);
+      setCurrentPage(1); // Reset to first page when filters change
+
+      // Save cookies if not instant
+      if (!instant) {
+        Cookies.set("search", search, { expires: 7 });
+        Cookies.set("location", location, { expires: 7 });
+        Cookies.set("jobTypes", JSON.stringify(jobTypes), { expires: 7 });
+        Cookies.set("shifts", JSON.stringify(shifts), { expires: 7 });
+        Cookies.set("roleCategories", JSON.stringify(roleCategories), {
+          expires: 7,
+        });
+        Cookies.set("experience", JSON.stringify(experience), { expires: 7 });
+        Cookies.set("payRate", String(payRate), { expires: 7 });
+        Cookies.set("visaStatus", JSON.stringify(visaStatus), { expires: 7 });
+        Cookies.set("radius", String(radius), { expires: 7 });
+      }
+    },
+    [
+      candidates,
+      search,
+      location,
+      jobTypes,
+      shifts,
+      experience,
+      roleCategories,
+      payRate,
+      radius,
+      visaStatus,
+    ]
+  );
 
   useEffect(() => {
     const debounce = setTimeout(() => applyFilters(true), 300);
     return () => clearTimeout(debounce);
-  }, [search, location, jobTypes, shifts, roleCategories, experience, payRate, radius, applyFilters]);
+  }, [
+    search,
+    location,
+    jobTypes,
+    shifts,
+    roleCategories,
+    experience,
+    payRate,
+    radius,
+    applyFilters,
+  ]);
 
   const handleCheckboxChange = (
     value: string,
@@ -289,6 +421,7 @@ function parseExperienceToYears(exp: string): number {
     setPayRate(0);
     setRadius(0);
     setFilteredCandidates(candidates);
+    setCurrentPage(1); // Reset to first page
 
     // Clear all cookies
     Cookies.remove("search");
@@ -302,6 +435,12 @@ function parseExperienceToYears(exp: string): number {
     Cookies.remove("radius");
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (loading) return <Loader />;
   if (error)
     return (
@@ -311,10 +450,9 @@ function parseExperienceToYears(exp: string): number {
     );
 
   return (
-    <div className="p-6 min-h-screen mx-auto  bg-[#F5F6FA]">
-
+    <div className="p-6 min-h-screen mx-auto bg-[#F5F6FA]">
       {/* Top Search Bar */}
-      <div className="flex justify-center items-center sticky top-0 z-50 bg-[#F5F6FA] ">
+      <div className="flex justify-center items-center sticky top-0 z-50 bg-[#F5F6FA]">
         <div className="flex items-center w-[950px] border border-gray-300 rounded-lg bg-white overflow-hidden p-1">
           {/* Search input with icon */}
           <div className="flex items-center px-3 w-1/2">
@@ -353,17 +491,12 @@ function parseExperienceToYears(exp: string): number {
         </div>
       </div>
 
-
-
       <div className="flex gap-6 mt-6 mx-auto container">
         {/* Left Filters */}
         <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
-          <h2 className="font-semibold text-gray-800 flex justify-between ">
+          <h2 className="font-semibold text-gray-800 flex justify-between">
             All Filters
-            <button
-              onClick={clearFilters}
-              className="text-sm text-blue-600 "
-            >
+            <button onClick={clearFilters} className="text-sm text-blue-600">
               Clear All
             </button>
           </h2>
@@ -371,7 +504,7 @@ function parseExperienceToYears(exp: string): number {
 
           {/* Job Type */}
           <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2 ">Job Type</h3>
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
             {["Full-Time", "Part-Time", "Casual", "Open to any"].map((type) => (
               <div key={type} className="flex items-center gap-2 text-sm mb-1">
                 <input
@@ -405,19 +538,26 @@ function parseExperienceToYears(exp: string): number {
 
           {/* Role Category */}
           <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Role Category</h3>
+            <h3 className="font-medium text-sm text-gray-700 mb-2">
+              Role Category
+            </h3>
             {[
               "Clinical Lead / Manager",
               "Registered Nurse (RN)",
               "Enrolled Nurse (EN)",
               "Assistant in Nursing (AIN)",
-              "Others"
+              "Personal Care Assistant (PCA)",
+              "Attendant",
+              "Support Worker",
+              "Nursing Assistant",
             ].map((role) => (
               <div key={role} className="flex items-center gap-2 text-sm mb-1">
                 <input
                   type="checkbox"
                   checked={roleCategories.includes(role)}
-                  onChange={() => handleCheckboxChange(role, setRoleCategories)}
+                  onChange={() =>
+                    handleCheckboxChange(role, setRoleCategories)
+                  }
                   className="rounded"
                 />
                 <label>{role}</label>
@@ -428,14 +568,10 @@ function parseExperienceToYears(exp: string): number {
 
           {/* Experience */}
           <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Experience</h3>
-            {[
-              "Less than 6 months",
-              "6 months – 1 year",
-              "1–3 years",
-              "3 - 5 years",
-              "Over 5 years",
-            ].map((exp) => (
+            <h3 className="font-medium text-sm text-gray-700 mb-2">
+              Experience
+            </h3>
+            {Object.keys(experienceRanges).map((exp) => (
               <div key={exp} className="flex items-center gap-2 text-sm mb-1">
                 <input
                   type="checkbox"
@@ -447,21 +583,14 @@ function parseExperienceToYears(exp: string): number {
               </div>
             ))}
           </div>
-
-
-
           <div className="w-py h-0.5 bg-gray-300" />
-          {/* visa status */}
+
+          {/* Visa Status */}
           <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Visa Status</h3>
-            {[
-              "Australian Citizen / Permanent Resident",
-              "Temporary Resident",
-              "Student Visa Holder",
-              "Student Dependent Visa Holder",
-              "Working Visa Holder",
-              "Other",
-            ].map((status) => (
+            <h3 className="font-medium text-sm text-gray-700 mb-2">
+              Visa Status
+            </h3>
+            {["Permanent", "Temporary", "Citizen"].map((status) => (
               <div key={status} className="flex items-center gap-2 text-sm mb-1">
                 <input
                   type="checkbox"
@@ -475,69 +604,62 @@ function parseExperienceToYears(exp: string): number {
           </div>
           <div className="w-py h-0.5 bg-gray-300" />
 
-
-          {/* Pay Rate */}
+          {/* Pay Rate Slider */}
           <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Pay Rate</h3>
             <input
               type="range"
               min="0"
               max="100"
-              value={isNaN(payRate) ? 0 : payRate}
-              onChange={(e) => setPayRate(Number(e.target.value) || 0)}
-              className="w-full accent-blue-600"
+              value={payRate}
+              onChange={(e) => setPayRate(Number(e.target.value))}
+              className="w-full"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>Any</span>
-              <span>${payRate}+</span>
-            </div>
+            <div className="text-sm text-gray-600">${payRate}+/hr</div>
           </div>
           <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Radius */}
-          {/* <div>
+          {/* Radius Slider */}
+          <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Radius</h3>
             <input
               type="range"
               min="0"
-              max="50"
-              value={isNaN(radius) ? 0 : radius}
-              onChange={(e) => setRadius(Number(e.target.value) || 0)}
-              className="w-full accent-blue-600"
+              max="100"
+              value={radius}
+              onChange={(e) => setRadius(Number(e.target.value))}
+              className="w-full"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>Any</span>
-              <span>{radius} km</span>
-            </div>
-          </div> */}
+            <div className="text-sm text-gray-600">{radius} km</div>
+          </div>
         </div>
 
-        {/* Candidate Cards */}
-        <div className="flex-1 max-w-[983px] ">
-          <div className="grid grid-cols-1 gap-4">
-            {filteredCandidates.map((candidate) => {
+        {/* Right Candidate List */}
+        <div className="flex-1">
+          {/* Candidates */}
+          <div className="space-y-4">
+            {currentCandidates.map((candidate) => {
               let jobTypesArray: string[] = [];
               try {
-                if (candidate.jobTypes) jobTypesArray = JSON.parse(candidate.jobTypes);
+                if (candidate.jobTypes) {
+                  jobTypesArray = JSON.parse(candidate.jobTypes);
+                }
               } catch {
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 jobTypesArray = [];
               }
-              const profileImageUrl = candidate.profileImage
-                ? BASE_IMAGE_URL + candidate.profileImage.path
-                : null;
 
               return (
                 <div
                   key={candidate.id}
-                  className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2"
+                  className="flex justify-between items-center bg-white max-w-[983px] rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2 "
                 >
                   {/* Left side content */}
                   <div className="flex-1">
-                    <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
+                    <h2 className="font-semibold text-lg text-[#61A6FA] mb-1">
                       {candidate.fullName}
                     </h2>
-                    <p className=" text-regular  mb-3">
+                    <p className="text-regular mb-3">
                       {candidate.qualification || "Qualification not specified"}
                     </p>
 
@@ -545,9 +667,7 @@ function parseExperienceToYears(exp: string): number {
                       {/* Location */}
                       <div className="flex items-center gap-1">
                         <MapPin size={16} />
-                        <span>
-                          {candidate.currentResidentialLocation || "Location not specified"}
-                        </span>
+                        <span>{candidate.currentResidentialLocation || "Location not specified"}</span>
                       </div>
 
                       {/* Email */}
@@ -559,27 +679,19 @@ function parseExperienceToYears(exp: string): number {
                       {/* Pay Rate */}
                       <div className="flex items-center gap-1">
                         <DollarSign size={16} />
-                        <span>
-                          {candidate.maxWorkHours
-                            ? `$${candidate.maxWorkHours}/hr`
-                            : "Not specified"}
-                        </span>
+                        <span>{candidate.maxWorkHours ? `$${candidate.maxWorkHours}/hr` : "Not specified"}</span>
                       </div>
 
                       {/* Experience */}
                       <div className="flex items-center gap-1">
                         <Clock1 size={16} className="text-blue-500" />
-                        <span>
-                          {candidate.experience || "Not specified"}
-                        </span>
+                        <span>{candidate.experience || "Not specified"}</span>
                       </div>
-
 
                       {/* Job Type */}
                       <div className="flex items-center gap-1">
                         <Briefcase size={16} />
                         <span>{candidate.jobTypes || "Not specified"}</span>
-
                       </div>
 
                       {/* Shift */}
@@ -589,25 +701,18 @@ function parseExperienceToYears(exp: string): number {
                           {candidate.shiftPreferences.length > 0
                             ? candidate.shiftPreferences.join(", ")
                             : "Not specified"}
-
-
                         </span>
                       </div>
-
-
                     </div>
-
-
                   </div>
-
 
                   {/* Right side - Photo and button */}
                   <div className="flex items-center gap-4 ml-6 flex-col">
                     {/* Circular Profile Image */}
                     <div className="h-16 w-16 rounded-full overflow-hidden border flex-shrink-0">
-                      {profileImageUrl ? (
+                      {candidate.profileImage ? (
                         <Image
-                          src={profileImageUrl}
+                          src={BASE_IMAGE_URL + candidate.profileImage.path}
                           alt={candidate.fullName}
                           className="h-full w-full object-cover"
                           width={64}
@@ -620,7 +725,7 @@ function parseExperienceToYears(exp: string): number {
                       )}
                     </div>
 
-                    {/* Button */}
+                    {/* View Details Button */}
                     <Link
                       href={`/EmployerDashboard/Candidatelist/${candidate.id}`}
                       target="_blank"
@@ -631,15 +736,18 @@ function parseExperienceToYears(exp: string): number {
                     </Link>
                   </div>
                 </div>
-
               );
+
             })}
           </div>
 
-          {filteredCandidates.length === 0 && (
-            <div className="text-center text-gray-500 mt-8">
-              No candidates found matching your criteria.
-            </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           )}
         </div>
       </div>
