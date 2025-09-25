@@ -26,13 +26,28 @@ export function ContactPasswordStep({ formData, handleChange }: ContactPasswordS
   const [filteredSuburbs, setFilteredSuburbs] = useState<SuburbData[]>([]);
   const [selectedSuburb, setSelectedSuburb] = useState(formData.currentResidentialLocation || "");
 
+  const [fullNameError, setFullNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [passwordStrength, setPasswordStrength] = useState("");
 
-  // Australian phone number validation
+  // Full name validation
+  const validateFullName = (name: string) => {
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2) return false;
+    
+    // Check if it contains at least one space (first name + last name)
+    const nameParts = trimmedName.split(' ').filter(part => part.length > 0);
+    if (nameParts.length < 2) return false;
+    
+    // Check if it only contains letters, spaces, hyphens, and apostrophes
+    const nameRegex = /^[a-zA-Z\s\-']+$/;
+    return nameRegex.test(trimmedName);
+  };
+
+  // Australian phone number validation - updated for 04 + 8 digits
   const validatePhone = (phone: string) => {
-    const auPhoneRegex = /^(\+?61|0)4\d{8}$/;
+    const auPhoneRegex = /^04\d{8}$/;
     return auPhoneRegex.test(phone.replace(/\s/g, ""));
   };
 
@@ -102,9 +117,20 @@ export function ContactPasswordStep({ formData, handleChange }: ContactPasswordS
           id="fullName"
           placeholder="Your full name"
           value={formData.fullName}
-          onChange={(e) => handleChange("fullName", e.target.value)}
+          onChange={(e) => {
+            handleChange("fullName", e.target.value);
+            const isValid = validateFullName(e.target.value);
+            if (e.target.value.trim().length === 0) {
+              setFullNameError("Full name is required");
+            } else if (!isValid) {
+              setFullNameError("Please enter your first and last name (letters only)");
+            } else {
+              setFullNameError("");
+            }
+          }}
           className="w-full border rounded p-2"
         />
+        {fullNameError && <p className="text-red-600 text-sm mt-1">{fullNameError}</p>}
       </div>
 
       {/* Postcode */}
@@ -164,15 +190,20 @@ export function ContactPasswordStep({ formData, handleChange }: ContactPasswordS
       <div className="mt-3">
         <label htmlFor="phone" className="block text-sm font-medium text-[#121224] mb-1">Phone Number</label>
         <div className="flex items-center border rounded overflow-hidden w-full">
-          <span className="bg-gray-100 px-3 text-[#121224] select-none">+61</span>
+          <span className=" px-3 text-[#121224] select-none">04</span>
           <input
             type="tel"
             id="phone"
-            placeholder="4XX XXX XXX"
+            placeholder="XXXXXXXX"
             value={formData.phone}
+            maxLength={8}
             onChange={(e) => {
-              handleChange("phone", e.target.value);
-              setPhoneError(validatePhone(e.target.value) ? "" : "Invalid  number");
+              const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+              if (value.length <= 8) {
+                handleChange("phone", value);
+                const fullPhone = `04${value}`;
+                setPhoneError(value.length === 8 && validatePhone(fullPhone) ? "" : "Phone number must be 8 digits");
+              }
             }}
             className="flex-1 p-2 outline-none"
           />

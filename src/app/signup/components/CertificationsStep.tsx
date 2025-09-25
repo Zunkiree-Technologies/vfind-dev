@@ -33,12 +33,19 @@ export function CertificationsStep({ formData, handleCheckboxChange, handleChang
       <button
         type="button"
         onClick={toggleSelectAll}
-        className={`inline-flex w-fit px-4 py-2 mt-2  font-bold text-[14px] ${
-          allSelected ? " text-[#2142B9] " : " text-[#2142B9] "
-        }`}
+        className="inline-flex items-center gap-2 w-fit  mt-2 font-bold text-[14px] text-black"
       >
+        {/* Checkbox-like box */}
+        <div
+          className={`w-5 h-5 flex items-center justify-center border-2 ${allSelected ? "border-blue-700 bg-blue-700" : "border-gray-400"
+            }`}
+        >
+          {allSelected && <Check className="h-3 w-3 text-white" />}
+        </div>
+
         {allSelected ? "Deselect All" : "Select All"}
       </button>
+
 
       <div className="flex flex-col gap-3 mt-3 w-fit">
         {allCertifications.map((cert) => {
@@ -46,9 +53,8 @@ export function CertificationsStep({ formData, handleCheckboxChange, handleChang
           return (
             <label key={cert} className="flex items-center gap-2 cursor-pointer">
               <div
-                className={`w-5 h-5 flex items-center justify-center border-2 ${
-                  isSelected ? "border-blue-700 bg-blue-700" : "border-gray-400"
-                }`}
+                className={`w-5 h-5 flex items-center justify-center border-2 ${isSelected ? "border-blue-700 bg-blue-700" : "border-gray-400"
+                  }`}
                 onClick={() => handleCheckboxChange("certifications", cert)}
               >
                 {isSelected && <Check className="h-3 w-3 text-white" />}

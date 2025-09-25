@@ -1,37 +1,197 @@
 "use client";
 
+import { BenefitsSection } from "../../../components/benefits-section2";
+import Navbar from "../../../components/navbar";
+import Image from "next/image";
+
+
 export default function AboutPage() {
   return (
-    <section className="max-w-5xl mx-auto px-6 py-16">
-      <h1 className="text-3xl font-bold text-blue-600 mb-6">About VFind</h1>
-      <p className="text-gray-700 leading-relaxed mb-4">
-        VFind is a modern job-matching platform designed to simplify the hiring
-        process. Our mission is to connect talented job seekers with employers
-        who are searching for the right skills. Whether you are a recent
-        graduate looking for your first role or a company searching for top
-        talent, VFind provides the tools and features to make the process smooth
-        and transparent.
-      </p>
+    <main>
+      <Navbar />
+      {/* --------------------------other section about vfind---------------------- */}
+      <section
+        className="relative min-h-[450px] flex items-center justify-center overflow-hidden bg-[#F5F6FA]"
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between">
 
-      <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-3">
-        What We Offer
-      </h2>
-      <ul className="list-disc pl-6 text-gray-700 space-y-2">
-        <li>Seamless job search with category, skill, and location filters</li>
-        <li>Employer dashboards to post and manage job openings</li>
-        <li>Secure login/signup for seekers and employers</li>
-        <li>Personalized recommendations for better matches</li>
-      </ul>
+          {/* Left Content */}
+          <div className="flex-1 text-center lg:text-left space-y-8 max-w-4xl h-[415px] flex flex-col justify-center">
+            <h1 className="text-3xl md:text-4xl font-semibold leading-tight">
+              About <span className="text-[#61A6FA]">VFind</span> <br />
+            </h1>
 
-      <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-3">
-        Our Vision
-      </h2>
-      <p className="text-gray-700 leading-relaxed">
-        At VFind, we envision a future where hiring is faster, fairer, and more
-        accessible. By leveraging technology, we aim to reduce the gap between
-        employers and job seekers, making career opportunities more reachable
-        for everyone.
-      </p>
-    </section>
+            <p className="text-gray-600 text-[18px] md:text-xl leading-relaxed text-regular">
+              VFind is a trusted healthcare recruitment platform built to connect nurses and healthcare professionals with the right career opportunities in Australia. We simplify the hiring process for aged care providers and hospitals, making recruitment faster, secure, and reliable.
+            </p>
+          </div>
+
+          {/* Right Image */}
+          <div className="flex-1 flex justify-center">
+            <div className="hidden sm:flex relative w-[388px] h-[336px] lg:w-[450px] lg:h-[390px]">
+              <Image
+                src="/assets/About1.png"
+                alt="Nurse illustration"
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 388px, 450px"
+                priority
+              />
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* --------------------------other section- who we are--------------------- */}
+
+      <section className="relative flex items-center justify-center overflow-hidden min-h-[422px] py-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-39">
+
+          {/* Left Image */}
+          <div className="flex-1 flex justify-center lg:justify-start">
+            <div className="hidden sm:flex relative w-[388px] h-[336px] lg:w-[450px] lg:h-[390px]">
+              <Image
+                src="/assets/About2.png"
+                alt="Nurse illustration"
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 388px, 450px"
+                priority
+              />
+            </div>
+          </div>
+
+          {/* Right Content */}
+          <div className="flex-1 flex items-center justify-center bg-[#F5F6FA] rounded-lg p-8 min-w-[320px] lg:min-w-[746px] h-auto">
+            <div className="space-y-5">
+              <h1 className="text-3xl md:text-4xl font-semibold leading-tight">
+                Who We <span className="text-[#61A6FA]">Are</span>?
+              </h1>
+              <p className="text-gray-600 text-base md:text-xl leading-relaxed max-w-[629px]">
+                We are a team of healthcare and technology professionals passionate about building a platform that empowers nurses while supporting employers in delivering quality care. At VFind, people come first — we are driven by empathy, trust, and innovation.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      {/* --------------------------other section what we do---------------------- */}
+
+      <section  >
+        <BenefitsSection />
+      </section>
+      {/* --------------------------other section our mission ---------------------- */}
+      <section className="relative flex items-center justify-center overflow-hidden min-h-[422px] py-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-39">
+
+          {/* Left Content */}
+          <div className="flex-1 flex items-center justify-center bg-[#F5F6FA] rounded-lg p-8 min-w-[320px] lg:min-w-[746px] h-auto">
+            <div className="space-y-5">
+              <h1 className="text-3xl md:text-4xl font-semibold leading-tight">
+                Our <span className="text-[#61A6FA]">Mission</span>
+              </h1>
+              <p className="text-gray-600 text-base md:text-xl leading-relaxed max-w-[629px]">
+                To empower nurses and healthcare professionals by providing equal access to opportunities while supporting employers with trusted hiring solutions.
+              </p>
+            </div>
+          </div>
+
+          {/* Right Image */}
+          <div className="flex-1 flex justify-center lg:justify-end relative">
+            <div className="hidden sm:flex relative w-[345px] h-[314px] lg:w-[345px] lg:h-[314px]">
+              <Image
+                src="/assets/About3.png"
+                alt="Nurse illustration"
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 388px, 450px"
+                priority
+              />
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* --------------------------other section over vision---------------------- */}
+      <section className="relative flex items-center justify-center overflow-hidden min-h-[422px] ">
+        <div className="max-w-7xl mx-auto  flex flex-col lg:flex-row items-center  gap-39">
+
+          {/* Left Image */}
+          <div className="flex-1 flex justify-center lg:justify-end relative">
+            <div className="hidden sm:flex relative w-[345px] h-[314px] lg:w-[345px] lg:h-[314px]">
+              <Image
+                src="/assets/About4.png"
+                alt="Nurse illustration"
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 388px, 450px"
+                priority
+              />
+            </div>
+          </div>
+
+          {/* Right Content */}
+          <div className="flex-1 flex items-center justify-center bg-[#F5F6FA] rounded-lg p-8 min-w-[320px] lg:min-w-[746px] h-auto">
+            <div className="space-y-5">
+              <h1 className="text-3xl md:text-4xl font-semibold leading-tight">
+                Our <span className="text-[#61A6FA]">Vision</span>
+              </h1>
+              <p className="text-gray-600 text-base md:text-xl leading-relaxed max-w-[629px]">
+                To become Australia’s most trusted healthcare hiring platform — where nurses thrive, employers succeed, and quality care reaches every community.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* --------------------------other section Contact---------------------- */}
+      <section
+        className="relative min-h-[460px] flex items-center justify-center overflow-hidden bg-[#F5F6FA]"
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-39">
+
+          {/* Left Content */}
+          <div className="flex-1 text-center lg:text-left space-y-7 max-w-4xl h-[415px] flex flex-col justify-center">
+            <h1 className="text-3xl md:text-4xl font-semibold leading-tight">
+              Have questions or want to partner with <span className="text-[#61A6FA]">us</span>?<br />
+            </h1>
+            <div className="gap-5">
+              <h1 className="text-2xl md:text-4xl font-semibold leading-tight text-[#58A6F9]">
+                Let&apos;s connect!
+              </h1>
+
+              <a
+                href="/contact"
+                className="inline-block mt-4 px-6 py-3 bg-[#58A6F9] text-white font-semibold rounded-lg hover:bg-blue-500 transition-colors w-fit"
+              >
+                Contact Us
+              </a>
+            </div>
+          </div>
+
+          {/* Right Illustration */}
+          <div className="flex-1 flex justify-center lg:justify-end relative hidden sm:flex">
+            <div className="relative w-[325px] h-[300px] lg:w-[325px] lg:h-[300px]">
+              <Image
+                src="/assets/About5.png"
+                alt="Nurse illustration"
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 325px, 300px"
+                priority
+              />
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+    </main>
   );
 }

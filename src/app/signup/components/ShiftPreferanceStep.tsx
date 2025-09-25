@@ -11,9 +11,9 @@ export function ShiftPreferenceStep({ formData, handleCheckboxChange, handleChan
   // Toggle Select All / Deselect All
   const toggleSelectAll = () => {
     if (allSelected) {
-      handleChange("shiftPreferences", []); 
+      handleChange("shiftPreferences", []);
     } else {
-      handleChange("shiftPreferences", [...shifts]); 
+      handleChange("shiftPreferences", [...shifts]);
     }
   };
 
@@ -28,14 +28,17 @@ export function ShiftPreferenceStep({ formData, handleCheckboxChange, handleChan
         <button
           type="button"
           onClick={toggleSelectAll}
-          className={`inline-flex w-fit px-4 py-2 r font-semibold text-[14px] ${
-            allSelected
-              ? ""
-              : ""
-          }`}
+          className="inline-flex items-center gap-2 w-fit  font-semibold text-[14px]"
         >
+          <div
+            className={`w-5 h-5 flex items-center justify-center border-2 ${allSelected ? "border-blue-700 bg-blue-700" : "border-gray-400"
+              }`}
+          >
+            {allSelected && <Check className="h-3 w-3 text-white" />}
+          </div>
           {allSelected ? "Deselect All" : "Select All"}
         </button>
+
 
         {/* Individual shift options */}
         <div className="flex flex-col gap-3">
@@ -44,9 +47,8 @@ export function ShiftPreferenceStep({ formData, handleCheckboxChange, handleChan
             return (
               <label key={shift} className="flex items-center gap-2 cursor-pointer">
                 <div
-                  className={`w-5 h-5 flex items-center justify-center border-2 ${
-                    isSelected ? "border-blue-700 bg-blue-700" : "border-gray-400"
-                  }`}
+                  className={`w-5 h-5 flex items-center justify-center border-2 ${isSelected ? "border-blue-700 bg-blue-700" : "border-gray-400"
+                    }`}
                   onClick={() => handleCheckboxChange("shiftPreferences", shift)}
                 >
                   {isSelected && <Check className="h-3 w-3 text-white" />}

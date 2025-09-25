@@ -14,8 +14,9 @@ export default function EmployerPage() {
   // Refs for OTP input boxes
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
-  // Australian mobile validation: starts with 04 or 4 and is 10 digits long
-  const isValidAUSNumber = /^(?:\+?61|0)4\d{8}$/.test(mobile);
+  // Australian mobile validation: exactly 8 digits (04 prefix is already shown)
+  const isValidAUSNumber = /^\d{8}$/.test(mobile);
+
   const canSendOTP = isValidAUSNumber && checked;
 
   const handleOtpChange = (element: HTMLInputElement, index: number) => {
@@ -45,10 +46,10 @@ export default function EmployerPage() {
       alert("Mobile number is required");
       return;
     }
-    router.push(`/registrationpage?mobile=${encodeURIComponent(mobile)}`);
+    // Combine 04 prefix with the entered 8 digits
+    const fullMobile = "04" + mobile;
+    router.push(`/registrationpage?mobile=${encodeURIComponent(fullMobile)}`);
   };
-
-
 
   return (
     <div>
@@ -117,18 +118,19 @@ export default function EmployerPage() {
                     Mobile number
                   </label>
                   <div className="w-full h-[40px] flex items-center border rounded-[25px] overflow-hidden">
-                    <span className="px-3 text-gray-700 select-none">+61</span>
+                    <span className="px-3 text-gray-700 select-none border-r">04</span>
                     <input
                       type="tel"
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
-                      placeholder="Enter mobile number"
+                      placeholder="Enter 8 digits"
                       className="w-full px-3 py-2 outline-none"
+                      maxLength={8} // Limit to 8 digits only
                     />
                   </div>
                   {!isValidAUSNumber && mobile.length > 0 && (
                     <p className="text-red-500 text-xs mt-2">
-                      Enter a valid Australian number (e.g., 04XXXXXXXX)
+                      Please enter your number
                     </p>
                   )}
                 </div>
@@ -179,7 +181,7 @@ export default function EmployerPage() {
                   Enter the OTP sent to SMS on
                 </h2>
                 <p className="text-sm text-gray-500 mt-2">
-                  <strong>{mobile}</strong>
+                  <strong>04{mobile}</strong>
                 </p>
                 <div className="mt-5">
                   <label className="block text-sm text-[#091E42] mb-1">
@@ -204,7 +206,7 @@ export default function EmployerPage() {
                   </div>
                 </div>
                 <p className="text-sm text-gray-500 mt-4 ">
-                  Didn’t receive it? {" "}
+                  Didnt receive it? {" "}
                   <button
                     onClick={() => alert("Resend OTP")}
                     className="text-blue-600 underline"
@@ -214,7 +216,6 @@ export default function EmployerPage() {
                 </p>
                 <button
                   onClick={handleVerifyOtp}
-
                   className="mt-5 w-full py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
                 >
                   Verify OTP

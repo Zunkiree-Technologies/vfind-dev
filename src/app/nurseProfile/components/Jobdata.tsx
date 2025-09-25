@@ -229,10 +229,13 @@ export default function JobData() {
     );
 
   return (
-    <div className="p-6 min-h-screen mx-auto container bg-[#F5F6FA]">
+    <div className="p-6 min-h-screen  bg-[#F5F6FA] ">
       <div className="flex gap-6 mt-6 items-start">
+        <div className="mx-auto container flex justify-center item-center gap-8">
+
+       
         {/* Filters Sidebar (same wide set as CandidateList) */}
-        <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-[60px] h-[calc(100vh-3rem)]  overflow-y-auto scrollbar-hide">
+        <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-[60px] h-fit overflow-y-auto scrollbar-hide">
           <h2 className="font-semibold text-gray-800 flex justify-between">
             All Filters
             <button onClick={clearFilters} className="text-sm text-blue-600">Clear All</button>
@@ -290,7 +293,6 @@ export default function JobData() {
               <span>${payRate}+</span>
             </div>
           </div>
-          <div className="h-0.5 bg-gray-300" />
 
           {/* Radius (placeholder control)
           <div>
@@ -384,6 +386,7 @@ export default function JobData() {
             </div>
           )}
         </div>
+         </div>
       </div>
     </div>
   );

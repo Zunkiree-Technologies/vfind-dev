@@ -5,13 +5,11 @@ import Image from "next/image";
 
 export const HeroSection = () => {
   return (
-    <section
-      className="relative min-h-[576px] flex items-center justify-center overflow-hidden bg-[#F8FAFD]"
-    >
-      <div className="container mx-auto px-10 lg:px-1 flex flex-col lg:flex-row items-center justify-between ">
+    <section className="relative min-h-[576px] flex items-center justify-center overflow-hidden bg-[#F8FAFD]">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between">
 
         {/* Left Content */}
-        <div className="flex-1 text-center lg:text-left space-y-8 max-w-4xl h-[415px]  flex flex-col justify-center">
+        <div className="flex-1 text-center lg:text-left space-y-8 max-w-4xl h-[415px] flex flex-col justify-center">
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight">
             Find Your{" "}
@@ -32,11 +30,8 @@ export const HeroSection = () => {
           </div>
         </div>
 
-
         {/* Right Illustration */}
         <div className="flex-1 flex justify-center lg:justify-end relative hidden sm:flex">
-
-
           <div className="relative w-[482px] h-[533px]">
             <Image
               src="/assets/landing.png"

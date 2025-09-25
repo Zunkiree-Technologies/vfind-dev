@@ -18,7 +18,7 @@ const companies = [
 export const FeaturedCompanies = () => {
     return (
         <section className="min-h-fit p-4 bg-white flex items-center justify-center">
-            <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8">
                 {/* Heading */}
                 <div className="text-center mb-16">
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
@@ -41,15 +41,9 @@ export const FeaturedCompanies = () => {
                         }}
                         autoplay={{ delay: 2500, disableOnInteraction: false }}
                         loop={true}
-                        pagination={{
-                            clickable: true,
-                            el: ".custom-pagination", 
-                        }}
+                        pagination={{ clickable: true, el: ".custom-pagination" }}
                         className="pb-16"
                     >
-
-                        <div className="custom-pagination flex justify-center mt-20" />
-
                         {companies.map((company) => (
                             <SwiperSlide key={company.id}>
                                 <div className="border border-gray-200 rounded-xl p-8 h-48 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition bg-white">
@@ -64,6 +58,9 @@ export const FeaturedCompanies = () => {
                             </SwiperSlide>
                         ))}
                     </Swiper>
+
+                    {/* Custom Pagination */}
+                    <div className="custom-pagination flex justify-center mt-10"></div>
                 </div>
             </div>
         </section>

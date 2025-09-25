@@ -53,7 +53,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="shadow-md px-4 py-2 bg-white dark:bg-gray-900 transition-colors duration-300">
+    <nav className="shadow-md px-4 py-2 bg-white dark:bg-gray-900 transition-colors duration-300 ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
         {/* Left: Logo */}
 
@@ -86,7 +86,7 @@ export default function Navbar() {
             >
               For Seekers
               <ChevronDown
-                className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${isAuthDropdownOpen ? "rotate-180" : ""
+                className={`ml-2 w-4 h-4 text-blue-500 transition-transform duration-300 ${isAuthDropdownOpen ? "rotate-180" : ""
                   }`}
               />
             </button>
@@ -116,7 +116,7 @@ export default function Navbar() {
             >
               For Employers
               <ChevronDown
-                className={`ml-2 w-4 h-4 text-red-500 transition-transform duration-300 ${isForEmployersDropdownOpen ? "rotate-180" : ""
+                className={`ml-2 w-4 h-4 text-blue-500 transition-transform duration-300 ${isForEmployersDropdownOpen ? "rotate-180" : ""
                   }`}
               />
             </button>
@@ -165,7 +165,7 @@ export default function Navbar() {
             Resources
           </Link>
           <Link href="/about" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
-            About
+            About Us
           </Link>
           <Link href="/contact" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
             Contact Us

@@ -19,7 +19,7 @@ export function LocationPreferenceStep({ formData, handleChange }: StepProps) {
     );
     handleChange("preferredLocations", updated);
     setQuery("");
-    setShowSuggestions(false);
+    setShowSuggestions(false); // Close after selection
   };
 
   const removeLocation = (location: string) => {
@@ -85,12 +85,14 @@ export function LocationPreferenceStep({ formData, handleChange }: StepProps) {
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
               onFocus={() => setShowSuggestions(true)}
-              onBlur={(e) => {
-                if (!e.relatedTarget || !e.relatedTarget.closest('.suggestions-dropdown')) {
-                  setTimeout(() => setShowSuggestions(false), 1);
-                }
+              onBlur={() => {
+                // Delay closing to allow clicking on suggestions
+                setTimeout(() => setShowSuggestions(false), 200);
               }}
               onKeyDown={handleKeyDown}
               placeholder="Type or select a location"
@@ -98,12 +100,11 @@ export function LocationPreferenceStep({ formData, handleChange }: StepProps) {
             />
 
             {showSuggestions && filteredList.length > 0 && (
-              <ul className="suggestions-dropdown absolute z-10 bg-white border w-full max-h-60 overflow-y-auto mt-1 rounded shadow">
+              <ul className="absolute z-10 bg-white border w-full max-h-60 overflow-y-auto mt-1 rounded shadow">
                 {filteredList.map((city, index) => (
                   <li
                     key={`${city}-${index}`}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => addLocation(city)}
+                    onMouseDown={() => addLocation(city)}
                     className="px-3 py-2 cursor-pointer hover:bg-blue-100"
                   >
                     {city}

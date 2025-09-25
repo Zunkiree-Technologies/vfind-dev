@@ -5,7 +5,7 @@ export type FormDataType = {
     startDate: string;
     jobSearchStatus: string;
      shiftPreferences: string[];
-    qualification: string;
+    qualification: string ;
     otherQualification: string;
     workingInHealthcare: string;
     experience: string;

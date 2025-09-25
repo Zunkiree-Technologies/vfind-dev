@@ -20,6 +20,7 @@ export default function NurseSignup() {
     const router = useRouter();
     const totalSteps = 10;
     const [currentStep, setCurrentStep] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormDataType>({
         jobTypes: "",
         openToOtherTypes: "",
@@ -69,6 +70,31 @@ export default function NurseSignup() {
         });
     };
 
+    // Full name validation function
+    const validateFullName = (name: string) => {
+        const trimmedName = name.trim();
+        if (trimmedName.length < 2) return false;
+        
+        // Check if it contains at least one space (first name + last name)
+        const nameParts = trimmedName.split(' ').filter(part => part.length > 0);
+        if (nameParts.length < 2) return false;
+        
+        // Check if it only contains letters, spaces, hyphens, and apostrophes
+        const nameRegex = /^[a-zA-Z\s\-']+$/;
+        return nameRegex.test(trimmedName);
+    };
+
+    // Email validation function
+    const validateEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // Phone validation function
+    const validatePhone = (phone: string) => {
+        return phone.length === 8 && /^\d+$/.test(phone);
+    };
+
     const isStepComplete = (stepNumber: number) => {
         switch (stepNumber) {
             case 1:
@@ -114,12 +140,24 @@ export default function NurseSignup() {
                 );
             case 10:
                 return (
+                    // Full Name validation
+                    formData.fullName &&
+                    validateFullName(formData.fullName) &&
+                    // Email validation
                     formData.email &&
+                    validateEmail(formData.email) &&
+                    // Phone validation
                     formData.phone &&
+                    validatePhone(formData.phone) &&
+                    // Password validation
                     formData.password &&
+                    formData.password.length >= 8 &&
                     formData.password === formData.confirmPassword &&
+                    // Terms and location
                     formData.termsAccepted &&
-                    formData.currentResidentialLocation
+                    formData.currentResidentialLocation &&
+                    formData.postcode &&
+                    formData.postcode.length === 4
                 );
             default:
                 return false;
@@ -154,59 +192,146 @@ export default function NurseSignup() {
         }
     };
 
-    const handleSubmit = async () => {
-        // Validate all steps before submit
-        for (let step = 1; step <= totalSteps; step++) {
-            if (!isStepComplete(step)) {
-                const stepElement = document.getElementById(`step-${step}`);
-                if (stepElement) {
-                    stepElement.scrollIntoView({ behavior: "smooth", block: "center" });
-                }
-                alert("Please complete all required fields in this step.");
-                return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const getErrorMessage = (error: any, statusCode: number) => {
+        // Handle different types of errors
+        if (error?.message) {
+            // Check for specific error messages
+            if (error.message.includes("Email already exists")) {
+                return "This email is already registered. Please use a different email or try logging in.";
             }
+            if (error.message.includes("Phone number already exists")) {
+                return "This phone number is already registered. Please use a different phone number.";
+            }
+            if (error.message.includes("validation")) {
+                return `Validation Error: ${error.message}`;
+            }
+            if (error.message.includes("required")) {
+                return `Required Field Missing: ${error.message}`;
+            }
+            return error.message;
         }
 
-        const form = new FormData();
-        for (const key in formData) {
-            const value = formData[key as keyof FormDataType];
-            if (Array.isArray(value)) {
-                form.append(key, JSON.stringify(value));
-            } else if (value instanceof File) {
-                form.append(key, value);
-            } else {
-                form.append(key, value as string);
-            }
+        // Handle different status codes
+        switch (statusCode) {
+            case 400:
+                return "Bad Request: Please check your form data and try again.";
+            case 401:
+                return "Unauthorized: Please check your credentials.";
+            case 403:
+                return "Forbidden: You don't have permission to perform this action.";
+            case 409:
+                return "Conflict: This email or phone number may already be registered.";
+            case 422:
+                return "Validation Error: Please check all required fields are filled correctly.";
+            case 500:
+                return "Server Error: Something went wrong on our end. Please try again later.";
+            case 503:
+                return "Service Unavailable: The server is temporarily unavailable. Please try again later.";
+            default:
+                return `Error ${statusCode}: An unexpected error occurred. Please try again.`;
         }
+    };
+
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
 
         try {
-            const res = await fetch(
-                process.env.NEXT_PUBLIC_SIGNUP_ENDPOINT ||
-                "https://x76o-gnx4-xrav.a2.xano.io/api:YhrHeNAH/nurse_onboarding",
-                { method: "POST", body: form }
-            );
-
-            const data = await res.json();
-
-            if (res.ok) {
-                // Save token and profile, then redirect
-                if (typeof window !== "undefined") {
-                    localStorage.setItem("authToken", data.authToken);
-                    localStorage.setItem("userProfile", JSON.stringify(data.user));
-                    router.push("/signin");
-                }
-            } else {
-                // Check specifically for email 
-                if (data.message?.includes("Email already exists")) {
-                    alert("Email is already registered. Please use a different email or login.");
-
-                } else {
-                    alert("Error submitting form. Please try again.");
+            // Validate all steps before submit
+            for (let step = 1; step <= totalSteps; step++) {
+                if (!isStepComplete(step)) {
+                    const stepElement = document.getElementById(`step-${step}`);
+                    if (stepElement) {
+                        stepElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                    alert(`Please complete all required fields in step ${step}.`);
+                    setIsSubmitting(false);
+                    return;
                 }
             }
+
+            const form = new FormData();
+            for (const key in formData) {
+                const value = formData[key as keyof FormDataType];
+                if (Array.isArray(value)) {
+                    form.append(key, JSON.stringify(value));
+                } else if (value instanceof File) {
+                    form.append(key, value);
+                } else {
+                    form.append(key, value as string);
+                }
+            }
+
+            console.log('Submitting form data...', Object.fromEntries(form.entries()));
+
+            const response = await fetch(
+                process.env.NEXT_PUBLIC_SIGNUP_ENDPOINT ||
+                "https://x76o-gnx4-xrav.a2.xano.io/api:YhrHeNAH/nurse_onboarding",
+                { 
+                    method: "POST", 
+                    body: form,
+                    headers: {
+                        // Don't set Content-Type when sending FormData, let the browser set it
+                    }
+                }
+            );
+
+            console.log('Response status:', response.status);
+            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+            let responseData;
+            const contentType = response.headers.get("content-type");
+            
+            if (contentType && contentType.includes("application/json")) {
+                responseData = await response.json();
+            } else {
+                // Handle non-JSON responses
+                const textResponse = await response.text();
+                console.log('Non-JSON response:', textResponse);
+                responseData = { message: textResponse };
+            }
+
+            console.log('Response data:', responseData);
+
+            if (response.ok) {
+                console.log('Signup successful!');
+                // Save token and profile, then redirect
+                if (typeof window !== "undefined") {
+                    if (responseData.authToken) {
+                        localStorage.setItem("authToken", responseData.authToken);
+                    }
+                    if (responseData.user) {
+                        localStorage.setItem("userProfile", JSON.stringify(responseData.user));
+                    }
+                    
+                    // Show congratulations message
+                    alert("🎉 Congratulations! Your account has been created successfully!\n\nYou will now be redirected to the login page to access your new account.");
+                    
+                    // Small delay to let user read the message before redirect
+                    setTimeout(() => {
+                        router.push("/signin");
+                    }, 1000);
+                }
+            } else {
+                // Handle error responses
+                const errorMessage = getErrorMessage(responseData, response.status);
+                console.error('Signup failed:', errorMessage);
+                alert(`Registration failed: ${errorMessage}`);
+            }
+
         } catch (err) {
-            console.error(err);
-            alert("Network error. Please try again later.");
+            console.error('Network/Fetch error:', err);
+            let errorMessage = "Network error. Please check your connection and try again.";
+            
+            if (err instanceof TypeError && err.message.includes("fetch")) {
+                errorMessage = "Unable to connect to the server. Please check your internet connection.";
+            } else if (err instanceof Error) {
+                errorMessage = `Network Error: ${err.message}`;
+            }
+            
+            alert(errorMessage);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -302,13 +427,13 @@ export default function NurseSignup() {
                                 {currentStep === totalSteps && (
                                     <button
                                         onClick={handleSubmit}
-                                        disabled={!isStepComplete(currentStep)}
-                                        className={`px-4 lg:px-4 py-2 lg:py-2 rounded text-white text-sm lg:text-base ${isStepComplete(currentStep)
+                                        disabled={!isStepComplete(currentStep) || isSubmitting}
+                                        className={`px-4 lg:px-4 py-2 lg:py-2 rounded text-white text-sm lg:text-base ${isStepComplete(currentStep) && !isSubmitting
                                             ? "bg-green-600 hover:bg-green-700"
                                             : "bg-gray-400 cursor-not-allowed"
                                             } transition-colors`}
                                     >
-                                        Submit
+                                        {isSubmitting ? "Submitting..." : "Submit"}
                                     </button>
                                 )}
                             </div>

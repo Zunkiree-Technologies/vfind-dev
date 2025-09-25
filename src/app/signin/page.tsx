@@ -13,11 +13,37 @@ export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
-const loginWithGoogle = () => {
-  const redirectUrl = encodeURIComponent("http://localhost:3000/oauth/callback"); 
-  // 👆 change to your production domain later
-  window.location.href = `https://x76o-gnx4-xrav.a2.xano.io/api:U0aE1wpF/oauth/google/init?redirect_url=${redirectUrl}`;
-};
+  // Google Sign-In
+  const loginWithGoogle = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      // Use localhost for dev, Vercel for production
+      const redirectUri = encodeURIComponent(
+        process.env.NEXT_PUBLIC_APP_URL + "/oauth/callback"
+      );
+
+      // Call Xano init endpoint
+      const response = await fetch(
+        `https://x76o-gnx4-xrav.a2.xano.io/api:U0aE1wpF/oauth/google/init?redirect_uri=${redirectUri}`
+      );
+      const data = await response.json();
+
+      if (data.authUrl) {
+        // Redirect browser to Google login
+        window.location.href = data.authUrl;
+      } else {
+        console.error("No authUrl returned from Xano:", data);
+        setError("Unable to start Google login.");
+      }
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError("Google login failed. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,11 +53,11 @@ const loginWithGoogle = () => {
 
     try {
       const response = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/auth/login", 
+        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, role: "Nurse", }),
+          body: JSON.stringify({ email, password, role: "Nurse" }),
         }
       );
 
@@ -53,7 +79,6 @@ const loginWithGoogle = () => {
     } finally {
       setLoading(false);
     }
-
   };
 
   return (
@@ -123,9 +148,10 @@ const loginWithGoogle = () => {
               Nurse Login
             </h2>
 
-
             {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-            {success && <p className="text-green-500 text-sm mb-3">{success}</p>}
+            {success && (
+              <p className="text-green-500 text-sm mb-3">{success}</p>
+            )}
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label className="block text-gray-700 font-medium text-sm mt-3 ">
@@ -176,21 +202,24 @@ const loginWithGoogle = () => {
               >
                 {loading ? "Logging in..." : "Login"}
               </button>
-
             </form>
 
             <div className="my-4 flex items-center">
               <div className="flex-1 h-px bg-gray-300"></div>
               <span className="px-3 text-gray-500 text-sm">Or</span>
               <div className="flex-1 h-px bg-gray-300"></div>
-
             </div>
             <div>
               <button
                 onClick={loginWithGoogle}
                 className="w-full sm:w-[300px] h-auto sm:h-[38px] bg-white text-[#717B9E] rounded-lg font-medium hover:bg-gray-300 hover:text-white transition flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-15 py-3 sm:py-0 mx-auto"
               >
-                <Image src="/icons/google.png" alt="Google Icon" width={20} height={20} />
+                <Image
+                  src="/icons/google.png"
+                  alt="Google Icon"
+                  width={20}
+                  height={20}
+                />
                 Sign in with Google
               </button>
             </div>
@@ -203,7 +232,6 @@ const loginWithGoogle = () => {
                 Sign up
               </button>
             </div>
-
           </div>
         </div>
       </div>
