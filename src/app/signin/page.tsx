@@ -39,6 +39,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error("Google login error:", err);
+      setError("Google login failed. Please try again or use email/password.");
       setError("Google login failed. Try again.");
     } finally {
       setLoading(false);

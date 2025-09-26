@@ -51,17 +51,19 @@ export default function ContactUs() {
   return (
     <div>
       <Navbar />
-      <div className="flex justify-center items-center py-16 px-6 bg-gray-50">
+
+      
+      <div className="flex justify-center items-center py-16 px-6 bg-gray-50 ">
         <div className="flex flex-col md:flex-row gap-10 w-full max-w-6xl items-start">
           {/* Left Side: Map + Info */}
-          <div className="flex-1">
+          <div className="flex-1 h-[600px]">
             <h1 className="text-4xl font-bold mb-4 text-gray-800">Contact Us</h1>
             <p className="mb-2 text-gray-600">Need to get in touch with us?</p>
             <p className="mb-6 text-gray-600">
               Either fill out the form or contact us at {" "}
               <a
                 href="mailto:info@vfind.com"
-                className="text-blue-600 underline font-medium"
+                className="text-primary underline font-medium"
               >
                 info@vfind.com
               </a>
@@ -80,7 +82,7 @@ export default function ContactUs() {
 
 
           {/* Right Side: Form */}
-          <Card className="flex-1 shadow-lg border-0 rounded-2xl">
+          <Card className="flex-1 shadow-lg border-0 rounded-2xl h-[550px]">
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -156,7 +158,7 @@ export default function ContactUs() {
                 ></textarea>
 
 
-                <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg text-lg">
+                <Button type="submit" className="w-full bg-primary hover:bg-[#477fff] text-white py-3 rounded-lg text-lg">
                   SEND MESSAGE
                 </Button>
               </form>
@@ -164,6 +166,7 @@ export default function ContactUs() {
           </Card>
         </div>
       </div>
+
       <Footer />
     </div>
 

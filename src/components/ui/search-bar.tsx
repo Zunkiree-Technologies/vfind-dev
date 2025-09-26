@@ -44,7 +44,7 @@ export const SearchBar = () => {
       </div>
 
       {/* Search Button */}
-      <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[#61A6FA] text-white hover:bg-blue-500 transition">
+      <button className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white hover:bg-[#477fff] transition">
         <Search className="h-4 w-4" />
       </button>
     </div>

@@ -1,11 +1,7 @@
-// app/oauth/callback/page.tsx (App Router)
-// OR pages/oauth/callback.tsx (Pages Router)
-
-"use client"; // Only needed for App Router
+"use client"; 
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // App Router
-// import { useRouter } from 'next/router'; // Pages Router
+import { useRouter } from "next/navigation"; 
 
 export default function OAuthCallback() {
   const [status, setStatus] = useState("Processing...");
@@ -58,25 +54,58 @@ export default function OAuthCallback() {
 
         if (!response.ok) {
           console.error("OAuth continue failed:", data);
-          setStatus(`Login failed: ${data.message || "Unknown error"}`);
-          setTimeout(() => router.push("/signin"), 3000);
+
+          // Handle specific error for users who haven't signed up yet
+          if (
+            data.error === "account_not_found" ||
+            data.code === "ERROR_CODE_ACCESS_DENIED"
+          ) {
+            setStatus(
+              "No account found with this email. Please sign up first."
+            );
+            setTimeout(
+              () => router.push("/signup?message=create-account-first"),
+              3000
+            );
+            return;
+          }
+
+          // Handle other OAuth errors
+          setStatus(
+            `Google sign-in failed: ${
+              data.message || data.payload || "Please try again"
+            }`
+          );
+          setTimeout(
+            () => router.push("/signin?error=google-signin-failed"),
+            3000
+          );
           return;
         }
 
-        // Check if we got an auth token
+        // Check if we got a token (Xano returns 'token' not 'authToken')
         if (data.token) {
           console.log("Auth token received, logging in...");
+          console.log("User info:", { name: data.name, email: data.email });
           setStatus("Login successful! Redirecting...");
 
-          // Store the token (adjust based on your auth system)
-          localStorage.setItem("token", data.token);
+          // Store the token and user info (consistent with regular signin)
+          localStorage.setItem("token", data.token); // Changed from 'authToken'
+          localStorage.setItem("email", data.email);
+          localStorage.setItem("userName", data.name);
 
-          // Redirect to dashboard or home
+          // Redirect to same place as regular signin
           setTimeout(() => router.push("/nurseProfile"), 1000);
         } else {
-          console.error("No auth token in response:", data);
-          setStatus("Login failed - no token received");
-          setTimeout(() => router.push("/signin"), 3000);
+          // This should rarely happen now, but keep as fallback
+          console.error("Unexpected response format:", data);
+          setStatus(
+            data.payload
+          );
+          setTimeout(
+            () => router.push("/signin?error=unexpected-response"),
+            3000
+          );
         }
       } catch (error) {
         console.error("OAuth callback error:", error);

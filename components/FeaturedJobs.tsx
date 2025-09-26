@@ -57,7 +57,7 @@ export default function FeaturedJobs() {
           <h2 className="text-3xl sm:text-3xl md:text-5xl lg:text-4xl font-bold text-black text-healthcare-navy mb-6">
             Featured Jobs
           </h2>
-          <p className="text-gray-500">
+          <p className="text-gray-500 text-paragraph">
             Discover your next career opportunity with Australia’s top healthcare
             employers
           </p>
@@ -118,7 +118,7 @@ export default function FeaturedJobs() {
                     : "Recently posted"}
                 </p>
                 <button
-                  className="bg-blue-400 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-500 transition"
+                  className="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-[#477fff] transition"
                   onClick={() => router.push(`/nurseProfile/jobapplicationpage/${job.id}`)}
                 >
                   View Details

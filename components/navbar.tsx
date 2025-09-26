@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ChevronDown, Menu, Search, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
@@ -58,23 +58,25 @@ export default function Navbar() {
         {/* Left: Logo */}
 
         <Link href="/" className="flex items-center space-x-2 cursor-pointer">
-          <div className="w-8 h-8 flex items-center justify-center bg-blue-400 rounded-[10px]">
-            <Search size={16} className="text-white" />
-          </div>
 
-          <span className="font-bold text-lg text-black">VFind</span>
+
+          <span className="text-lg font-bold">
+            <span className="text-primary">V</span>FIND
+          </span>
+
+
         </Link>
 
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex lg:items-center lg:space-x-6">
-          <Link href="/blogs" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+          <Link href="/blogs" className="text-gray-700 dark:text-gray-200 hover:text-[#477fff] px-3 py-2 text-sm font-medium">
             Resources
           </Link>
-          <Link href="/about" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">
-            About
+          <Link href="/about" className="text-gray-700 dark:text-gray-200 hover:text-[#477fff] px-3 py-2 text-sm font-medium">
+            About Us
           </Link>
-          <Link href="/contact" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+          <Link href="/contact" className="text-gray-700 dark:text-gray-200 hover:text-[#477fff]  px-3 py-2 text-sm font-medium">
             Contact Us
           </Link>
 
@@ -82,11 +84,11 @@ export default function Navbar() {
           <div className="relative" ref={authRef}>
             <button
               onClick={toggleAuthDropdown}
-              className="flex items-center text-black px-4 py-2 text-sm font-medium"
+              className="flex items-center text-gray-700 px-4 py-2 text-sm font-medium hover:text-[#477fff] "
             >
               For Seekers
               <ChevronDown
-                className={`ml-2 w-4 h-4 text-blue-500 transition-transform duration-300 ${isAuthDropdownOpen ? "rotate-180" : ""
+                className={`ml-2 w-4 h-4 text-primary transition-transform duration-300 ${isAuthDropdownOpen ? "rotate-180" : ""
                   }`}
               />
             </button>
@@ -112,11 +114,11 @@ export default function Navbar() {
           <div className="relative" ref={employerRef}>
             <button
               onClick={toggleEmployersDropdown}
-              className="flex items-center text-black px-4 py-2 rounded-md text-sm font-medium cursor-pointer"
+              className="flex items-center text-gray-700 px-4 py-2 rounded-md text-sm font-medium cursor-pointer hover:text-[#477fff] "
             >
               For Employers
               <ChevronDown
-                className={`ml-2 w-4 h-4 text-blue-500 transition-transform duration-300 ${isForEmployersDropdownOpen ? "rotate-180" : ""
+                className={`ml-2 w-4 h-4 text-primary transition-transform duration-300 ${isForEmployersDropdownOpen ? "rotate-180" : ""
                   }`}
               />
             </button>
@@ -144,7 +146,8 @@ export default function Navbar() {
           </div>
           <button
             onClick={() => router.push("/joblist")}
-            className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
+            className="px-6 py-2 bg-primary text-white font-medium hover:bg-[#477fff] rounded-[10px]"
+
           >
             <p className="text-sm">Find Jobs</p>
           </button>
@@ -161,13 +164,13 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden px-4 pb-4 space-y-2 border-t">
-          <Link href="/blogs" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
+          <Link href="/blogs" className="block text-gray-700 hover:text-[#477fff]  px-3 py-2 rounded">
             Resources
           </Link>
-          <Link href="/about" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
+          <Link href="/about" className="block text-gray-700 hover:text-[#477fff]  px-3 py-2 rounded">
             About Us
           </Link>
-          <Link href="/contact" className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded">
+          <Link href="/contact" className="block text-gray-700 hover:text-[#477fff]  px-3 py-2 rounded">
             Contact Us
           </Link>
 

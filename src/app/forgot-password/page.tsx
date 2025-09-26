@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "../../../components/navbar";
+import { useRouter } from "next/navigation";
+
 
 
 
@@ -18,11 +20,13 @@ const ForgotPassword: React.FC = () => {
   const [isResending, setIsResending] = useState<boolean>(false);
 
   // Timer states
-  const [timeLeft, setTimeLeft] = useState<number>(600); // 10 minutes
+  const [timeLeft, setTimeLeft] = useState<number>(600); 
   const [canResend, setCanResend] = useState<boolean>(false);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const router = useRouter();
+
 
   // Email validation
   const validateEmail = (value: string): boolean => {
@@ -213,6 +217,8 @@ const ForgotPassword: React.FC = () => {
         setNewPassword("");
         setConfirmPassword("");
         setTimeLeft(600);
+
+        router.push("/");
       } else {
         alert(data?.message || "Failed to update password");
       }

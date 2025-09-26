@@ -13,9 +13,9 @@ export const HeroSection = () => {
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight">
             Find Your{" "}
-            <span className="text-[#61A6FA]">Nursing</span> <br />
-            <span className="text-[#61A6FA]">Job</span> in{" "}
-            <span className="text-black">Australia</span>
+            <span className="text-primary">Nursing</span> <br />
+            <span className="text-primary">Job</span> in{" "}
+            <span className="">Australia</span>
           </h1>
 
           <p className="text-gray-600 text-lg md:text-xl lg:text-2xl leading-relaxed">

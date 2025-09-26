@@ -4,15 +4,53 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --primary-color: #275DF5;
+  --primary: #61A6FA;
+  --secondary: #58A6F9;
+  --darkgray: #717376;
+  --background-gray: #676666;
+  --background: #F5F6FA;
+
+
+  --border: #D8D8D8;
+  --border-line: #B9B9B9;
+  --primary-hover: #61A6FA;
+    --secondary-hover: #477fff;
+
+
+  /* Primary Heading */
+  --font-heading-family: "Inter", sans-serif;
+  --font-heading-size: 32px;
+  --font-heading-weight: 600;
+  /* semi-bold */
+  --font-heading-line-height: 38px;
+  /* Title */
+  --font-title-family: "Inter", sans-serif;
+  --font-title-size: 18px;
+  --font-title-weight: 500;
+  /* medium */
+  --font-title-line-height: 24px;
+
+  /* Paragraph */
+  --font-paragraph-family: "Inter", sans-serif;
+  --font-paragraph-size: 20px;
+  --font-paragraph-weight: 400;
+  /* regular */
+  --font-paragraph-line-height: 24px;
+
+  /* Sub Text */
+  --font-subtext-family: "Inter", sans-serif;
+  --font-subtext-size: 16px;
+  --font-subtext-weight: 500;
+  /* medium */
+  --font-subtext-line-height: 24px;
+
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(40.868% 0.17956 268.734);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -120,31 +158,55 @@
     background-position: var(--width);
   }
 }
+
 a {
   cursor: pointer;
-  text-decoration: none; /* optional */
+  text-decoration: none;
+  /* optional */
 }
 
 button {
   cursor: pointer;
 }
+
 /* .border{
   border-width: 0px;
 } */
 
 /* Heart pop animation on click */
 @keyframes heart-pop {
-  0% { transform: scale(1); }
-  25% { transform: scale(1.4); }
-  50% { transform: scale(0.9); }
-  75% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(1.4);
+  }
+
+  50% {
+    transform: scale(0.9);
+  }
+
+  75% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Heart hover animation */
 @keyframes heart-hover {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
 }
 
 /* Classes to apply animations */
@@ -160,6 +222,7 @@ button {
 .custom-pagination .swiper-pagination-bullet {
   @apply w-3 h-3 bg-blue-400 opacity-50;
 }
+
 .custom-pagination .swiper-pagination-bullet-active {
   @apply bg-blue-600 opacity-100;
 }
