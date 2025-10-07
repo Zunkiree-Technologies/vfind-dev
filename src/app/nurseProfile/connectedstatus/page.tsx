@@ -30,32 +30,28 @@ export default function NurseStatusPage() {
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [messageType, setMessageType] = useState<"success" | "error">("success");
 
-  const fetchRequests = useCallback(async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+const fetchRequests = useCallback(async () => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
 
-    setLoading(true);
-    try {
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error("Failed to fetch requests");
-      let data: ConnectionRequest[] = await res.json();
+  setLoading(true);
+  try {
+    const res = await fetch(
+      "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) throw new Error("Failed to fetch requests");
+    const data: ConnectionRequest[] = await res.json();
 
-      const hiddenIds: number[] = JSON.parse(
-        localStorage.getItem("hiddenNotifications") || "[]"
-      );
-      data = data.filter((item) => !hiddenIds.includes(item.id));
+    data.sort((a, b) => b.id - a.id);
+    setRequests(data);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
-      data.sort((a, b) => b.id - a.id);
-      setRequests(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     fetchRequests();

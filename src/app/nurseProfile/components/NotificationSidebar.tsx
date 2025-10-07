@@ -31,13 +31,15 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    setLoading(true);
     try {
+      setLoading(true);
       const res = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       if (!res.ok) throw new Error("Failed to fetch notifications");
+
       let data: ConnectionRequest[] = await res.json();
 
       const hiddenIds: number[] = JSON.parse(localStorage.getItem("hiddenNotifications") || "[]");
@@ -60,23 +62,24 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
     }
   }, [employerId]);
 
-  const handleToggleSidebar = async () => {
-    if (!isOpen) await fetchNotifications();
+  const handleToggleSidebar = () => {
     setIsOpen(!isOpen);
   };
 
-  // Refresh every 30s while open
   useEffect(() => {
-    if (!isOpen) return;
-    const timer = setInterval(() => fetchNotifications(), 30000);
-    return () => clearInterval(timer);
-  }, [isOpen, fetchNotifications]);
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   const handleUpdateStatus = async (requestId: number, newStatus: "accepted" | "rejected") => {
     const token = localStorage.getItem("token");
     if (!token) return alert("Unauthorized");
 
     try {
+      const affectedRequest = requests.find((r) => r.id === requestId);
+      if (!affectedRequest) throw new Error("Request not found");
+
       const res = await fetch(
         `https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/connections/${requestId}`,
         {
@@ -85,21 +88,29 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({
+            connections_id: requestId,
+            employer_profiles_id: affectedRequest.employer_profiles_id,
+            nurse_profiles_id: affectedRequest.nurse_profiles_id,
+            status: newStatus,
+          }),
         }
       );
-      if (!res.ok) throw new Error("Failed to update request");
+
+      let updatedData: Partial<ConnectionRequest> = {};
+      if (res.status !== 204) {
+        updatedData = await res.json().catch(() => ({}));
+      }
 
       setRequests((prev) =>
         prev.map((req) =>
-          req.id === requestId ? { ...req, status: newStatus } : req
+          req.id === requestId ? { ...req, status: newStatus, ...updatedData } : req
         )
       );
 
-      const affectedRequest = requests.find((r) => r.id === requestId);
       const employerName =
-        affectedRequest?._employer_profiles?.companyName ||
-        affectedRequest?._employer_profiles?.fullName ||
+        affectedRequest._employer_profiles?.companyName ||
+        affectedRequest._employer_profiles?.fullName ||
         "Employer";
 
       if (newStatus === "accepted") {
@@ -116,7 +127,7 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
 
       setTimeout(() => setSuccessMessage(""), 5000);
     } catch (err) {
-      console.error(err);
+      console.error("Update error:", err);
       alert("Failed to update request");
     }
   };
@@ -127,6 +138,8 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
     if (!hiddenIds.includes(requestId)) {
       localStorage.setItem("hiddenNotifications", JSON.stringify([...hiddenIds, requestId]));
     }
+    // Dispatch storage event to notify other tabs/components
+    window.dispatchEvent(new Event("storage"));
   };
 
   useEffect(() => {

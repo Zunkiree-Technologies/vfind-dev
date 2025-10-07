@@ -54,10 +54,12 @@ export default function FeaturedJobs() {
       <div className="max-w-7xl w-full">
         {/* Header */}
         <div className="text-center mb-12 flex justify-center items-center flex-col">
-          <h2 className="text-3xl sm:text-3xl md:text-5xl lg:text-4xl font-bold text-black text-healthcare-navy mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold  font-bold text-gray-900 mb-4">
+
             Featured Jobs
           </h2>
-          <p className="text-gray-500 text-paragraph">
+          <p className="text-gray-500 max-w-2xl mx-auto text-paragraph">
+
             Discover your next career opportunity with Australia’s top healthcare
             employers
           </p>
@@ -76,14 +78,11 @@ export default function FeaturedJobs() {
                   <h3 className="text-lg font-semibold text-blue-500">
                     {job.title || "Untitled Job"}
                   </h3>
-                  <p className="text-gray-800 mt-1">
+                  {/* <p className="text-gray-800 mt-1">
                     {job.company || "Unknown Company"}
-                  </p>
+                  </p> */}
                 </div>
-                {/* Logo Placeholder */}
-                <div className="w-14 h-14 bg-gray-200 rounded-md flex items-center justify-center text-gray-500 text-xs">
-                  Logo
-                </div>
+
               </div>
 
               {/* Job Details */}

@@ -25,42 +25,35 @@ const steps = [
 
 export const HowItWorksSection = () => {
   return (
-    <section className="min-h-fit p-5 mt-5 bg-[#F8FAFD] flex items-center justify-center ">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <section className="min-h-fit p-5 mt-5 bg-[#F8FAFD] flex items-center justify-center">
+      <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <div className="text-center mb-16 fade-in">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             How It Works?
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto text-paragraph">
-            Start your working journey in Australia with our simple three-step
-            process.
+            Start your working journey in Australia with our simple three-step process.
           </p>
         </div>
 
         {/* Steps */}
-        <div className="max-w-5xl mx-auto relative">
+        <div className="relative max-w-full mx-auto">
           {/* Horizontal Line */}
           <div className="hidden md:block absolute top-10 left-0 right-0 h-0.5 bg-blue-200 z-0" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-12 relative z-10">
             {steps.map((step, index) => (
-              <div
-                key={index}
-                className="text-center flex flex-col items-center"
-              >
-                {/* Circle with Icon */}
-                <div className="w-20 h-20 rounded-full border-2 border-blue-400 flex items-center justify-center bg-white mb-6">
-                  <step.icon className="h-8 w-8 text-blue-400" />
+              <div key={index} className="text-center flex flex-col items-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-blue-400 flex items-center justify-center bg-white mb-4 sm:mb-6">
+                  <step.icon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
                 </div>
 
-                {/* Title */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
                   {step.title}
                 </h3>
 
-                {/* Description */}
-                <p className="text-gray-600 text-sm max-w-xs">
+                <p className="text-gray-600 text-sm sm:text-base max-w-sm sm:max-w-xs">
                   {step.description}
                 </p>
               </div>
@@ -69,5 +62,6 @@ export const HowItWorksSection = () => {
         </div>
       </div>
     </section>
+
   );
 };

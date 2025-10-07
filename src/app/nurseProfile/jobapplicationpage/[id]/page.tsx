@@ -15,7 +15,6 @@ interface Job {
   description: string;
   requirements?: string[];
   roleCategory: string;
-
   benefits?: string[];
   experienceMin: string;
   experienceMax: string;
@@ -31,61 +30,107 @@ interface Company {
   about_company: string;
 }
 
-interface Employer {
-  id: number;
-  companyName?: string;
-  fullName?: string;
-  company?: string;
-}
-
 export default function JobApplicationPage() {
   const router = useRouter();
   const { id } = useParams();
+  const searchParams = useSearchParams();
+  const companyFromQuery = searchParams.get("company");
+
   const [job, setJob] = useState<Job | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
-  const [employer, setEmployer] = useState<Employer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [nurseEmail, setNurseEmail] = useState<string | null>(null);
-  const searchParams = useSearchParams();
-  const companyFromQuery = searchParams.get("company");
+  const [nurseProfileId, setNurseProfileId] = useState<number | null>(null);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [checkingApplication, setCheckingApplication] = useState(false);
 
-  // Fetch token & nurse email from localStorage
+  // Load token, email, profileId from localStorage
   useEffect(() => {
     const token = localStorage.getItem("token");
     const email = localStorage.getItem("email");
+    const profileId = localStorage.getItem("nurse_profile_id");
+
+    console.log("LocalStorage values:", { token, email, profileId });
+
     if (token) setAuthToken(token);
     if (email) setNurseEmail(email);
+    if (profileId) setNurseProfileId(Number(profileId));
   }, []);
 
-  // Fetch job details and automatically get company info
+  // Check if user has already applied
+  const checkIfAlreadyApplied = async (jobId: number, profileId: number) => {
+    try {
+      setCheckingApplication(true);
+
+      const payload = {
+        jobs_id: jobId.toString(),
+        nurse_profiles_id: profileId.toString(),
+      };
+
+      console.log("Checking application status with payload:", payload);
+
+      const res = await fetch(
+        `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/is_applied`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await res.json();
+      console.log("Raw application API response:", result);
+
+      if (res.ok) {
+        if (Array.isArray(result) && result.length > 0) {
+          const hasAppliedStatus = result.some((app) => app.status === "applied");
+          console.log("User has applied?", hasAppliedStatus);
+          setHasApplied(hasAppliedStatus);
+        } else {
+          console.log("No previous application found.");
+          setHasApplied(false);
+        }
+      } else {
+        console.error("Failed to check application status:", res.status);
+        setHasApplied(false);
+      }
+    } catch (err) {
+      console.error("Error checking application status:", err);
+      setHasApplied(false); // fail open
+    } finally {
+      setCheckingApplication(false);
+    }
+  };
+
+  // Fetch job and company details
   useEffect(() => {
     if (!id) {
       router.push("/nurseProfile");
       return;
     }
 
-    const fetchJobAndCompanyData = async () => {
+    const fetchJobData = async () => {
       try {
         setLoading(true);
-        
-        // Step 1: Fetch job details
+
         const jobRes = await fetch(
           `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${id}`
         );
-        
+
         if (!jobRes.ok) throw new Error("Job not found");
-        
+
         const jobData: Job = await jobRes.json();
+        console.log("Fetched job data:", jobData);
         setJob(jobData);
-        
-        // Step 2: Automatically fetch company info using user_id from job
+
+        // Fetch company info
         if (jobData.user_id) {
           await fetchCompanyInfo(jobData.user_id);
-          await fetchEmployerDetails(jobData.user_id);
         }
+
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to fetch job");
       } finally {
@@ -93,77 +138,74 @@ export default function JobApplicationPage() {
       }
     };
 
-    fetchJobAndCompanyData();
+    fetchJobData();
   }, [id, router]);
 
-  // Fetch company information using user_id
+  // Run application check only after job and profileId are ready
+  useEffect(() => {
+    if (job && nurseProfileId) {
+      console.log("Triggering application check for job:", job.id, "profile:", nurseProfileId);
+      checkIfAlreadyApplied(job.id, nurseProfileId);
+    }
+  }, [job, nurseProfileId]);
+
+  // Fetch company info
   const fetchCompanyInfo = async (userId: number) => {
     try {
       const companyRes = await fetch(
         `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company`,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: userId 
-          })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: userId }),
         }
       );
 
       if (companyRes.ok) {
         const companyData = await companyRes.json();
-        
-        if (companyData && companyData.about_company) {
-          setCompany({ about_company: companyData.about_company });
-        } else {
-          setCompany({ about_company: "No company information available." });
-        }
+        console.log("Company info fetched:", companyData);
+        setCompany({
+          about_company: companyData.about_company || "No company information available.",
+        });
       } else {
         setCompany({ about_company: "Failed to load company information." });
       }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
+      console.error("Error fetching company info:", err);
       setCompany({ about_company: "Error loading company information." });
     }
   };
 
-  // Fetch employer details (for company name) using user_id
-  const fetchEmployerDetails = async (employerId: number) => {
-  try {
-    const employerRes = await fetch(
-      `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/employers/${employerId}`
-    );
-
-    if (!employerRes.ok) {
-      setEmployer(null);
-      return;
-    }
-
-    const employerData: Employer = await employerRes.json();
-    setEmployer(employerData);
-  } catch {
-    setEmployer(null);
-  }
-};
-
-
+  // Submit job application
   const handleSubmitApplication = async () => {
     if (!job) return;
+
+    console.log("Submitting application for job:", job.id, "Nurse Email:", nurseEmail);
 
     if (!authToken) {
       alert("You must be logged in to apply.");
       return;
     }
-
     if (!nurseEmail) {
       alert("Could not find your email. Please log in again.");
+      return;
+    }
+    if (hasApplied) {
+      console.log("User has already applied, skipping submission.");
       return;
     }
 
     try {
       setSubmitting(true);
+
+      const payload = {
+        jobs_id: job.id,
+        status: "applied",
+        applied_date: new Date().toISOString(),
+        email: nurseEmail,
+      };
+
+      console.log("Application payload:", payload);
 
       const res = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/applications",
@@ -173,26 +215,28 @@ export default function JobApplicationPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${authToken}`,
           },
-          body: JSON.stringify({
-            jobs_id: job.id,
-            status: "applied",
-            applied_date: new Date().toISOString(),
-            email: nurseEmail,
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
       const result = await res.json();
+      console.log("Application response:", result);
+
       if (!res.ok) throw new Error(result.message || "Failed to submit application");
 
+      setHasApplied(true);
       alert("Job application sent successfully!");
       router.push("/nurseProfile");
     } catch (err: unknown) {
+      console.error("Failed to submit application:", err);
       alert(err instanceof Error ? err.message : "Failed to submit application");
     } finally {
       setSubmitting(false);
     }
   };
+
+  // Get company name
+  const getCompanyName = () => companyFromQuery || "Healthcare Facility";
 
   if (loading) return <Loader loading={true} message="Fetching job data..." />;
   if (error || !job)
@@ -203,12 +247,6 @@ export default function JobApplicationPage() {
         </div>
       </div>
     );
-
-  const getCompanyName = () => {
-    if (companyFromQuery) return companyFromQuery;
-    if (employer?.companyName) return employer.companyName;
-    return "Healthcare Facility"; 
-  };
 
   return (
     <div className="min-h-screen bg-white py-8">
@@ -237,7 +275,6 @@ export default function JobApplicationPage() {
               {/* Basic Info Section */}
               <div className="p-4 border-b border-gray-500">
                 <div className="flex flex-col gap-4 text-sm">
-
                   {/* Location */}
                   <div className="flex justify-between items-center w-2/3 ">
                     <span className="font-medium text-gray-600">Location</span>
@@ -298,7 +335,6 @@ export default function JobApplicationPage() {
                       </p>
                     </div>
                   </div>
-
                 </div>
               </div>
 
@@ -336,30 +372,39 @@ export default function JobApplicationPage() {
               </div>
 
               {/* Job Description */}
-              <div className="p-6  ">
+              <div className="p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Job Description</h2>
                 <div
-                  className="prose prose-sm max-w-none text-gray-700  rounded-lg p-4 bg-gray-50 text-justify"
+                  className="prose prose-sm max-w-none text-gray-700 rounded-lg p-4 bg-gray-50 text-justify"
                   dangerouslySetInnerHTML={{ __html: job.description }}
                 />
               </div>
-
             </div>
 
+            {/* Apply Button */}
             <button
               onClick={() => {
                 if (!authToken || !nurseEmail) {
-                  router.push("/signup"); // redirect to signup
+                  router.push("/signup");
                 } else {
                   handleSubmitApplication();
                 }
               }}
-              disabled={submitting}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3"
+              disabled={submitting || hasApplied || checkingApplication}
+              className={`${
+                hasApplied 
+                  ? 'bg-amber-700 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
             >
-              {submitting ? "Submitting..." : "Apply Now"}
+              {checkingApplication 
+                ? "Checking..." 
+                : hasApplied 
+                  ? "Applied" 
+                  : submitting 
+                    ? "Submitting..." 
+                    : "Apply Now"}
             </button>
-
           </div>
 
           {/* Right Column - About Company */}
@@ -375,8 +420,6 @@ export default function JobApplicationPage() {
                   <p>Loading company information...</p>
                 )}
               </div>
-              
-            
             </div>
           </div>
 

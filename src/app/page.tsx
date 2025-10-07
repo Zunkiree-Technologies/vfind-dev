@@ -14,14 +14,13 @@ export default function Home() {
     <main className="min-h-screen ">
       <Navbar />
 
-      <header>
+     <header>
         <HeroSection />
-      </header>
-      <section aria-label="Early access signup">
+      </header> 
+
+     <section aria-label="Early access signup">
         <FeaturedCompanies />
       </section>
-
-
 
       <section aria-label="How our process works">
         <HowItWorksSection />
@@ -35,11 +34,11 @@ export default function Home() {
         <FeaturedJobs />
       </section>
 
-      <section aria-label="Success stories and testimonials">
+      {/* <section aria-label="Success stories and testimonials">
         <TestimonialsSection />
-      </section>
+      </section> */}
 
-      <FooterSectionTwo />
+      {/* <FooterSectionTwo />  */}
 
     </main>
   );
