@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Navbar from "../../../components/navbar";
+import { CheckCircle } from "lucide-react";
+import Footer from "../../../components/footer-section";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -83,70 +85,59 @@ export default function LoginPage() {
   };
 
   return (
-    <div>
+    <div className="h-fit ">
       <Navbar />
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
+      <div className="flex items-center justify-center min-h-fit py-10  px-4">
         {/* Flex container with responsive behavior */}
         <div className="flex flex-col md:flex-col lg:flex-row gap-6 max-w-5xl w-full">
           {/* "New to VFind" Section (Now on the Left) */}
           <div
             className="hidden md:flex flex-col justify-between w-full lg:w-[627px] lg:h-[480px] p-10 rounded-2xl shadow-md 
-        order-2 lg:order-1 bg-gradient-to-tr from-[rgba(238,174,202,0.15)] to-white"
+        order-2 lg:order-1
+bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
+"
           >
             <div className="mt-10 ml-10">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
                 New to VFind?
               </h2>
               <ul className="space-y-3 text-[#474D6A] font-weight-medium text-sm  ">
+
                 <li className="flex items-start gap-4 mt-5">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-200 text-green-500 text-sm font-bold">
-                    ✔
-                  </span>
-                  One click apply using VFind profile.
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black " >One click apply using VFind profile.</span>
+                </li>
+
+                <li className="flex items-start gap-4 mt-5">
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black "  > Get relevant job recommendations.</span>
                 </li>
                 <li className="flex items-start gap-4 mt-5">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-200 text-green-500 text-sm font-bold">
-                    ✔
-                  </span>
-                  Get relevant job recommendations.
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black "  >  Showcase profile to top companies and consultants.</span>
                 </li>
                 <li className="flex items-start gap-4 mt-5">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-200 text-green-500 text-sm font-bold">
-                    ✔
-                  </span>
-                  Showcase profile to top companies and consultants.
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black " >  Get connection request from top companies.</span>
                 </li>
-                <li className="flex items-start gap-4 mt-5">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-200 text-green-500 text-sm font-bold">
-                    ✔
-                  </span>
-                  Get connection request from top companies.
-                </li>
+
               </ul>
               <button
                 onClick={() => router.push("/signup")}
-                className="mt-6 h-[38px] w-[225px] bg-white text-[#4A90E2] rounded-[8px] shadow hover:bg-blue-500 hover:text-white transition font-medium"
+                className="mt-6 h-[38px] w-[225px] text-white bg-[#4A90E2] rounded-[8px] shadow hover:bg-blue-500 hover:text-white transition font-medium"
               >
                 Register for Free
               </button>
             </div>
-            <div className="mt-auto flex justify-end">
-              <div className="w-35 h-35 rounded-full overflow-hidden">
-                <Image
-                  src="/assets/profile.png"
-                  alt="Login Illustration"
-                  width={194}
-                  height={194}
-                  className="object-cover"
-                />
-              </div>
-            </div>
+
           </div>
 
           {/* Login Section (Now on the Right) */}
-          <div className="order-1 lg:order-2 w-full lg:w-[448px] h-auto lg:h-[477px] bg-white shadow-md rounded-2xl p-10">
-            <h2 className="text-xl sm:text-2xl text-center md:text-3xl font-medium text-gray-800 mb-2 mt-10 ">
-              Nurse Login
+          <div className="border-1 border-gray-300 lg:order-1 w-full lg:w-[448px] h-auto lg:h-[477px] bg-white shadow-md rounded-2xl p-10">
+
+
+            <h2 className="text-2xl font-medium text-gray-800 mb-4 text-center">
+              Sign In to Your Nurse Account
             </h2>
 
             {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
@@ -156,14 +147,14 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label className="block text-gray-700 font-medium text-sm mt-3 ">
-                  Email ID{" "}
+                  Email Address{" "}
                 </label>
                 <input
                   type="email"
                   className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#717B9E] h-[40] w-[328]"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter Email ID"
+                  placeholder="Enter your email"
                   required
                 />
               </div>
@@ -191,7 +182,7 @@ export default function LoginPage() {
                 </div>
                 <a
                   href="/forgot_password_nurse"
-                  className="text-sm text-[#4A90E2] hover:underline float-right mt-2"
+                  className="text-sm text-[#4A90E2] hover:underline float-right mt-2 font-medium"
                 >
                   Forgot password?
                 </a>
@@ -199,10 +190,11 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-[327px] md:w-[400px] h-auto sm:h-[38px] bg-[#4A90E2] text-white rounded-lg font-medium hover:bg-blue-500 transition mt-10 mx-auto block py-3 sm:py-0"
+                className="w-full sm:w-[328px] h-[40px] bg-[#4A90E2] text-white rounded-lg font-medium hover:bg-blue-500 transition mt-5 mx-auto block"
               >
                 {loading ? "Logging in..." : "Login"}
               </button>
+
             </form>
 
             <div className="my-4 flex items-center">
@@ -213,7 +205,7 @@ export default function LoginPage() {
             <div>
               <button
                 onClick={loginWithGoogle}
-                className="w-full sm:w-[300px] h-auto sm:h-[38px] bg-white text-[#717B9E] rounded-lg font-medium hover:bg-gray-300 hover:text-white transition flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-15 py-3 sm:py-0 mx-auto"
+                className="w-full sm:w-[328px] h-[40px] border border-gray-300 bg-white text-[#717B9E] rounded-lg font-medium hover:bg-gray-100 transition flex items-center justify-center gap-2 mx-auto"
               >
                 <Image
                   src="/icons/google.png"
@@ -221,10 +213,11 @@ export default function LoginPage() {
                   width={20}
                   height={20}
                 />
-                Sign in with Google
+                <span>Sign in with Google</span>
               </button>
+
             </div>
-            <div className="block sm:hidden text-center mt-4 text-sm text-gray-600">
+            <div className="block text-center mt-4 text-sm text-gray-600">
               Don’t have an account?
               <button
                 onClick={() => router.push("/signup")}
@@ -236,6 +229,10 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+      <div className="bg-[#1F3C88] ">
+        <Footer />
+      </div>
+
     </div>
   );
 }

@@ -5,7 +5,6 @@ import Image from "next/image";
 import {
   GraduationCap,
   Calendar,
-  Heart,
   User,
   UserRoundSearch,
   Award,
@@ -65,6 +64,7 @@ export default function CandidateDetailPage() {
 
   const [nurseId, setNurseId] = useState<number | null>(null);
   const [employerId, setEmployerId] = useState<number | null>(null);
+  // const nurseId = Number(params.id); // always available
 
   // Wishlist state
   const [wishlisted, setWishlisted] = useState(false);
@@ -78,14 +78,17 @@ export default function CandidateDetailPage() {
   }, [employerId]);
 
   // Load wishlist state from localStorage
+  
+
   useEffect(() => {
-    if (typeof window !== "undefined" && id) {
-      const stored = localStorage.getItem(`wishlist-${id}`);
-      setWishlisted(stored === "true");
+    if (typeof window !== "undefined") {
+      const storedEmployerId = localStorage.getItem("employerId");
+      if (storedEmployerId) setEmployerId(Number(storedEmployerId));
     }
-  }, [id]);
+  }, []);
 
   // Check if this candidate is already in wishlist
+
   useEffect(() => {
     const fetchWishlistStatus = async () => {
       if (!nurseId || !employerId) return;
@@ -94,22 +97,30 @@ export default function CandidateDetailPage() {
       if (!token) return;
 
       try {
+        const nurseid = params.id;
         const res = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/wishlist?employer_profiles_id=${employerId}&nurse_profiles_id=${nurseId}`,
+          "https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/fetch_wishlist_status",
           {
-            headers: { Authorization: `Bearer ${token}` },
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              nurse_profiles_id: nurseid,
+            }),
           }
         );
 
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Failed to fetch wishlist status:", text);
-          return;
-        }
-
         const data = await res.json();
+        console.log("Wishlist status data:", data);
 
-        if (data.length > 0) {
+        // Safely check if status exists
+        if (
+          data[0] &&
+          typeof data[0].status === "string" &&
+          data[0].status === "saved"
+        ) {
           setWishlisted(true);
         } else {
           setWishlisted(false);
@@ -120,13 +131,21 @@ export default function CandidateDetailPage() {
     };
 
     fetchWishlistStatus();
-  }, [nurseId, employerId]);
+  }, [nurseId, employerId, params.id]);
 
+
+
+  useEffect(() => {
+    console.log("Nurse ID:", nurseId);
+    const token = localStorage.getItem("authToken");
+    console.log("Auth Token:", token);
+  }, [nurseId]);
 
   const handleWishlistToggle = async () => {
     if (!nurseId || !employerId) return;
 
     const token = localStorage.getItem("authToken");
+    console.log(token);
     if (!token) return alert("Unauthorized: Please log in");
 
     try {
@@ -157,22 +176,27 @@ export default function CandidateDetailPage() {
       } else {
         // Remove from wishlist
         // First, get the wishlist ID for this combination
-        const fetchRes = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/wishlist?employer_profiles_id=${employerId}&nurse_profiles_id=${nurseId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+        const id = params.id; // from useParams()
+        // console.log("Params ID:", id);
+        const res = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/fetch_wishlist_id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              nurse_profiles_id: id,
+            }),
+          }
         );
 
-        if (!fetchRes.ok) {
-          const text = await fetchRes.text();
-          console.error("Failed to fetch wishlist:", text);
-          return alert("Failed to remove from wishlist");
-        }
-
-        const data = await fetchRes.json();
-
-        if (data.length === 0) return; // Nothing to delete
-
+        if (!res.ok) throw new Error("Failed to get wishlist ID");
+        const data = await res.json();
+        // console.log(data);
         const wishlistId = data[0].id;
+        if (!wishlistId) throw new Error("Wishlist ID not found");
 
         const deleteRes = await fetch(
           `https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/wishlist/${wishlistId}`,
@@ -377,17 +401,19 @@ export default function CandidateDetailPage() {
   return (
     <div className="min-h-screen bg-[#F5F6FA]  p-4  ">
       {/* ================= Top Profile Section ================= */}
-      <div className=" mx-auto bg-white rounded-xl shadow-sm p-8 mb-8 relative container" >
+      <div className=" mx-auto bg-white rounded-xl shadow-sm p-8 mb-8 relative container">
         {/* Wishlist Button */}
         <button
           onClick={handleWishlistToggle}
-          className={`absolute top-6 right-6 p-2 rounded-full shadow-md transition-all duration-200
-          ${wishlisted ? "bg-blue-600 animate-heart-pop" : "bg-white hover:animate-heart-hover"}`}
+          disabled={!nurseId || !employerId}
+          className={`absolute top-6 right-6 px-4 py-2 rounded-md shadow-md font-semibold transition-all duration-200
+    ${
+      wishlisted
+        ? "bg-blue-600 text-white"
+        : "bg-white text-blue-600 hover:bg-blue-100"
+    }`}
         >
-          <Heart
-            className={`w-6 h-6 transition-colors duration-200 ${wishlisted ? "text-white" : "text-blue-600"
-              }`}
-          />
+          {wishlisted ? "Saved" : "Save"}
         </button>
 
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
@@ -411,7 +437,9 @@ export default function CandidateDetailPage() {
 
           {/* Profile Info */}
           <div className="flex-1 space-y-2">
-            <h1 className="text-2xl font-bold text-gray-900">{candidate.fullName}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {candidate.fullName}
+            </h1>
             <div className="flex items-center gap-2 text-gray-500 text-sm">
               <Calendar className="w-4 h-4 text-blue-700" />
               Profile last updated: {new Date().toLocaleDateString()}
@@ -429,7 +457,10 @@ export default function CandidateDetailPage() {
 
             {connectionStatus === "accepted" && (
               <div className="flex items-center gap-3 mt-3">
-                <button disabled className="px-6 py-2 bg-green-600 text-white rounded-lg">
+                <button
+                  disabled
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg"
+                >
                   Connected
                 </button>
                 <div className="px-6 py-2 border rounded-lg cursor-pointer hover:bg-gray-100">
@@ -438,7 +469,8 @@ export default function CandidateDetailPage() {
               </div>
             )}
 
-            {(connectionStatus === "rejected" || connectionStatus === "none") && (
+            {(connectionStatus === "rejected" ||
+              connectionStatus === "none") && (
               <button
                 onClick={handleSendConnection}
                 disabled={sendingConnection}
@@ -457,30 +489,41 @@ export default function CandidateDetailPage() {
         <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center space-x-2 mb-4">
             <User className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-medium text-gray-900">Basic Information</h2>
+            <h2 className="text-lg font-medium text-gray-900">
+              Basic Information
+            </h2>
           </div>
           <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Location</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">
+                Location
+              </h3>
               <p className="text-gray-900">
-                {candidate.currentResidentialLocation || "Location not specified"}
+                {candidate.currentResidentialLocation ||
+                  "Location not specified"}
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Job Role</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">
+                Job Role
+              </h3>
               <p className="text-gray-900">
                 {candidate.jobSearchStatus || " Not specified"}
               </p>
             </div>
             {candidate.email && (
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Email</h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-1">
+                  Email
+                </h3>
                 <p className="text-gray-900">{candidate.email}</p>
               </div>
             )}
             {candidate.startTime && (
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Availability</h3>
+                <h3 className="text-sm font-medium text-gray-500 mb-1">
+                  Availability
+                </h3>
                 <p className="text-gray-900">{candidate.startTime}</p>
               </div>
             )}
@@ -491,25 +534,31 @@ export default function CandidateDetailPage() {
         <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Shield className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-medium text-gray-900">Visa & Residency</h2>
+            <h2 className="text-lg font-medium text-gray-900">
+              Visa & Residency
+            </h2>
           </div>
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
               <p className="text-gray-900">
-                {candidate.residencyStatus || "Australian Citizen / Permanent Resident"}
+                {candidate.residencyStatus ||
+                  "Australian Citizen / Permanent Resident"}
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Visa Type</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">
+                Visa Type
+              </h3>
               <p className="text-gray-900">
                 {candidate.visaType || "Not Speciified"}
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Duration</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">
+                Duration
+              </h3>
               {candidate.visaDuration || "Not Speciified"}
-
             </div>
           </div>
         </div>
@@ -519,12 +568,16 @@ export default function CandidateDetailPage() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-5 mx-4 mx-auto container">
         <div className="flex items-center space-x-2 mb-6">
           <UserRoundSearch className="w-6 h-6 text-blue-600" />
-          <h2 className="text-lg font-medium text-gray-900">Job search preferences</h2>
+          <h2 className="text-lg font-medium text-gray-900">
+            Job search preferences
+          </h2>
         </div>
         <div className="flex justify-between gap-6">
           {/* Preferred Work Locations */}
           <div className="w-1/2 mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Preferred Work Locations</h3>
+            <h3 className="font-medium text-gray-700 mb-2">
+              Preferred Work Locations
+            </h3>
             <div className="flex flex-wrap gap-2">
               {preferredLocationsArray.length > 0 ? (
                 preferredLocationsArray.map((loc, index) => (
@@ -549,7 +602,9 @@ export default function CandidateDetailPage() {
 
           {/* Preferred Job Types */}
           <div className="w-1/2 mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Preferred Job Types</h3>
+            <h3 className="font-medium text-gray-700 mb-2">
+              Preferred Job Types
+            </h3>
             <div className="flex flex-wrap gap-2">
               {jobTypesArray.length > 0 ? (
                 jobTypesArray.map((type: string, index: number) => (
@@ -573,7 +628,9 @@ export default function CandidateDetailPage() {
         <div className="flex justify-between gap-6">
           {/* Open To Other Types */}
           <div className="w-1/2 mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Open To Other Types</h3>
+            <h3 className="font-medium text-gray-700 mb-2">
+              Open To Other Types
+            </h3>
             <div>
               {candidate.openToOtherTypes ? (
                 <span className="px-3 py-1  border border-gray-300 rounded-lg text-sm font-medium">
@@ -591,7 +648,8 @@ export default function CandidateDetailPage() {
           <div className="w-1/2 mb-6">
             <h3 className="font-medium text-gray-700 mb-2">Preferred Shift</h3>
             <div className="flex flex-wrap gap-2">
-              {candidate.shiftPreferences && candidate.shiftPreferences.length > 0 ? (
+              {candidate.shiftPreferences &&
+              candidate.shiftPreferences.length > 0 ? (
                 candidate.shiftPreferences.map((shift, index) => (
                   <span
                     key={index}
@@ -609,11 +667,11 @@ export default function CandidateDetailPage() {
           </div>
         </div>
 
-
         {/* Availability */}
         <div className="flex items-center text-sm text-gray-600">
           <Calendar className="w-4 h-4 text-blue-700 mr-2" />
-          Available To Start: <span className="ml-1">{candidate.startTime || "2025-09-15"}</span>
+          Available To Start:{" "}
+          <span className="ml-1">{candidate.startTime || "2025-09-15"}</span>
         </div>
       </div>
 
@@ -621,7 +679,9 @@ export default function CandidateDetailPage() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-4 mt-5 mx-auto container">
         <div className="flex items-center space-x-2 mb-6">
           <GraduationCap className="w-6 h-6 text-blue-600" />
-          <h2 className="text-lg font-medium text-gray-900">Qualifications & Certificates</h2>
+          <h2 className="text-lg font-medium text-gray-900">
+            Qualifications & Certificates
+          </h2>
         </div>
 
         {/* Education */}
@@ -647,7 +707,9 @@ export default function CandidateDetailPage() {
               ))}
             </ul>
           ) : (
-            <p className="text-gray-400 text-sm italic">No certifications specified</p>
+            <p className="text-gray-400 text-sm italic">
+              No certifications specified
+            </p>
           )}
         </div>
       </div>
@@ -658,7 +720,9 @@ export default function CandidateDetailPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center space-x-2 mb-6">
             <Briefcase className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-medium text-gray-900">Work Experience</h2>
+            <h2 className="text-lg font-medium text-gray-900">
+              Work Experience
+            </h2>
           </div>
 
           <div className="space-y-3 text-sm border-l-4 border-blue-500 pl-4">
@@ -680,26 +744,29 @@ export default function CandidateDetailPage() {
               <p className="text-gray-500">Organization Name</p>
               <p className="font-medium text-gray-900">
                 {candidate.organizationName
-                  ? `${candidate.organizationName} (since ${candidate.organizationStartYear || "N/A"})`
+                  ? `${candidate.organizationName} (since ${
+                      candidate.organizationStartYear || "N/A"
+                    })`
                   : "Not specified"}
               </p>
             </div>
-
           </div>
-
-
         </div>
 
         {/* Work Preferences */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center space-x-2 mb-6">
             <Clock className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-medium text-gray-900">Work Preferences</h2>
+            <h2 className="text-lg font-medium text-gray-900">
+              Work Preferences
+            </h2>
           </div>
           <div className="space-y-3 text-sm">
             <div>
               <p className="text-gray-500">Maximum work hours</p>
-              <p className="font-medium text-gray-900">{candidate.maxWorkHours || "Not specified"}</p>
+              <p className="font-medium text-gray-900">
+                {candidate.maxWorkHours || "Not specified"}
+              </p>
             </div>
             <div>
               <p className="text-gray-500">Work hours restricted</p>
@@ -712,5 +779,4 @@ export default function CandidateDetailPage() {
       </div>
     </div>
   );
-
 }

@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Navbar from "../../../components/navbar";
+import { CheckCircle } from "lucide-react";
+import Footer from "../../../components/footer-section";
 
 const EmployerLoginPage = () => {
   const router = useRouter();
@@ -262,57 +263,51 @@ const EmployerLoginPage = () => {
   return (
     <div>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-blue-50 px-4 sm:px-6">
+      <div className="min-h-fit flex items-center justify-center   py-10  px-4 sm:px-6">
 
         <div className="flex flex-col xl:flex-row gap-6 lg:gap-8 max-w-7xl w-full">
           {/* Left section - Hidden on mobile and small tablets */}
+
+
           <div
-            style={{
-              background:
-                "linear-gradient(160deg, rgba(255, 255, 255, 0.22) 0%, rgba(238, 174, 202, 0.14) 72%, rgba(39, 93, 245, 0.11) 100%)",
-            }}
-            className="hidden lg:flex flex-col justify-center w-full xl:w-[699px] h-auto lg:h-[420px] xl:h-[481px] rounded-2xl shadow-lg p-6 lg:p-8 xl:p-10"
+            className="hidden md:flex flex-col justify-between w-full lg:w-[627px] lg:h-[480px] p-10 rounded-2xl shadow-md 
+        
+bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
+"
           >
-            <h1 className="text-3xl lg:text-4xl xl:text-[48px] font-bold text-[#121224] leading-tight">
-              Find & hire the right <br className="hidden xl:block" /> 
-              <span className="xl:hidden">talent with us</span>
-              <span className="hidden xl:inline">talent with us</span>
-            </h1>
-            <div className="mt-4 flex items-center gap-2 text-sm text-[#474D6A]">
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/icons/check.png"
-                  alt="Check Icon"
-                  width={14}
-                  height={14}
-                  className="text-white flex-shrink-0"
-                />
-                <span className="text-xs lg:text-sm">Trusted by 10 Cr+ candidates | 4 Lakh+ employers</span>
-              </div>
+            <div className="mt-5 ml-10">
+              <h2 className="text-2xl font-bold text-center text-gray-800 ">
+                Find & hire the right talent with us
+              </h2>
+              <ul className="space-y-3 text-[#474D6A] font-weight-medium text-sm  ">
+
+                <li className="flex items-start gap-4 mt-5">
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black " >Post jobs and reach verified healthcare professionals.</span>
+                </li>
+
+                <li className="flex items-start gap-4 mt-5">
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black "  > View detailed nurse profiles and credentials.</span>
+                </li>
+                <li className="flex items-start gap-4 mt-5">
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black "  >  Connect directly with top nursing talent.</span>
+                </li>
+                <li className="flex items-start gap-4 mt-5">
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black " > Build your trusted employer brand.</span>
+                </li>
+
+              </ul>
+              <button
+                onClick={() => router.push("/foremployer")}
+                className="mt-6 h-[38px] w-[225px] text-white bg-[#4A90E2] rounded-[8px] shadow hover:bg-blue-500 hover:text-white transition font-medium"
+              >
+                Register for Free
+              </button>
             </div>
-            <div className="mt-4 flex -space-x-2">
-              {[...Array(5)].map((_, i) => (
-                <Image
-                  key={i}
-                  width={32}
-                  height={32}
-                  src="/assets/profile.png"
-                  className="w-7 h-7 lg:w-8 lg:h-8 rounded-full shadow-sm"
-                  alt="Employer Avatar"
-                />
-              ))}
-            </div>
-            <div className="mt-auto flex justify-end">
-              <div className="w-32 lg:w-40 xl:w-48 h-32 lg:h-40 xl:h-48 rounded-full overflow-hidden">
-                <Image
-                  src="/assets/profile.png"
-                  alt="Login Illustration"
-                  width={194}
-                  height={194}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            </div>
+
           </div>
 
           {/* Right section - Responsive form with matching height */}
@@ -320,7 +315,7 @@ const EmployerLoginPage = () => {
             {step === 1 && (
               <>
                 <h2 className="text-xl sm:text-[22px] font-medium text-[#121224] mt-2">
-                  Login with Email
+                  Sign In to Your Employer Account
                 </h2>
                 <div className="mt-5">
                   <label className="block text-sm text-[#091E42] mb-1">Email</label>
@@ -358,7 +353,7 @@ const EmployerLoginPage = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-blue-500 text-sm whitespace-nowrap pl-3 hover:text-blue-600 transition-colors"
+                      className="text-blue-400 text-sm whitespace-nowrap pl-3 hover:text-blue-500 transition-colors"
                     >
                       {showPassword ? "Hide" : "Show"}
                     </button>
@@ -366,7 +361,7 @@ const EmployerLoginPage = () => {
                   <div className="text-right mt-2">
                     <a
                       href="/forgot-password-employer"
-                      className="text-sm text-blue-600 hover:underline transition-all"
+                      className="text-sm text-blue-400 hover:underline transition-all"
                     >
                       Forgot Password?
                     </a>
@@ -376,18 +371,18 @@ const EmployerLoginPage = () => {
                   onClick={handleLogin}
                   disabled={isLoading || !!emailError || !email || !password}
                   className={`mt-6 w-full py-2.5 rounded-lg font-medium transition-all ${!emailError && email && password
-                    ? "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800"
+                    ? "bg-blue-400 text-white hover:bg-blue-500 active:bg-blue-800"
                     : "bg-gray-200 text-gray-500 cursor-not-allowed"
                     }`}
                 >
-                  {isLoading ? "Processing..." : "Continue"}
+                  {isLoading ? "Processing..." : "Login"}
                 </button>
                 <div className="mt-4 text-center">
                   <p className="text-sm text-gray-600">
                     Did not have an account?{" "}
                     <a
                       href="/foremployer"
-                      className="text-blue-600 font-medium hover:underline transition-all"
+                      className="text-blue-400 font-medium hover:underline transition-all"
                     >
                       Sign up
                     </a>
@@ -447,7 +442,7 @@ const EmployerLoginPage = () => {
                   onClick={handleVerifyOtp}
                   disabled={isLoading || timeLeft === 0}
                   className={`mt-6 w-full py-2.5 rounded-lg font-medium transition-all ${!isLoading && timeLeft > 0
-                    ? "bg-green-600 text-white hover:bg-green-700 active:bg-green-800"
+                    ? "bg-blue-400 text-white hover:bg-blue-500 active:bg-blue-800"
                     : "bg-gray-300 text-gray-600 cursor-not-allowed"
                     }`}
                 >
@@ -462,7 +457,12 @@ const EmployerLoginPage = () => {
             )}
           </div>
         </div>
+
+
       </div>
+      <div className="bg-[#1F3C88] ">
+              <Footer />
+            </div>
     </div>
   );
 };

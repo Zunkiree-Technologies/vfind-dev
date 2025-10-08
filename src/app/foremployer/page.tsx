@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useRef } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Navbar from "../../../components/navbar";
+import { CheckCircle } from "lucide-react";
+import Footer from "../../../components/footer-section";
 
 export default function EmployerPage() {
   const [mobile, setMobile] = useState("");
@@ -55,57 +56,52 @@ export default function EmployerPage() {
     <div>
       <Navbar />
 
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-blue-50 px-6">
+           <div className="min-h-fit flex items-center justify-center   py-10  px-4 sm:px-6">
+
 
         <div className="flex flex-col lg:flex-row gap-8 max-w-6xl w-full">
           {/* Left Section */}
-          <div
-            style={{
-              background:
-                "linear-gradient(160deg, rgba(255, 255, 255, 0.22) 0%, rgba(238, 174, 202, 0.14) 72%, rgba(39, 93, 245, 0.11) 100%)",
-            }}
-            className="hidden md:flex flex-col justify-center w-full lg:w-[699px] h-auto md:h-[400px] lg:h-[481px] rounded-2xl shadow p-6 md:p-8 lg:p-10"
-          >
-            <h1 className="text-[48px] font-bold text-[#121224] leading-tight">
-              Find & hire the right <br /> talent with us
-            </h1>
-            <div className="mt-4 flex items-center gap-2 text-sm text-[#474D6A]">
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/icons/check.png"
-                  alt="Check Icon"
-                  width={14}
-                  height={14}
-                  className="text-white"
-                />
-                Trusted by 9 Cr+ candidates | 5 Lakh+ employers
-              </div>
-            </div>
-            <div className="mt-4 flex -space-x-2">
-              {[...Array(5)].map((_, i) => (
-                <Image
-                  key={i}
-                  width={32}
-                  height={32}
-                  src="/assets/profile.png"
-                  className="w-8 h-8 rounded-full border-2 border-white"
-                  alt="Employer Avatar"
-                />
-              ))}
-            </div>
-            <div className="mt-auto flex justify-end">
-              <div className="w-35 mb-2 h-35 rounded-full overflow-hidden">
-                <Image
-                  src="/assets/profile.png"
-                  alt="Login Illustration"
-                  width={194}
-                  height={194}
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          </div>
 
+          <div
+            className="hidden md:flex flex-col justify-between w-full lg:w-[627px] lg:h-[480px] p-10 rounded-2xl shadow-md 
+        
+bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
+"
+          >
+            <div className="mt-5 ml-10">
+              <h2 className="text-2xl font-bold text-center text-gray-800 ">
+                Find & hire the right talent with us
+              </h2>
+              <ul className="space-y-3 text-[#474D6A] font-weight-medium text-sm  ">
+
+                <li className="flex items-start gap-4 mt-5">
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black " >Post jobs and reach verified healthcare professionals.</span>
+                </li>
+
+                <li className="flex items-start gap-4 mt-5">
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black "  > View detailed nurse profiles and credentials.</span>
+                </li>
+                <li className="flex items-start gap-4 mt-5">
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black "  >  Connect directly with top nursing talent.</span>
+                </li>
+                <li className="flex items-start gap-4 mt-5">
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <span className=" font-regular text-[14px]  text-black " > Build your trusted employer brand.</span>
+                </li>
+
+              </ul>
+              <button
+                onClick={() => router.push("/foremployer")}
+                className="mt-6 h-[38px] w-[225px] text-white bg-[#4A90E2] rounded-[8px] shadow hover:bg-blue-500 hover:text-white transition font-medium"
+              >
+                Register for Free
+              </button>
+            </div>
+
+          </div>
           {/* Right Section (Dynamic) */}
           <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md h-[313px]">
             {!otpSent ? (
@@ -167,7 +163,7 @@ export default function EmployerPage() {
                     // Optional: store the mobile or do other side effects here
                   }}
                   className={`mt-5 w-full py-2 rounded-lg font-medium transition-colors ${canSendOTP
-                    ? "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                    ? "bg-blue-400 text-white hover:bg-blue-500 cursor-pointer"
                     : "bg-gray-200 text-gray-500 cursor-not-allowed"
                     }`}
                 >
@@ -209,14 +205,14 @@ export default function EmployerPage() {
                   Didnt receive it? {" "}
                   <button
                     onClick={() => alert("Resend OTP")}
-                    className="text-blue-600 underline"
+                    className="text-blue-400 underline"
                   >
                     Resend OTP
                   </button>
                 </p>
                 <button
                   onClick={handleVerifyOtp}
-                  className="mt-5 w-full py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+                  className="mt-5 w-full py-2 rounded-lg bg-blue-400 text-white hover:bg-blue-500"
                 >
                   Verify OTP
                 </button>
@@ -224,6 +220,10 @@ export default function EmployerPage() {
             )}
           </div>
         </div>
+
+      </div>
+      <div className="bg-[#1F3C88] ">
+        <Footer />
       </div>
     </div>
   );
