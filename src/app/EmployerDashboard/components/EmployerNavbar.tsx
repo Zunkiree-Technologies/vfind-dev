@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import NotificationSidebar from "./NotificationSidebar";
-import { ChevronDown, Heart, Search, UserRound } from "lucide-react";
+import { ChevronDown, UserRound } from "lucide-react";
 
 interface NavbarProps {
   companyName?: string;
@@ -36,12 +36,11 @@ export default function EmployerNavbar({ }: NavbarProps) {
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => router.push("/EmployerDashboard")}
         >
-          {/* Icon inside a rounded square */}
-          <div className="w-8 h-8 flex items-center justify-center bg-blue-400 rounded-[10px]">
-            <Search size={16} className="text-white" />
-          </div>
 
-          <span className="font-semibold text-lg text-black">VFind</span>
+
+          <span className="text-lg font-bold">
+            <span className="text-primary">V</span>FIND
+          </span>
         </div>
 
 
@@ -50,21 +49,19 @@ export default function EmployerNavbar({ }: NavbarProps) {
           <div className="hidden md:flex space-x-6">
             <button
               onClick={() => router.push("/EmployerDashboard/status")}
-              className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
+              className="px-6 py-2 bg-primary text-white font-medium hover:bg-blue-500 rounded-[10px]"
             >
               <p className="text-sm"> Connection Request</p>
             </button>
 
             <button
               onClick={() => router.push("/EmployerDashboard/Wishlist")}
-              className="text-gray-700 hover:text-blue-600 font-medium"
+              className="flex items-center gap-2 px-6 py-2 bg-primary text-white font-medium hover:bg-blue-500 rounded-[10px] transition-colors duration-200"
             >
-              <Heart
-                className={`w-6 h-6 transition-colors duration-200
-             "text-white" : "text-blue-600"
-          }`}
-              />
+              {/* <Heart className="w-6 h-6" /> */}
+              <span>Wishlist</span>
             </button>
+
           </div>
 
           <button
@@ -98,21 +95,20 @@ export default function EmployerNavbar({ }: NavbarProps) {
               >
                 Profile
               </button>
+
               <button
                 onClick={() => {
-                  localStorage.clear();
+                  // Only remove auth token, keep hidden notifications
+                  localStorage.removeItem("authToken");
                   sessionStorage.clear();
-                  if ("caches" in window) {
-                    caches.keys().then((cacheNames) => {
-                      cacheNames.forEach((name) => caches.delete(name));
-                    });
-                  }
                   router.push("/employerloginpage");
                 }}
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               >
                 Logout
               </button>
+
+
               <button
                 onClick={() => router.push("/EmployerDashboard/status")}
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 md:hidden"

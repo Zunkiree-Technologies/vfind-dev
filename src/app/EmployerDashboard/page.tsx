@@ -49,6 +49,30 @@ export default function EmployerDashboard() {
   const [isEditingExisting, setIsEditingExisting] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
 
+  // 🔹 Function to fetch applicant counts for each job
+  const fetchApplicantCounts = async (jobsList: Job[]) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return jobsList;
+
+    const jobsWithCounts = await Promise.all(
+      jobsList.map(async (job) => {
+        try {
+          const res = await fetch(
+            `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/getAllNursesAppliedForJob?job_id=${job.id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const applications = await res.json();
+          return { ...job, applicants_count: applications.length };
+        } catch (err) {
+          console.error(`Error fetching applicants for job ${job.id}:`, err);
+          return { ...job, applicants_count: 0 };
+        }
+      })
+    );
+
+    return jobsWithCounts;
+  };
+
   // 🔹 Fetch employer + jobs + company profile
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -86,7 +110,10 @@ export default function EmployerDashboard() {
 
         if (!res.ok) throw new Error("Failed to fetch jobs");
         const data = await res.json();
-        setJobs(data);
+        
+        // Fetch applicant counts for all jobs
+        const jobsWithCounts = await fetchApplicantCounts(data);
+        setJobs(jobsWithCounts);
       } catch (err) {
         console.error("Error fetching jobs:", err);
       }
@@ -289,8 +316,8 @@ export default function EmployerDashboard() {
 
                 <button
                   onClick={() => setCompanyProfileStep("editing")}
-                  className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md 
-                   hover:bg-blue-600 text-sm md:text-base transition"
+                  className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-400 text-white rounded-md 
+                   hover:bg-blue-500 text-sm md:text-base transition"
                 >
                   Complete Profile
                 </button>
@@ -362,11 +389,6 @@ export default function EmployerDashboard() {
                     </p>
                   </div>
                 </div>
-                {/* Show company description
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                  <h3 className="font-medium text-gray-800 text-sm">Company Description:</h3>
-                  <p className="mt-1 text-sm text-gray-700">{companyDescription}</p>
-                </div> */}
 
                 {/* Action buttons */}
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -515,7 +537,7 @@ export default function EmployerDashboard() {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          View
+                          View ({job.applicants_count || 0})
                         </a>
                       </td>
                       <td className="py-2 px-3">
@@ -550,7 +572,7 @@ export default function EmployerDashboard() {
                 ) : (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={4}
                       className="text-center py-4 text-gray-500"
                     >
                       No jobs posted yet.
@@ -565,22 +587,21 @@ export default function EmployerDashboard() {
           <div className="md:hidden mt-3 space-y-3">
             {jobs.length > 0 ? (
               (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
-                <div key={job.id} className="pb-3 last:border-0">
+                <div key={job.id} className="pb-3 border-b last:border-0">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-medium">{job.title}</h3>
                       <p className="text-xs text-gray-500">
-
-                        <a
-                          href={`/EmployerDashboard/Applicants/${job.id}`}
-                          className="text-blue-600 hover:underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {employer.email}
-                        </a>
+                        {employer.email}
                       </p>
-
+                      <a
+                        href={`/EmployerDashboard/Applicants/${job.id}`}
+                        className="text-xs text-blue-600 hover:underline inline-block mt-1"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View Applicants ({job.applicants_count || 0})
+                      </a>
                     </div>
                     <div className="relative">
                       <button

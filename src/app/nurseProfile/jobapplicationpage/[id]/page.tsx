@@ -43,7 +43,7 @@ export default function JobApplicationPage() {
   const [submitting, setSubmitting] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [nurseEmail, setNurseEmail] = useState<string | null>(null);
-  const [nurseProfileId, setNurseProfileId] = useState<number | null>(null);
+  const [, setNurseProfileId] = useState<number | null>(null);
   const [hasApplied, setHasApplied] = useState(false);
   const [checkingApplication, setCheckingApplication] = useState(false);
 
@@ -61,49 +61,49 @@ export default function JobApplicationPage() {
   }, []);
 
   // Check if user has already applied
-  const checkIfAlreadyApplied = async (jobId: number, profileId: number) => {
-    try {
-      setCheckingApplication(true);
+const checkIfAlreadyApplied = async (jobId: number, email: string) => {
+  try {
+    setCheckingApplication(true);
 
-      const payload = {
-        jobs_id: jobId.toString(),
-        nurse_profiles_id: profileId.toString(),
-      };
+    const payload = {
+      jobs_id: jobId.toString(),
+      email: email,
+    };
 
-      console.log("Checking application status with payload:", payload);
+    console.log("Checking application status with payload:", payload);
 
-      const res = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/is_applied`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+    const res = await fetch(
+      `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/is_applied`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
 
-      const result = await res.json();
-      console.log("Raw application API response:", result);
+    const result = await res.json();
+    console.log("Raw application API response:", result);
 
-      if (res.ok) {
-        if (Array.isArray(result) && result.length > 0) {
-          const hasAppliedStatus = result.some((app) => app.status === "applied");
-          console.log("User has applied?", hasAppliedStatus);
-          setHasApplied(hasAppliedStatus);
-        } else {
-          console.log("No previous application found.");
-          setHasApplied(false);
-        }
+    if (res.ok) {
+      if (Array.isArray(result) && result.length > 0) {
+        const hasAppliedStatus = result.some((app) => app.status === "applied");
+        console.log("User has applied?", hasAppliedStatus);
+        setHasApplied(hasAppliedStatus);
       } else {
-        console.error("Failed to check application status:", res.status);
+        console.log("No previous application found.");
         setHasApplied(false);
       }
-    } catch (err) {
-      console.error("Error checking application status:", err);
-      setHasApplied(false); // fail open
-    } finally {
-      setCheckingApplication(false);
+    } else {
+      console.error("Failed to check application status:", res.status);
+      setHasApplied(false);
     }
-  };
+  } catch (err) {
+    console.error("Error checking application status:", err);
+    setHasApplied(false);
+  } finally {
+    setCheckingApplication(false);
+  }
+};
 
   // Fetch job and company details
   useEffect(() => {
@@ -142,12 +142,13 @@ export default function JobApplicationPage() {
   }, [id, router]);
 
   // Run application check only after job and profileId are ready
-  useEffect(() => {
-    if (job && nurseProfileId) {
-      console.log("Triggering application check for job:", job.id, "profile:", nurseProfileId);
-      checkIfAlreadyApplied(job.id, nurseProfileId);
-    }
-  }, [job, nurseProfileId]);
+ useEffect(() => {
+  if (job && nurseEmail) {
+    console.log("Triggering application check for job:", job.id, "email:", nurseEmail);
+    checkIfAlreadyApplied(job.id, nurseEmail);
+  }
+}, [job, nurseEmail]);
+
 
   // Fetch company info
   const fetchCompanyInfo = async (userId: number) => {
@@ -393,7 +394,7 @@ export default function JobApplicationPage() {
               disabled={submitting || hasApplied || checkingApplication}
               className={`${
                 hasApplied 
-                  ? 'bg-amber-700 cursor-not-allowed' 
+                  ? 'bg-primary cursor-not-allowed' 
                   : 'bg-blue-600 hover:bg-blue-700'
               } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
             >

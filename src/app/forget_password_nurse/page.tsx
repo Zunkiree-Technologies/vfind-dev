@@ -218,7 +218,7 @@ const ForgotPassword: React.FC = () => {
         setConfirmPassword("");
         setTimeLeft(600);
 
-        router.push("/");
+        router.push("/signin");
       } else {
         alert(data?.message || "Failed to update password");
       }
@@ -481,4 +481,3 @@ const ForgotPassword: React.FC = () => {
 };
 
 export default ForgotPassword;
-

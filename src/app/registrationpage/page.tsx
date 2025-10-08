@@ -18,6 +18,8 @@ type FormData = {
   city: string;
   pinCode: string;
   companyAddress: string;
+  organizationWebsite: string;
+  AustralianBusinessNumber: string;
 };
 
 function RegistrationComponent() {
@@ -39,13 +41,25 @@ function RegistrationComponent() {
     city: "",
     pinCode: "",
     companyAddress: "",
+    organizationWebsite: "",
+    AustralianBusinessNumber: "",
   });
 
   // Pre-fill mobile from query params
   useEffect(() => {
     const mobileFromQuery = searchParams.get("mobile");
+
     if (mobileFromQuery) {
       setFormData((prev) => ({ ...prev, mobile: mobileFromQuery }));
+      sessionStorage.setItem("registrationMobile", mobileFromQuery);
+
+      // Remove mobile from URL using native browser API
+      window.history.replaceState({}, "", window.location.pathname);
+    } else {
+      const savedMobile = sessionStorage.getItem("registrationMobile");
+      if (savedMobile) {
+        setFormData((prev) => ({ ...prev, mobile: savedMobile }));
+      }
     }
   }, [searchParams]);
 
@@ -150,7 +164,7 @@ function RegistrationComponent() {
       if (data.error && data.error.toLowerCase().includes("email")) {
         alert("This email is already registered. Please use a different email or login.");
         return;
-      }
+      } 
       // Check for duplicate phone number error
       if (data.error && data.error.toLowerCase().includes("phone")) {
         alert("This phone number is already registered. Please use a different number or login.");
@@ -184,37 +198,99 @@ function RegistrationComponent() {
       {/* Step Indicator */}
       <div className="w-full max-w-md h-10 flex items-center justify-center text-center mt-2 mb-4 gap-2 text-xs sm:text-sm font-semibold">
         {/* Step 1 */}
-        <div className={`flex items-center gap-1 ${step === 1 ? "text-blue-600" : step > 1 ? "text-green-600" : "text-gray-500"}`}>
-          <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${step > 1 ? "bg-green-600" : step === 1 ? "bg-blue-600" : "bg-gray-300"}`}>
+        <div
+          className={`flex items-center gap-1 ${
+            step === 1
+              ? "text-blue-600"
+              : step > 1
+              ? "text-green-600"
+              : "text-gray-500"
+          }`}
+        >
+          <div
+            className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${
+              step > 1
+                ? "bg-green-600"
+                : step === 1
+                ? "bg-blue-600"
+                : "bg-gray-300"
+            }`}
+          >
             {step > 1 ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-2 h-2 sm:w-3 sm:h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-2 h-2 sm:w-3 sm:h-3 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             ) : null}
           </div>
-          <span className="hidden sm:inline">Basic Details</span>
+          <span className="hidden sm:inline">Personal Details</span>
         </div>
 
         <span className="text-xs">—</span>
 
         {/* Step 2 */}
-        <div className={`flex items-center gap-1 ${step === 2 ? "text-blue-600" : step > 2 ? "text-green-600" : "text-gray-500"}`}>
-          <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${step > 2 ? "bg-green-600" : step === 2 ? "bg-blue-600" : "bg-gray-300"}`}>
+        <div
+          className={`flex items-center gap-1 ${
+            step === 2
+              ? "text-blue-600"
+              : step > 2
+              ? "text-green-600"
+              : "text-gray-500"
+          }`}
+        >
+          <div
+            className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${
+              step > 2
+                ? "bg-green-600"
+                : step === 2
+                ? "bg-blue-600"
+                : "bg-gray-300"
+            }`}
+          >
             {step > 2 ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-2 h-2 sm:w-3 sm:h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-2 h-2 sm:w-3 sm:h-3 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             ) : null}
           </div>
-          <span className="hidden sm:inline">Verif Email</span>
+          <span className="hidden sm:inline">Verify Email</span>
         </div>
 
         <span className="text-xs">—</span>
 
         {/* Step 3 */}
-        <div className={`flex items-center gap-1 ${step === 3 ? "text-blue-600" : "text-gray-500"}`}>
-          <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${step === 3 ? "bg-blue-600" : "bg-gray-300"}`}></div>
-          <span className="hidden sm:inline">Company Details</span>
+        <div
+          className={`flex items-center gap-1 ${
+            step === 3 ? "text-blue-600" : "text-gray-500"
+          }`}
+        >
+          <div
+            className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${
+              step === 3 ? "bg-blue-600" : "bg-gray-300"
+            }`}
+          ></div>
+          <span className="hidden sm:inline">Organization Details</span>
         </div>
       </div>
 
@@ -223,12 +299,7 @@ function RegistrationComponent() {
         {/* STEP 1: Basic Details */}
         {step === 1 && (
           <div className="space-y-4">
-            <div className="flex flex-col items-center text-center">
-              <Image src="/icons/badgeIcon.png" alt="Badge Icon" width={50} height={35} />
-              <h2 className="mt-2 text-[#6B7794] text-sm sm:text-base">
-                We need these details to identify you and create your account
-              </h2>
-            </div>
+            <div className="flex flex-col items-center text-center"></div>
 
             <div className="space-y-4">
               <div>
@@ -241,7 +312,7 @@ function RegistrationComponent() {
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <label className="text-xs font-bold">Account Type</label>
                 <div className="flex gap-4 mt-1 text-xs sm:text-sm">
                   <label className="flex items-center font-bold gap-1">
@@ -255,7 +326,7 @@ function RegistrationComponent() {
                     Company/Organization
                   </label>
                 </div>
-              </div>
+              </div> */}
 
               <div>
                 <label className="text-xs sm:text-sm">Full Name</label>
@@ -263,13 +334,13 @@ function RegistrationComponent() {
                   type="text"
                   value={formData.fullName}
                   onChange={(e) => handleChange("fullName", e.target.value)}
-                  placeholder="Name as per ABN"
+                  placeholder="Enter name"
                   className="w-full mt-1 px-3 py-2 rounded-md bg-gray-100 text-sm"
                 />
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm">Official Email ID</label>
+                <label className="text-xs sm:text-sm">Email</label>
                 <input
                   type="email"
                   value={formData.email}
@@ -281,7 +352,9 @@ function RegistrationComponent() {
 
               <div className="space-y-3">
                 <div className="relative">
-                  <label className="text-xs sm:text-sm block mb-1">Create Password</label>
+                  <label className="text-xs sm:text-sm block mb-1">
+                    Create Password
+                  </label>
                   <div className="flex items-center w-full rounded-md bg-gray-100 px-3">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -301,7 +374,9 @@ function RegistrationComponent() {
                 </div>
 
                 <div className="relative">
-                  <label className="text-xs sm:text-sm block mb-1">Confirm Password</label>
+                  <label className="text-xs sm:text-sm block mb-1">
+                    Confirm Password
+                  </label>
                   <div className="flex items-center w-full rounded-md bg-gray-100 px-3">
                     <input
                       type={showConfirm ? "text" : "password"}
@@ -359,7 +434,12 @@ function RegistrationComponent() {
         {step === 2 && (
           <div className="space-y-5">
             <div className="flex flex-col items-center text-center">
-              <Image src="/icons/badgeIcon.png" alt="Badge Icon" width={50} height={35} />
+              <Image
+                src="/icons/badgeIcon.png"
+                alt="Badge Icon"
+                width={50}
+                height={35}
+              />
               <h2 className="mt-2 text-[#6B7794] text-sm sm:text-base">
                 We need these details to identify you and create your account
               </h2>
@@ -420,49 +500,74 @@ function RegistrationComponent() {
         {/* STEP 3: Company Details */}
         {step === 3 && (
           <div className="space-y-4">
-            <div className="flex flex-col items-center text-center">
-              <Image src="/icons/badgeIcon.png" alt="Badge Icon" width={50} height={35} />
-              <h2 className="mt-2 text-[#6B7794] text-sm sm:text-base px-2">
-                We use this information to know about your company and generate invoices
-              </h2>
-            </div>
-
             <div className="space-y-3">
               <div>
-                <label className="text-xs sm:text-sm">Company Name</label>
+                <label className="text-xs sm:text-sm">
+                  Organization Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.companyName}
                   onChange={(e) => handleChange("companyName", e.target.value)}
-                  placeholder="Enter company name"
+                  placeholder="Enter Organization name"
                   className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
+                  required
                 />
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm">Number of Employees</label>
+                <label className="text-xs sm:text-sm">Organization Size</label>
                 <select
                   value={formData.numberOfEmployees}
-                  onChange={(e) => handleChange("numberOfEmployees", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("numberOfEmployees", e.target.value)
+                  }
                   className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
                 >
-                  <option value="">Select range</option>
-                  <option value="1-10">1-10</option>
-                  <option value="11-50">11-50</option>
-                  <option value="51-200">51-200</option>
-                  <option value="200+">200+</option>
+                  <option value="">Select organization size</option>
+                  <option value="Less than 5 employees">
+                    Less than 5 employees
+                  </option>
+                  <option value="Less than 20 employees">
+                    Less than 20 employees
+                  </option>
+                  <option value="Less than 50 employees">
+                    Less than 50 employees
+                  </option>
+                  <option value="Less than 100 employees">
+                    Less than 100 employees
+                  </option>
+                  <option value="Less than 200 employees">
+                    Less than 200 employees
+                  </option>
+                  <option value="More than 200 employees">
+                    More than 200 employees
+                  </option>
                 </select>
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm">Your Designation</label>
-                <input
-                  type="text"
+                <label className="text-xs sm:text-sm">
+                  Your Role at Organization{" "}
+                </label>
+                <select
                   value={formData.yourDesignation}
-                  onChange={(e) => handleChange("yourDesignation", e.target.value)}
-                  placeholder="Enter designation"
+                  onChange={(e) =>
+                    handleChange("yourDesignation", e.target.value)
+                  }
                   className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                />
+                >
+                  <option value="Australia">Your role at organization</option>
+                  <option value="I own this organization">
+                    I own this organization
+                  </option>
+                  <option value="I am an employee of this organization">
+                    I am an employee of this organization
+                  </option>
+                  <option value="I am an external recruiter for this organization">
+                    I am an external recruiter for this organization
+                  </option>
+                </select>
               </div>
 
               <div>
@@ -472,8 +577,6 @@ function RegistrationComponent() {
                   onChange={(e) => handleChange("country", e.target.value)}
                   className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
                 >
-                  <option value="Nepal">Nepal</option>
-                  <option value="India">India</option>
                   <option value="Australia">Australia</option>
                 </select>
               </div>
@@ -509,12 +612,44 @@ function RegistrationComponent() {
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm">Company Address</label>
+                <label className="text-xs sm:text-sm">
+                  Company Address <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.companyAddress}
-                  onChange={(e) => handleChange("companyAddress", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("companyAddress", e.target.value)
+                  }
                   placeholder="Enter company address"
+                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs sm:text-sm">
+                  Organization website/ Social media link
+                </label>
+                <input
+                  type="text"
+                  value={formData.organizationWebsite}
+                  onChange={(e) =>
+                    handleChange("organizationWebsite", e.target.value)
+                  }
+                  placeholder="Enter organization website/ social media link"
+                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs sm:text-sm">
+                  Australian Business Number (ABN) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.AustralianBusinessNumber}
+                  onChange={(e) =>
+                    handleChange("AustralianBusinessNumber", e.target.value)
+                  }
+                  placeholder="Enter Australian Business Number"
                   className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
                 />
               </div>

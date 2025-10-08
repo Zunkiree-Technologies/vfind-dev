@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import { MapPin, Briefcase, Clock, DollarSign, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, Briefcase, Clock, DollarSign, Calendar, ChevronLeft, ChevronRight, Clock1 } from "lucide-react";
 import Loader from "../../../../components/loading";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -44,12 +44,14 @@ interface Job {
   benefits?: string[];
   experienceMin?: string;
   experienceMax?: string;
-  updated_at?: string;
   company?: string;
   shift?: string;
   contact_email?: string;
   roleCategory?: string;
   visaRequirement?: string;
+  created_at?: string;  
+  updated_at?: string;
+
 }
 
 // Pagination props typing
@@ -103,11 +105,10 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          currentPage === 1
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
-        }`}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
+          }`}
       >
         <ChevronLeft size={16} />
         Previous
@@ -122,11 +123,10 @@ const Pagination: React.FC<PaginationProps> = ({
             ) : (
               <button
                 onClick={() => onPageChange(page as number)}
-                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${
-                  currentPage === page
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
+                  ? "bg-gray-900 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
               >
                 {page}
               </button>
@@ -139,11 +139,10 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          currentPage === totalPages
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
-        }`}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
+          }`}
       >
         Next
         <ChevronRight size={16} />
@@ -464,6 +463,22 @@ export default function JobData() {
                         <Briefcase size={16} />
                         <span>{job.roleCategory || "General"}</span>
                       </div>
+
+
+                    
+                      <div className="flex items-center gap-1">
+                        <Clock1 size={16} />
+                        <span>
+                          {job.created_at
+                            ? new Date(job.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })
+                            : "Date not available"}
+                        </span>
+                      </div>
+
                     </div>
                   </div>
 
@@ -472,7 +487,7 @@ export default function JobData() {
                     <Link
                       href={{
                         pathname: `/nurseProfile/jobapplicationpage/${job.id}`,
-                        query: { company: getCompanyName(job) }, 
+                        query: { company: getCompanyName(job) },
                       }}
                       target="_blank"
                       rel="noopener noreferrer"

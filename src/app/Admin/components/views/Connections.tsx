@@ -26,6 +26,7 @@ interface Connection {
   nurse_profiles_id: number;
   nurseName: string;
   employerName?: string; 
+  companyName?: string; 
   status: "accepted" | "pending" | "rejected";
 }
 
@@ -156,7 +157,7 @@ export default function AdminDashboard() {
               <div className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-400">
                 <Building2 className="w-4 h-4 text-white" />
               </div>
-              {conn.employerName || `Employer #${conn.employer_profiles_id}`}
+              {conn.companyName || `Employer #${conn.employer_profiles_id}`}
             </div>
           </td>
 

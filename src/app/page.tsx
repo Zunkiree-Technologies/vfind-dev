@@ -34,11 +34,11 @@ export default function Home() {
         <FeaturedJobs />
       </section>
 
-      {/* <section aria-label="Success stories and testimonials">
+      <section aria-label="Success stories and testimonials">
         <TestimonialsSection />
-      </section> */}
+      </section>
 
-      {/* <FooterSectionTwo />  */}
+      <FooterSectionTwo /> 
 
     </main>
   );

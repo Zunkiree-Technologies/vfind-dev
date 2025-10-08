@@ -315,8 +315,8 @@ const EmployerLoginPage = () => {
             </div>
           </div>
 
-          {/* Right section - Responsive form */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-md h-fit mx-auto xl:mx-0">
+          {/* Right section - Responsive form with matching height */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-md h-auto lg:h-[420px] xl:h-[481px] mx-auto xl:mx-0 flex flex-col justify-center">
             {step === 1 && (
               <>
                 <h2 className="text-xl sm:text-[22px] font-medium text-[#121224] mt-2">
@@ -365,7 +365,7 @@ const EmployerLoginPage = () => {
                   </div>
                   <div className="text-right mt-2">
                     <a
-                      href="/forgot-password"
+                      href="/forgot-password-employer"
                       className="text-sm text-blue-600 hover:underline transition-all"
                     >
                       Forgot Password?

@@ -297,7 +297,7 @@ export default function NursesPage() {
                               if (confirm(`Delete nurse: ${nurse.fullName}?`)) {
                                 try {
                                   await fetch(
-                                    `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/nurse_profiles_admin/${nurse.id}`,
+                                    `https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/delete_nurse_Admin/${nurse.id}`,
                                     { method: "DELETE" }
                                   );
                                   setNurses((prev) =>

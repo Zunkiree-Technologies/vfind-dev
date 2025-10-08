@@ -190,7 +190,7 @@ export default function LoginPage() {
                   </button>
                 </div>
                 <a
-                  href="/forgot-password"
+                  href="/forgot_password_nurse"
                   className="text-sm text-[#4A90E2] hover:underline float-right mt-2"
                 >
                   Forgot password?

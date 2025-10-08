@@ -231,7 +231,7 @@ export default function EmployersPage() {
                             ) {
                               try {
                                 await fetch(
-                                  `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/employer_profiles/${employer.id}`,
+                                  `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/delete_employer_id/${employer.id}`,
                                   { method: "DELETE" }
                                 );
                                 setEmployers((prev) =>
