@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import NotificationSidebar from "./NotificationSidebar";
@@ -13,6 +13,7 @@ export const Navbar = () => {
   const [authToken, setAuthToken] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   // Pre-fill inputs if query params exist
   useEffect(() => {
@@ -23,16 +24,30 @@ export const Navbar = () => {
     setAuthToken(token);
   }, [searchParams]);
 
-  // Debounce function to prevent too many updates
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  const debounce = (fn: Function, delay = 250) => {
-    let timer: NodeJS.Timeout;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (...args: any[]) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn(...args), delay);
+  // Detect outside clicks to close user menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setUserMenuOpen(false);
+      }
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Debounce function
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const debounce = <T extends (...args: any[]) => void>(fn: T, delay = 250) => {
+  let timer: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
   };
+};
+
 
   const updateQuery = debounce((s: string, l: string) => {
     router.replace(
@@ -47,32 +62,33 @@ export const Navbar = () => {
   };
 
   return (
+
+
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 flex-wrap">
           {/* Logo */}
-         <div
-  className="flex items-center space-x-2 cursor-pointer"
-  onClick={() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      router.push("/nurseProfile"); // user logged in
-    } else {
-      router.push("/"); // not logged in
-    }
-  }}
->
-  <span className="text-lg font-bold">
-    <span className="text-primary">V</span>FIND
-  </span>
-</div>
-
+          <div
+            className="flex items-center space-x-2 cursor-pointer"
+            onClick={() => {
+              const token = localStorage.getItem("token");
+              if (token) {
+                router.push("/nurseProfile");
+              } else {
+                router.push("/");
+              }
+            }}
+          >
+            <span className="text-lg font-bold">
+              <span className="text-primary">V</span>FIND
+            </span>
+          </div>
 
           {/* Search Bar */}
           <div className="flex items-center flex-1 max-w-3xl bg-white rounded-xl shadow border border-gray-300 px-2 py-1.5 gap-3">
             {/* Job Search */}
             <div className="flex items-center flex-1">
-                <Search size={22} className="m-2 text-blue-600" />
+              <Search size={22} className="m-2 text-blue-600" />
               <input
                 type="text"
                 placeholder="Search by keyword, specialty, job title"
@@ -89,7 +105,7 @@ export const Navbar = () => {
 
             {/* Location Search */}
             <div className="flex items-center flex-1">
-              <MapPin size={22}  className="m-2 text-blue-600 " />
+              <MapPin size={22} className="m-2 text-blue-600" />
               <input
                 type="text"
                 placeholder="City, State or Zip code"
@@ -114,44 +130,63 @@ export const Navbar = () => {
                   <p className="text-sm">Connection Request</p>
                 </button>
 
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center space-x-2 cursor-pointer ml-4"
-                >
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-400 hover:bg-gray-50">
-                    <UserRound size={20} className="text-gray-700" />
-                  </div>
-                  <svg
-                    className={`w-4 h-4 text-gray-600 transition-transform ${userMenuOpen ? "rotate-180" : ""}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {/* User Menu */}
+                <div ref={userMenuRef} className="relative flex items-center">
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center space-x-2 cursor-pointer ml-4"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-400 hover:bg-gray-50">
+                      <UserRound size={20} className="text-gray-700" />
+                    </div>
+                    <svg
+                      className={`w-4 h-4 text-gray-600 transition-transform ${
+                        userMenuOpen ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {userMenuOpen && (
+                    <div className="absolute right-0 top-12 bg-white shadow-lg rounded-md w-40 z-50">
+                      <Link
+                        href="/nurseProfile/profile"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        href="/nurseProfile/connectedstatus"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Connections
+                      </Link>
+                      <Link
+                        href="/nurseProfile/SavedJobs"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Saved Jobs
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 <NotificationSidebar />
-
-                {userMenuOpen && (
-                  <div className="absolute right-0 top-12 bg-white shadow-lg rounded-md w-40 z-50">
-                    <Link href="/nurseProfile/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
-                      Profile
-                    </Link>
-                    <Link href="/nurseProfile/connectedstatus" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
-                      Connections
-                    </Link>
-                    <Link href="/nurseProfile/SavedJobs" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
-                     Saved Jobs
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
               </>
             ) : (
               <>
@@ -159,7 +194,7 @@ export const Navbar = () => {
                   onClick={() => router.push("/signup")}
                   className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
                 >
-                Create an Account
+                  Create an Account
                 </button>
                 <button
                   onClick={() => router.push("/signin")}
@@ -173,5 +208,7 @@ export const Navbar = () => {
         </div>
       </div>
     </nav>
+
+    
   );
 };

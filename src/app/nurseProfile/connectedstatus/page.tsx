@@ -30,27 +30,27 @@ export default function NurseStatusPage() {
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [messageType, setMessageType] = useState<"success" | "error">("success");
 
-const fetchRequests = useCallback(async () => {
-  const token = localStorage.getItem("token");
-  if (!token) return;
+  const fetchRequests = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-  setLoading(true);
-  try {
-    const res = await fetch(
-      "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (!res.ok) throw new Error("Failed to fetch requests");
-    const data: ConnectionRequest[] = await res.json();
+    setLoading(true);
+    try {
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch requests");
+      const data: ConnectionRequest[] = await res.json();
 
-    data.sort((a, b) => b.id - a.id);
-    setRequests(data);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+      data.sort((a, b) => b.id - a.id);
+      setRequests(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
 
   useEffect(() => {
@@ -148,125 +148,125 @@ const fetchRequests = useCallback(async () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row sm:justify-between sm:items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Connection Requests</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Manage requests from employers
-            </p>
-          </div>
-          <span className="mt-4 sm:mt-0 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-            {requests.length} Total Requests
-          </span>
-        </div>
-      </div>
 
-      {/* Filters/Search */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-          <div className="flex-1 max-w-md relative">
-            <input
-              type="text"
-              placeholder="Search by employer name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
 
-          <select
-            value={statusFilter}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="accepted">Accepted</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
-
-        {/* Cards */}
-        <div className="mt-6 space-y-4">
-          {loading ? (
-            <div className="text-center text-gray-500">Loading...</div>
-          ) : filteredRequests.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-              <User className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium text-gray-900">
-                No requests found
-              </h3>
-              <p className="mt-2 text-sm text-gray-500">
-                Try adjusting your filters or search terms.
-              </p>
+      <div className="bg-white min-h-screen">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {/* Header + Filters/Search aligned in one row */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Left: Title + Subtitle */}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Connection Requests</h1>
+              <p className="mt-1 text-sm text-gray-500">Manage requests from employers</p>
             </div>
-          ) : (
-            filteredRequests.map((req) => (
-              <div
-                key={req.id}
-                onClick={() => handleCardClick(req._employer_profiles?.id)}
-                className="bg-white rounded-lg shadow-sm p-4 sm:p-6 hover:shadow-md transition cursor-pointer flex flex-col sm:flex-row sm:justify-between sm:items-center"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {req._employer_profiles?.companyName ||
-                        req._employer_profiles?.fullName ||
-                        "Unknown"}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {req.created_at
-                        ? new Date(req.created_at).toLocaleString()
-                        : ""}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-                  {getStatusBadge(req.status)}
-                  {req.status === "pending" && (
-                    <>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUpdateStatus(req.id, "accepted");
-                        }}
-                        className="px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUpdateStatus(req.id, "rejected");
-                        }}
-                        className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium"
-                      >
-                        Reject
-                      </button>
-                    </>
-                  )}
-                </div>
+            {/* Right: Search + Filter + Total Requests */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+              {/* Search Bar */}
+              <div className="flex-1 sm:w-64 relative">
+                <input
+                  type="text"
+                  placeholder="Search by employer name..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
-            ))
-          )}
+
+              {/* Status Filter */}
+              <select
+                value={statusFilter}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+              </select>
+
+              {/* Total Requests Badge */}
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                {requests.length} Total Notification
+              </span>
+            </div>
+          </div>
+
+          {/* Cards Section */}
+          <div className="mt-6 space-y-4">
+            {loading ? (
+              <div className="text-center text-gray-500">Loading...</div>
+            ) : filteredRequests.length === 0 ? (
+              <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+                <User className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-4 text-lg font-medium text-gray-900">No requests found</h3>
+                <p className="mt-2 text-sm text-gray-500">Try adjusting your filters or search terms.</p>
+              </div>
+            ) : (
+              filteredRequests.map((req) => (
+                <div
+                  key={req.id}
+                  onClick={() => handleCardClick(req._employer_profiles?.id)}
+                  className="bg-white rounded-lg shadow-sm p-4 sm:p-6 hover:shadow-md transition cursor-pointer flex flex-col sm:flex-row sm:justify-between sm:items-center"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {req._employer_profiles?.companyName ||
+                          req._employer_profiles?.fullName ||
+                          "Unknown"}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {req.created_at ? new Date(req.created_at).toLocaleString() : ""}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+                    {getStatusBadge(req.status)}
+                    {req.status === "pending" && (
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdateStatus(req.id, "accepted");
+                          }}
+                          className="px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdateStatus(req.id, "rejected");
+                          }}
+                          className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
+
+
 
       {/* Toast */}
       {successMessage && (
         <div
-          className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-sm transition-all duration-300 transform ${
-            messageType === "success"
+          className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-sm transition-all duration-300 transform ${messageType === "success"
               ? "bg-green-100 text-green-800 border border-green-300"
               : "bg-red-100 text-red-800 border border-red-300"
-          }`}
+            }`}
         >
           {successMessage}
         </div>

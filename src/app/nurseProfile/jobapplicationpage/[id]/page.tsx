@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import Loader from "../../../../../components/loading";
-import { Bookmark, Building2 } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { Navbar } from "../../components/Navbar";
 
 
@@ -51,6 +51,10 @@ export default function JobApplicationPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
 
+  // console.log("Job ID from params:", id);
+  // const iddd = localStorage.getItem("nurse_profile_id");
+  // console.log("Nurse Profile ID from localStorage:", iddd);
+
   // Load token, email, profileId from localStorage
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -58,24 +62,30 @@ export default function JobApplicationPage() {
     const profileId = localStorage.getItem("nurse_profile_id");
 
     console.log("LocalStorage values:", { token, email, profileId });
-
+    console.log("Auth token state before setting:", token);
     if (token) {
       setAuthToken(token);
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
-
+    // console.log("Is user logged in?", authToken);
     if (email) setNurseEmail(email);
     if (profileId) setNurseProfileId(Number(profileId));
   }, []);
-
- // Check if job is already bookmarked
+  // console.log("Is user logged in?", authToken);
+  // Check if job is already bookmarked
   useEffect(() => {
     const fetchBookmarkStatus = async () => {
-      if (!id || !authToken) return;
 
+      const authToken = localStorage.getItem("token");
+      if (!id || !authToken) return;
+      console.log("Checking bookmark status for job ID:", id);
+      console.log("Auth token for bookmark check:", authToken);
+      console.log("Fetching bookmark status for job ID:", id);
       try {
+        console.log("Checking bookmark status for job ID:", id);
+        console.log("I am in", authToken);
         const res = await fetch(
           "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
           {
@@ -90,7 +100,7 @@ export default function JobApplicationPage() {
 
         const data = await res.json();
         console.log("Bookmark status response:", data);
-        setBookmarked(Array.isArray(data) && data.length > 0);
+        setBookmarked(Array.isArray(data[0]) && data[0].length > 0);
       } catch (err) {
         console.error("Error fetching bookmark status:", err);
         setBookmarked(false);
@@ -99,11 +109,14 @@ export default function JobApplicationPage() {
 
     fetchBookmarkStatus();
   }, [id, authToken]);
+  console.log("nurse id:", nurseProfileId);
+
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async () => {
-    if (!id || !nurseProfileId) {
-      console.log("Missing required data:", { id, nurseProfileId });
+    console.log("Handle fired");
+    if (!id) {
+      console.log("Missing required data:", { id });
       return;
     }
 
@@ -118,13 +131,15 @@ export default function JobApplicationPage() {
     try {
       if (!bookmarked) {
         const payload = {
-          nurse_profiles_id: nurseProfileId,
-          jobs_id: Number(id),
-          status: "",
-        };
-        
-        console.log("Saving job with payload:", payload);
 
+          jobs_id: Number(id),
+
+        };
+
+        console.log("Saving job with payload:", payload);
+        console.log(Number(id));
+
+        // Add to saved jobs
         const res = await fetch(
           "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved",
           {
@@ -133,7 +148,11 @@ export default function JobApplicationPage() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({
+
+              jobs_id: Number(id),
+
+            }),
           }
         );
 
@@ -150,7 +169,7 @@ export default function JobApplicationPage() {
       } else {
         // Remove from saved jobs
         console.log("Fetching saved job ID to delete...");
-        
+
         const fetchRes = await fetch(
           "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
           {
@@ -171,10 +190,10 @@ export default function JobApplicationPage() {
         if (!fetchRes.ok || !Array.isArray(data) || data.length === 0) {
           throw new Error("Failed to get saved job ID");
         }
-        
+
         const savedJobId = data[0]?.id;
         console.log("Saved job ID to delete:", savedJobId);
-        
+
         if (!savedJobId) throw new Error("Saved job ID not found");
 
         // Delete the saved job
@@ -268,7 +287,7 @@ export default function JobApplicationPage() {
         if (!jobRes.ok) throw new Error("Job not found");
 
         const jobData: Job = await jobRes.json();
-        console.log("Fetched job data:", jobData);
+        // console.log("Fetched job data:", jobData);
         setJob(jobData);
 
         // Fetch company info
@@ -295,14 +314,15 @@ export default function JobApplicationPage() {
   }, [job, nurseEmail, isLoggedIn]);
 
   // Fetch company info
-  const fetchCompanyInfo = async (userId: number) => {
+  const fetchCompanyInfo = async (id: number) => {
     try {
+
       const companyRes = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company`,
+        `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company_for_saved_jobs_page`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: userId }),
+          body: JSON.stringify({ user_id: id }),
         }
       );
 
@@ -418,21 +438,23 @@ export default function JobApplicationPage() {
       <div className="min-h-screen bg-white py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
             {/* Left Column - Main Job Details */}
             <div className="lg:col-span-2">
               <div className="shadow-sm relative">
                 <button
                   onClick={handleBookmarkToggle}
-                  disabled={!isLoggedIn || !nurseProfileId}
-                  className={`absolute top-4 right-4 p-2 rounded-full transition-all ${
-                    bookmarked ? "text-blue-600" : "text-blue-400"
-                  } hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  disabled={!isLoggedIn || !id}
+                  className={`absolute top-4 right-4 px-3 py-1 rounded-md transition-all text-sm font-medium
+                 ${bookmarked
+                      ? "bg-[#0073FF] text-white border-[#0073FF] "
+                      : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF] "
+                    } 
+               `}
                   title={bookmarked ? "Remove from saved jobs" : "Save job"}
                 >
-                  <Bookmark
-                    className={`w-5 h-5 ${bookmarked ? "fill-blue-600" : "fill-none"}`}
-                  />
+                  {bookmarked
+                    ? "Unsave Job"
+                    : "Save for later"}
                 </button>
 
                 {/* Header Section */}
@@ -447,7 +469,9 @@ export default function JobApplicationPage() {
                       </h1>
                     </div>
                   </div>
-                  <h2 className="text-[24px] font-semibold text-gray-900">{job.title}</h2>
+                  <h2 className="text-[24px] font-semibold text-gray-900">
+                    {job.title}
+                  </h2>
                 </div>
 
                 {/* Basic Info Section */}
@@ -455,10 +479,14 @@ export default function JobApplicationPage() {
                   <div className="flex flex-col gap-4 text-sm">
                     {/* Location */}
                     <div className="flex justify-between items-center w-2/3">
-                      <span className="font-medium text-gray-600">Location</span>
+                      <span className="font-medium text-gray-600">
+                        Location
+                      </span>
                       <div className="flex justify-start items-center w-1/2 gap-10">
                         <span className="font-medium text-gray-600">:</span>
-                        <p className="text-gray-900">{job.location || "Not specified"}</p>
+                        <p className="text-gray-900">
+                          {job.location || "Not specified"}
+                        </p>
                       </div>
                     </div>
 
@@ -481,34 +509,47 @@ export default function JobApplicationPage() {
 
                     {/* Job Type */}
                     <div className="flex justify-between items-center w-2/3">
-                      <span className="font-medium text-gray-600">Job Type</span>
+                      <span className="font-medium text-gray-600">
+                        Job Type
+                      </span>
                       <div className="flex justify-start gap-10 items-center w-1/2">
                         <span className="font-medium text-gray-600">:</span>
-                        <p className="text-gray-900">{job.type || "Not specified"}</p>
+                        <p className="text-gray-900">
+                          {job.type || "Not specified"}
+                        </p>
                       </div>
                     </div>
 
                     {/* Job Shift */}
                     <div className="flex justify-between items-center w-2/3">
-                      <span className="font-medium text-gray-600">Job Shift</span>
+                      <span className="font-medium text-gray-600">
+                        Job Shift
+                      </span>
                       <div className="flex justify-start gap-10 items-center w-1/2">
                         <span className="font-medium text-gray-600">:</span>
-                        <p className="text-gray-900">{job.JobShift || "Not specified"}</p>
+                        <p className="text-gray-900">
+                          {job.JobShift || "Not specified"}
+                        </p>
                       </div>
                     </div>
 
                     {/* Job Posted */}
                     <div className="flex justify-between items-center w-2/3">
-                      <span className="font-medium text-gray-600">Job Posted</span>
+                      <span className="font-medium text-gray-600">
+                        Job Posted
+                      </span>
                       <div className="flex justify-start gap-10 items-center w-1/2">
                         <span className="font-medium text-gray-600">:</span>
                         <p className="text-gray-900">
                           {job.created_at
-                            ? new Date(job.created_at).toLocaleDateString("en-AU", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })
+                            ? new Date(job.created_at).toLocaleDateString(
+                              "en-AU",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )
                             : "Not specified"}
                         </p>
                       </div>
@@ -518,10 +559,14 @@ export default function JobApplicationPage() {
 
                 {/* Candidate Preferences */}
                 <div className="p-6 border-b border-gray-500">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Candidate Preferences</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Candidate Preferences
+                  </h3>
                   <div className="space-y-4 text-sm">
                     <div className="flex justify-between items-center w-2/3">
-                      <span className="font-medium text-gray-600">Role Category</span>
+                      <span className="font-medium text-gray-600">
+                        Role Category
+                      </span>
                       <div className="flex justify-start gap-10 items-center w-1/2">
                         <span className="font-medium text-gray-600">:</span>
                         <p className="text-gray-900">{job.roleCategory}</p>
@@ -529,14 +574,20 @@ export default function JobApplicationPage() {
                     </div>
 
                     <div className="flex justify-between items-center w-2/3">
-                      <span className="font-medium text-gray-600">Experience</span>
+                      <span className="font-medium text-gray-600">
+                        Experience
+                      </span>
                       <div className="flex justify-start gap-10 items-center w-1/2">
                         <span className="font-medium text-gray-600">:</span>
-                        <p className="text-gray-900">{job.experienceMin} {job.experienceMax}</p>
+                        <p className="text-gray-900">
+                          {job.experienceMin}  {job.experienceMax}
+                        </p>
                       </div>
                     </div>
                     <div>
-                      <span className="font-medium text-gray-900">Preferred Certifications</span>
+                      <span className="font-medium text-gray-900">
+                        Preferred Certifications
+                      </span>
                       <div className="mt-2 space-y-1">
                         {job.certifications?.map((cert, index) => (
                           <div key={index} className="flex items-start">
@@ -551,7 +602,9 @@ export default function JobApplicationPage() {
 
                 {/* Job Description */}
                 <div className="p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Job Description</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                    Job Description
+                  </h2>
                   <div
                     className="prose prose-sm max-w-none text-gray-700 rounded-lg p-4 bg-gray-50 text-justify"
                     dangerouslySetInnerHTML={{ __html: job.description }}
@@ -562,14 +615,16 @@ export default function JobApplicationPage() {
               {/* Apply Button */}
               <button
                 onClick={handleButtonClick}
-                disabled={isLoggedIn && (submitting || hasApplied || checkingApplication)}
-                className={`${
-                  !isLoggedIn
+                disabled={
+                  isLoggedIn &&
+                  (submitting || hasApplied || checkingApplication)
+                }
+                className={`${!isLoggedIn
                     ? "bg-green-500 hover:bg-green-600"
                     : hasApplied
                       ? "bg-primary cursor-not-allowed"
                       : "bg-blue-400 hover:bg-blue-500"
-                } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
+                  } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
               >
                 {getButtonText()}
               </button>
@@ -590,7 +645,6 @@ export default function JobApplicationPage() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
