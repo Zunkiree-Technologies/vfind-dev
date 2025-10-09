@@ -51,15 +51,22 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3 flex-wrap">
           {/* Logo */}
-          <div
-            className="flex items-center space-x-2 cursor-pointer"
-            onClick={() => router.push("/nurseProfile")}
-          >
-            <div className="w-8 h-8 flex items-center justify-center bg-blue-400 rounded-[10px]">
-              <Search size={16} className="text-white" />
-            </div>
-            <span className="font-semibold text-lg text-black">VFind</span>
-          </div>
+         <div
+  className="flex items-center space-x-2 cursor-pointer"
+  onClick={() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.push("/nurseProfile"); // user logged in
+    } else {
+      router.push("/"); // not logged in
+    }
+  }}
+>
+  <span className="text-lg font-bold">
+    <span className="text-primary">V</span>FIND
+  </span>
+</div>
+
 
           {/* Search Bar */}
           <div className="flex items-center flex-1 max-w-3xl bg-white rounded-xl shadow border border-gray-300 px-2 py-1.5 gap-3">
@@ -133,6 +140,9 @@ export const Navbar = () => {
                     </Link>
                     <Link href="/nurseProfile/connectedstatus" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                       Connections
+                    </Link>
+                    <Link href="/nurseProfile/SavedJobs" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                     Saved Jobs
                     </Link>
                     <button
                       onClick={handleLogout}

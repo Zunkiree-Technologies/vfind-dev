@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import Loader from "../../../../../components/loading";
-import { Building2 } from "lucide-react";
+import { Bookmark, Building2 } from "lucide-react";
+import { Navbar } from "../../components/Navbar";
+
 
 interface Job {
   id: number;
@@ -43,9 +45,11 @@ export default function JobApplicationPage() {
   const [submitting, setSubmitting] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [nurseEmail, setNurseEmail] = useState<string | null>(null);
-  const [, setNurseProfileId] = useState<number | null>(null);
+  const [nurseProfileId, setNurseProfileId] = useState<number | null>(null);
   const [hasApplied, setHasApplied] = useState(false);
   const [checkingApplication, setCheckingApplication] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
 
   // Load token, email, profileId from localStorage
   useEffect(() => {
@@ -55,55 +59,196 @@ export default function JobApplicationPage() {
 
     console.log("LocalStorage values:", { token, email, profileId });
 
-    if (token) setAuthToken(token);
+    if (token) {
+      setAuthToken(token);
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+
     if (email) setNurseEmail(email);
     if (profileId) setNurseProfileId(Number(profileId));
   }, []);
 
-  // Check if user has already applied
-const checkIfAlreadyApplied = async (jobId: number, email: string) => {
-  try {
-    setCheckingApplication(true);
+ // Check if job is already bookmarked
+  useEffect(() => {
+    const fetchBookmarkStatus = async () => {
+      if (!id || !authToken) return;
 
-    const payload = {
-      jobs_id: jobId.toString(),
-      email: email,
+      try {
+        const res = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({ jobs_id: id.toString() }),
+          }
+        );
+
+        const data = await res.json();
+        console.log("Bookmark status response:", data);
+        setBookmarked(Array.isArray(data) && data.length > 0);
+      } catch (err) {
+        console.error("Error fetching bookmark status:", err);
+        setBookmarked(false);
+      }
     };
 
-    console.log("Checking application status with payload:", payload);
+    fetchBookmarkStatus();
+  }, [id, authToken]);
 
-    const res = await fetch(
-      `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/is_applied`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }
-    );
+  // Handle bookmark toggle
+  const handleBookmarkToggle = async () => {
+    if (!id || !nurseProfileId) {
+      console.log("Missing required data:", { id, nurseProfileId });
+      return;
+    }
 
-    const result = await res.json();
-    console.log("Raw application API response:", result);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in to save jobs");
+      return;
+    }
 
-    if (res.ok) {
-      if (Array.isArray(result) && result.length > 0) {
-        const hasAppliedStatus = result.some((app) => app.status === "applied");
-        console.log("User has applied?", hasAppliedStatus);
-        setHasApplied(hasAppliedStatus);
+    console.log("Toggling bookmark. Current state:", bookmarked);
+
+    try {
+      if (!bookmarked) {
+        const payload = {
+          nurse_profiles_id: nurseProfileId,
+          jobs_id: Number(id),
+          status: "",
+        };
+        
+        console.log("Saving job with payload:", payload);
+
+        const res = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        const responseData = await res.json();
+        console.log("Save job response:", responseData);
+
+        if (!res.ok) {
+          console.error("Failed to save job:", responseData);
+          return alert("Failed to save job");
+        }
+
+        setBookmarked(true);
+        console.log("Job saved successfully");
       } else {
-        console.log("No previous application found.");
+        // Remove from saved jobs
+        console.log("Fetching saved job ID to delete...");
+        
+        const fetchRes = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              jobs_id: id.toString(),
+            }),
+          }
+        );
+
+        const data = await fetchRes.json();
+        console.log("Fetch saved job data:", data);
+
+        if (!fetchRes.ok || !Array.isArray(data) || data.length === 0) {
+          throw new Error("Failed to get saved job ID");
+        }
+        
+        const savedJobId = data[0]?.id;
+        console.log("Saved job ID to delete:", savedJobId);
+        
+        if (!savedJobId) throw new Error("Saved job ID not found");
+
+        // Delete the saved job
+        const deleteRes = await fetch(
+          `https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved/${savedJobId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("Delete response status:", deleteRes.status);
+
+        if (!deleteRes.ok) {
+          const text = await deleteRes.text();
+          console.error("Failed to remove saved job:", text);
+          return alert("Failed to remove saved job");
+        }
+
+        setBookmarked(false);
+        console.log("Job removed successfully");
+      }
+    } catch (err) {
+      console.error("Error handling bookmark:", err);
+      alert("An error occurred while updating saved jobs");
+    }
+  };
+
+  // Check if user has already applied
+  const checkIfAlreadyApplied = async (jobId: number, email: string) => {
+    try {
+      setCheckingApplication(true);
+
+      const payload = {
+        jobs_id: jobId.toString(),
+        email: email,
+      };
+
+      console.log("Checking application status with payload:", payload);
+
+      const res = await fetch(
+        `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/is_applied`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await res.json();
+      console.log("Raw application API response:", result);
+
+      if (res.ok) {
+        if (Array.isArray(result) && result.length > 0) {
+          const hasAppliedStatus = result.some((app) => app.status === "applied");
+          console.log("User has applied?", hasAppliedStatus);
+          setHasApplied(hasAppliedStatus);
+        } else {
+          console.log("No previous application found.");
+          setHasApplied(false);
+        }
+      } else {
+        console.error("Failed to check application status:", res.status);
         setHasApplied(false);
       }
-    } else {
-      console.error("Failed to check application status:", res.status);
+    } catch (err) {
+      console.error("Error checking application status:", err);
       setHasApplied(false);
+    } finally {
+      setCheckingApplication(false);
     }
-  } catch (err) {
-    console.error("Error checking application status:", err);
-    setHasApplied(false);
-  } finally {
-    setCheckingApplication(false);
-  }
-};
+  };
 
   // Fetch job and company details
   useEffect(() => {
@@ -141,14 +286,13 @@ const checkIfAlreadyApplied = async (jobId: number, email: string) => {
     fetchJobData();
   }, [id, router]);
 
-  // Run application check only after job and profileId are ready
- useEffect(() => {
-  if (job && nurseEmail) {
-    console.log("Triggering application check for job:", job.id, "email:", nurseEmail);
-    checkIfAlreadyApplied(job.id, nurseEmail);
-  }
-}, [job, nurseEmail]);
-
+  // Run application check only after job and profileId are ready AND user is logged in
+  useEffect(() => {
+    if (job && nurseEmail && isLoggedIn) {
+      console.log("Triggering application check for job:", job.id, "email:", nurseEmail);
+      checkIfAlreadyApplied(job.id, nurseEmail);
+    }
+  }, [job, nurseEmail, isLoggedIn]);
 
   // Fetch company info
   const fetchCompanyInfo = async (userId: number) => {
@@ -236,6 +380,24 @@ const checkIfAlreadyApplied = async (jobId: number, email: string) => {
     }
   };
 
+  // Get button text based on authentication and application status
+  const getButtonText = () => {
+    if (!isLoggedIn) return "Create an Account";
+    if (checkingApplication) return "Checking...";
+    if (hasApplied) return "Applied";
+    if (submitting) return "Submitting...";
+    return "Apply Now";
+  };
+
+  // Get button action based on authentication status
+  const handleButtonClick = () => {
+    if (!isLoggedIn) {
+      router.push("/signup");
+    } else {
+      handleSubmitApplication();
+    }
+  };
+
   // Get company name
   const getCompanyName = () => companyFromQuery || "Healthcare Facility";
 
@@ -250,180 +412,186 @@ const checkIfAlreadyApplied = async (jobId: number, email: string) => {
     );
 
   return (
-    <div className="min-h-screen bg-white py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div>
+      <Navbar />
 
-          {/* Left Column - Main Job Details */}
-          <div className="lg:col-span-2">
-            <div className="bg-[#F5F6FA] rounded-lg shadow-sm ">
+      <div className="min-h-screen bg-white py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-              {/* Header Section */}
-              <div className="p-6 border-b border-gray-500" >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-6 h-6 text-blue-600" />
+            {/* Left Column - Main Job Details */}
+            <div className="lg:col-span-2">
+              <div className="shadow-sm relative">
+                <button
+                  onClick={handleBookmarkToggle}
+                  disabled={!isLoggedIn || !nurseProfileId}
+                  className={`absolute top-4 right-4 p-2 rounded-full transition-all ${
+                    bookmarked ? "text-blue-600" : "text-blue-400"
+                  } hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  title={bookmarked ? "Remove from saved jobs" : "Save job"}
+                >
+                  <Bookmark
+                    className={`w-5 h-5 ${bookmarked ? "fill-blue-600" : "fill-none"}`}
+                  />
+                </button>
+
+                {/* Header Section */}
+                <div className="p-6 border-b border-gray-500">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Building2 className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-semibold text-gray-900">
+                        {getCompanyName()}
+                      </h1>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="text-xl font-semibold text-gray-900">
-                      {getCompanyName()}
-                    </h1>
-                  </div>
+                  <h2 className="text-[24px] font-semibold text-gray-900">{job.title}</h2>
                 </div>
-                <h2 className="text-[24px] font-semibold text-gray-900 ">{job.title}</h2>
-              </div>
 
-              {/* Basic Info Section */}
-              <div className="p-4 border-b border-gray-500">
-                <div className="flex flex-col gap-4 text-sm">
-                  {/* Location */}
-                  <div className="flex justify-between items-center w-2/3 ">
-                    <span className="font-medium text-gray-600">Location</span>
-                    <div className="flex justify-start items-center w-1/2 gap-10">
-                      <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">{job.location || "Not specified"}</p>
+                {/* Basic Info Section */}
+                <div className="p-4 border-b border-gray-500">
+                  <div className="flex flex-col gap-4 text-sm">
+                    {/* Location */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">Location</span>
+                      <div className="flex justify-start items-center w-1/2 gap-10">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">{job.location || "Not specified"}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Salary */}
-                  <div className="flex justify-between items-center w-2/3 ">
-                    <span className="font-medium text-gray-600">Salary</span>
-                    <div className="flex justify-start gap-10 items-center w-1/2 ">
-                      <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">
-                        {job.minPay && job.maxPay
-                          ? `AUD ${job.minPay}-${job.maxPay}/hr`
-                          : job.minPay
-                            ? `From AUD ${job.minPay}/hr`
-                            : job.maxPay
-                              ? `Up to AUD ${job.maxPay}/hr`
-                              : "Not specified"}
-                      </p>
+                    {/* Salary */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">Salary</span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">
+                          {job.minPay && job.maxPay
+                            ? `AUD ${job.minPay}-${job.maxPay}/hr`
+                            : job.minPay
+                              ? `From AUD ${job.minPay}/hr`
+                              : job.maxPay
+                                ? `Up to AUD ${job.maxPay}/hr`
+                                : "Not specified"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Job Type */}
-                  <div className="flex justify-between items-center w-2/3 ">
-                    <span className="font-medium text-gray-600">Job Type</span>
-                    <div className="flex justify-start gap-10 items-center w-1/2 ">
-                      <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">{job.type || "Not specified"}</p>
+                    {/* Job Type */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">Job Type</span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">{job.type || "Not specified"}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Job Shift */}
-                  <div className="flex justify-between items-center w-2/3 ">
-                    <span className="font-medium text-gray-600">Job Shift</span>
-                    <div className="flex justify-start gap-10 items-center w-1/2 ">
-                      <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">{job.JobShift || "Not specified"}</p>
+                    {/* Job Shift */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">Job Shift</span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">{job.JobShift || "Not specified"}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Job Posted */}
-                  <div className="flex justify-between items-center w-2/3 ">
-                    <span className="font-medium text-gray-600">Job Posted</span>
-                    <div className="flex justify-start gap-10 items-center w-1/2 ">
-                      <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">
-                        {job.created_at
-                          ? new Date(job.created_at).toLocaleDateString("en-AU", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
-                          : "Not specified"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Candidate Preferences */}
-              <div className="p-6 border-b border-gray-500">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Candidate Preferences</h3>
-                <div className="space-y-4 text-sm">
-                  <div className="flex justify-between items-center w-2/3 ">
-                    <span className="font-medium text-gray-600">Role Category</span>
-                    <div className="flex justify-start gap-10 items-center w-1/2 ">
-                      <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900">{job.roleCategory}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center w-2/3 ">
-                    <span className="font-medium text-gray-600">Experience</span>
-                    <div className="flex justify-start gap-10 items-center w-1/2 ">
-                      <span className="font-medium text-gray-600">:</span>
-                      <p className="text-gray-900 ">{job.experienceMin}  {job.experienceMax} </p>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-900">Preferred Certifications</span>
-                    <div className="mt-2 space-y-1">
-                      {job.certifications?.map((cert, index) => (
-                        <div key={index} className="flex items-start">
-                          <span className="w-1 h-1 bg-gray-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
-                          <span className="text-gray-700">{cert}</span>
-                        </div>
-                      ))}
+                    {/* Job Posted */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">Job Posted</span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">
+                          {job.created_at
+                            ? new Date(job.created_at).toLocaleDateString("en-AU", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                            : "Not specified"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Candidate Preferences */}
+                <div className="p-6 border-b border-gray-500">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Candidate Preferences</h3>
+                  <div className="space-y-4 text-sm">
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">Role Category</span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">{job.roleCategory}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">Experience</span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">{job.experienceMin} {job.experienceMax}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900">Preferred Certifications</span>
+                      <div className="mt-2 space-y-1">
+                        {job.certifications?.map((cert, index) => (
+                          <div key={index} className="flex items-start">
+                            <span className="w-1 h-1 bg-gray-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                            <span className="text-gray-700">{cert}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job Description */}
+                <div className="p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Job Description</h2>
+                  <div
+                    className="prose prose-sm max-w-none text-gray-700 rounded-lg p-4 bg-gray-50 text-justify"
+                    dangerouslySetInnerHTML={{ __html: job.description }}
+                  />
+                </div>
               </div>
 
-              {/* Job Description */}
-              <div className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Job Description</h2>
-                <div
-                  className="prose prose-sm max-w-none text-gray-700 rounded-lg p-4 bg-gray-50 text-justify"
-                  dangerouslySetInnerHTML={{ __html: job.description }}
-                />
+              {/* Apply Button */}
+              <button
+                onClick={handleButtonClick}
+                disabled={isLoggedIn && (submitting || hasApplied || checkingApplication)}
+                className={`${
+                  !isLoggedIn
+                    ? "bg-green-500 hover:bg-green-600"
+                    : hasApplied
+                      ? "bg-primary cursor-not-allowed"
+                      : "bg-blue-400 hover:bg-blue-500"
+                } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
+              >
+                {getButtonText()}
+              </button>
+            </div>
+
+            {/* Right Column - About Company */}
+            <div className="lg:col-span-1">
+              <div className="bg-[#F5F6FA] rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  About Company
+                </h3>
+                <div className="text-sm text-gray-700 leading-relaxed">
+                  {company?.about_company ? (
+                    <p>{company.about_company}</p>
+                  ) : (
+                    <p>Loading company information...</p>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Apply Button */}
-            <button
-              onClick={() => {
-                if (!authToken || !nurseEmail) {
-                  router.push("/signup");
-                } else {
-                  handleSubmitApplication();
-                }
-              }}
-              disabled={submitting || hasApplied || checkingApplication}
-              className={`${
-                hasApplied 
-                  ? 'bg-primary cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700'
-              } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
-            >
-              {checkingApplication 
-                ? "Checking..." 
-                : hasApplied 
-                  ? "Applied" 
-                  : submitting 
-                    ? "Submitting..." 
-                    : "Apply Now"}
-            </button>
           </div>
-
-          {/* Right Column - About Company */}
-          <div className="lg:col-span-1">
-            <div className="bg-[#F5F6FA] rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                About Company
-              </h3>
-              <div className="text-sm text-gray-700 leading-relaxed">
-                {company?.about_company ? (
-                  <p>{company.about_company}</p>
-                ) : (
-                  <p>Loading company information...</p>
-                )}
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>

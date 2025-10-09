@@ -484,7 +484,7 @@ export default function CandidateList() {
           {/* Search button */}
           <button
             onClick={() => applyFilters()}
-            className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-600 rounded-[10px]"
+            className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
           >
             Search
           </button>
@@ -617,9 +617,8 @@ export default function CandidateList() {
             />
             <div className="text-sm text-gray-600">${payRate}+/hr</div>
           </div>
-          <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Radius Slider */}
+          {/* Radius Slider
           <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Radius</h3>
             <input
@@ -631,7 +630,7 @@ export default function CandidateList() {
               className="w-full"
             />
             <div className="text-sm text-gray-600">{radius} km</div>
-          </div>
+          </div> */}
         </div>
 
         {/* Right Candidate List */}

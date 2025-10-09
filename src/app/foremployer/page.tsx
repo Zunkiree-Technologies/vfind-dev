@@ -69,7 +69,7 @@ bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
 "
           >
             <div className="mt-5 ml-10">
-              <h2 className="text-2xl font-bold text-center text-gray-800 ">
+              <h2 className="text-2xl font-bold  text-gray-800 ">
                 Find & hire the right talent with us
               </h2>
               <ul className="space-y-3 text-[#474D6A] font-weight-medium text-sm  ">

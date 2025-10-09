@@ -151,7 +151,6 @@ export default function NurseSignup() {
                     validatePhone(formData.phone) &&
                     // Password validation
                     formData.password &&
-                    formData.password.length >= 8 &&
                     formData.password === formData.confirmPassword &&
                     // Terms and location
                     formData.termsAccepted &&
@@ -305,7 +304,7 @@ export default function NurseSignup() {
                     }
                     
                     // Show congratulations message
-                    alert("🎉 Congratulations! Your account has been created successfully!\n\nYou will now be redirected to the login page to access your new account.");
+                    alert("🎉 Congratulations! Your account has been created successfully!");
                     
                     // Small delay to let user read the message before redirect
                     setTimeout(() => {

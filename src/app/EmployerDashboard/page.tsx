@@ -28,7 +28,7 @@ interface Employer {
   email?: string;
   company?: string;
   mobile?: string;
-  companyName?:string;
+  companyName?: string;
 }
 
 export default function EmployerDashboard() {
@@ -110,7 +110,7 @@ export default function EmployerDashboard() {
 
         if (!res.ok) throw new Error("Failed to fetch jobs");
         const data = await res.json();
-        
+
         // Fetch applicant counts for all jobs
         const jobsWithCounts = await fetchApplicantCounts(data);
         setJobs(jobsWithCounts);
@@ -303,7 +303,7 @@ export default function EmployerDashboard() {
         {/* 👉 Left section */}
         <div className="space-y-5">
           {/* KYC Section */}
-          <div className="bg-white rounded-lg p-6 md:p-8 shadow-sm">
+          <div className="bg-white rounded-lg p-6 md:p-8 shadow-sm min-h-[195px]">
             {/* Initial Step */}
             {companyProfileStep === "initial" && (
               <>
@@ -394,7 +394,7 @@ export default function EmployerDashboard() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     onClick={handleEditCompanyProfile}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 
+                    className="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 
                      text-sm transition flex items-center gap-2"
                   >
                     <Edit size={16} />
@@ -461,7 +461,7 @@ export default function EmployerDashboard() {
 
         {/* 👉 Right section */}
         <div className="hidden lg:block lg:w-80  ">
-          <div className="bg-white rounded-lg p-4 shadow-sm space-y-4 h-[325px]">
+          <div className="bg-white rounded-lg p-4 shadow-sm space-y-4 h-[343px]">
             <h2 className="font-semibold text-gray-800">Need Help?</h2>
 
             {/* Phone */}

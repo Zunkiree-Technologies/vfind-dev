@@ -78,7 +78,7 @@ export default function CandidateDetailPage() {
   }, [employerId]);
 
   // Load wishlist state from localStorage
-  
+
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -401,21 +401,7 @@ export default function CandidateDetailPage() {
   return (
     <div className="min-h-screen bg-[#F5F6FA]  p-4  ">
       {/* ================= Top Profile Section ================= */}
-      <div className=" mx-auto bg-white rounded-xl shadow-sm p-8 mb-8 relative container">
-        {/* Wishlist Button */}
-        <button
-          onClick={handleWishlistToggle}
-          disabled={!nurseId || !employerId}
-          className={`absolute top-6 right-6 px-4 py-2 rounded-md shadow-md font-semibold transition-all duration-200
-    ${
-      wishlisted
-        ? "bg-blue-600 text-white"
-        : "bg-white text-blue-600 hover:bg-blue-100"
-    }`}
-        >
-          {wishlisted ? "Saved" : "Save"}
-        </button>
-
+      <div className="mx-auto bg-white rounded-xl shadow-sm p-8 mb-8 relative container">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
           {/* Profile Image */}
           <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200 flex-shrink-0">
@@ -437,51 +423,60 @@ export default function CandidateDetailPage() {
 
           {/* Profile Info */}
           <div className="flex-1 space-y-2">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {candidate.fullName}
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900">{candidate.fullName}</h1>
             <div className="flex items-center gap-2 text-gray-500 text-sm">
               <Calendar className="w-4 h-4 text-blue-700" />
               Profile last updated: {new Date().toLocaleDateString()}
             </div>
 
-            {/* Connection Buttons */}
-            {connectionStatus === "pending" && (
-              <button
-                disabled
-                className="mt-3 px-6 py-2 rounded-lg bg-gray-400 text-white cursor-not-allowed"
-              >
-                Request Sent
-              </button>
-            )}
-
-            {connectionStatus === "accepted" && (
-              <div className="flex items-center gap-3 mt-3">
+            {/* Buttons Row */}
+            <div className="flex items-center gap-3 mt-3 flex-wrap">
+              {/* Connection Buttons */}
+              {connectionStatus === "pending" && (
                 <button
                   disabled
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg"
+                  className="px-6 py-2 rounded-[14px] bg-gray-400 text-white cursor-not-allowed"
+                >
+                  Request Sent
+                </button>
+              )}
+
+              {connectionStatus === "accepted" && (
+                <button
+                  disabled
+                  className="px-6 py-2 rounded-[14px] bg-green-600 text-white"
                 >
                   Connected
                 </button>
-                <div className="px-6 py-2 border rounded-lg cursor-pointer hover:bg-gray-100">
-                  Connected
-                </div>
-              </div>
-            )}
+              )}
 
-            {(connectionStatus === "rejected" ||
-              connectionStatus === "none") && (
+              {(connectionStatus === "rejected" || connectionStatus === "none") && (
+                <button
+                  onClick={handleSendConnection}
+                  disabled={sendingConnection}
+                  className="px-6 py-2 rounded-[14px] bg-[#FFFDFD] hover:bg-[#0073FF] hover:text-white text-[#0073FF] border border-blue-400 font-regular"
+                >
+                  {sendingConnection ? "Sending..." : "Connect With Candidate"}
+                </button>
+              )}
+
+              {/* Wishlist Button - same UI */}
               <button
-                onClick={handleSendConnection}
-                disabled={sendingConnection}
-                className="mt-3 px-6 py-1 rounded-[14px] bg-[#FFFDFD] hover:bg-[#0073FF] hover:text-white text-[#0073FF] border border-blue-400 font-regular"
+                onClick={handleWishlistToggle}
+                disabled={!nurseId || !employerId}
+                className={`px-6 py-2 rounded-[14px] border font-regular transition-all duration-200 ${wishlisted
+                    ? "bg-[#0073FF] text-white border-[#0073FF]"
+                    : "bg-[#FFFDFD] hover:bg-[#0073FF] hover:text-white text-[#0073FF] border-blue-400"
+                  }`}
               >
-                {sendingConnection ? "Sending..." : "Connect With Candidate"}
+                {wishlisted ? "Saved" : "Save for later"}
               </button>
-            )}
+            </div>
           </div>
         </div>
       </div>
+
+
 
       {/* ================= Basic Info & Visa Section ================= */}
       <div className="lg:col-span-1 flex flex-col lg:flex-row justify-between gap-4 mx-4 mx-auto container">
@@ -649,7 +644,7 @@ export default function CandidateDetailPage() {
             <h3 className="font-medium text-gray-700 mb-2">Preferred Shift</h3>
             <div className="flex flex-wrap gap-2">
               {candidate.shiftPreferences &&
-              candidate.shiftPreferences.length > 0 ? (
+                candidate.shiftPreferences.length > 0 ? (
                 candidate.shiftPreferences.map((shift, index) => (
                   <span
                     key={index}
@@ -744,9 +739,8 @@ export default function CandidateDetailPage() {
               <p className="text-gray-500">Organization Name</p>
               <p className="font-medium text-gray-900">
                 {candidate.organizationName
-                  ? `${candidate.organizationName} (since ${
-                      candidate.organizationStartYear || "N/A"
-                    })`
+                  ? `${candidate.organizationName} (since ${candidate.organizationStartYear || "N/A"
+                  })`
                   : "Not specified"}
               </p>
             </div>

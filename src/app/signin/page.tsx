@@ -87,7 +87,7 @@ export default function LoginPage() {
   return (
     <div className="h-fit ">
       <Navbar />
-      <div className="flex items-center justify-center min-h-fit py-10  px-4">
+      <div className="flex items-center justify-center min-h-fit py-10  px-4 mt-10">
         {/* Flex container with responsive behavior */}
         <div className="flex flex-col md:flex-col lg:flex-row gap-6 max-w-5xl w-full">
           {/* "New to VFind" Section (Now on the Left) */}
@@ -136,7 +136,7 @@ bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
           <div className="border-1 border-gray-300 lg:order-1 w-full lg:w-[448px] h-auto lg:h-[477px] bg-white shadow-md rounded-2xl p-10">
 
 
-            <h2 className="text-2xl font-medium text-gray-800 mb-4 text-center">
+            <h2 className="text-xl sm:text-[22px] font-medium text-[#121224] ">
               Sign In to Your Nurse Account
             </h2>
 
@@ -151,7 +151,7 @@ bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
                 </label>
                 <input
                   type="email"
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#717B9E] h-[40] w-[328]"
+                  className="w-full p-3 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#717B9E] h-[40] w-[328]"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
@@ -166,7 +166,7 @@ bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
-                    className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#717B9E] h-[40] w-[328]"
+                    className="w-full p-3 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#717B9E] h-[40] w-[328]"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter password"
@@ -190,7 +190,7 @@ bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-[328px] h-[40px] bg-[#4A90E2] text-white rounded-lg font-medium hover:bg-blue-500 transition mt-5 mx-auto block"
+                className="w-full sm:w-[328px] h-[40px] bg-[#4A90E2] text-white rounded-lg font-medium hover:bg-blue-500 transition mt-8 mx-auto block"
               >
                 {loading ? "Logging in..." : "Login"}
               </button>

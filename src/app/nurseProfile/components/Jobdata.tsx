@@ -346,7 +346,7 @@ export default function JobData() {
     );
 
   return (
-    <div className="p-6 min-h-screen bg-[#F5F6FA]">
+    <div className="p-4 min-h-screen bg-[#F5F6FA]">
       <div className="flex gap-6 mt-6 items-start">
         <div className="mx-auto container flex justify-center item-center gap-8">
           {/* Filters Sidebar */}

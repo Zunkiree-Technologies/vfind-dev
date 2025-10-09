@@ -414,8 +414,8 @@ function RegistrationComponent() {
                   alert("Please enter a valid email address");
                   return;
                 }
-                if (!formData.password || formData.password.length < 6) {
-                  alert("Password must be at least 6 characters");
+                if (!formData.password || formData.password.length < 1) {
+                  alert("Password must be at least 1 characters");
                   return;
                 }
                 if (!passwordsMatch) {
