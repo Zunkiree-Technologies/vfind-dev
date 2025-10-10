@@ -48,7 +48,7 @@ export default function FeaturedJobs() {
 
   return (
     <section
-      className="min-h-fit bg-[#F8FAFD] flex items-center justify-center px-6 py-12"
+      className="min-h-fit flex items-center justify-center px-6 py-12 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
       id="Featurejobs"
     >
       <div className="max-w-7xl w-full">

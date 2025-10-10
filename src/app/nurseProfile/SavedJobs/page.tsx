@@ -13,6 +13,7 @@ import {
 import Loader from "../../../../components/loading";
 import Link from "next/link";
 import { Navbar } from "../components/Navbar";
+import Footer from "@/app/Admin/components/layout/Footer";
 
 const EXPERIENCE_RANGES: Record<string, [number, number]> = {
   "Less than 6 months": [0, 0.5],
@@ -561,6 +562,9 @@ export default function SavedJobs() {
           </div>
         </div>
       </div>
+         <div>
+              <Footer/>
+            </div>
     </div>
   );
 }

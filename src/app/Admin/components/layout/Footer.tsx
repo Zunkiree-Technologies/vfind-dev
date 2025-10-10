@@ -1,5 +1,6 @@
 "use client";
-import { Linkedin, Instagram, Search } from "lucide-react";
+import { Linkedin, Instagram } from "lucide-react";
+import Link from "next/link";
 
 export default function Footer() {
     return (
@@ -7,12 +8,15 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 grid grid-cols-1 md:grid-cols-[500px_1fr_1fr_1fr] gap-10">
                 {/* Logo & About */}
                 <div>
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="bg-blue-400 p-2 rounded-lg">
-                            <Search size={16} className="text-white " />
-                        </div>
-                        <h3 className="text-black font-semibold text-lg">VFind</h3>
-                    </div>
+                    <Link href="/" className="flex items-center space-x-2 cursor-pointer">
+
+
+                        <span className="text-lg font-bold text-black">
+                            <span className="text-primary">V</span> FIND
+                        </span>
+
+
+                    </Link>
                     <p className="text-sm text-black leading-relaxed">
                         VFind – A trusted platform that connects nurses and healthcare professionals with leading employers across Australia.
                         We make the hiring process faster, simpler, and more reliable, while helping jobseekers build successful careers
@@ -53,8 +57,8 @@ export default function Footer() {
                     <h4 className="text-black  font-semibold mb-4">Important Links</h4>
                     <ul className="space-y-2 text-sm">
                         <li><a href="blogs" className="text-black ">Resources</a></li>
-                        <li><a href="#" className="text-black ">Privacy Policy</a></li>
-                        <li><a href="#" className="text-black ">Terms & Conditions</a></li>
+                        <li><a href="" className="text-black ">Privacy Policy</a></li>
+                        <li><a href="" className="text-black ">Terms & Conditions</a></li>
                     </ul>
                 </div>
 
@@ -62,16 +66,16 @@ export default function Footer() {
                 <div>
                     <h4 className="text-black  font-semibold mb-4">Quick Links</h4>
                     <ul className="space-y-2 text-sm">
-                        <li><a href="#" className="text-black ">Contact Us</a></li>
-                        <li><a href="#" className="text-black ">About Us</a></li>
+                        <li><a href="/contact" className="text-black ">Contact Us</a></li>
+                        <li><a href="/about" className="text-black ">About Us</a></li>
                     </ul>
                 </div>
             </div>
 
             {/* Bottom Bar */}
-            <div className="border-t border-white mt-10">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 text-center text-sm text-gray-400">
-                    © {new Date().getFullYear()} | VFind Pty. Ltd.
+            <div className="border-t border-black ">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 text-center text-sm text-black">
+                    {new Date().getFullYear()} | VFind Pty. Ltd.
                 </div>
             </div>
         </footer>

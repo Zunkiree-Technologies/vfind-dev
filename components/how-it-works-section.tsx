@@ -25,7 +25,7 @@ const steps = [
 
 export const HowItWorksSection = () => {
   return (
-    <section className="min-h-fit p-5 mt-5 bg-[#F8FAFD] flex items-center justify-center">
+    <section className="min-h-fit p-5 mt-5  flex items-center justify-center bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]">
       <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <div className="text-center mb-16 fade-in">
@@ -44,7 +44,11 @@ export const HowItWorksSection = () => {
 
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-12 relative z-10">
             {steps.map((step, index) => (
+
+
               <div key={index} className="text-center flex flex-col items-center">
+
+                
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-blue-400 flex items-center justify-center bg-white mb-4 sm:mb-6">
                   <step.icon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
                 </div>

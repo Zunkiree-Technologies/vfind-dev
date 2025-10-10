@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 import React, { Suspense } from "react";
 import Jobdata from "../nurseProfile/components/Jobdata";
 import { Navbar } from "../nurseProfile/components/Navbar";
-import FooterSectionTwo from "../../../components/Footer-section-two";
+import Footer from "../../../components/footer-section";
 
 export default function JobListPage() {
   return (
@@ -14,7 +14,9 @@ export default function JobListPage() {
       <Suspense fallback={<div>Loading jobs...</div>}>
         <Jobdata />
       </Suspense>
-      <FooterSectionTwo />
+      <div className="bg-[#1F3C88] ">
+        <Footer />
+      </div>
 
 
     </>

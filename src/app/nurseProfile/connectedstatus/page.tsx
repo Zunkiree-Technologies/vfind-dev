@@ -1,8 +1,11 @@
 "use client";
+export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { User, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Navbar } from "../components/Navbar";
+import Footer from "@/app/Admin/components/layout/Footer";
 
 interface ConnectionRequest {
   id: number;
@@ -19,7 +22,7 @@ interface ConnectionRequest {
   };
 }
 
-export default function NurseStatusPage() {
+function NurseStatusContent() {
   const router = useRouter();
   const [requests, setRequests] = useState<ConnectionRequest[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,7 +54,6 @@ export default function NurseStatusPage() {
       setLoading(false);
     }
   }, []);
-
 
   useEffect(() => {
     fetchRequests();
@@ -93,7 +95,7 @@ export default function NurseStatusPage() {
       if (newStatus === "accepted") {
         setMessageType("success");
         setSuccessMessage(
-          `You’ve successfully connected with ${employerName}. You will soon receive a confirmation email with further details from the employer.`
+          `You've successfully connected with ${employerName}. You will soon receive a confirmation email with further details from the employer.`
         );
       } else {
         setMessageType("error");
@@ -147,10 +149,9 @@ export default function NurseStatusPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-
-
-      <div className="bg-white min-h-screen">
+    <>
+      <Navbar />
+      <div className="bg-white min-h-[60vh]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Header + Filters/Search aligned in one row */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -258,19 +259,34 @@ export default function NurseStatusPage() {
         </div>
       </div>
 
-
-
       {/* Toast */}
       {successMessage && (
         <div
           className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-sm transition-all duration-300 transform ${messageType === "success"
-              ? "bg-green-100 text-green-800 border border-green-300"
-              : "bg-red-100 text-red-800 border border-red-300"
+            ? "bg-green-100 text-green-800 border border-green-300"
+            : "bg-red-100 text-red-800 border border-red-300"
             }`}
         >
           {successMessage}
         </div>
       )}
+      <div>
+        <Footer />
+      </div>
+    </>
+  );
+}
+
+export default function NurseStatusPage() {
+  return (
+    <div className="bg-gray-50">
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-gray-500">Loading...</div>
+        </div>
+      }>
+        <NurseStatusContent />
+      </Suspense>
     </div>
   );
 }

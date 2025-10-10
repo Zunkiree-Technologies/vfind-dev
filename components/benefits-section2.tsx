@@ -21,11 +21,12 @@ const benefits = [
 
 export const BenefitsSection = () => {
   return (
-    <section className="min-h-[505px] flex items-center justify-center bg-[#F5F6FA]">
+    <section className="min-h-[505px] flex items-center justify-center bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]
+">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Heading */}
         <div className="text-center mb-16 fade-in">
-          <h2 className="text-3xl sm:text-3xl md:text-5xl lg:text-4xl font-bold text-black mb-6">
+          <h2 className="text-[32px] md:text-4xl font-semibold leading-tight">
             What we <span className="text-[#61A6FA]">Do</span>?
           </h2>
         </div>
@@ -38,17 +39,17 @@ export const BenefitsSection = () => {
               className="flex flex-col items-center space-y-4"
             >
               {/* Icon Circle */}
-              <div className="bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center">
-                <benefit.icon className="h-10 w-10 text-[#61A6FA]" />
+              <div className="bg-blue-100 w-[138px] h-[138px] rounded-full flex items-center justify-center">
+                <benefit.icon className="h-[62px] w-[62px] text-[#61A6FA]" />
               </div>
 
               {/* Title */}
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-[22px] font-medium  text-gray-900">
                 {benefit.title}
               </h3>
 
               {/* Description */}
-              <p className="text-gray-600 text-sm max-w-[260px]">
+              <p className="text-gray-600 text-[16px] text-medium">
                 {benefit.description}
               </p>
             </div>

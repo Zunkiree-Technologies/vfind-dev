@@ -15,6 +15,7 @@ import { StartTimeStep } from "./components/StartTimeStep";
 import { WorkingInHealthcareStep } from "./components/WorkingInHealthcareStep";
 import { ShiftPreferenceStep } from "./components/ShiftPreferanceStep";
 import Navbar from "../../../components/navbar";
+import Footer from "../../../components/footer-section";
 
 export default function NurseSignup() {
     const router = useRouter();
@@ -387,7 +388,7 @@ export default function NurseSignup() {
                                     className={`flex-1 h-1.5 lg:h-2 mx-0.5 lg:mx-1 rounded-full ${currentStep > stepNumber
                                         ? "bg-green-600"
                                         : currentStep === stepNumber
-                                            ? "bg-blue-600"
+                                            ? "bg-blue-500"
                                             : "bg-gray-300"
                                         }`}
                                 />
@@ -416,7 +417,7 @@ export default function NurseSignup() {
                                         onClick={() => setCurrentStep((prev) => prev + 1)}
                                         disabled={!isStepComplete(currentStep)}
                                         className={`px-4 lg:px-4 py-2 lg:py-2 rounded text-white text-sm lg:text-base ${isStepComplete(currentStep)
-                                            ? "bg-blue-600 hover:bg-blue-700"
+                                            ? "bg-blue-400 hover:bg-blue-500"
                                             : "bg-gray-400 cursor-not-allowed"
                                             } transition-colors`}
                                     >
@@ -428,7 +429,7 @@ export default function NurseSignup() {
                                         onClick={handleSubmit}
                                         disabled={!isStepComplete(currentStep) || isSubmitting}
                                         className={`px-4 lg:px-4 py-2 lg:py-2 rounded text-white text-sm lg:text-base ${isStepComplete(currentStep) && !isSubmitting
-                                            ? "bg-green-600 hover:bg-green-700"
+                                            ? "bg-blue-400 hover:bg-blue-500"
                                             : "bg-gray-400 cursor-not-allowed"
                                             } transition-colors`}
                                     >
@@ -440,6 +441,9 @@ export default function NurseSignup() {
                     </div>
                 </div>
             </div>
+             <div className="bg-[#1F3C88] ">
+                    <Footer />
+                  </div>
         </div>
     );
 }

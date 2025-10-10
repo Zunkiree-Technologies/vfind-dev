@@ -1,17 +1,36 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search, MapPin, Briefcase, Clock } from "lucide-react";
 
-
 export const SearchBar = () => {
+  const router = useRouter();
+
+  const [jobTitle, setJobTitle] = useState("");
+  const [city, setCity] = useState("");
+  const [experience, setExperience] = useState("");
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+
+    if (jobTitle) params.set("search", jobTitle);
+    if (city) params.set("location", city);
+    if (experience) params.set("experience", experience);
+
+    // Navigate to jobdata page with query params
+    router.push(`/nurseProfile?${params.toString()}`);
+  };
+
   return (
-    <div className="bg-white rounded-full  px-4 py-3 flex items-center gap-3 max-w-4xl mx-auto">
+    <div className="bg-white rounded-full px-4 py-3 flex items-center gap-3 max-w-4xl mx-auto shadow-md">
       {/* Job Title */}
-     <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md flex-1 bg-white">
+      <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md flex-1 bg-white">
         <Briefcase className="text-gray-400 h-4 w-4" />
         <input
           type="text"
           placeholder="Job Title"
+          value={jobTitle}
+          onChange={(e) => setJobTitle(e.target.value)}
           className="w-full text-sm bg-transparent outline-none placeholder-gray-400"
         />
       </div>
@@ -19,7 +38,11 @@ export const SearchBar = () => {
       {/* Location */}
       <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md flex-1 bg-white">
         <MapPin className="text-gray-400 h-4 w-4" />
-        <select className="w-full text-sm bg-transparent outline-none text-gray-600">
+        <select
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          className="w-full text-sm bg-transparent outline-none text-gray-600"
+        >
           <option value="">City</option>
           <option value="sydney">Sydney, NSW</option>
           <option value="melbourne">Melbourne, VIC</option>
@@ -30,10 +53,14 @@ export const SearchBar = () => {
         </select>
       </div>
 
-    {/* Experience */}
+      {/* Experience */}
       <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md flex-1 bg-white">
         <Clock className="text-gray-400 h-4 w-4" />
-        <select className="w-full text-sm bg-transparent outline-none text-gray-600">
+        <select
+          value={experience}
+          onChange={(e) => setExperience(e.target.value)}
+          className="w-full text-sm bg-transparent outline-none text-gray-600"
+        >
           <option value="">Experience</option>
           <option value="new">Starting</option>
           <option value="entry">Less than 1 year</option>
@@ -44,7 +71,10 @@ export const SearchBar = () => {
       </div>
 
       {/* Search Button */}
-      <button className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-white hover:bg-[#477fff] transition">
+      <button
+        onClick={handleSearch}
+        className="flex items-center justify-center w-10 h-10 rounded-full bg-[#61A6FA] text-white hover:bg-[#477fff] transition"
+      >
         <Search className="h-4 w-4" />
       </button>
     </div>

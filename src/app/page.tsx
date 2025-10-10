@@ -1,7 +1,7 @@
 import { BenefitsSection } from "../../components/benefits-section";
 import { FeaturedCompanies } from "../../components/FeaturedCompanies";
 import FeaturedJobs from "../../components/FeaturedJobs";
-import FooterSectionTwo from "../../components/Footer-section-two";
+import Footer from "../../components/footer-section";
 import { HeroSection } from "../../components/hero-section";
 import { HowItWorksSection } from "../../components/how-it-works-section";
 import Navbar from "../../components/navbar";
@@ -38,7 +38,9 @@ export default function Home() {
         <TestimonialsSection />
       </section>
 
-      <FooterSectionTwo /> 
+    <div className="bg-[#1F3C88] ">
+           <Footer />
+         </div>
 
     </main>
   );

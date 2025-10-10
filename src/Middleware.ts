@@ -18,6 +18,13 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
   }
+    if (pathname.startsWith("/Applicants")) {
+    if (!token) {
+      // Redirect to employer login if not logged in
+      url.pathname = "/employerloginpage"; // or your employer login route
+      return NextResponse.redirect(url);
+    }
+  }
 
   // Protect nurseProfile routes
   if (pathname.startsWith("/nurseProfile")) {
@@ -26,6 +33,15 @@ export function middleware(req: NextRequest) {
       url.pathname = "/signin"; // or your nurse login route
       return NextResponse.redirect(url);
     }
+    
+  }
+   if (pathname.startsWith("/joblist")) {
+    if (!token) {
+      // Redirect to nurse login if not logged in
+      url.pathname = "/signin"; // or your nurse login route
+      return NextResponse.redirect(url);
+    }
+    
   }
 
   // If token exists or route is public, continue

@@ -261,7 +261,8 @@ const EmployerLoginPage = () => {
           <div
             className="hidden md:flex flex-col justify-between w-full lg:w-[627px] lg:h-[480px] p-10 rounded-2xl shadow-md 
         order-2 lg:order-1
-bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]"
+bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
+
           >
             <div className="mt-10 ml-10">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -269,26 +270,26 @@ bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]"
               </h2>
               <ul className="space-y-3 text-[#474D6A] font-weight-medium text-sm">
                 <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
                   <span className="font-regular text-[14px] text-black">
                     Post jobs and reach verified healthcare professionals.
                   </span>
                 </li>
 
                 <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
                   <span className="font-regular text-[14px] text-black">
                     View detailed nurse profiles and credentials.
                   </span>
                 </li>
                 <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
                   <span className="font-regular text-[14px] text-black">
                     Connect directly with top nursing talent.
                   </span>
                 </li>
                 <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0 bg-white rounded-full" />
+                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
                   <span className="font-regular text-[14px] text-black">
                     Build your trusted employer brand.
                   </span>

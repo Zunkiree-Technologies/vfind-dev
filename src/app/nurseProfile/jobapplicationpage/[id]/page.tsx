@@ -441,21 +441,22 @@ export default function JobApplicationPage() {
             {/* Left Column - Main Job Details */}
             <div className="lg:col-span-2">
               <div className="shadow-sm relative">
-                <button
-                  onClick={handleBookmarkToggle}
-                  disabled={!isLoggedIn || !id}
-                  className={`absolute top-4 right-4 px-3 py-1 rounded-md transition-all text-sm font-medium
-                 ${bookmarked
-                      ? "bg-[#0073FF] text-white border-[#0073FF] "
-                      : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF] "
-                    } 
-               `}
-                  title={bookmarked ? "Remove from saved jobs" : "Save job"}
-                >
-                  {bookmarked
-                    ? "Unsave Job"
-                    : "Save for later"}
-                </button>
+                {isLoggedIn && (
+                  <button
+                    onClick={handleBookmarkToggle}
+                    disabled={!id}
+                    className={`absolute top-4 right-4 px-3 py-1 rounded-md transition-all text-sm font-medium
+      ${bookmarked
+                        ? "bg-[#0073FF] text-white border-[#0073FF]"
+                        : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF]"
+                      }
+    `}
+                    title={bookmarked ? "Remove from saved jobs" : "Save job"}
+                  >
+                    {bookmarked ? "Unsave Job" : "Save for later"}
+                  </button>
+                )}
+
 
                 {/* Header Section */}
                 <div className="p-6 border-b border-gray-500">
@@ -620,10 +621,10 @@ export default function JobApplicationPage() {
                   (submitting || hasApplied || checkingApplication)
                 }
                 className={`${!isLoggedIn
-                    ? "bg-green-500 hover:bg-green-600"
-                    : hasApplied
-                      ? "bg-primary cursor-not-allowed"
-                      : "bg-blue-400 hover:bg-blue-500"
+                  ? "bg-blue-400 hover:bg-blue-500"
+                  : hasApplied
+                    ? "bg-primary cursor-not-allowed"
+                    : "bg-blue-400 hover:bg-blue-500"
                   } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
               >
                 {getButtonText()}

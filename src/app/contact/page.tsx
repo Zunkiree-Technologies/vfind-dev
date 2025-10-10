@@ -4,7 +4,7 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "../../../components/navbar";
-import Footer from "../../../components/Footer-section-two";
+import Footer from "../../../components/footer-section";
 
 export default function ContactUs() {
   const [formData, setFormData] = useState({
@@ -167,7 +167,10 @@ export default function ContactUs() {
         </div>
       </div>
 
-      <Footer />
+     
+         <div className="bg-[#1F3C88] ">
+                <Footer />
+              </div>
     </div>
 
   );

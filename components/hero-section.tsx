@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export const HeroSection = () => {
   return (
-    <section className="relative min-h-[576px] flex items-center justify-center overflow-hidden bg-[#F8FAFD]">
+    <section className="relative min-h-[576px] flex items-center justify-center overflow-hidden bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between">
 
         {/* Left Content */}
@@ -18,14 +18,14 @@ export const HeroSection = () => {
             <span className="">Australia</span>
           </h1>
 
-          <p className="text-gray-600 text-lg md:text-xl lg:text-2xl leading-relaxed">
+          <p className="text-[#717376]  md:text-xl lg:text-xxl leading-relaxed">
             VFind helps nurses and healthcare professionals find the right jobs,
             while making it easier for aged care providers to hire the right
             people—fast, secure, and reliable.
           </p>
 
           {/* Search Bar */}
-          <div className="w-full max-w-3xl h-[90px] mx-auto lg:mx-0">
+          <div className="w-[645px] h-[90px] mx-auto lg:mx-0">
             <SearchBar />
           </div>
         </div>
