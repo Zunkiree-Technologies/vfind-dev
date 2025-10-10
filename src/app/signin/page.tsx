@@ -191,7 +191,7 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-[328px] h-[40px] bg-[#4A90E2] text-white rounded-lg font-medium hover:bg-blue-500 transition mt-8 mx-auto block"
+                className="w-full sm:w-[328px] h-[40px] bg-[#4A90E2] text-white rounded-lg font-medium hover:bg-blue-500 transition mt-12 mx-auto block"
               >
                 {loading ? "Logging in..." : "Login"}
               </button>

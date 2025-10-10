@@ -16,6 +16,7 @@ import { WorkingInHealthcareStep } from "./components/WorkingInHealthcareStep";
 import { ShiftPreferenceStep } from "./components/ShiftPreferanceStep";
 import Navbar from "../../../components/navbar";
 import Footer from "../../../components/footer-section";
+import { CheckCircle } from "lucide-react";
 
 export default function NurseSignup() {
     const router = useRouter();
@@ -75,11 +76,11 @@ export default function NurseSignup() {
     const validateFullName = (name: string) => {
         const trimmedName = name.trim();
         if (trimmedName.length < 2) return false;
-        
+
         // Check if it contains at least one space (first name + last name)
         const nameParts = trimmedName.split(' ').filter(part => part.length > 0);
         if (nameParts.length < 2) return false;
-        
+
         // Check if it only contains letters, spaces, hyphens, and apostrophes
         const nameRegex = /^[a-zA-Z\s\-']+$/;
         return nameRegex.test(trimmedName);
@@ -267,8 +268,8 @@ export default function NurseSignup() {
             const response = await fetch(
                 process.env.NEXT_PUBLIC_SIGNUP_ENDPOINT ||
                 "https://x76o-gnx4-xrav.a2.xano.io/api:YhrHeNAH/nurse_onboarding",
-                { 
-                    method: "POST", 
+                {
+                    method: "POST",
                     body: form,
                     headers: {
                         // Don't set Content-Type when sending FormData, let the browser set it
@@ -281,7 +282,7 @@ export default function NurseSignup() {
 
             let responseData;
             const contentType = response.headers.get("content-type");
-            
+
             if (contentType && contentType.includes("application/json")) {
                 responseData = await response.json();
             } else {
@@ -303,10 +304,10 @@ export default function NurseSignup() {
                     if (responseData.user) {
                         localStorage.setItem("userProfile", JSON.stringify(responseData.user));
                     }
-                    
+
                     // Show congratulations message
                     alert("🎉 Congratulations! Your account has been created successfully!");
-                    
+
                     // Small delay to let user read the message before redirect
                     setTimeout(() => {
                         router.push("/signin");
@@ -322,13 +323,13 @@ export default function NurseSignup() {
         } catch (err) {
             console.error('Network/Fetch error:', err);
             let errorMessage = "Network error. Please check your connection and try again.";
-            
+
             if (err instanceof TypeError && err.message.includes("fetch")) {
                 errorMessage = "Unable to connect to the server. Please check your internet connection.";
             } else if (err instanceof Error) {
                 errorMessage = `Network Error: ${err.message}`;
             }
-            
+
             alert(errorMessage);
         } finally {
             setIsSubmitting(false);
@@ -349,31 +350,37 @@ export default function NurseSignup() {
 
             <div className="container mx-auto px-4 lg:px-0 flex items-center justify-center gap-10 min-h-[calc(100vh-80px)] py-4 lg:py-0">
                 {/* Left Side - Static Card - Hidden on mobile */}
-                <div className="hidden lg:flex w-[300px] h-[374px] bg-white rounded-lg shadow-md flex-col items-center text-center text-gray-800  -gray-200 -mt-40">
+                <div className="hidden lg:flex w-[300px] h-[380px]  rounded-lg shadow-md flex-col items-center text-center text-gray-800  -gray-200 -mt-40 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]">
                     <div className="mt-10">
                         <Image src="/assets/nurse.png" alt="Profile" className="w-28 h-28 object-cover rounded-full -2 -blue-400 mx-auto" width={112} height={112} />
                     </div>
                     <h2 className="text-lg font-bold mt-5 text-[14px]">On registering, you can</h2>
                     <ul className=" text-[#474D6A] font-medium text-sm flex items-center justify-center flex-col ">
                         <li className="flex w-[92%] items-center gap-3 mt-5 text-[14px] leading-[18px] text-[#474D6A]">
-                            <span className="flex mb-[15px] w-[14px] h-[14px] rounded-full ">
-                                <Image src="/icons/check.png" alt="Check Icon" width={14} height={14} />
+                            <span className="flex items-center justify-center w-[20px] h-[20px] rounded-full">
+                                <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
                             </span>
-                            <span className="flex-1 text-justify">Build your profile and let recruiters find you</span>
+                            <span className="flex-1 text-justify">Build your profile and let recruiters find you.</span>
                         </li>
-                        <li className="flex w-[92%] items-center gap-3 mt-3 text-[14px] leading-[18px] text-[#474D6A]">
-                            <span className="flex mb-[15px] w-[14px] h-[14px] rounded-full "> <Image src="/icons/check.png" alt="Check Icon" width={14} height={14} /> </span>
-                            <span className="flex-1 text-justify">Get job posting delivered right to your email</span>
+                        <li className="flex w-[92%] items-center gap-3 mt-5 text-[14px] leading-[18px] text-[#474D6A]">
+                            <span className="flex items-center justify-center w-[20px] h-[20px] rounded-full">
+                                <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                            </span>
+                            <span className="flex-1 text-justify">Get job posting delivered right to your email.</span>
                         </li>
-                        <li className="flex w-[92%] items-center gap-3 mt-3 text-[14px] leading-[18px] text-[#474D6A]">
-                            <span className="flex mb-[15px] w-[14px] h-[14px] rounded-full "> <Image src="/icons/check.png" alt="Check Icon" width={14} height={14} /> </span>
-                            <span className="flex-1 text-justify">Find a job and grow your career with Vfind</span> 
+                        <li className="flex w-[92%] items-center gap-3 mt-5 text-[14px] leading-[18px] text-[#474D6A]">
+                            <span className="flex items-center justify-center w-[20px] h-[20px] rounded-full">
+                                <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                            </span>
+                            <span className="flex-1 text-justify">Find a job and grow your career with Vfind.</span>
                         </li>
-                        <div className="block text-center mt-10 text-sm text-gray-600"> 
+                        <div className="block text-center mt-10 text-sm text-gray-600">
                             Already have an account?
                             <button onClick={() => router.push("/signin")} className="text-[#4A90E2] font-medium ml-1"> Login </button>
                         </div>
                     </ul>
+
+
                 </div>
 
                 {/* Right Side - Form - Responsive */}
@@ -441,9 +448,9 @@ export default function NurseSignup() {
                     </div>
                 </div>
             </div>
-             <div className="bg-[#1F3C88] ">
-                    <Footer />
-                  </div>
+            <div className="bg-[#1F3C88] ">
+                <Footer />
+            </div>
         </div>
     );
 }
