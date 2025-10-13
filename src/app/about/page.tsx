@@ -1,16 +1,34 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { BenefitsSection } from "../../../components/benefits-section2";
-import Footer from "../../../components/footer-section";
-
-import Navbar from "../../../components/navbar";
 import Image from "next/image";
 
+// Public components
+import NavbarPublic from "../../../components/navbar";
+import FooterPublic from "../../../components/footer-section";
+
+// Logged-in components
+import { Navbar as NavbarPrivate } from "../nurseProfile/components/Navbar";
+import FooterPrivate from "../Admin/components/layout/Footer";
 
 export default function AboutPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check login token from localStorage, sessionStorage, or cookie
+    const token =
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token") ||
+      document.cookie.includes("token=");
+    setIsLoggedIn(!!token);
+  }, []);
+
   return (
     <main>
-      <Navbar />
+      {/* ✅ Conditional Navbar */}
+      {isLoggedIn ? <NavbarPrivate /> : <NavbarPublic />}
+
       {/* --------------------------other section about vfind---------------------- */}
       <section
         className="relative min-h-[450px] flex items-center justify-center overflow-hidden bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]
@@ -202,10 +220,10 @@ export default function AboutPage() {
 
         </div>
       </section>
-      {/* -----------Footer----------- */}
-          <div className="bg-[#1F3C88] ">
-                 <Footer />
-               </div>
+        {/* -------------------------- Footer Section -------------------------- */}
+      <div >
+        {isLoggedIn ? <FooterPrivate /> : <FooterPublic />}
+      </div>
     
 
     </main>

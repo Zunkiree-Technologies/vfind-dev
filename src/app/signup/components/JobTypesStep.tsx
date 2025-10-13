@@ -18,13 +18,13 @@ export function JobTypesStep({ formData, handleChange }: StepProps) {
                         <label key={type} className="flex items-center gap-2 cursor-pointer">
                             <div
                                 className={`w-5 h-5 flex items-center justify-center border-2 ${
-                                    isSelected ? "border-blue-700 bg-blue-700" : "border-gray-400"
+                                    isSelected ? "border-blue-500 bg-blue-500" : "border-gray-400"
                                 }`}
                                 onClick={() => handleChange("jobTypes", type)}
                             >
                                 {isSelected && <Check className="h-3 w-3 text-white" />}
                             </div>
-                            <span className="text-[14px] font-medium">{type}</span>
+                            <span className="text-[14px] font-light">{type}</span>
                         </label>
                     );
                 })}
@@ -42,13 +42,13 @@ export function JobTypesStep({ formData, handleChange }: StepProps) {
                                 <label key={opt} className="flex items-center gap-2 cursor-pointer">
                                     <div
                                         className={`w-5 h-5 flex items-center justify-center border-2 ${
-                                            isSelected ? "border-blue-700 bg-blue-700" : "border-gray-400"
+                                            isSelected ? "border-blue-500 bg-blue-500" : "border-gray-400"
                                         }`}
                                         onClick={() => handleChange("openToOtherTypes", opt)}
                                     >
                                         {isSelected && <Check className="h-3 w-3 text-white" />}
                                     </div>
-                                    <span className="text-[14px] font-medium">{opt}</span>
+                                    <span className="text-[14px] font-light">{opt}</span>
                                 </label>
                             );
                         })}

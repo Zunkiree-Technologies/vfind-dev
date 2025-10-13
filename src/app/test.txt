@@ -1,672 +1,652 @@
 "use client";
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import Loading from "../../../components/loading";
-import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
-import { Briefcase, Calendar, CheckCircle, Clock, Edit, Eye, Mail, Phone, Search, Trash } from "lucide-react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+
+import Loader from "../../../../../components/loading";
+import { Building2 } from "lucide-react";
+import { Navbar } from "../../components/Navbar";
+
 
 interface Job {
-  created_at: string;
   id: number;
   title: string;
   location: string;
-  locality?: string;
   type: string;
   minPay: string;
   maxPay: string;
   description: string;
+  requirements?: string[];
   roleCategory: string;
+  benefits?: string[];
   experienceMin: string;
   experienceMax: string;
+  created_at: string;
   certifications: string[];
-  updated_at: string;
-  applicants_count?: number;
-}
-
-interface Employer {
-  fullName?: string;
-  email?: string;
   company?: string;
-  mobile?: string;
-  companyName?: string;
+  JobShift?: string;
+  contact_email?: string;
+  user_id?: number;
 }
 
-export default function EmployerDashboard() {
+interface Company {
+  about_company: string;
+}
+
+export default function JobApplicationPage() {
   const router = useRouter();
+  const { id } = useParams();
+  const searchParams = useSearchParams();
+  const companyFromQuery = searchParams.get("company");
 
-  // 🔹 States
-  const [employer, setEmployer] = useState<Employer>({});
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [job, setJob] = useState<Job | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showAllJobs, setShowAllJobs] = useState(false);
-  const [mobileActionMenu, setMobileActionMenu] = useState<number | null>(null);
-  const [companyProfileStep, setCompanyProfileStep] = useState<
-    "initial" | "editing" | "completed"
-  >("initial");
-  const [companyDescription, setCompanyDescription] = useState<string>("");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [existingCompanyData, setExistingCompanyData] = useState<any>(null);
-  const [isEditingExisting, setIsEditingExisting] = useState(false);
-  const [saveLoading, setSaveLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [nurseEmail, setNurseEmail] = useState<string | null>(null);
+  const [nurseProfileId, setNurseProfileId] = useState<number | null>(null);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [checkingApplication, setCheckingApplication] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
 
-  // 🔹 Function to fetch applicant counts for each job
-  const fetchApplicantCounts = async (jobsList: Job[]) => {
-    const token = localStorage.getItem("authToken");
-    if (!token) return jobsList;
+  // console.log("Job ID from params:", id);
+  // const iddd = localStorage.getItem("nurse_profile_id");
+  // console.log("Nurse Profile ID from localStorage:", iddd);
 
-    const jobsWithCounts = await Promise.all(
-      jobsList.map(async (job) => {
-        try {
-          const res = await fetch(
-            `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/getAllNursesAppliedForJob?job_id=${job.id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          const applications = await res.json();
-          return { ...job, applicants_count: applications.length };
-        } catch (err) {
-          console.error(`Error fetching applicants for job ${job.id}:`, err);
-          return { ...job, applicants_count: 0 };
-        }
-      })
-    );
-
-    return jobsWithCounts;
-  };
-
-  // 🔹 Fetch employer + jobs + company profile
+  // Load token, email, profileId from localStorage
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!token) return;
+    const token = localStorage.getItem("token");
+    const email = localStorage.getItem("email");
+    const profileId = localStorage.getItem("nurse_profile_id");
 
-    const fetchEmployer = async () => {
-      try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/get_employer_profile",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        console.log(token)
-
-        if (!res.ok) throw new Error("Failed to fetch employer profile");
-        const data = await res.json();
-
-        setEmployer(data?.data || data);
-
-        // ✅ Store employerId in localStorage
-        const employerId = data?.data?.id || data?.id;
-        if (employerId) {
-          localStorage.setItem("employerId", String(employerId));
-        }
-      } catch (err) {
-        console.error("Error fetching employer profile:", err);
-      }
-    };
-
-    const fetchJobs = async () => {
-      try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/get_job_details",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        if (!res.ok) throw new Error("Failed to fetch jobs");
-        const data = await res.json();
-
-        // Fetch applicant counts for all jobs
-        const jobsWithCounts = await fetchApplicantCounts(data);
-        setJobs(jobsWithCounts);
-      } catch (err) {
-        console.error("Error fetching jobs:", err);
-      }
-    };
-
-    const fetchCompanyProfile = async () => {
-      try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.about_company) {
-            setExistingCompanyData(data);
-            setCompanyDescription(data.about_company);
-            setCompanyProfileStep("completed");
-          }
-        }
-        // If no company profile exists, we keep the initial state
-      } catch (err) {
-        console.error("Error fetching company profile:", err);
-        // Keep initial state if there's an error
-      }
-    };
-
-    Promise.all([fetchEmployer(), fetchJobs(), fetchCompanyProfile()]).finally(() =>
-      setLoading(false)
-    );
-  }, []);
-
-  // 🔹 Company Profile API Functions
-  const createCompanyProfile = async (aboutCompany: string) => {
-    const token = localStorage.getItem("authToken");
-    if (!token) throw new Error("No auth token");
-
-    const res = await fetch(
-      "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ about_company: aboutCompany })
-      }
-    );
-
-    if (!res.ok) throw new Error("Failed to create company profile");
-    return res.json();
-  };
-
-  const updateCompanyProfile = async (aboutCompany: string) => {
-    const token = localStorage.getItem("authToken");
-    if (!token) throw new Error("No auth token");
-
-    const res = await fetch(
-      "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company",
-      {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ about_company: aboutCompany })
-      }
-    );
-
-    if (!res.ok) throw new Error("Failed to update company profile");
-    return res.json();
-  };
-
-  const deleteCompanyProfile = async () => {
-    const token = localStorage.getItem("authToken");
-    if (!token) throw new Error("No auth token");
-
-    const res = await fetch(
-      "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company",
-      {
-        method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` }
-      }
-    );
-
-    if (!res.ok) throw new Error("Failed to delete company profile");
-    return res.json();
-  };
-
-  // 🔹 Job actions
-  const handleEdit = (job: Job) => {
-    router.push(`/EmployerDashboard/jobposting?jobId=${job.id}`);
-  };
-
-  const handleDelete = async (jobId: number) => {
-    if (!confirm("Are you sure you want to delete this job?")) return;
-
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        alert("Unauthorized. Please login.");
-        return;
-      }
-
-      const res = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${jobId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to delete job");
-
-      setJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
-      alert("Job deleted successfully.");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete the job. Please try again.");
+    console.log("LocalStorage values:", { token, email, profileId });
+    console.log("Auth token state before setting:", token);
+    if (token) {
+      setAuthToken(token);
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
     }
-  };
+    // console.log("Is user logged in?", authToken);
+    if (email) setNurseEmail(email);
+    if (profileId) setNurseProfileId(Number(profileId));
+  }, []);
+  // console.log("Is user logged in?", authToken);
+  // Check if job is already bookmarked
+  useEffect(() => {
+    const fetchBookmarkStatus = async () => {
 
-  const handleSaveCompanyProfile = async () => {
-    if (companyDescription.trim() === "") {
-      alert("Please provide a brief description before saving.");
+      const authToken = localStorage.getItem("token");
+      if (!id || !authToken) return;
+      console.log("Checking bookmark status for job ID:", id);
+      console.log("Auth token for bookmark check:", authToken);
+      console.log("Fetching bookmark status for job ID:", id);
+      try {
+        console.log("Checking bookmark status for job ID:", id);
+        console.log("I am in", authToken);
+        const res = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({ jobs_id: id.toString() }),
+          }
+        );
+
+        const data = await res.json();
+        console.log("Bookmark status response:", data);
+        setBookmarked(Array.isArray(data[0]) && data[0].length > 0);
+      } catch (err) {
+        console.error("Error fetching bookmark status:", err);
+        setBookmarked(false);
+      }
+    };
+
+    fetchBookmarkStatus();
+  }, [id, authToken]);
+  console.log("nurse id:", nurseProfileId);
+
+
+  // Handle bookmark toggle
+  const handleBookmarkToggle = async () => {
+    console.log("Handle fired");
+    if (!id) {
+      console.log("Missing required data:", { id });
       return;
     }
 
-    setSaveLoading(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in to save jobs");
+      return;
+    }
+
+    console.log("Toggling bookmark. Current state:", bookmarked);
+
     try {
-      if (existingCompanyData) {
-        // Update existing profile
-        await updateCompanyProfile(companyDescription);
+      if (!bookmarked) {
+        const payload = {
+
+          jobs_id: Number(id),
+
+        };
+
+        console.log("Saving job with payload:", payload);
+        console.log(Number(id));
+
+        // Add to saved jobs
+        const res = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+
+              jobs_id: Number(id),
+
+            }),
+          }
+        );
+
+        const responseData = await res.json();
+        console.log("Save job response:", responseData);
+
+        if (!res.ok) {
+          console.error("Failed to save job:", responseData);
+          return alert("Failed to save job");
+        }
+
+        setBookmarked(true);
+        console.log("Job saved successfully");
       } else {
-        // Create new profile
-        const newData = await createCompanyProfile(companyDescription);
-        setExistingCompanyData(newData);
-      }
+        // Remove from saved jobs
+        console.log("Fetching saved job ID to delete...");
 
-      setCompanyProfileStep("completed");
-      setIsEditingExisting(false);
-      alert("Company profile saved successfully!");
+        const fetchRes = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              jobs_id: id.toString(),
+            }),
+          }
+        );
+
+        const data = await fetchRes.json();
+        console.log("Fetch saved job data:", data);
+
+        if (!fetchRes.ok || !Array.isArray(data) || data.length === 0) {
+          throw new Error("Failed to get saved job ID");
+        }
+
+        const savedJobId = data[0]?.id;
+        console.log("Saved job ID to delete:", savedJobId);
+
+        if (!savedJobId) throw new Error("Saved job ID not found");
+
+        // Delete the saved job
+        const deleteRes = await fetch(
+          `https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved/${savedJobId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("Delete response status:", deleteRes.status);
+
+        if (!deleteRes.ok) {
+          const text = await deleteRes.text();
+          console.error("Failed to remove saved job:", text);
+          return alert("Failed to remove saved job");
+        }
+
+        setBookmarked(false);
+        console.log("Job removed successfully");
+      }
     } catch (err) {
-      console.error("Error saving company profile:", err);
-      alert("Failed to save company profile. Please try again.");
-    } finally {
-      setSaveLoading(false);
+      console.error("Error handling bookmark:", err);
+      alert("An error occurred while updating saved jobs");
     }
   };
 
-  const handleEditCompanyProfile = () => {
-    setIsEditingExisting(true);
-    setCompanyProfileStep("editing");
+  // Check if user has already applied
+  const checkIfAlreadyApplied = async (jobId: number, email: string) => {
+    try {
+      setCheckingApplication(true);
+
+      const payload = {
+        jobs_id: jobId.toString(),
+        email: email,
+      };
+
+      console.log("Checking application status with payload:", payload);
+
+      const res = await fetch(
+        `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/is_applied`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await res.json();
+      console.log("Raw application API response:", result);
+
+      if (res.ok) {
+        if (Array.isArray(result) && result.length > 0) {
+          const hasAppliedStatus = result.some((app) => app.status === "applied");
+          console.log("User has applied?", hasAppliedStatus);
+          setHasApplied(hasAppliedStatus);
+        } else {
+          console.log("No previous application found.");
+          setHasApplied(false);
+        }
+      } else {
+        console.error("Failed to check application status:", res.status);
+        setHasApplied(false);
+      }
+    } catch (err) {
+      console.error("Error checking application status:", err);
+      setHasApplied(false);
+    } finally {
+      setCheckingApplication(false);
+    }
   };
 
-  const handleDeleteCompanyProfile = async () => {
-    if (!confirm("Are you sure you want to delete your company profile?")) return;
+  // Fetch job and company details
+  useEffect(() => {
+    if (!id) {
+      router.push("/nurseProfile");
+      return;
+    }
+
+    const fetchJobData = async () => {
+      try {
+        setLoading(true);
+
+        const jobRes = await fetch(
+          `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${id}`
+        );
+
+        if (!jobRes.ok) throw new Error("Job not found");
+
+        const jobData: Job = await jobRes.json();
+        // console.log("Fetched job data:", jobData);
+        setJob(jobData);
+
+        // Fetch company info
+        if (jobData.user_id) {
+          await fetchCompanyInfo(jobData.user_id);
+        }
+
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Failed to fetch job");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobData();
+  }, [id, router]);
+
+  // Run application check only after job and profileId are ready AND user is logged in
+  useEffect(() => {
+    if (job && nurseEmail && isLoggedIn) {
+      console.log("Triggering application check for job:", job.id, "email:", nurseEmail);
+      checkIfAlreadyApplied(job.id, nurseEmail);
+    }
+  }, [job, nurseEmail, isLoggedIn]);
+
+  // Fetch company info
+  const fetchCompanyInfo = async (id: number) => {
+    try {
+
+      const companyRes = await fetch(
+        `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company_for_saved_jobs_page`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: id }),
+        }
+      );
+
+      if (companyRes.ok) {
+        const companyData = await companyRes.json();
+        console.log("Company info fetched:", companyData);
+        setCompany({
+          about_company: companyData.about_company || "No company information available.",
+        });
+      } else {
+        setCompany({ about_company: "Failed to load company information." });
+      }
+    } catch (err) {
+      console.error("Error fetching company info:", err);
+      setCompany({ about_company: "Error loading company information." });
+    }
+  };
+
+  // Submit job application
+  const handleSubmitApplication = async () => {
+    if (!job) return;
+
+    console.log("Submitting application for job:", job.id, "Nurse Email:", nurseEmail);
+
+    if (!authToken) {
+      alert("You must be logged in to apply.");
+      return;
+    }
+    if (!nurseEmail) {
+      alert("Could not find your email. Please log in again.");
+      return;
+    }
+    if (hasApplied) {
+      console.log("User has already applied, skipping submission.");
+      return;
+    }
 
     try {
-      await deleteCompanyProfile();
-      setExistingCompanyData(null);
-      setCompanyDescription("");
-      setCompanyProfileStep("initial");
-      setIsEditingExisting(false);
-      alert("Company profile deleted successfully.");
-    } catch (err) {
-      console.error("Error deleting company profile:", err);
-      alert("Failed to delete company profile. Please try again.");
+      setSubmitting(true);
+
+      const payload = {
+        jobs_id: job.id,
+        status: "applied",
+        applied_date: new Date().toISOString(),
+        email: nurseEmail,
+      };
+
+      console.log("Application payload:", payload);
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/applications",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await res.json();
+      console.log("Application response:", result);
+
+      if (!res.ok) throw new Error(result.message || "Failed to submit application");
+
+      setHasApplied(true);
+      alert("Job application sent successfully!");
+      router.push("/nurseProfile");
+    } catch (err: unknown) {
+      console.error("Failed to submit application:", err);
+      alert(err instanceof Error ? err.message : "Failed to submit application");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const toggleMobileActionMenu = (jobId: number) => {
-    setMobileActionMenu(mobileActionMenu === jobId ? null : jobId);
+  // Get button text based on authentication and application status
+  const getButtonText = () => {
+    if (!isLoggedIn) return "Apply Now!!!";
+    if (checkingApplication) return "Checking...";
+    if (hasApplied) return "Applied";
+    if (submitting) return "Submitting...";
+    return "Apply Now";
   };
 
-  // 🔹 Loader
-  if (loading) return <Loading />;
+  // Get button action based on authentication status
+  const handleButtonClick = () => {
+    if (!isLoggedIn) {
+      router.push("/signup");
+    } else {
+      handleSubmitApplication();
+    }
+  };
 
-  return (
-    <div className="  bg-[#F5F6FA] min-h-screen">
-      {/* 🔹 Navbar */}
-      <EmployerNavbar />
+  // Get company name
+  const getCompanyName = () => companyFromQuery || "Healthcare Facility";
 
-      {/* 🔹 Main container */}
-      <div className="p-4 mt-5 md:p-6   flex flex-col lg:flex-row gap-6 mx-auto container justify-center ">
-
-        {/* 👉 Left section */}
-        <div className="space-y-5">
-          {/* KYC Section */}
-          <div className="bg-white rounded-lg p-6 md:p-8 shadow-sm min-h-[195px]">
-            {/* Initial Step */}
-            {companyProfileStep === "initial" && (
-              <>
-                <h2 className="font-semibold text-gray-800 text-base md:text-lg">
-                  Complete Your Company Profile
-                </h2>
-                <p className="text-sm md:text-base text-gray-600 mt-1">
-                  Provide your company details to make your job postings stand out.
-                </p>
-
-                <button
-                  onClick={() => setCompanyProfileStep("editing")}
-                  className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-400 text-white rounded-md 
-                   hover:bg-blue-500 text-sm md:text-base transition"
-                >
-                  Complete Profile
-                </button>
-              </>
-            )}
-
-            {/* Editing Step */}
-            {companyProfileStep === "editing" && (
-              <>
-                <h2 className="font-semibold text-gray-800 text-base md:text-lg">
-                  {isEditingExisting ? "Edit Company Profile" : "Complete Your Company Profile"}
-                </h2>
-                <p className="text-sm md:text-base text-gray-600 mt-1">
-                  Provide your company details to make your job postings stand out.
-                </p>
-
-                {/* Textarea */}
-                <textarea
-                  placeholder="Provide a brief description of your company"
-                  value={companyDescription}
-                  onChange={(e) => setCompanyDescription(e.target.value)}
-                  rows={4}
-                  className="mt-4 w-full border border-gray-300 rounded-lg px-3 py-2 
-                   text-sm md:text-base text-gray-800 
-                   focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
-                />
-
-                {/* Save button */}
-                <button
-                  onClick={handleSaveCompanyProfile}
-                  disabled={saveLoading}
-                  className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md 
-                   hover:bg-blue-600 text-sm md:text-base transition disabled:opacity-50"
-                >
-                  {saveLoading ? "Saving..." : "Save & Continue"}
-                </button>
-
-                {isEditingExisting && (
-                  <button
-                    onClick={() => {
-                      setCompanyProfileStep("completed");
-                      setIsEditingExisting(false);
-                    }}
-                    className="mt-4 ml-2 w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded-md 
-                     hover:bg-gray-600 text-sm md:text-base transition"
-                  >
-                    Cancel
-                  </button>
-                )}
-
-                <p className="mt-2 text-xs md:text-sm text-gray-500">
-                  Your company description will appear on job postings.
-                </p>
-              </>
-            )}
-
-            {/* Completed Step */}
-            {companyProfileStep === "completed" && (
-              <>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 
-                      bg-green-50 border border-green-200 rounded-lg p-4">
-                  <CheckCircle className="text-green-600 flex-shrink-0" size={22} />
-                  <div className="flex-grow">
-                    <h2 className="font-semibold text-green-700 text-sm md:text-base">
-                      Company Profile Completed
-                    </h2>
-                    <p className="mt-1 text-xs md:text-sm text-green-600">
-                      Your company description has been saved successfully.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Action buttons */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    onClick={handleEditCompanyProfile}
-                    className="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 
-                     text-sm transition flex items-center gap-2"
-                  >
-                    <Edit size={16} />
-                    Edit Profile
-                  </button>
-                  <button
-                    onClick={handleDeleteCompanyProfile}
-                    className="px-4 py-2 bg-red-400 text-white rounded-md hover:bg-red-500 
-                     text-sm transition flex items-center gap-2"
-                  >
-                    <Trash size={16} />
-                    Delete Profile
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Talent Pool + Free Job Posting */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Talent Pool */}
-            <div className="bg-white rounded-lg p-4 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
-                <Search size={20} className="text-blue-500" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">
-                  VFind Talent Pool
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Discover talent, start free.
-                </p>
-                <button
-                  onClick={() =>
-                    window.open("/EmployerDashboard/Candidatelist", "_blank")
-                  }
-                  className="mt-3 px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
-                >
-                  Search Candidate
-                </button>
-              </div>
-            </div>
-
-            {/* Free Job Posting */}
-            <div className="bg-white rounded-lg p-4 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
-                <Briefcase size={20} className="text-blue-500" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">Post a Free Job</h2>
-                <p className="text-sm text-gray-600">
-                  Start for free upgrade anytime
-                </p>
-                <button
-                  onClick={() => router.push("/EmployerDashboard/jobposting")}
-                  className="mt-3 px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
-                >
-                  Post a Free Job
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 👉 Right section */}
-        <div className="hidden lg:block lg:w-80  ">
-          <div className="bg-white rounded-lg p-4 shadow-sm space-y-4 h-[343px]">
-            <h2 className="font-semibold text-gray-800">Need Help?</h2>
-
-            {/* Phone */}
-            <div className="flex items-start space-x-3">
-              <Phone size={20} className="text-blue-500 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-800">Phone</p>
-                <p className="mt-2 text-sm text-gray-700"> {employer.mobile}  </p>
-              </div>
-            </div>
-
-            {/* Hours */}
-            <div className="flex items-start space-x-3">
-              <Clock size={20} className="text-blue-500 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-800">Hours</p>
-                <p className="text-sm text-gray-600">7:00 AM - 6:00 PM</p>
-              </div>
-            </div>
-
-            {/* Weekdays */}
-            <div className="flex items-start space-x-3">
-              <Calendar size={20} className="text-blue-500 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-800">Weekdays</p>
-                <p className="text-sm text-gray-600">Mon - Sat</p>
-              </div>
-            </div>
-
-            {/* Email */}
-            <div className="flex items-start space-x-3">
-              <Mail size={20} className="text-blue-500 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-800">Email</p>
-                <a
-                  href="mailto:support@vfind.com"
-                  className="text-sm text-gray-600 hover:underline"
-                >
-                  support@vfind.com
-                </a>
-              </div>
-            </div>
-          </div>
+  if (loading) return <Loader loading={true} message="Fetching job data..." />;
+  if (error || !job)
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-red-50 border-l-4 border-red-500 p-4">
+          <p className="text-red-700">{error || "Job not found."}</p>
         </div>
       </div>
+    );
 
-      {/* 🔹 Job Postings Section */}
-      <div className=" flex item-center justify-center   container mx-auto ">
-        <div className="bg-white p-5 w-[950px] rounded-lg  shadow-sm ">
-          <h2 className="font-semibold text-gray-800">Job Postings</h2>
+  return (
+    <div>
+      <Navbar />
 
-          {/* Desktop Table */}
-          <div className="hidden md:block">
-            <table className="w-full mt-3 text-sm text-left border-collapse">
-              <thead>
-                <tr className="text-gray-600">
-                  <th className="py-2 px-3">Job Title</th>
-                  <th className="py-2 px-3">Created By</th>
-                  <th className="py-2 px-3">Applicants</th>
-                  <th className="py-2 px-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {jobs.length > 0 ? (
-                  (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
-                    <tr key={job.id} className="hover:bg-gray-50">
-                      <td className="py-2 px-3">{job.title}</td>
-                      <td className="py-2 px-3">{employer.email}</td>
-                      <td className="py-2 px-3">
-                        <a
-                          href={`/EmployerDashboard/Applicants/${job.id}`}
-                          className="text-blue-600 hover:underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View ({job.applicants_count || 0})
-                        </a>
-                      </td>
-                      <td className="py-2 px-3">
-                        <div className="flex items-center gap-3">
-                          <a
-                            href={`/EmployerDashboard/jobPreview/${job.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-600 hover:text-blue-600 p-1 rounded cursor-pointer"
-                            title="Preview"
-                          >
-                            <Eye size={16} />
-                          </a>
-                          <button
-                            onClick={() => handleEdit(job)}
-                            className="text-gray-600 hover:text-blue-600 p-1 rounded cursor-pointer"
-                            title="Edit"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(job.id)}
-                            className="text-gray-600 hover:text-red-600 p-1 rounded cursor-pointer"
-                            title="Delete"
-                          >
-                            <Trash size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="text-center py-4 text-gray-500"
-                    >
-                      No jobs posted yet.
-                    </td>
-                  </tr>
+      <div className="min-h-screen bg-white py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Main Job Details */}
+            <div className="lg:col-span-2">
+              <div className="shadow-sm relative">
+                {isLoggedIn && (
+                  <button
+                    onClick={handleBookmarkToggle}
+                    disabled={!id}
+                    className={`absolute top-4 right-4 px-3 py-1 rounded-md transition-all text-sm font-medium
+      ${bookmarked
+                        ? "bg-[#0073FF] text-white border-[#0073FF]"
+                        : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF]"
+                      }
+    `}
+                    title={bookmarked ? "Remove from saved jobs" : "Save job"}
+                  >
+                    {bookmarked ? "Unsave Job" : "Save for later"}
+                  </button>
                 )}
-              </tbody>
-            </table>
-          </div>
 
-          {/* Mobile List */}
-          <div className="md:hidden mt-3 space-y-3">
-            {jobs.length > 0 ? (
-              (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
-                <div key={job.id} className="pb-3 border-b last:border-0">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{job.title}</h3>
-                      <p className="text-xs text-gray-500">
-                        {employer.email}
-                      </p>
-                      <a
-                        href={`/EmployerDashboard/Applicants/${job.id}`}
-                        className="text-xs text-blue-600 hover:underline inline-block mt-1"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        View Applicants ({job.applicants_count || 0})
-                      </a>
+
+                {/* Header Section */}
+                <div className="p-6 border-b border-gray-500">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Building2 className="w-6 h-6 text-blue-600" />
                     </div>
-                    <div className="relative">
-                      <button
-                        onClick={() => toggleMobileActionMenu(job.id)}
-                        className="p-1 rounded-full hover:bg-gray-100"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-gray-500"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                        </svg>
-                      </button>
-                      {mobileActionMenu === job.id && (
-                        <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg z-10 border">
-                          <a
-                            href={`/EmployerDashboard/jobPreview/${job.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Preview
-                          </a>
-                          <button
-                            onClick={() => {
-                              handleEdit(job);
-                              setMobileActionMenu(null);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleDelete(job.id);
-                              setMobileActionMenu(null);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                    <div>
+                      <h1 className="text-xl font-semibold text-gray-900">
+                        {getCompanyName()}
+                      </h1>
+                    </div>
+                  </div>
+                  <h2 className="text-[24px] font-semibold text-gray-900">
+                    {job.title}
+                  </h2>
+                </div>
+
+                {/* Basic Info Section */}
+                <div className="p-4 border-b border-gray-500">
+                  <div className="flex flex-col gap-4 text-sm">
+                    {/* Location */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">
+                        Location
+                      </span>
+                      <div className="flex justify-start items-center w-1/2 gap-10">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">
+                          {job.location || "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Salary */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">Salary</span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">
+                          {job.minPay && job.maxPay
+                            ? `AUD ${job.minPay}-${job.maxPay}/hr`
+                            : job.minPay
+                              ? `From AUD ${job.minPay}/hr`
+                              : job.maxPay
+                                ? `Up to AUD ${job.maxPay}/hr`
+                                : "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Job Type */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">
+                        Job Type
+                      </span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">
+                          {job.type || "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Job Shift */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">
+                        Job Shift
+                      </span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">
+                          {job.JobShift || "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Job Posted */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">
+                        Job Posted
+                      </span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">
+                          {job.created_at
+                            ? new Date(job.created_at).toLocaleDateString(
+                              "en-AU",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )
+                            : "Not specified"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                No jobs posted yet.
-              </div>
-            )}
-          </div>
 
-          {/* Show All Button */}
-          {jobs.length > 4 && (
-            <button
-              onClick={() => setShowAllJobs(!showAllJobs)}
-              className="mt-4 px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
-            >
-              {showAllJobs ? "Show Less" : "View All Jobs"}
-            </button>
-          )}
+                {/* Candidate Preferences */}
+                <div className="p-6 border-b border-gray-500">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Candidate Preferences
+                  </h3>
+                  <div className="space-y-4 text-sm">
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">
+                        Role Category
+                      </span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">{job.roleCategory}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">
+                        Experience
+                      </span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">
+                          {job.experienceMin}  {job.experienceMax}
+                        </p>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900">
+                        Preferred Certifications
+                      </span>
+                      <div className="mt-2 space-y-1">
+                        {job.certifications?.map((cert, index) => (
+                          <div key={index} className="flex items-start">
+                            <span className="w-1 h-1 bg-gray-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                            <span className="text-gray-700">{cert}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Job Description */}
+                <div className="p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                    Job Description
+                  </h2>
+                  <div
+                    className="prose prose-sm max-w-none text-gray-700 rounded-lg p-4 bg-gray-50 text-justify"
+                    dangerouslySetInnerHTML={{ __html: job.description }}
+                  />
+                </div>
+              </div>
+
+              {/* Apply Button */}
+              <button
+                onClick={handleButtonClick}
+                disabled={
+                  isLoggedIn &&
+                  (submitting || hasApplied || checkingApplication)
+                }
+                className={`${!isLoggedIn
+                  ? "bg-blue-400 hover:bg-blue-500"
+                  : hasApplied
+                    ? "bg-primary cursor-not-allowed"
+                    : "bg-blue-400 hover:bg-blue-500"
+                  } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
+              >
+                {getButtonText()}
+              </button>
+            </div>
+
+            {/* Right Column - About Company */}
+            <div className="lg:col-span-1">
+              <div className="bg-[#F5F6FA] rounded-lg shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  About Company
+                </h3>
+                <div className="text-sm text-gray-700 leading-relaxed">
+                  {company?.about_company ? (
+                    <p>{company.about_company}</p>
+                  ) : (
+                    <p>Loading company information...</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

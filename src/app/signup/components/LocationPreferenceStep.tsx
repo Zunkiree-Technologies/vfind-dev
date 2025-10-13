@@ -1,7 +1,7 @@
 import { StepProps } from "../types/FormTypes";
 import locationListJson from "./json/locationList.json";
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 
 const locationList: string[] = locationListJson as string[];
 
@@ -58,14 +58,13 @@ export function LocationPreferenceStep({ formData, handleChange }: StepProps) {
           return (
             <label key={opt} className="flex items-center gap-2 cursor-pointer">
               <div
-                className={`w-5 h-5 flex items-center justify-center border-2 ${
-                  isSelected ? "border-blue-700 bg-blue-700" : "border-gray-400"
-                }`}
+                className={`w-5 h-5 flex items-center justify-center border-2 ${isSelected ? "border-blue-500 bg-blue-500" : "border-gray-400"
+                  }`}
                 onClick={() => handleChange("locationPreference", opt)}
               >
                 {isSelected && <Check className="h-3 w-3 text-white" />}
               </div>
-              <span className="text-[14px] font-medium">{opt}</span>
+              <span className="text-[14px] font-light">{opt}</span>
             </label>
           );
         })}
@@ -98,6 +97,16 @@ export function LocationPreferenceStep({ formData, handleChange }: StepProps) {
               placeholder="Type or select a location"
               className="w-full border rounded p-2"
             />
+            {/* Arrow Icon */}
+            <button
+              type="button"
+              onClick={() => setShowSuggestions((prev) => !prev)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-500 transition-transform duration-200"
+            >
+              <ChevronDown
+                className={`w-5 h-5 ${showSuggestions ? "rotate-180" : "rotate-0"} transition-transform duration-200`}
+              />
+            </button>
 
             {showSuggestions && filteredList.length > 0 && (
               <ul className="absolute z-10 bg-white border w-full max-h-60 overflow-y-auto mt-1 rounded shadow">

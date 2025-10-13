@@ -1,12 +1,29 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Navbar from "../../../components/navbar";
-import Footer from "../../../components/footer-section";
+
+// Public components
+import NavbarPublic from "../../../components/navbar";
+import FooterPublic from "../../../components/footer-section";
+
+// Logged-in components
+import { Navbar as NavbarPrivate } from "../nurseProfile/components/Navbar";
+import FooterPrivate from "../Admin/components/layout/Footer";
 
 export default function ContactUs() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // ✅ Detect login state from token
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token") ||
+      sessionStorage.getItem("token") ||
+      document.cookie.includes("token=");
+    setIsLoggedIn(!!token);
+  }, []);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -14,7 +31,6 @@ export default function ContactUs() {
     message: "",
   });
 
-  // Fix typing here
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -26,9 +42,7 @@ export default function ContactUs() {
         "https://x76o-gnx4-xrav.a2.xano.io/api:gbZ4MFHH/contact_us",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         }
       );
@@ -50,9 +64,10 @@ export default function ContactUs() {
 
   return (
     <div>
-      <Navbar />
+      {/* ✅ Conditional Navbar */}
+      {isLoggedIn ? <NavbarPrivate /> : <NavbarPublic />}
 
-      
+      {/* -------------------- Contact Section -------------------- */}
       <div className="flex justify-center items-center py-16 px-6 bg-gray-50 ">
         <div className="flex flex-col md:flex-row gap-10 w-full max-w-6xl items-start">
           {/* Left Side: Map + Info */}
@@ -60,7 +75,7 @@ export default function ContactUs() {
             <h1 className="text-4xl font-bold mb-4 text-gray-800">Contact Us</h1>
             <p className="mb-2 text-gray-600">Need to get in touch with us?</p>
             <p className="mb-6 text-gray-600">
-              Either fill out the form or contact us at {" "}
+              Either fill out the form or contact us at{" "}
               <a
                 href="mailto:info@vfind.com"
                 className="text-primary underline font-medium"
@@ -68,7 +83,6 @@ export default function ContactUs() {
                 info@vfind.com
               </a>
             </p>
-
 
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d271.7302561497269!2d85.30364919359299!3d27.675390939707295!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb1b0cf2ce96c5%3A0x4f3ed477e4f68c22!2sSimplifycodes%20(%20Simplify%20Tech%20Pvt.%20Ltd.%20)!5e1!3m2!1sen!2snp!4v1758707183808!5m2!1sen!2snp"
@@ -79,7 +93,6 @@ export default function ContactUs() {
               className="rounded-2xl shadow-md"
             ></iframe>
           </div>
-
 
           {/* Right Side: Form */}
           <Card className="flex-1 shadow-lg border-0 rounded-2xl h-[550px]">
@@ -157,8 +170,10 @@ export default function ContactUs() {
                   className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400"
                 ></textarea>
 
-
-                <Button type="submit" className="w-full bg-primary hover:bg-[#477fff] text-white py-3 rounded-lg text-lg">
+                <Button
+                  type="submit"
+                  className="w-full bg-primary hover:bg-[#477fff] text-white py-3 rounded-lg text-lg"
+                >
                   SEND MESSAGE
                 </Button>
               </form>
@@ -167,11 +182,10 @@ export default function ContactUs() {
         </div>
       </div>
 
-     
-         <div className="bg-[#1F3C88] ">
-                <Footer />
-              </div>
+      {/* ✅ Conditional Footer */}
+      <div >
+        {isLoggedIn ? <FooterPrivate /> : <FooterPublic />}
+      </div>
     </div>
-
   );
 }

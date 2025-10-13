@@ -6,7 +6,6 @@ import Loader from "../../../../../components/loading";
 import { Building2 } from "lucide-react";
 import { Navbar } from "../../components/Navbar";
 
-
 interface Job {
   id: number;
   title: string;
@@ -45,11 +44,11 @@ export default function JobApplicationPage() {
   const [submitting, setSubmitting] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [nurseEmail, setNurseEmail] = useState<string | null>(null);
-  const [nurseProfileId, setNurseProfileId] = useState<number | null>(null);
+  const [, setNurseProfileId] = useState<number | null>(null);
   const [hasApplied, setHasApplied] = useState(false);
   const [checkingApplication, setCheckingApplication] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   // console.log("Job ID from params:", id);
   // const iddd = localStorage.getItem("nurse_profile_id");
@@ -61,8 +60,8 @@ export default function JobApplicationPage() {
     const email = localStorage.getItem("email");
     const profileId = localStorage.getItem("nurse_profile_id");
 
-    console.log("LocalStorage values:", { token, email, profileId });
-    console.log("Auth token state before setting:", token);
+    // console.log("LocalStorage values:", { token, email, profileId });
+    // console.log("Auth token state before setting:", token);
     if (token) {
       setAuthToken(token);
       setIsLoggedIn(true);
@@ -75,71 +74,19 @@ export default function JobApplicationPage() {
   }, []);
   // console.log("Is user logged in?", authToken);
   // Check if job is already bookmarked
-  useEffect(() => {
-    const fetchBookmarkStatus = async () => {
-
-      const authToken = localStorage.getItem("token");
-      if (!id || !authToken) return;
-      console.log("Checking bookmark status for job ID:", id);
-      console.log("Auth token for bookmark check:", authToken);
-      console.log("Fetching bookmark status for job ID:", id);
-      try {
-        console.log("Checking bookmark status for job ID:", id);
-        console.log("I am in", authToken);
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${authToken}`,
-            },
-            body: JSON.stringify({ jobs_id: id.toString() }),
-          }
-        );
-
-        const data = await res.json();
-        console.log("Bookmark status response:", data);
-        setBookmarked(Array.isArray(data[0]) && data[0].length > 0);
-      } catch (err) {
-        console.error("Error fetching bookmark status:", err);
-        setBookmarked(false);
-      }
-    };
-
-    fetchBookmarkStatus();
-  }, [id, authToken]);
-  console.log("nurse id:", nurseProfileId);
-
+  
+  
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async () => {
-    console.log("Handle fired");
-    if (!id) {
-      console.log("Missing required data:", { id });
-      return;
-    }
+    if (!id) return alert("Missing job ID");
 
     const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please log in to save jobs");
-      return;
-    }
-
-    console.log("Toggling bookmark. Current state:", bookmarked);
+    if (!token) return alert("Please log in to save jobs");
 
     try {
-      if (!bookmarked) {
-        const payload = {
-
-          jobs_id: Number(id),
-
-        };
-
-        console.log("Saving job with payload:", payload);
-        console.log(Number(id));
-
-        // Add to saved jobs
+      if (!isSaved) {
+        // Save job
         const res = await fetch(
           "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved",
           {
@@ -148,28 +95,13 @@ export default function JobApplicationPage() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({
-
-              jobs_id: Number(id),
-
-            }),
+            body: JSON.stringify({ jobs_id: Number(id) }),
           }
         );
-
-        const responseData = await res.json();
-        console.log("Save job response:", responseData);
-
-        if (!res.ok) {
-          console.error("Failed to save job:", responseData);
-          return alert("Failed to save job");
-        }
-
-        setBookmarked(true);
-        console.log("Job saved successfully");
+        if (!res.ok) throw new Error("Failed to save job");
+        setIsSaved(true); // ✅ Update button instantly
       } else {
-        // Remove from saved jobs
-        console.log("Fetching saved job ID to delete...");
-
+        // Unsave job
         const fetchRes = await fetch(
           "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
           {
@@ -178,51 +110,61 @@ export default function JobApplicationPage() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({
-              jobs_id: id.toString(),
-            }),
+            body: JSON.stringify({ jobs_id: id.toString() }),
           }
         );
 
         const data = await fetchRes.json();
-        console.log("Fetch saved job data:", data);
-
-        if (!fetchRes.ok || !Array.isArray(data) || data.length === 0) {
-          throw new Error("Failed to get saved job ID");
-        }
-
         const savedJobId = data[0]?.id;
-        console.log("Saved job ID to delete:", savedJobId);
-
         if (!savedJobId) throw new Error("Saved job ID not found");
 
-        // Delete the saved job
         const deleteRes = await fetch(
           `https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved/${savedJobId}`,
           {
             method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
+        if (!deleteRes.ok) throw new Error("Failed to remove saved job");
 
-        console.log("Delete response status:", deleteRes.status);
-
-        if (!deleteRes.ok) {
-          const text = await deleteRes.text();
-          console.error("Failed to remove saved job:", text);
-          return alert("Failed to remove saved job");
-        }
-
-        setBookmarked(false);
-        console.log("Job removed successfully");
+        setIsSaved(false); // ✅ Update button instantly
       }
     } catch (err) {
-      console.error("Error handling bookmark:", err);
-      alert("An error occurred while updating saved jobs");
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Error updating saved job");
     }
   };
+
+
+  const fetchSavedStatus = async (jobId: number) => {
+    const token = localStorage.getItem("token");
+    if (!token) return setIsSaved(false);
+
+    try {
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ jobs_id: jobId.toString() }),
+        }
+      );
+
+      const data = await res.json();
+      setIsSaved(Array.isArray(data) && data.length > 0);
+    } catch (err) {
+      console.error("Error fetching saved status:", err);
+      setIsSaved(false);
+    }
+  };
+
+ useEffect(() => {
+   if (id) fetchSavedStatus(Number(id));
+ }, [id]);
+
 
   // Check if user has already applied
   const checkIfAlreadyApplied = async (jobId: number, email: string) => {
@@ -234,7 +176,7 @@ export default function JobApplicationPage() {
         email: email,
       };
 
-      console.log("Checking application status with payload:", payload);
+      // console.log("Checking application status with payload:", payload);
 
       const res = await fetch(
         `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/is_applied`,
@@ -246,12 +188,14 @@ export default function JobApplicationPage() {
       );
 
       const result = await res.json();
-      console.log("Raw application API response:", result);
+      // console.log("Raw application API response:", result);
 
       if (res.ok) {
         if (Array.isArray(result) && result.length > 0) {
-          const hasAppliedStatus = result.some((app) => app.status === "applied");
-          console.log("User has applied?", hasAppliedStatus);
+          const hasAppliedStatus = result.some(
+            (app) => app.status === "applied"
+          );
+          // console.log("User has applied?", hasAppliedStatus);
           setHasApplied(hasAppliedStatus);
         } else {
           console.log("No previous application found.");
@@ -294,7 +238,6 @@ export default function JobApplicationPage() {
         if (jobData.user_id) {
           await fetchCompanyInfo(jobData.user_id);
         }
-
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to fetch job");
       } finally {
@@ -308,7 +251,12 @@ export default function JobApplicationPage() {
   // Run application check only after job and profileId are ready AND user is logged in
   useEffect(() => {
     if (job && nurseEmail && isLoggedIn) {
-      console.log("Triggering application check for job:", job.id, "email:", nurseEmail);
+      // console.log(
+      //   "Triggering application check for job:",
+      //   job.id,
+      //   "email:",
+      //   nurseEmail
+      // );
       checkIfAlreadyApplied(job.id, nurseEmail);
     }
   }, [job, nurseEmail, isLoggedIn]);
@@ -316,7 +264,6 @@ export default function JobApplicationPage() {
   // Fetch company info
   const fetchCompanyInfo = async (id: number) => {
     try {
-
       const companyRes = await fetch(
         `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company_for_saved_jobs_page`,
         {
@@ -330,14 +277,15 @@ export default function JobApplicationPage() {
         const companyData = await companyRes.json();
         console.log("Company info fetched:", companyData);
         setCompany({
-          about_company: companyData.about_company || "No company information available.",
+          about_company:
+            companyData.about_company || "No company information available.",
         });
       } else {
         setCompany({ about_company: "Failed to load company information." });
       }
-    } catch (err) {
-      console.error("Error fetching company info:", err);
-      setCompany({ about_company: "Error loading company information." });
+    } catch  {
+      // console.error("Error fetching company info:", err);
+      setCompany({ about_company: "There is no about company information." });
     }
   };
 
@@ -345,7 +293,12 @@ export default function JobApplicationPage() {
   const handleSubmitApplication = async () => {
     if (!job) return;
 
-    console.log("Submitting application for job:", job.id, "Nurse Email:", nurseEmail);
+    console.log(
+      "Submitting application for job:",
+      job.id,
+      "Nurse Email:",
+      nurseEmail
+    );
 
     if (!authToken) {
       alert("You must be logged in to apply.");
@@ -387,14 +340,17 @@ export default function JobApplicationPage() {
       const result = await res.json();
       console.log("Application response:", result);
 
-      if (!res.ok) throw new Error(result.message || "Failed to submit application");
+      if (!res.ok)
+        throw new Error(result.message || "Failed to submit application");
 
       setHasApplied(true);
       alert("Job application sent successfully!");
       router.push("/nurseProfile");
     } catch (err: unknown) {
       console.error("Failed to submit application:", err);
-      alert(err instanceof Error ? err.message : "Failed to submit application");
+      alert(
+        err instanceof Error ? err.message : "Failed to submit application"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -431,6 +387,8 @@ export default function JobApplicationPage() {
       </div>
     );
 
+
+
   return (
     <div>
       <Navbar />
@@ -444,19 +402,18 @@ export default function JobApplicationPage() {
                 {isLoggedIn && (
                   <button
                     onClick={handleBookmarkToggle}
-                    disabled={!id}
+                    disabled={!id || checkingApplication}
                     className={`absolute top-4 right-4 px-3 py-1 rounded-md transition-all text-sm font-medium
-      ${bookmarked
-                        ? "bg-[#0073FF] text-white border-[#0073FF]"
-                        : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF]"
-                      }
-    `}
-                    title={bookmarked ? "Remove from saved jobs" : "Save job"}
+      ${
+        isSaved
+          ? "bg-[#0073FF] text-white border-[#0073FF]"
+          : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF]"
+      }`}
+                    title={isSaved ? "Remove from saved jobs" : "Save job"}
                   >
-                    {bookmarked ? "Unsave Job" : "Save for later"}
+                    {isSaved ? "Unsave Job" : "Save for later"}
                   </button>
                 )}
-
 
                 {/* Header Section */}
                 <div className="p-6 border-b border-gray-500">
@@ -500,10 +457,10 @@ export default function JobApplicationPage() {
                           {job.minPay && job.maxPay
                             ? `AUD ${job.minPay}-${job.maxPay}/hr`
                             : job.minPay
-                              ? `From AUD ${job.minPay}/hr`
-                              : job.maxPay
-                                ? `Up to AUD ${job.maxPay}/hr`
-                                : "Not specified"}
+                            ? `From AUD ${job.minPay}/hr`
+                            : job.maxPay
+                            ? `Up to AUD ${job.maxPay}/hr`
+                            : "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -544,13 +501,13 @@ export default function JobApplicationPage() {
                         <p className="text-gray-900">
                           {job.created_at
                             ? new Date(job.created_at).toLocaleDateString(
-                              "en-AU",
-                              {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              }
-                            )
+                                "en-AU",
+                                {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                }
+                              )
                             : "Not specified"}
                         </p>
                       </div>
@@ -581,7 +538,7 @@ export default function JobApplicationPage() {
                       <div className="flex justify-start gap-10 items-center w-1/2">
                         <span className="font-medium text-gray-600">:</span>
                         <p className="text-gray-900">
-                          {job.experienceMin}  {job.experienceMax}
+                          {job.experienceMin} {job.experienceMax}
                         </p>
                       </div>
                     </div>
@@ -620,12 +577,13 @@ export default function JobApplicationPage() {
                   isLoggedIn &&
                   (submitting || hasApplied || checkingApplication)
                 }
-                className={`${!isLoggedIn
-                  ? "bg-blue-400 hover:bg-blue-500"
-                  : hasApplied
+                className={`${
+                  !isLoggedIn
+                    ? "bg-blue-400 hover:bg-blue-500"
+                    : hasApplied
                     ? "bg-primary cursor-not-allowed"
                     : "bg-blue-400 hover:bg-blue-500"
-                  } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
+                } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
               >
                 {getButtonText()}
               </button>
