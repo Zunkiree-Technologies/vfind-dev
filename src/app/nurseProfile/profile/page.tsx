@@ -6,9 +6,7 @@ import Loading from "../../../../components/loading";
 import Image from "next/image";
 import {
   GraduationCap,
-  Calendar,
   User,
-  UserRoundSearch,
   Award,
   Briefcase,
   Clock,
@@ -17,11 +15,32 @@ import {
   Save,
   X,
   Plus,
-  Minus,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 interface ProfileImage {
   url: string;
+}
+
+interface Education {
+  id?: number;
+  institution_name: string;
+  degree_name: string;
+  from_year: string;
+  to_year: string;
+  is_currently_studying?: boolean;
+}
+
+interface WorkExperience {
+  id?: number;
+  organization_name: string;
+  role_title: string;
+  total_years: string;
+  start_date: string;
+  end_date: string;
+  is_currently_working?: boolean;
 }
 
 interface NurseProfile {
@@ -41,171 +60,56 @@ interface NurseProfile {
   shiftPreferences: string[] | string;
   licenses?: string[] | string;
   certifications?: string[] | string;
-  education?: string[] | string;
+  education?: Education[];
   residencyStatus?: string;
   visaType?: string;
   visaDuration?: string;
+  visaExpiry?: string;
   maxWorkHours?: string;
   workHoursRestricted?: string;
   postcode?: string;
   organisation?: string;
   currentResidentialLocation?: string;
   profileImage?: ProfileImage | null;
+  willingToRelocate: string;
+  ahpraRegistration: string;
+  registrationNumber: string;
+  ahprRegistrationExpiry: string;
+  workExperiences?: WorkExperience[];
 }
 
-interface EditableFieldProps {
-  field: keyof NurseProfile;
-  value: string | undefined;
-  placeholder?: string;
-  multiline?: boolean;
-  isGlobalEdit: boolean;
-  editedData: Partial<NurseProfile>;
-  onFieldChange: (field: keyof NurseProfile, value: string) => void;
-  disabled?: boolean;
+interface CollapsibleSectionProps {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
 }
 
-const EditableField: React.FC<EditableFieldProps> = ({
-  field,
-  value,
-  placeholder = "Not specified",
-  multiline = false,
-  isGlobalEdit,
-  editedData,
-  onFieldChange,
-  disabled = false,
+const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
+  title,
+  icon,
+  children,
+  defaultOpen = true,
 }) => {
-  const currentValue = editedData[field] !== undefined ? editedData[field] as string : (value || "");
-
-  if (isGlobalEdit && !disabled) {
-    return multiline ? (
-      <textarea
-        value={currentValue}
-        onChange={(e) => onFieldChange(field, e.target.value)}
-        className="w-full px-2 py-1 border border-blue-300 rounded text-sm resize-none"
-        rows={2}
-        placeholder={placeholder}
-      />
-    ) : (
-      <input
-        type="text"
-        value={currentValue}
-        onChange={(e) => onFieldChange(field, e.target.value)}
-        className="w-full px-2 py-1 border border-blue-300 rounded text-sm"
-        placeholder={placeholder}
-      />
-    );
-  }
-
-  return <span>{currentValue || placeholder}</span>;
-};
-
-interface EditableArrayFieldProps {
-  field: keyof NurseProfile;
-  values: string[];
-  placeholder?: string;
-  isGlobalEdit: boolean;
-  editedData: Partial<NurseProfile>;
-  onFieldChange: (field: keyof NurseProfile, values: string[]) => void;
-}
-
-const EditableArrayField: React.FC<EditableArrayFieldProps> = ({
-  field,
-  values,
-  placeholder = "None specified",
-  isGlobalEdit,
-  editedData,
-  onFieldChange,
-}) => {
-  const currentValues = editedData[field] !== undefined
-    ? (Array.isArray(editedData[field]) ? editedData[field] as string[] : [editedData[field] as string])
-    : values;
-
-  const [newItem, setNewItem] = useState("");
-
-  const addItem = () => {
-    if (newItem.trim() && !currentValues.includes(newItem.trim())) {
-      const updatedValues = [...currentValues, newItem.trim()];
-      onFieldChange(field, updatedValues);
-      setNewItem("");
-    }
-  };
-
-  const removeItem = (indexToRemove: number) => {
-    const updatedValues = currentValues.filter((_, index) => index !== indexToRemove);
-    onFieldChange(field, updatedValues);
-  };
-
-  if (isGlobalEdit) {
-    return (
-      <div className="space-y-3">
-        {/* Display current items with remove buttons */}
-        <div className="flex flex-wrap gap-2">
-          {currentValues.map((value, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
-            >
-              <span>{value}</span>
-              <button
-                onClick={() => removeItem(index)}
-                className="ml-1 text-red-500 hover:text-red-700 transition-colors"
-                type="button"
-              >
-                <Minus className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Add new item input */}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newItem}
-            onChange={(e) => setNewItem(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addItem();
-              }
-            }}
-            className="flex-1 px-3 py-2 border border-blue-300 rounded text-sm"
-            placeholder="Add new item..."
-          />
-          <button
-            onClick={addItem}
-            disabled={!newItem.trim() || currentValues.includes(newItem.trim())}
-            className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            type="button"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Show placeholder when no items */}
-        {currentValues.length === 0 && (
-          <span className="text-gray-400 text-sm italic">{placeholder}</span>
-        )}
-      </div>
-    );
-  }
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="space-y-2">
-      {currentValues.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {currentValues.map((value, index) => (
-            <span
-              key={index}
-              className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
-            >
-              {value}
-            </span>
-          ))}
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-5">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center space-x-2">
+          {icon}
+          <h2 className="text-lg font-medium text-gray-900">{title}</h2>
         </div>
-      ) : (
-        <span className="text-gray-400 text-sm italic">{placeholder}</span>
-      )}
+        {isOpen ? (
+          <ChevronUp className="w-5 h-5 text-gray-500" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-gray-500" />
+        )}
+      </button>
+      {isOpen && <div className="px-6 pb-6">{children}</div>}
     </div>
   );
 };
@@ -217,6 +121,8 @@ export default function NurseProfilePage() {
   const [isGlobalEdit, setIsGlobalEdit] = useState(false);
   const [editedData, setEditedData] = useState<Partial<NurseProfile>>({});
   const [saving, setSaving] = useState(false);
+  const [educationList, setEducationList] = useState<Education[]>([]);
+  const [workExperienceList, setWorkExperienceList] = useState<WorkExperience[]>([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -241,8 +147,9 @@ export default function NurseProfilePage() {
 
         if (!res.ok) throw new Error("Failed to fetch profile");
         const data = await res.json();
-        console.log("Fetched Profile Data:", data);
         setProfile(data);
+        setEducationList(data.education || []);
+        setWorkExperienceList(data.workExperiences || []);
       } catch (err: any) {
         setError(err.message || "Failed to fetch profile");
       } finally {
@@ -254,9 +161,9 @@ export default function NurseProfilePage() {
   }, []);
 
   const handleFieldChange = (field: keyof NurseProfile, value: string | string[]) => {
-    setEditedData(prev => ({
+    setEditedData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -271,13 +178,10 @@ export default function NurseProfilePage() {
         return;
       }
 
-      // Merge original profile with edited data
       const updatedProfile = { ...profile, ...editedData };
 
-      // Convert array fields to strings for API compatibility
       const apiPayload = {
         ...updatedProfile,
-        // Convert arrays to JSON strings for fields that might be arrays
         jobTypes: Array.isArray(updatedProfile.jobTypes)
           ? JSON.stringify(updatedProfile.jobTypes)
           : updatedProfile.jobTypes,
@@ -293,12 +197,7 @@ export default function NurseProfilePage() {
         certifications: Array.isArray(updatedProfile.certifications)
           ? JSON.stringify(updatedProfile.certifications)
           : updatedProfile.certifications,
-        education: Array.isArray(updatedProfile.education)
-          ? JSON.stringify(updatedProfile.education)
-          : updatedProfile.education,
       };
-
-      console.log("API Payload:", apiPayload); // Debug log to see what's being sent
 
       const res = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
@@ -318,10 +217,10 @@ export default function NurseProfilePage() {
       }
 
       const updatedData = await res.json();
-      console.log("Profile Updated Successfully:", updatedData);
       setProfile(updatedData);
       setEditedData({});
       setIsGlobalEdit(false);
+      alert("Profile updated successfully!");
     } catch (err: any) {
       alert(err.message || "Failed to update profile");
     } finally {
@@ -347,7 +246,6 @@ export default function NurseProfilePage() {
       const formData = new FormData();
       formData.append("profileImage", file);
 
-      // Add all profile fields to formData
       Object.entries(profile).forEach(([key, value]) => {
         if (key !== "profileImage" && value !== null && value !== undefined) {
           if (Array.isArray(value)) {
@@ -375,20 +273,88 @@ export default function NurseProfilePage() {
     }
   };
 
-  if (loading) return <Loading />;
-  if (error) return (
-    <div className="flex justify-center items-center h-screen text-red-600 font-semibold">
-      {error}
-    </div>
-  );
-  if (!profile) return (
-    <div className="flex justify-center items-center h-screen text-gray-600">
-      No profile data found
-    </div>
-  );
+  const handleAddEducation = async (education: Education) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
 
-  const renderArray = (value: string[] | string | undefined) =>
-    parseValues(value) || [];
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/add_education",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(education),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to add education");
+      const newEducation = await res.json();
+      setEducationList([...educationList, newEducation]);
+    } catch (err: any) {
+      alert(err.message || "Failed to add education");
+    }
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleEditEducation = async (education: Education, index: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/edit_education",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(education),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to edit education");
+      const updatedEducation = await res.json();
+      const newList = [...educationList];
+      newList[index] = updatedEducation;
+      setEducationList(newList);
+    } catch (err: any) {
+      alert(err.message || "Failed to edit education");
+    }
+  };
+
+  const handleAddWorkExperience = () => {
+    setWorkExperienceList([
+      ...workExperienceList,
+      {
+        organization_name: "",
+        role_title: "",
+        total_years: "",
+        start_date: "",
+        end_date: "",
+        is_currently_working: false,
+      },
+    ]);
+  };
+
+  if (loading) return <Loading />;
+  if (error)
+    return (
+      <div className="flex justify-center items-center h-screen text-red-600 font-semibold">
+        {error}
+      </div>
+    );
+  if (!profile)
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-600">
+        No profile data found
+      </div>
+    );
+
+  const renderArray = (value: string[] | string | undefined) => parseValues(value) || [];
 
   const preferredLocationsArray = renderArray(profile.preferredLocations);
   const jobTypesArray = renderArray(profile.jobTypes);
@@ -397,469 +363,858 @@ export default function NurseProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#F5F6FA] p-4">
-      {/* ================= Edit/Save Button Section ================= */}
-      <div className="container mx-auto mb-4">
-
-      </div>
-
-      {/* ================= Top Profile Section ================= */}
-      <div className="container mx-auto bg-white rounded-xl shadow-sm p-8 mb-8 relative">
-        {/* Top-right buttons */}
-        <div className="absolute top-4 right-4 flex justify-end gap-2">
-          {!isGlobalEdit ? (
-            <button
-              onClick={() => setIsGlobalEdit(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Edit className="w-4 h-4" />
-              Edit Profile
-            </button>
-          ) : (
-            <div className="flex gap-2">
+      <div className="container mx-auto">
+        {/* Profile Picture & Basic Information */}
+        <CollapsibleSection
+          title="Profile Picture & Basic Information"
+          icon={<User className="w-6 h-6 text-blue-600" />}
+        >
+          <div className="relative">
+            {/* Edit Profile Button */}
+            {!isGlobalEdit ? (
               <button
-                onClick={handleSaveAll}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                onClick={() => setIsGlobalEdit(true)}
+                className="absolute top-0 right-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                <Save className="w-4 h-4" />
-                {saving ? "Saving..." : "Save Changes"}
+                <Edit className="w-4 h-4" />
+                Edit Profile
               </button>
-              <button
-                onClick={handleCancelEdit}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                <X className="w-4 h-4" />
-                Cancel
-              </button>
+            ) : (
+              <div className="absolute top-0 right-0 flex gap-2">
+                <button
+                  onClick={handleCancelEdit}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveAll}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            )}
+
+            {/* Profile Content */}
+            <div className="flex flex-col items-center gap-4 pt-12">
+              {/* Profile Image */}
+              <div className="flex flex-col items-center">
+                <div className="relative h-32 w-32 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200">
+                  {profile.profileImage?.url ? (
+                    <Image
+                      priority
+                      src={profile.profileImage.url}
+                      alt={profile.fullName}
+                      width={128}
+                      height={128}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-blue-500 flex items-center justify-center text-white text-3xl font-semibold">
+                      {profile.fullName?.charAt(0) || "N"}
+                    </div>
+                  )}
+                </div>
+
+                <label className="mt-3 bg-white border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
+                  <Edit className="w-4 h-4" />
+                  Upload/Change Picture
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        handleImageEdit(e.target.files[0]);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+
+              {/* Basic Info Grid */}
+              <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Full Name
+                  </label>
+                  {isGlobalEdit ? (
+                    <input
+                      type="text"
+                      value={editedData.fullName ?? profile.fullName}
+                      onChange={(e) => handleFieldChange("fullName", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  ) : (
+                    <p className="text-gray-900">{profile.fullName}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Email
+                  </label>
+                  <p className="text-gray-900">{profile.email}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Phone Number
+                  </label>
+                  {isGlobalEdit ? (
+                    <input
+                      type="text"
+                      value={editedData.phoneNumber ?? profile.phoneNumber}
+                      onChange={(e) => handleFieldChange("phoneNumber", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  ) : (
+                    <p className="text-gray-900">{profile.phoneNumber}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Current Location
+                  </label>
+                  {isGlobalEdit ? (
+                    <input
+                      type="text"
+                      value={
+                        editedData.currentResidentialLocation ??
+                        profile.currentResidentialLocation
+                      }
+                      onChange={(e) =>
+                        handleFieldChange("currentResidentialLocation", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  ) : (
+                    <p className="text-gray-900">{profile.currentResidentialLocation}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Postcode
+                  </label>
+                  {isGlobalEdit ? (
+                    <input
+                      type="text"
+                      value={editedData.postcode ?? profile.postcode}
+                      onChange={(e) => handleFieldChange("postcode", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  ) : (
+                    <p className="text-gray-900">{profile.postcode || "Not specified"}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Willing to Relocate
+                  </label>
+                  {isGlobalEdit ? (
+                    <select
+                      value={editedData.willingToRelocate ?? profile.willingToRelocate}
+                      onChange={(e) => handleFieldChange("willingToRelocate", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  ) : (
+                    <p className="text-gray-900">{profile.willingToRelocate}</p>
+                  )}
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        </CollapsibleSection>
 
-        {/* Profile Content */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
-          {/* Profile Image */}
-          <div className="flex flex-col items-center">
-            <div className="relative h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200 flex-shrink-0">
-              {profile.profileImage?.url ? (
-                <Image
-                  priority
-                  src={profile.profileImage.url}
-                  alt={profile.fullName}
-                  width={96}
-                  height={96}
-                  className="object-cover w-full h-full"
+        {/* Visa & Residency */}
+        <CollapsibleSection
+          title="Visa & Residency"
+          icon={<Shield className="w-6 h-6 text-blue-600" />}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Residency / Visa Status
+              </label>
+              {isGlobalEdit ? (
+                <input
+                  type="text"
+                  value={editedData.residencyStatus ?? profile.residencyStatus}
+                  onChange={(e) => handleFieldChange("residencyStatus", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               ) : (
-                <div className="h-full w-full bg-blue-500 flex items-center justify-center text-white text-lg font-semibold">
-                  {profile.fullName?.charAt(0) || "N"}
-                </div>
+                <p className="text-gray-900">{profile.residencyStatus}</p>
               )}
             </div>
 
-            {/* Edit Profile Image Button */}
-            <label className="mt-2 bg-blue-600 text-white text-xs px-3 py-1 rounded cursor-pointer hover:bg-blue-700">
-              Edit Photo
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    handleImageEdit(e.target.files[0]);
-                  }
-                }}
-              />
-            </label>
-          </div>
-
-          {/* Profile Info */}
-          <div className="flex-1 space-y-2">
-            <h1 className="text-2xl font-bold text-gray-900 w-fit">
-              <EditableField
-                field="fullName"
-                value={profile.fullName}
-                placeholder="Full Name"
-                isGlobalEdit={isGlobalEdit}
-                editedData={editedData}
-                onFieldChange={handleFieldChange}
-              />
-            </h1>
-            <div className="flex items-center gap-2 text-gray-500 text-sm">
-              <Calendar className="w-4 h-4 text-blue-700" />
-              Profile last updated: {new Date().toLocaleDateString()}
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      {/* ================= Basic Info & Visa Section ================= */}
-      <div className="container mx-auto flex flex-col lg:flex-row justify-between gap-4 mb-5">
-        {/* Basic Information */}
-        <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6 ">
-          <div className="flex items-center space-x-2 mb-4">
-            <User className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-medium text-gray-900">Basic Information</h2>
-          </div>
-          <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Location</h3>
-              <p className="text-gray-900 w-fit">
-                <EditableField
-                  field="currentResidentialLocation"
-                  value={profile.currentResidentialLocation}
-                  placeholder="Location not specified"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Visa Type
+              </label>
+              {isGlobalEdit ? (
+                <input
+                  type="text"
+                  value={editedData.visaType ?? profile.visaType}
+                  onChange={(e) => handleFieldChange("visaType", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
-              </p>
+              ) : (
+                <p className="text-gray-900">{profile.visaType || "Not specified"}</p>
+              )}
             </div>
+
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Job Status</h3>
-              <p className="text-gray-900 w-fit">
-                <EditableField
-                  field="jobSearchStatus"
-                  value={profile.jobSearchStatus}
-                  placeholder="Not specified"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Visa Expiry
+              </label>
+              {isGlobalEdit ? (
+                <input
+                  type="date"
+                  value={editedData.visaExpiry ?? profile.visaExpiry}
+                  onChange={(e) => handleFieldChange("visaExpiry", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
-              </p>
+              ) : (
+                <p className="text-gray-900">{profile.visaExpiry || "Not specified"}</p>
+              )}
             </div>
+
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Email</h3>
-              <p className="text-gray-900 w-fit">
-                <EditableField
-                  field="email"
-                  value={profile.email}
-                  placeholder="Email"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                  disabled={true}
-                />
-              </p>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Work Restriction
+              </label>
+              {isGlobalEdit ? (
+                <select
+                  value={editedData.workHoursRestricted ?? profile.workHoursRestricted}
+                  onChange={(e) => handleFieldChange("workHoursRestricted", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              ) : (
+                <p className="text-gray-900">{profile.workHoursRestricted}</p>
+              )}
             </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Phone</h3>
-              <p className="text-gray-900 w-fit">
-                <EditableField
-                  field="phoneNumber"
-                  value={profile.phoneNumber}
-                  placeholder="Phone number"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Availability</h3>
-              <p className="text-gray-900 w-fit">
-                <EditableField
-                  field="startTime"
-                  value={profile.startDate || profile.startTime}
-                  placeholder="Not specified"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
-              </p>
-            </div>
-          </div>
-        </div>
 
-        {/* Visa & Residency */}
-        <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center space-x-2 mb-4">
-            <Shield className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-medium text-gray-900">Visa & Residency</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
-              <p className="text-gray-900 w-fit">
-                <EditableField
-                  field="residencyStatus"
-                  value={profile.residencyStatus}
-                  placeholder="Australian Citizen / Permanent Resident"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Visa Type</h3>
-              <p className="text-gray-900 w-fit">
-                <EditableField
-                  field="visaType"
-                  value={profile.visaType}
-                  placeholder="Not Specified"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Duration</h3>
-              <p className="text-gray-900 w-fit">
-                <EditableField
-                  field="visaDuration"
-                  value={profile.visaDuration}
-                  placeholder="Not Specified"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ================= Job Search Preferences ================= */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-5 container mx-auto">
-        <div className="flex items-center space-x-2 mb-6">
-          <UserRoundSearch className="w-6 h-6 text-blue-600" />
-          <h2 className="text-lg font-medium text-gray-900">Job search preferences</h2>
-        </div>
-        <div className="flex justify-between gap-6">
-          {/* Preferred Work Locations */}
-          <div className="w-1/2 mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Preferred Work Locations</h3>
-            <EditableArrayField
-              field="preferredLocations"
-              values={preferredLocationsArray}
-              placeholder="No preferred locations specified"
-              isGlobalEdit={isGlobalEdit}
-              editedData={editedData}
-              onFieldChange={handleFieldChange}
-            />
-          </div>
-
-          {/* Preferred Job Types */}
-          <div className="w-1/2 mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Preferred Job Types</h3>
-            <EditableArrayField
-              field="jobTypes"
-              values={jobTypesArray}
-              placeholder="No job types specified"
-              isGlobalEdit={isGlobalEdit}
-              editedData={editedData}
-              onFieldChange={handleFieldChange}
-            />
-          </div>
-        </div>
-
-        {/* Open To Other Types & Preferred Shift */}
-        <div className="flex justify-between gap-6">
-          {/* Open To Other Types */}
-          <div className="w-1/2 mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Open To Other Types</h3>
-            <div className="px-3 py-1 border border-gray-300 rounded-lg text-sm font-medium inline-block">
-              <EditableField
-                field="openToOtherTypes"
-                value={profile.openToOtherTypes}
-                placeholder="Not Specified"
-                isGlobalEdit={isGlobalEdit}
-                editedData={editedData}
-                onFieldChange={handleFieldChange}
-              />
-            </div>
-          </div>
-
-          {/* Preferred Shift */}
-          <div className="w-1/2 mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Preferred Shift</h3>
-            <EditableArrayField
-              field="shiftPreferences"
-              values={shiftPreferencesArray}
-              placeholder="No shift preferences specified"
-              isGlobalEdit={isGlobalEdit}
-              editedData={editedData}
-              onFieldChange={handleFieldChange}
-            />
-          </div>
-        </div>
-
-        {/* Availability */}
-        <div className="flex items-center text-sm text-gray-600">
-          <Calendar className="w-4 h-4 text-blue-700 mr-2" />
-          Available To Start: <span className="ml-1">
-            <EditableField
-              field="startTime"
-              value={profile.startDate || profile.startTime}
-              placeholder="Not specified"
-              isGlobalEdit={isGlobalEdit}
-              editedData={editedData}
-              onFieldChange={handleFieldChange}
-            />
-          </span>
-        </div>
-      </div>
-
-      {/* ================= Qualifications & Certificates ================= */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-5 container mx-auto">
-        <div className="flex items-center space-x-2 mb-6">
-          <GraduationCap className="w-6 h-6 text-blue-600" />
-          <h2 className="text-lg font-medium text-gray-900">Qualifications & Certificates</h2>
-        </div>
-
-        {/* Education */}
-        <div className="mb-6">
-          <h3 className="font-medium text-gray-700 mb-2">Education</h3>
-          <div className="flex flex-col gap-3 text-sm text-gray-800">
-            <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium w-fit">
-              <EditableField
-                field="qualification"
-                value={profile.qualification}
-                placeholder="Bachelor of Nursing"
-                isGlobalEdit={isGlobalEdit}
-                editedData={editedData}
-                onFieldChange={handleFieldChange}
-              />
-            </div>
-            {(profile.otherQualification || isGlobalEdit) && (
-              <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium w-fit">
-                <EditableField
-                  field="otherQualification"
-                  value={profile.otherQualification}
-                  placeholder="Other Qualification"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
+            {profile.workHoursRestricted === "Yes" && (
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Work Restriction Details
+                </label>
+                {isGlobalEdit ? (
+                  <input
+                    type="text"
+                    value={editedData.maxWorkHours ?? profile.maxWorkHours}
+                    onChange={(e) => handleFieldChange("maxWorkHours", e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                ) : (
+                  <p className="text-gray-900">{profile.maxWorkHours || "Not specified"}</p>
+                )}
               </div>
             )}
           </div>
-        </div>
-        {/* Certification */}
-        <div>
-          <h3 className="font-medium text-gray-700 mb-2">Certifications</h3>
-          <div className="flex flex-col gap-2">
-            {certificationsArray && certificationsArray.length > 0 ? (
-              certificationsArray.map((cert, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-gray-800">
-                  <Award className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                  <span>{cert}</span>
+        </CollapsibleSection>
+
+        {/* AHPRA Registration */}
+        <CollapsibleSection
+          title="AHPRA Registration"
+          icon={<Award className="w-6 h-6 text-blue-600" />}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                AHPRA Registration
+              </label>
+              {isGlobalEdit ? (
+                <select
+                  value={editedData.ahpraRegistration ?? profile.ahpraRegistration}
+                  onChange={(e) => handleFieldChange("ahpraRegistration", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              ) : (
+                <p className="text-gray-900">{profile.ahpraRegistration}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                AHPRA Registration Number
+              </label>
+              {isGlobalEdit ? (
+                <input
+                  type="text"
+                  value={editedData.registrationNumber ?? profile.registrationNumber}
+                  onChange={(e) => handleFieldChange("registrationNumber", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              ) : (
+                <p className="text-gray-900">{profile.registrationNumber}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1 block">
+                Registration Expiry
+              </label>
+              {isGlobalEdit ? (
+                <input
+                  type="date"
+                  value={editedData.ahprRegistrationExpiry ?? profile.ahprRegistrationExpiry}
+                  onChange={(e) =>
+                    handleFieldChange("ahprRegistrationExpiry", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              ) : (
+                <p className="text-gray-900">{profile.ahprRegistrationExpiry}</p>
+              )}
+            </div>
+          </div>
+        </CollapsibleSection>
+
+        {/* Education */}
+        <CollapsibleSection
+          title="Education"
+          icon={<GraduationCap className="w-6 h-6 text-blue-600" />}
+        >
+          <div className="space-y-4">
+            {educationList.map((edu, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Highest Qualification
+                    </label>
+                    <input
+                      type="text"
+                      value={edu.degree_name}
+                      onChange={(e) => {
+                        const newList = [...educationList];
+                        newList[index].degree_name = e.target.value;
+                        setEducationList(newList);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      disabled={!isGlobalEdit}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Institution
+                    </label>
+                    <input
+                      type="text"
+                      value={edu.institution_name}
+                      onChange={(e) => {
+                        const newList = [...educationList];
+                        newList[index].institution_name = e.target.value;
+                        setEducationList(newList);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      disabled={!isGlobalEdit}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      From Year
+                    </label>
+                    <input
+                      type="text"
+                      value={edu.from_year}
+                      onChange={(e) => {
+                        const newList = [...educationList];
+                        newList[index].from_year = e.target.value;
+                        setEducationList(newList);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      disabled={!isGlobalEdit}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      To Year
+                    </label>
+                    <input
+                      type="text"
+                      value={edu.to_year}
+                      onChange={(e) => {
+                        const newList = [...educationList];
+                        newList[index].to_year = e.target.value;
+                        setEducationList(newList);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      disabled={!isGlobalEdit || edu.is_currently_studying}
+                    />
+                  </div>
                 </div>
-              ))
-            ) : (
-              <span className="text-gray-500 text-sm">
-                No certifications specified
-              </span>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={edu.is_currently_studying}
+                    onChange={(e) => {
+                      const newList = [...educationList];
+                      newList[index].is_currently_studying = e.target.checked;
+                      if (e.target.checked) {
+                        newList[index].to_year = "";
+                      }
+                      setEducationList(newList);
+                    }}
+                    disabled={!isGlobalEdit}
+                    className="rounded"
+                  />
+                  <label className="text-sm text-gray-600">
+                    I am currently studying here
+                  </label>
+                </div>
+              </div>
+            ))}
+
+            {isGlobalEdit && (
+              <button
+                onClick={() => handleAddEducation({
+                  institution_name: "",
+                  degree_name: "",
+                  from_year: "",
+                  to_year: "",
+                })}
+                className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Education
+              </button>
             )}
           </div>
+        </CollapsibleSection>
 
-          {/* Editable mode */}
-          {isGlobalEdit && (
-            <EditableArrayField
-              field="certifications"
-              values={certificationsArray}
-              placeholder="Add certification"
-              isGlobalEdit={isGlobalEdit}
-              editedData={editedData}
-              onFieldChange={handleFieldChange}
-            />
-          )}
-        </div>
-
-      </div>
-
-      {/* ================= Work Experience & Preferences ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 container mx-auto">
         {/* Work Experience */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center space-x-2 mb-6">
-            <Briefcase className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-medium text-gray-900">Work Experience</h2>
+        <CollapsibleSection
+          title="Work Experience"
+          icon={<Briefcase className="w-6 h-6 text-blue-600" />}
+        >
+          <div className="space-y-6">
+            {workExperienceList.map((exp, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-medium text-gray-900">Experience {index + 1}</h3>
+                  {isGlobalEdit && workExperienceList.length > 1 && (
+                    <button
+                      onClick={() => {
+                        const newList = workExperienceList.filter((_, i) => i !== index);
+                        setWorkExperienceList(newList);
+                      }}
+                      className="text-red-600 hover:text-red-700 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Organization Name
+                    </label>
+                    <input
+                      type="text"
+                      value={exp.organization_name}
+                      onChange={(e) => {
+                        const newList = [...workExperienceList];
+                        newList[index].organization_name = e.target.value;
+                        setWorkExperienceList(newList);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      disabled={!isGlobalEdit}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Total Years of Experience
+                    </label>
+                    <input
+                      type="text"
+                      value={exp.total_years}
+                      onChange={(e) => {
+                        const newList = [...workExperienceList];
+                        newList[index].total_years = e.target.value;
+                        setWorkExperienceList(newList);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      disabled={!isGlobalEdit}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Role Title
+                    </label>
+                    <input
+                      type="text"
+                      value={exp.role_title}
+                      onChange={(e) => {
+                        const newList = [...workExperienceList];
+                        newList[index].role_title = e.target.value;
+                        setWorkExperienceList(newList);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      disabled={!isGlobalEdit}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      value={exp.start_date}
+                      onChange={(e) => {
+                        const newList = [...workExperienceList];
+                        newList[index].start_date = e.target.value;
+                        setWorkExperienceList(newList);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      disabled={!isGlobalEdit}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      value={exp.end_date}
+                      onChange={(e) => {
+                        const newList = [...workExperienceList];
+                        newList[index].end_date = e.target.value;
+                        setWorkExperienceList(newList);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      disabled={!isGlobalEdit || exp.is_currently_working}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={exp.is_currently_working}
+                    onChange={(e) => {
+                      const newList = [...workExperienceList];
+                      newList[index].is_currently_working = e.target.checked;
+                      if (e.target.checked) {
+                        newList[index].end_date = "";
+                      }
+                      setWorkExperienceList(newList);
+                    }}
+                    disabled={!isGlobalEdit}
+                    className="rounded"
+                  />
+                  <label className="text-sm text-gray-600">
+                    I am currently working here
+                  </label>
+                </div>
+              </div>
+            ))}
+
+            {isGlobalEdit && (
+              <button
+                onClick={handleAddWorkExperience}
+                className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Experience
+              </button>
+            )}
           </div>
+        </CollapsibleSection>
 
-          <div className="space-y-3 text-sm border-l-4 border-blue-500 pl-4">
+        {/* Certifications */}
+        <CollapsibleSection
+          title="Certifications"
+          icon={<Award className="w-6 h-6 text-blue-600" />}
+        >
+          <div className="space-y-3">
             <div>
-              <p className="text-gray-500">Healthcare Experience</p>
-              <p className="font-medium text-gray-900">
-                <EditableField
-                  field="experience"
-                  value={profile.experience}
-                  placeholder="No experience specified"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
-              </p>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Select Certifications
+              </label>
+              {isGlobalEdit ? (
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && !certificationsArray.includes(e.target.value)) {
+                      handleFieldChange("certifications", [
+                        ...certificationsArray,
+                        e.target.value,
+                      ]);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Select a certification</option>
+                  <option value="Police Check Certificate">Police Check Certificate</option>
+                  <option value="BLS Certification">BLS Certification</option>
+                  <option value="ACLS Certification">ACLS Certification</option>
+                  <option value="PALS Certification">PALS Certification</option>
+                </select>
+              ) : null}
+
+              <div className="flex flex-wrap gap-2 mt-3">
+                {certificationsArray.map((cert, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+                  >
+                    <span>{cert}</span>
+                    {isGlobalEdit && (
+                      <button
+                        onClick={() => {
+                          const newCerts = certificationsArray.filter((_, i) => i !== idx);
+                          handleFieldChange("certifications", newCerts);
+                        }}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {certificationsArray.length === 0 && (
+                <p className="text-gray-400 text-sm italic mt-2">
+                  No certifications specified
+                </p>
+              )}
             </div>
 
             <div>
-              <p className="text-gray-500">Currently working in healthcare</p>
-              <p className="font-medium text-gray-900">
-                <EditableField
-                  field="workingInHealthcare"
-                  value={profile.workingInHealthcare}
-                  placeholder="Not specified"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Other Certifications
+              </label>
+              {isGlobalEdit ? (
+                <input
+                  type="text"
+                  placeholder="Enter other certifications"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
-              </p>
-            </div>
-
-            <div>
-              <p className="text-gray-500">Organization Name</p>
-              <p className="font-medium text-gray-900">
-                <EditableField
-                  field="organisation"
-                  value={profile.organisation}
-                  placeholder="Not specified"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
-              </p>
+              ) : (
+                <p className="text-gray-400 text-sm italic">Not specified</p>
+              )}
             </div>
           </div>
-        </div>
+        </CollapsibleSection>
 
         {/* Work Preferences */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center space-x-2 mb-6">
-            <Clock className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-medium text-gray-900">Work Preferences</h2>
-          </div>
-          <div className="space-y-3 text-sm">
+        <CollapsibleSection
+          title="Work Preferences"
+          icon={<Clock className="w-6 h-6 text-blue-600" />}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-gray-500">Maximum work hours</p>
-              <p className="font-medium text-gray-900">
-                <EditableField
-                  field="maxWorkHours"
-                  value={profile.maxWorkHours}
-                  placeholder="Not specified"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
-              </p>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Preferred Job Type
+              </label>
+              {isGlobalEdit ? (
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && !jobTypesArray.includes(e.target.value)) {
+                      handleFieldChange("jobTypes", [...jobTypesArray, e.target.value]);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Select job type</option>
+                  <option value="Full time">Full time</option>
+                  <option value="Part time">Part time</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Casual">Casual</option>
+                </select>
+              ) : null}
+
+              <div className="flex flex-wrap gap-2 mt-2">
+                {jobTypesArray.map((type, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+                  >
+                    <span>{type}</span>
+                    {isGlobalEdit && (
+                      <button
+                        onClick={() => {
+                          const newTypes = jobTypesArray.filter((_, i) => i !== idx);
+                          handleFieldChange("jobTypes", newTypes);
+                        }}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
+
             <div>
-              <p className="text-gray-500">Work hours restricted</p>
-              <p className="font-medium text-gray-900">
-                <EditableField
-                  field="workHoursRestricted"
-                  value={profile.workHoursRestricted}
-                  placeholder="No"
-                  isGlobalEdit={isGlobalEdit}
-                  editedData={editedData}
-                  onFieldChange={handleFieldChange}
-                />
-              </p>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Open to Other Job Types
+              </label>
+              {isGlobalEdit ? (
+                <select
+                  value={editedData.openToOtherTypes ?? profile.openToOtherTypes}
+                  onChange={(e) => handleFieldChange("openToOtherTypes", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              ) : (
+                <p className="text-gray-900">{profile.openToOtherTypes}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Preferred Shift
+              </label>
+              {isGlobalEdit ? (
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && !shiftPreferencesArray.includes(e.target.value)) {
+                      handleFieldChange("shiftPreferences", [
+                        ...shiftPreferencesArray,
+                        e.target.value,
+                      ]);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Select shift preference</option>
+                  <option value="Morning">Morning</option>
+                  <option value="Afternoon">Afternoon</option>
+                  <option value="Night">Night</option>
+                </select>
+              ) : null}
+
+              <div className="flex flex-wrap gap-2 mt-2">
+                {shiftPreferencesArray.map((shift, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+                  >
+                    <span>{shift}</span>
+                    {isGlobalEdit && (
+                      <button
+                        onClick={() => {
+                          const newShifts = shiftPreferencesArray.filter((_, i) => i !== idx);
+                          handleFieldChange("shiftPreferences", newShifts);
+                        }}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Locations
+              </label>
+              {isGlobalEdit ? (
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && !preferredLocationsArray.includes(e.target.value)) {
+                      handleFieldChange("preferredLocations", [
+                        ...preferredLocationsArray,
+                        e.target.value,
+                      ]);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Select location</option>
+                  <option value="Sydney">Sydney</option>
+                  <option value="Melbourne">Melbourne</option>
+                  <option value="Brisbane">Brisbane</option>
+                  <option value="Perth">Perth</option>
+                  <option value="Adelaide">Adelaide</option>
+                </select>
+              ) : null}
+
+              <div className="flex flex-wrap gap-2 mt-2">
+                {preferredLocationsArray.map((location, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+                  >
+                    <span>{location}</span>
+                    {isGlobalEdit && (
+                      <button
+                        onClick={() => {
+                          const newLocations = preferredLocationsArray.filter(
+                            (_, i) => i !== idx
+                          );
+                          handleFieldChange("preferredLocations", newLocations);
+                        }}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                Available to Start
+              </label>
+              {isGlobalEdit ? (
+                <select
+                  value={editedData.startTime ?? profile.startTime}
+                  onChange={(e) => handleFieldChange("startTime", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="Immediately">Immediately</option>
+                  <option value="Within 2 weeks">Within 2 weeks</option>
+                  <option value="Within 1 month">Within 1 month</option>
+                  <option value="Within 2 months">Within 2 months</option>
+                </select>
+              ) : (
+                <p className="text-gray-900">{profile.startTime || profile.startDate}</p>
+              )}
             </div>
           </div>
-        </div>
+        </CollapsibleSection>
       </div>
     </div>
   );

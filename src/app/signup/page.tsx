@@ -350,43 +350,44 @@ export default function NurseSignup() {
             <div className="container mx-auto px-4 lg:px-0 flex items-center justify-center gap-10 min-h-[calc(100vh-80px)] py-4 lg:py-0">
                 {/* Left Side - Static Card - Hidden on mobile */}
 
-              <div className="flex flex-col items-center">
-      {/* Main Box */}
-      <div className="hidden lg:flex w-[435px] h-[410px] rounded-lg shadow-md flex-col justify-center items-center text-center text-gray-800 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]">
-        <h2 className="text-lg font-bold mb-6 text-[16px]">
-          On registering, you can
-        </h2>
+                <div className="flex flex-col items-center">
+                    {/* Main Box */}
+                    <div className="hidden lg:flex w-[435px] h-[410px] rounded-lg shadow-md flex-col justify-center items-center text-center text-gray-800 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]">
+                       
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                            On registering, you can
+                        </h2>
 
-        <ul className="text-[#474D6A] font-[14px] text-sm flex flex-col items-start justify-center gap-5">
-          {[
-            "Build your profile and let recruiters find you.",
-            "Get job posting delivered right to your email.",
-            "Find a job and grow your career with Vfind.",
-          ].map((text, i) => (
-            <li
-              key={i}
-              className="flex items-center gap-3 text-[14px] leading-[18px] text-[#474D6A]"
-            >
-              <span className="flex items-center justify-center w-[20px] h-[20px]">
-                <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
-              </span>
-              <span className="flex-1 text-left">{text}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+                        <ul className="text-[#474D6A] font-[14px] text-sm flex flex-col items-start justify-center gap-5">
+                            {[
+                                "Build your profile and let recruiters find you.",
+                                "Get job posting delivered right to your email.",
+                                "Find a job and grow your career with Vfind.",
+                            ].map((text, i) => (
+                                <li
+                                    key={i}
+                                    className="flex items-center gap-3 text-[14px] leading-[18px] text-[#474D6A]"
+                                >
+                                    <span className="flex items-center justify-center w-[20px] h-[20px]">
+                                        <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                                    </span>
+                                    <span className="flex-1 text-left">{text}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
 
-      {/* Login Below the Box */}
-      <div className="block text-center mt-4 text-sm text-gray-600">
-        Already have an account?
-        <button
-          onClick={() => router.push("/signin")}
-          className="text-[#4A90E2] font-medium ml-1"
-        >
-          Login
-        </button>
-      </div>
-    </div>
+                    {/* Login Below the Box */}
+                    <div className="block text-center mt-4 text-sm text-gray-600">
+                        Already have an account?
+                        <button
+                            onClick={() => router.push("/signin")}
+                            className="text-[#4A90E2] font-medium ml-1"
+                        >
+                            Login
+                        </button>
+                    </div>
+                </div>
 
                 {/* Right Side - Form - Responsive */}
                 <div className="w-full max-w-[779px]">
