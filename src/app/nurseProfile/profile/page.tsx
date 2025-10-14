@@ -157,7 +157,7 @@ export default function NurseProfilePage() {
         const eduRes = await fetch(
           "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education",
           {
-            method: "GET",
+            method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
@@ -384,7 +384,7 @@ export default function NurseProfilePage() {
       const eduRes = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education",
         {
-          method: "GET",
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

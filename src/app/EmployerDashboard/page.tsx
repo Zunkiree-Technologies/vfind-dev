@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Loading from "../../../components/loading";
 import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
-import { Briefcase, Calendar, CheckCircle, Clock, Edit, Eye, Mail, Phone, Search, Trash } from "lucide-react";
+import { Briefcase, Calendar, CheckCircle, Clock, Edit, Eye, Mail, Phone, Search, Trash, Pause, Play } from "lucide-react";
 
 interface Job {
   created_at: string;
@@ -21,6 +21,8 @@ interface Job {
   certifications: string[];
   updated_at: string;
   applicants_count?: number;
+  is_active?: boolean;
+  status: "Active" | "Paused";
 }
 
 interface Employer {
@@ -48,6 +50,8 @@ export default function EmployerDashboard() {
   const [existingCompanyData, setExistingCompanyData] = useState<any>(null);
   const [isEditingExisting, setIsEditingExisting] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [pausingJobId] = useState<number | null>(null);
 
   // 🔹 Function to fetch applicant counts for each job
   const fetchApplicantCounts = async (jobsList: Job[]) => {
@@ -236,6 +240,60 @@ export default function EmployerDashboard() {
     }
   };
 
+ const handleTogglePauseJob = async (jobId: number) => {
+   const job = jobs.find((j) => j.id === jobId);
+   if (!job) return;
+
+   const newStatus = job.status === "Active" ? "Paused" : "Active";
+
+   // Optimistically update UI
+   setJobs((prev) =>
+     prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j))
+   );
+  // console.log(jobId)
+   try {
+     const token = localStorage.getItem("authToken");
+     const res = await fetch(
+       "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/pause_active_job",
+       {
+         method: "POST",
+         headers: {
+           Authorization: `Bearer ${token}`,
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify({ jobs_id: jobId }),
+       }
+     );
+
+     // Prevent throwing error to console
+     if (!res.ok) {
+       console.warn(
+         "API returned an error, but frontend already updated optimistically",
+         res.status
+       );
+       return; // do not throw
+     }
+
+     const data = await res.json();
+     if (data.result1?.status) {
+       setJobs((prev) =>
+         prev.map((j) =>
+           j.id === jobId ? { ...j, status: data.result1.status } : j
+         )
+       );
+     }
+   } catch (err) {
+     // Silently handle network or fetch errors
+     console.warn("Network/API request failed, but UI already updated", err);
+   }
+ };
+
+
+
+
+
+
+
   const handleSaveCompanyProfile = async () => {
     if (companyDescription.trim() === "") {
       alert("Please provide a brief description before saving.");
@@ -289,6 +347,12 @@ export default function EmployerDashboard() {
     setMobileActionMenu(mobileActionMenu === jobId ? null : jobId);
   };
 
+  // Helper function to truncate description
+  const getTruncatedDescription = (text: string, maxLength: number = 150) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
+  };
+
   // 🔹 Loader
   if (loading) return <Loading />;
 
@@ -299,7 +363,6 @@ export default function EmployerDashboard() {
 
       {/* 🔹 Main container */}
       <div className="p-4 mt-5 md:p-6   flex flex-col lg:flex-row gap-6 mx-auto container justify-center ">
-
         {/* 👉 Left section */}
         <div className="space-y-5">
           {/* KYC Section */}
@@ -311,7 +374,8 @@ export default function EmployerDashboard() {
                   Complete Your Company Profile
                 </h2>
                 <p className="text-sm md:text-base text-gray-600 mt-1">
-                  Provide your company details to make your job postings stand out.
+                  Provide your company details to make your job postings stand
+                  out.
                 </p>
 
                 <button
@@ -328,10 +392,13 @@ export default function EmployerDashboard() {
             {companyProfileStep === "editing" && (
               <>
                 <h2 className="font-semibold text-gray-800 text-base md:text-lg">
-                  {isEditingExisting ? "Edit Company Profile" : "Complete Your Company Profile"}
+                  {isEditingExisting
+                    ? "Edit Company Profile"
+                    : "Complete Your Company Profile"}
                 </h2>
                 <p className="text-sm md:text-base text-gray-600 mt-1">
-                  Provide your company details to make your job postings stand out.
+                  Provide your company details to make your job postings stand
+                  out.
                 </p>
 
                 {/* Textarea */}
@@ -377,9 +444,14 @@ export default function EmployerDashboard() {
             {/* Completed Step */}
             {companyProfileStep === "completed" && (
               <>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 
-                      bg-green-50 border border-green-200 rounded-lg p-4">
-                  <CheckCircle className="text-green-600 flex-shrink-0" size={22} />
+                <div
+                  className="flex flex-col sm:flex-row items-start sm:items-center gap-3 
+                      bg-green-50 border border-green-200 rounded-lg p-4"
+                >
+                  <CheckCircle
+                    className="text-green-600 flex-shrink-0"
+                    size={22}
+                  />
                   <div className="flex-grow">
                     <h2 className="font-semibold text-green-700 text-sm md:text-base">
                       Company Profile Completed
@@ -388,6 +460,28 @@ export default function EmployerDashboard() {
                       Your company description has been saved successfully.
                     </p>
                   </div>
+                </div>
+
+                {/* Company Description Display */}
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <h3 className="font-medium text-gray-800 text-sm mb-2">
+                    Company Description
+                  </h3>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {showFullDescription
+                      ? companyDescription
+                      : getTruncatedDescription(companyDescription)}
+                  </p>
+                  {companyDescription.length > 150 && (
+                    <button
+                      onClick={() =>
+                        setShowFullDescription(!showFullDescription)
+                      }
+                      className="mt-2 text-blue-500 hover:text-blue-600 text-sm font-medium"
+                    >
+                      {showFullDescription ? "Show Less" : "Show More"}
+                    </button>
+                  )}
                 </div>
 
                 {/* Action buttons */}
@@ -469,7 +563,10 @@ export default function EmployerDashboard() {
               <Phone size={20} className="text-blue-500 mt-1" />
               <div>
                 <p className="text-sm font-medium text-gray-800">Phone</p>
-                <p className="mt-2 text-sm text-gray-700"> {employer.mobile}  </p>
+                <p className="mt-2 text-sm text-gray-700">
+                  {" "}
+                  {employer.mobile}{" "}
+                </p>
               </div>
             </div>
 
@@ -514,12 +611,13 @@ export default function EmployerDashboard() {
           <h2 className="font-semibold text-gray-800">Job Postings</h2>
 
           {/* Desktop Table */}
-          <div className="hidden md:block">
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full mt-3 text-sm text-left border-collapse">
               <thead>
                 <tr className="text-gray-600">
                   <th className="py-2 px-3">Job Title</th>
                   <th className="py-2 px-3">Created By</th>
+                  <th className="py-2 px-3">Status</th>
                   <th className="py-2 px-3">Applicants</th>
                   <th className="py-2 px-3">Actions</th>
                 </tr>
@@ -530,6 +628,17 @@ export default function EmployerDashboard() {
                     <tr key={job.id} className="hover:bg-gray-50">
                       <td className="py-2 px-3">{job.title}</td>
                       <td className="py-2 px-3">{employer.email}</td>
+                      <td className="py-2 px-3">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            job.is_active !== false
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {job.is_active !== false ? "Active" : "Paused"}
+                        </span>
+                      </td>
                       <td className="py-2 px-3">
                         <a
                           href={`/EmployerDashboard/Applicants/${job.id}`}
@@ -542,6 +651,32 @@ export default function EmployerDashboard() {
                       </td>
                       <td className="py-2 px-3">
                         <div className="flex items-center gap-3">
+                          {jobs.map((job) => (
+                            // eslint-disable-next-line react/jsx-key
+                            <button
+                              onClick={() => handleTogglePauseJob(job.id)}
+                              disabled={pausingJobId === job.id}
+                              className={`p-1 rounded cursor-pointer ${
+                                job.status === "Active"
+                                  ? "text-gray-600 hover:text-orange-600"
+                                  : "text-gray-600 hover:text-green-600"
+                              } disabled:opacity-50`}
+                              title={
+                                job.status === "Active"
+                                  ? "Pause Job"
+                                  : "Resume Job"
+                              }
+                            >
+                              {pausingJobId === job.id ? (
+                                <Clock size={16} className="animate-spin" />
+                              ) : job.status === "Active" ? (
+                                <Pause size={16} />
+                              ) : (
+                                <Play size={16} />
+                              )}
+                            </button>
+                          ))}
+
                           <a
                             href={`/EmployerDashboard/jobPreview/${job.id}`}
                             target="_blank"
@@ -571,10 +706,7 @@ export default function EmployerDashboard() {
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="text-center py-4 text-gray-500"
-                    >
+                    <td colSpan={5} className="text-center py-4 text-gray-500">
                       No jobs posted yet.
                     </td>
                   </tr>
@@ -589,11 +721,20 @@ export default function EmployerDashboard() {
               (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
                 <div key={job.id} className="pb-3 border-b last:border-0">
                   <div className="flex justify-between items-start">
-                    <div>
+                    <div className="flex-1">
                       <h3 className="font-medium">{job.title}</h3>
-                      <p className="text-xs text-gray-500">
-                        {employer.email}
-                      </p>
+                      <p className="text-xs text-gray-500">{employer.email}</p>
+                      <div className="mt-1">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            job.is_active !== false
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {job.is_active !== false ? "Active" : "Paused"}
+                        </span>
+                      </div>
                       <a
                         href={`/EmployerDashboard/Applicants/${job.id}`}
                         className="text-xs text-blue-600 hover:underline inline-block mt-1"
@@ -619,6 +760,29 @@ export default function EmployerDashboard() {
                       </button>
                       {mobileActionMenu === job.id && (
                         <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg z-10 border">
+                          <button
+                            onClick={() => handleTogglePauseJob(job.id)} // only pass job.id
+                            disabled={pausingJobId === job.id}
+                            className={`p-1 rounded cursor-pointer ${
+                              job.status === "Active"
+                                ? "text-gray-600 hover:text-orange-600"
+                                : "text-gray-600 hover:text-green-600"
+                            } disabled:opacity-50`}
+                            title={
+                              job.status === "Active"
+                                ? "Pause Job"
+                                : "Resume Job"
+                            }
+                          >
+                            {pausingJobId === job.id ? (
+                              <Clock size={16} className="animate-spin" />
+                            ) : job.status === "Active" ? (
+                              <Pause size={16} />
+                            ) : (
+                              <Play size={16} />
+                            )}
+                          </button>
+
                           <a
                             href={`/EmployerDashboard/jobPreview/${job.id}`}
                             target="_blank"
