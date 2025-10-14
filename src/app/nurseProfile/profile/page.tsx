@@ -30,7 +30,6 @@ interface Education {
   degree_name: string;
   from_year: string;
   to_year: string;
-  is_currently_studying?: boolean;
 }
 
 interface WorkExperience {
@@ -40,7 +39,6 @@ interface WorkExperience {
   total_years: string;
   start_date: string;
   end_date: string;
-  is_currently_working?: boolean;
 }
 
 interface NurseProfile {
@@ -123,6 +121,8 @@ export default function NurseProfilePage() {
   const [saving, setSaving] = useState(false);
   const [educationList, setEducationList] = useState<Education[]>([]);
   const [workExperienceList, setWorkExperienceList] = useState<WorkExperience[]>([]);
+  const [isEditingEducation, setIsEditingEducation] = useState(false);
+  const [isEditingWorkExperience, setIsEditingWorkExperience] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -133,6 +133,8 @@ export default function NurseProfilePage() {
           setLoading(false);
           return;
         }
+
+        console.log("🔐 Using token:", token);
 
         const res = await fetch(
           "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_profile",
@@ -147,10 +149,29 @@ export default function NurseProfilePage() {
 
         if (!res.ok) throw new Error("Failed to fetch profile");
         const data = await res.json();
+        console.log("✅ Nurse Profile fetched:", data);
+
         setProfile(data);
-        setEducationList(data.education || []);
         setWorkExperienceList(data.workExperiences || []);
+
+        const eduRes = await fetch(
+          "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (eduRes.ok) {
+          const eduData = await eduRes.json();
+          console.log("🎓 Education Data fetched:", eduData);
+          setEducationList(eduData || []);
+        }
       } catch (err: any) {
+        console.error("❌ Fetch Error:", err);
         setError(err.message || "Failed to fetch profile");
       } finally {
         setLoading(false);
@@ -161,6 +182,7 @@ export default function NurseProfilePage() {
   }, []);
 
   const handleFieldChange = (field: keyof NurseProfile, value: string | string[]) => {
+    console.log("✏️ Field Changed:", field, "=>", value);
     setEditedData((prev) => ({
       ...prev,
       [field]: value,
@@ -177,6 +199,8 @@ export default function NurseProfilePage() {
         alert("No authentication token found");
         return;
       }
+
+      console.log("📝 Saving Profile with Data:", editedData);
 
       const updatedProfile = { ...profile, ...editedData };
 
@@ -199,6 +223,8 @@ export default function NurseProfilePage() {
           : updatedProfile.certifications,
       };
 
+      console.log("📦 Final Payload to API:", apiPayload);
+
       const res = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
         {
@@ -217,11 +243,14 @@ export default function NurseProfilePage() {
       }
 
       const updatedData = await res.json();
+      console.log("✅ Profile successfully updated:", updatedData);
+
       setProfile(updatedData);
       setEditedData({});
       setIsGlobalEdit(false);
       alert("Profile updated successfully!");
     } catch (err: any) {
+      console.error("❌ Save Error:", err);
       alert(err.message || "Failed to update profile");
     } finally {
       setSaving(false);
@@ -229,6 +258,7 @@ export default function NurseProfilePage() {
   };
 
   const handleCancelEdit = () => {
+    console.log("🚫 Edit cancelled");
     setEditedData({});
     setIsGlobalEdit(false);
   };
@@ -237,6 +267,7 @@ export default function NurseProfilePage() {
     if (!profile) return;
 
     try {
+      console.log("🖼️ Uploading new image file:", file);
       const token = localStorage.getItem("token");
       if (!token) {
         alert("No authentication token found");
@@ -267,8 +298,10 @@ export default function NurseProfilePage() {
 
       if (!res.ok) throw new Error("Failed to update profile image");
       const updatedData = await res.json();
+      console.log("✅ Image updated:", updatedData);
       setProfile(updatedData);
     } catch (err: any) {
+      console.error("❌ Image Upload Error:", err);
       alert(err.message || "Error uploading image");
     }
   };
@@ -277,6 +310,8 @@ export default function NurseProfilePage() {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
+
+      console.log("➕ Adding Education:", education);
 
       const res = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/add_education",
@@ -292,17 +327,21 @@ export default function NurseProfilePage() {
 
       if (!res.ok) throw new Error("Failed to add education");
       const newEducation = await res.json();
-      setEducationList([...educationList, newEducation]);
+      console.log("✅ New Education Added:", newEducation);
+      return newEducation;
     } catch (err: any) {
+      console.error("❌ Add Education Error:", err);
       alert(err.message || "Failed to add education");
+      throw err;
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleEditEducation = async (education: Education, index: number) => {
+  const handleEditEducation = async (education: Education) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
+
+      console.log("✏️ Editing Education:", education);
 
       const res = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/edit_education",
@@ -318,26 +357,53 @@ export default function NurseProfilePage() {
 
       if (!res.ok) throw new Error("Failed to edit education");
       const updatedEducation = await res.json();
-      const newList = [...educationList];
-      newList[index] = updatedEducation;
-      setEducationList(newList);
+      console.log("✅ Education Updated:", updatedEducation);
+      return updatedEducation;
     } catch (err: any) {
+      console.error("❌ Edit Education Error:", err);
       alert(err.message || "Failed to edit education");
+      throw err;
     }
   };
 
-  const handleAddWorkExperience = () => {
-    setWorkExperienceList([
-      ...workExperienceList,
-      {
-        organization_name: "",
-        role_title: "",
-        total_years: "",
-        start_date: "",
-        end_date: "",
-        is_currently_working: false,
-      },
-    ]);
+  const handleSaveEducation = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      console.log("🎓 Saving education list:", educationList);
+
+      for (const edu of educationList) {
+        if (edu.id) {
+          await handleEditEducation(edu);
+        } else {
+          await handleAddEducation(edu);
+        }
+      }
+
+      const eduRes = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (eduRes.ok) {
+        const eduData = await eduRes.json();
+        console.log("🔄 Education refreshed:", eduData);
+        setEducationList(eduData || []);
+      }
+
+      setIsEditingEducation(false);
+      alert("Education saved successfully!");
+    } catch (err: any) {
+      console.error("❌ Save Education Error:", err);
+      alert(err.message || "Failed to save education");
+    }
   };
 
   if (loading) return <Loading />;
@@ -357,9 +423,20 @@ export default function NurseProfilePage() {
   const renderArray = (value: string[] | string | undefined) => parseValues(value) || [];
 
   const preferredLocationsArray = renderArray(profile.preferredLocations);
+  console.log("📍 Preferred Locations:", preferredLocationsArray);
+
   const jobTypesArray = renderArray(profile.jobTypes);
+  console.log("💼 Job Types:", jobTypesArray);
+
   const shiftPreferencesArray = renderArray(profile.shiftPreferences);
+  console.log("⏰ Shift Preferences:", shiftPreferencesArray);
+
   const certificationsArray = renderArray(profile.certifications);
+  console.log("🏅 Certifications:", certificationsArray);
+
+
+
+
 
   return (
     <div className="min-h-screen bg-[#F5F6FA] p-4">
@@ -695,8 +772,52 @@ export default function NurseProfilePage() {
           icon={<GraduationCap className="w-6 h-6 text-blue-600" />}
         >
           <div className="space-y-4">
+            <div className="flex justify-end gap-2 mb-4">
+              {!isEditingEducation ? (
+                <button
+                  onClick={() => setIsEditingEducation(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit Education
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setIsEditingEducation(false)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveEducation}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save Changes
+                  </button>
+                </>
+              )}
+            </div>
+
             {educationList.map((edu, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-medium text-gray-900">Education {index + 1}</h3>
+                  {isEditingEducation && (
+                    <button
+                      onClick={() => {
+                        const newList = educationList.filter((_, i) => i !== index);
+                        setEducationList(newList);
+                      }}
+                      className="text-red-600 hover:text-red-700 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">
@@ -711,7 +832,7 @@ export default function NurseProfilePage() {
                         setEducationList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      disabled={!isGlobalEdit}
+                      disabled={!isEditingEducation}
                     />
                   </div>
 
@@ -728,7 +849,7 @@ export default function NurseProfilePage() {
                         setEducationList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      disabled={!isGlobalEdit}
+                      disabled={!isEditingEducation}
                     />
                   </div>
 
@@ -745,7 +866,7 @@ export default function NurseProfilePage() {
                         setEducationList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      disabled={!isGlobalEdit}
+                      disabled={!isEditingEducation}
                     />
                   </div>
 
@@ -762,41 +883,26 @@ export default function NurseProfilePage() {
                         setEducationList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      disabled={!isGlobalEdit || edu.is_currently_studying}
+                      disabled={!isEditingEducation}
                     />
                   </div>
-                </div>
-
-                <div className="mt-3 flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={edu.is_currently_studying}
-                    onChange={(e) => {
-                      const newList = [...educationList];
-                      newList[index].is_currently_studying = e.target.checked;
-                      if (e.target.checked) {
-                        newList[index].to_year = "";
-                      }
-                      setEducationList(newList);
-                    }}
-                    disabled={!isGlobalEdit}
-                    className="rounded"
-                  />
-                  <label className="text-sm text-gray-600">
-                    I am currently studying here
-                  </label>
                 </div>
               </div>
             ))}
 
-            {isGlobalEdit && (
+            {isEditingEducation && (
               <button
-                onClick={() => handleAddEducation({
-                  institution_name: "",
-                  degree_name: "",
-                  from_year: "",
-                  to_year: "",
-                })}
+                onClick={() => {
+                  setEducationList([
+                    ...educationList,
+                    {
+                      institution_name: "",
+                      degree_name: "",
+                      from_year: "",
+                      to_year: "",
+                    },
+                  ]);
+                }}
                 className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
               >
                 <Plus className="w-4 h-4" />
@@ -812,11 +918,43 @@ export default function NurseProfilePage() {
           icon={<Briefcase className="w-6 h-6 text-blue-600" />}
         >
           <div className="space-y-6">
+            <div className="flex justify-end gap-2 mb-4">
+              {!isEditingWorkExperience ? (
+                <button
+                  onClick={() => setIsEditingWorkExperience(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit Work Experience
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setIsEditingWorkExperience(false)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditingWorkExperience(false);
+                      alert("Work experience saved!");
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save Changes
+                  </button>
+                </>
+              )}
+            </div>
+
             {workExperienceList.map((exp, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-medium text-gray-900">Experience {index + 1}</h3>
-                  {isGlobalEdit && workExperienceList.length > 1 && (
+                  {isEditingWorkExperience && (
                     <button
                       onClick={() => {
                         const newList = workExperienceList.filter((_, i) => i !== index);
@@ -843,7 +981,7 @@ export default function NurseProfilePage() {
                         setWorkExperienceList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      disabled={!isGlobalEdit}
+                      disabled={!isEditingWorkExperience}
                     />
                   </div>
 
@@ -860,7 +998,7 @@ export default function NurseProfilePage() {
                         setWorkExperienceList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      disabled={!isGlobalEdit}
+                      disabled={!isEditingWorkExperience}
                     />
                   </div>
 
@@ -877,7 +1015,7 @@ export default function NurseProfilePage() {
                         setWorkExperienceList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      disabled={!isGlobalEdit}
+                      disabled={!isEditingWorkExperience}
                     />
                   </div>
 
@@ -894,7 +1032,7 @@ export default function NurseProfilePage() {
                         setWorkExperienceList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      disabled={!isGlobalEdit}
+                      disabled={!isEditingWorkExperience}
                     />
                   </div>
 
@@ -911,36 +1049,27 @@ export default function NurseProfilePage() {
                         setWorkExperienceList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      disabled={!isGlobalEdit || exp.is_currently_working}
+                      disabled={!isEditingWorkExperience}
                     />
                   </div>
-                </div>
-
-                <div className="mt-3 flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={exp.is_currently_working}
-                    onChange={(e) => {
-                      const newList = [...workExperienceList];
-                      newList[index].is_currently_working = e.target.checked;
-                      if (e.target.checked) {
-                        newList[index].end_date = "";
-                      }
-                      setWorkExperienceList(newList);
-                    }}
-                    disabled={!isGlobalEdit}
-                    className="rounded"
-                  />
-                  <label className="text-sm text-gray-600">
-                    I am currently working here
-                  </label>
                 </div>
               </div>
             ))}
 
-            {isGlobalEdit && (
+            {isEditingWorkExperience && (
               <button
-                onClick={handleAddWorkExperience}
+                onClick={() => {
+                  setWorkExperienceList([
+                    ...workExperienceList,
+                    {
+                      organization_name: "",
+                      role_title: "",
+                      total_years: "",
+                      start_date: "",
+                      end_date: "",
+                    },
+                  ]);
+                }}
                 className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
               >
                 <Plus className="w-4 h-4" />
