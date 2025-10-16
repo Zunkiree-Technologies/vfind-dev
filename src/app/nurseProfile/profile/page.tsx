@@ -19,6 +19,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import Footer from "@/app/Admin/components/layout/Footer";
+import { Navbar } from "../components/Navbar";
 
 interface ProfileImage {
   url: string;
@@ -36,10 +38,11 @@ interface WorkExperience {
   id?: number;
   organization_name: string;
   role_title: string;
-  total_years: string;
+  total_years_of_experience: string;
   start_date: string;
   end_date: string;
 }
+
 
 interface NurseProfile {
   fullName: string;
@@ -120,7 +123,9 @@ export default function NurseProfilePage() {
   const [editedData, setEditedData] = useState<Partial<NurseProfile>>({});
   const [saving, setSaving] = useState(false);
   const [educationList, setEducationList] = useState<Education[]>([]);
-  const [workExperienceList, setWorkExperienceList] = useState<WorkExperience[]>([]);
+  const [workExperienceList, setWorkExperienceList] = useState<
+    WorkExperience[]
+  >([]);
   const [isEditingEducation, setIsEditingEducation] = useState(false);
   const [isEditingWorkExperience, setIsEditingWorkExperience] = useState(false);
 
@@ -167,7 +172,7 @@ export default function NurseProfilePage() {
 
         if (eduRes.ok) {
           const eduData = await eduRes.json();
-          console.log("🎓 Education Data fetched:", eduData);
+          // console.log("🎓 Education Data fetched:", eduData);
           setEducationList(eduData || []);
         }
       } catch (err: any) {
@@ -181,7 +186,10 @@ export default function NurseProfilePage() {
     fetchProfile();
   }, []);
 
-  const handleFieldChange = (field: keyof NurseProfile, value: string | string[]) => {
+  const handleFieldChange = (
+    field: keyof NurseProfile,
+    value: string | string[]
+  ) => {
     console.log("✏️ Field Changed:", field, "=>", value);
     setEditedData((prev) => ({
       ...prev,
@@ -406,6 +414,280 @@ export default function NurseProfilePage() {
     }
   };
 
+  const handleDeleteEducation = async (degree_name: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      console.log("🗑️ Deleting education with degree name:", degree_name);
+
+      // 1️⃣ Call get_education_id API
+      const getIdRes = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education_id",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ degree_name }),
+        }
+      );
+
+      console.log("📤 Request sent to get_education_id:", {
+        endpoint: "get_education_id",
+        method: "POST",
+        body: { degree_name },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const getIdData = await getIdRes.json();
+      console.log("📥 Response from get_education_id:", getIdData);
+
+      const education_id = getIdData[0]?.id;
+      console.log("💡 Extracted education_id:", education_id);
+
+      if (!education_id) {
+        console.error("❌ Education ID not found for degree:", degree_name);
+        alert(
+          "Could not find education ID. Make sure the degree name matches exactly."
+        );
+        return;
+      }
+
+      // 2️⃣ Call delete API
+      const deleteRes = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/delete_education",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ education_id }),
+        }
+      );
+
+      console.log("📤 Request sent to delete_education:", {
+        endpoint: "delete_education",
+        method: "POST",
+        body: { education_id },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const deleteData = await deleteRes.json();
+      console.log("📥 Response from delete_education:", deleteData);
+
+      if (!deleteRes.ok) throw new Error("Failed to delete education");
+
+      // 3️⃣ Update local state
+      setEducationList((prev) =>
+        prev.filter((edu) => edu.degree_name !== degree_name)
+      );
+      alert(`Education "${degree_name}" deleted successfully!`);
+    } catch (err: any) {
+      console.error("❌ Delete Education Error:", err);
+      alert(err.message || "Failed to delete education");
+    }
+  };
+
+  // WORK EXPERIENCE FUNCTIONALITY
+
+  // Add Work Experience
+  const handleAddWorkExperience = async (experience: WorkExperience) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      console.log("➕ Adding Work Experience:", experience);
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/add_work_experience",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(experience),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to add work experience");
+      const newExperience = await res.json();
+      console.log("✅ New Work Experience Added:", newExperience);
+      return newExperience;
+    } catch (err: any) {
+      console.error("❌ Add Work Experience Error:", err);
+      alert(err.message || "Failed to add work experience");
+      throw err;
+    }
+  };
+
+
+  // Edit Work Experience
+  const handleEditWorkExperience = async (experience: WorkExperience) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      console.log("✏️ Editing Work Experience:", experience);
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/edit_work_experience",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(experience),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to edit work experience");
+      const updatedExperience = await res.json();
+      console.log("✅ Work Experience Updated:", updatedExperience);
+      return updatedExperience;
+    } catch (err: any) {
+      console.error("❌ Edit Work Experience Error:", err);
+      alert(err.message || "Failed to edit work experience");
+      throw err;
+    }
+  };
+
+  // Save All Work Experience
+
+  // Delete Work Experience
+  const handleDeleteWorkExperience = async (experience: WorkExperience) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      console.log("🗑️ Deleting work experience:", experience);
+
+      // 1️⃣ Get the ID first
+      const getIdRes = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/get_workExperience_id",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            organization_name: experience.organization_name,
+            roleTitle: experience.role_title,
+          }),
+        }
+      );
+
+      console.log("📤 Request sent to get_work_experience_id:", {
+        organization_name: experience.organization_name,
+        roleTitle: experience.role_title,
+      });
+
+      const getIdData = await getIdRes.json();
+      console.log("📥 Response from get_work_experience_id:", getIdData);
+
+      const work_experience_id = getIdData[0]?.id;
+      console.log("💡 Extracted work_experience_id:", work_experience_id);
+
+      if (!work_experience_id) {
+        console.error("❌ Work Experience ID not found:", experience);
+        alert(
+          "Could not find work experience ID. Make sure organization and role match exactly."
+        );
+        return;
+      }
+
+      // 2️⃣ Delete API
+      const deleteRes = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/work_experience",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ work_experience_id }),
+        }
+      );
+
+      console.log("📤 Request sent to delete_work_experience:", {
+        work_experience_id,
+      });
+      const deleteData = await deleteRes.json();
+      console.log("📥 Response from delete_work_experience:", deleteData);
+
+      if (!deleteRes.ok) throw new Error("Failed to delete work experience");
+
+      // 3️⃣ Update local state
+      setWorkExperienceList((prev) =>
+        prev.filter(
+          (exp) =>
+            !(
+              exp.organization_name === experience.organization_name &&
+              exp.role_title === experience.role_title
+            )
+        )
+      );
+
+      alert(`Work Experience "${experience.role_title}" deleted successfully!`);
+    } catch (err: any) {
+      console.error("❌ Delete Work Experience Error:", err);
+      alert(err.message || "Failed to delete work experience");
+    }
+  };
+
+
+  const fetchWorkExperiences = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found");
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/get_workExperience",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch work experience");
+
+      const data = await res.json();
+      console.log("📥 Work Experience Data fetched:", data);
+
+      // Map API data to frontend state
+      const mapped = data.map((exp: any) => ({
+        id: exp.id,
+        organization_name: exp.organizationName,
+        role_title: exp.roleTitle,
+        total_years_of_experience: exp.totalYearsOfExperience || "",
+        start_date: exp.startDate,
+        end_date: exp.endDate,
+      }));
+
+      setWorkExperienceList(mapped);
+      console.log("🛠️ Mapped Work Experience:", mapped);
+    } catch (err: any) {
+      console.error("❌ Fetch Work Experience Error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkExperiences();
+  }, []);
+
+
+  useEffect(() => {
+    fetchWorkExperiences();
+  }, []);
+
   if (loading) return <Loading />;
   if (error)
     return (
@@ -413,6 +695,9 @@ export default function NurseProfilePage() {
         {error}
       </div>
     );
+
+
+
   if (!profile)
     return (
       <div className="flex justify-center items-center h-screen text-gray-600">
@@ -420,44 +705,46 @@ export default function NurseProfilePage() {
       </div>
     );
 
-  const renderArray = (value: string[] | string | undefined) => parseValues(value) || [];
+  const renderArray = (value: string[] | string | undefined) =>
+    parseValues(value) || [];
 
   const preferredLocationsArray = renderArray(profile.preferredLocations);
-  console.log("📍 Preferred Locations:", preferredLocationsArray);
+  // console.log("📍 Preferred Locations:", preferredLocationsArray);
 
   const jobTypesArray = renderArray(profile.jobTypes);
-  console.log("💼 Job Types:", jobTypesArray);
+  // console.log("💼 Job Types:", jobTypesArray);
 
   const shiftPreferencesArray = renderArray(profile.shiftPreferences);
-  console.log("⏰ Shift Preferences:", shiftPreferencesArray);
+  // console.log("⏰ Shift Preferences:", shiftPreferencesArray);
 
   const certificationsArray = renderArray(profile.certifications);
-  console.log("🏅 Certifications:", certificationsArray);
-
-
-
-
+  // console.log("🏅 Certifications:", certificationsArray);
 
   return (
-    <div className="min-h-screen bg-[#F5F6FA] p-4">
-      <div className="container mx-auto">
+    <div className="min-h-screen bg-[#F5F6FA] ">
+      <Navbar />
+      <div className="container mx-auto mt-5 ">
         {/* Profile Picture & Basic Information */}
-        <CollapsibleSection
-          title="Profile Picture & Basic Information"
-          icon={<User className="w-6 h-6 text-blue-600" />}
-        >
-          <div className="relative">
-            {/* Edit Profile Button */}
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-5">
+          {/* Section Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <User className="w-6 h-6 text-blue-400" />
+              <h2 className="text-lg font-semibold text-gray-800">
+                Profile Picture & Basic Information
+              </h2>
+            </div>
+
             {!isGlobalEdit ? (
               <button
                 onClick={() => setIsGlobalEdit(true)}
-                className="absolute top-0 right-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
               >
                 <Edit className="w-4 h-4" />
                 Edit Profile
               </button>
             ) : (
-              <div className="absolute top-0 right-0 flex gap-2">
+              <div className="flex gap-2">
                 <button
                   onClick={handleCancelEdit}
                   disabled={saving}
@@ -469,155 +756,160 @@ export default function NurseProfilePage() {
                 <button
                   onClick={handleSaveAll}
                   disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50"
                 >
                   <Save className="w-4 h-4" />
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             )}
+          </div>
 
-            {/* Profile Content */}
-            <div className="flex flex-col items-center gap-4 pt-12">
-              {/* Profile Image */}
-              <div className="flex flex-col items-center">
-                <div className="relative h-32 w-32 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200">
-                  {profile.profileImage?.url ? (
-                    <Image
-                      priority
-                      src={profile.profileImage.url}
-                      alt={profile.fullName}
-                      width={128}
-                      height={128}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-blue-500 flex items-center justify-center text-white text-3xl font-semibold">
-                      {profile.fullName?.charAt(0) || "N"}
-                    </div>
-                  )}
-                </div>
-
-                <label className="mt-3 bg-white border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
-                  <Edit className="w-4 h-4" />
-                  Upload/Change Picture
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        handleImageEdit(e.target.files[0]);
-                      }
-                    }}
+          {/* Profile Content */}
+          <div className="flex flex-col items-center gap-4">
+            {/* Profile Image */}
+            <div className="flex flex-col items-center">
+              <div className="relative h-32 w-32 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200">
+                {profile.profileImage?.url ? (
+                  <Image
+                    priority
+                    src={profile.profileImage.url}
+                    alt={profile.fullName}
+                    width={128}
+                    height={128}
+                    className="object-cover w-full h-full"
                   />
-                </label>
+                ) : (
+                  <div className="h-full w-full bg-blue-500 flex items-center justify-center text-white text-3xl font-semibold">
+                    {profile.fullName?.charAt(0) || "N"}
+                  </div>
+                )}
               </div>
 
-              {/* Basic Info Grid */}
-              <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Full Name
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="text"
-                      value={editedData.fullName ?? profile.fullName}
-                      onChange={(e) => handleFieldChange("fullName", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.fullName}</p>
-                  )}
-                </div>
+              <label className="mt-3 bg-white border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
+                <Edit className="w-4 h-4" />
+                Upload/Change Picture
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) handleImageEdit(e.target.files[0]);
+                  }}
+                />
+              </label>
+            </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Email
-                  </label>
-                  <p className="text-gray-900">{profile.email}</p>
-                </div>
+            {/* Basic Info Grid */}
+            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Full Name
+                </label>
+                {isGlobalEdit ? (
+                  <input
+                    type="text"
+                    value={editedData.fullName ?? profile.fullName}
+                    onChange={(e) => handleFieldChange("fullName", e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                ) : (
+                  <p className="text-gray-900">{profile.fullName}</p>
+                )}
+              </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Phone Number
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="text"
-                      value={editedData.phoneNumber ?? profile.phoneNumber}
-                      onChange={(e) => handleFieldChange("phoneNumber", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.phoneNumber}</p>
-                  )}
-                </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Email
+                </label>
+                <p className="text-gray-900">{profile.email}</p>
+              </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Current Location
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="text"
-                      value={
-                        editedData.currentResidentialLocation ??
-                        profile.currentResidentialLocation
-                      }
-                      onChange={(e) =>
-                        handleFieldChange("currentResidentialLocation", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.currentResidentialLocation}</p>
-                  )}
-                </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Phone Number
+                </label>
+                {isGlobalEdit ? (
+                  <input
+                    type="text"
+                    value={editedData.phoneNumber ?? profile.phoneNumber}
+                    onChange={(e) => handleFieldChange("phoneNumber", e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                ) : (
+                  <p className="text-gray-900">{profile.phoneNumber}</p>
+                )}
+              </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Postcode
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="text"
-                      value={editedData.postcode ?? profile.postcode}
-                      onChange={(e) => handleFieldChange("postcode", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.postcode || "Not specified"}</p>
-                  )}
-                </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Current Location
+                </label>
+                {isGlobalEdit ? (
+                  <input
+                    type="text"
+                    value={
+                      editedData.currentResidentialLocation ??
+                      profile.currentResidentialLocation
+                    }
+                    onChange={(e) =>
+                      handleFieldChange("currentResidentialLocation", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                ) : (
+                  <p className="text-gray-900">{profile.currentResidentialLocation}</p>
+                )}
+              </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Willing to Relocate
-                  </label>
-                  {isGlobalEdit ? (
-                    <select
-                      value={editedData.willingToRelocate ?? profile.willingToRelocate}
-                      onChange={(e) => handleFieldChange("willingToRelocate", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </select>
-                  ) : (
-                    <p className="text-gray-900">{profile.willingToRelocate}</p>
-                  )}
-                </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Postcode
+                </label>
+                {isGlobalEdit ? (
+                  <input
+                    type="text"
+                    value={editedData.postcode ?? profile.postcode}
+                    onChange={(e) => handleFieldChange("postcode", e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                ) : (
+                  <p className="text-gray-900">
+                    {profile.postcode || "Not specified"}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Willing to Relocate
+                </label>
+                {isGlobalEdit ? (
+                  <select
+                    value={editedData.willingToRelocate ?? profile.willingToRelocate}
+                    onChange={(e) =>
+                      handleFieldChange("willingToRelocate", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                ) : (
+                  <p className="text-gray-900">{profile.willingToRelocate}</p>
+                )}
               </div>
             </div>
           </div>
-        </CollapsibleSection>
+        </div>
+
+
+
 
         {/* Visa & Residency */}
         <CollapsibleSection
           title="Visa & Residency"
-          icon={<Shield className="w-6 h-6 text-blue-600" />}
+          icon={<Shield className="w-6 h-6 text-blue-400" />}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -628,7 +920,9 @@ export default function NurseProfilePage() {
                 <input
                   type="text"
                   value={editedData.residencyStatus ?? profile.residencyStatus}
-                  onChange={(e) => handleFieldChange("residencyStatus", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("residencyStatus", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               ) : (
@@ -644,11 +938,15 @@ export default function NurseProfilePage() {
                 <input
                   type="text"
                   value={editedData.visaType ?? profile.visaType}
-                  onChange={(e) => handleFieldChange("visaType", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("visaType", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               ) : (
-                <p className="text-gray-900">{profile.visaType || "Not specified"}</p>
+                <p className="text-gray-900">
+                  {profile.visaType || "Not specified"}
+                </p>
               )}
             </div>
 
@@ -660,11 +958,15 @@ export default function NurseProfilePage() {
                 <input
                   type="date"
                   value={editedData.visaExpiry ?? profile.visaExpiry}
-                  onChange={(e) => handleFieldChange("visaExpiry", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("visaExpiry", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               ) : (
-                <p className="text-gray-900">{profile.visaExpiry || "Not specified"}</p>
+                <p className="text-gray-900">
+                  {profile.visaExpiry || "Not specified"}
+                </p>
               )}
             </div>
 
@@ -674,8 +976,13 @@ export default function NurseProfilePage() {
               </label>
               {isGlobalEdit ? (
                 <select
-                  value={editedData.workHoursRestricted ?? profile.workHoursRestricted}
-                  onChange={(e) => handleFieldChange("workHoursRestricted", e.target.value)}
+                  value={
+                    editedData.workHoursRestricted ??
+                    profile.workHoursRestricted
+                  }
+                  onChange={(e) =>
+                    handleFieldChange("workHoursRestricted", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="Yes">Yes</option>
@@ -695,11 +1002,15 @@ export default function NurseProfilePage() {
                   <input
                     type="text"
                     value={editedData.maxWorkHours ?? profile.maxWorkHours}
-                    onChange={(e) => handleFieldChange("maxWorkHours", e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange("maxWorkHours", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 ) : (
-                  <p className="text-gray-900">{profile.maxWorkHours || "Not specified"}</p>
+                  <p className="text-gray-900">
+                    {profile.maxWorkHours || "Not specified"}
+                  </p>
                 )}
               </div>
             )}
@@ -709,7 +1020,7 @@ export default function NurseProfilePage() {
         {/* AHPRA Registration */}
         <CollapsibleSection
           title="AHPRA Registration"
-          icon={<Award className="w-6 h-6 text-blue-600" />}
+          icon={<Award className="w-6 h-6 text-blue-400" />}
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
@@ -718,8 +1029,12 @@ export default function NurseProfilePage() {
               </label>
               {isGlobalEdit ? (
                 <select
-                  value={editedData.ahpraRegistration ?? profile.ahpraRegistration}
-                  onChange={(e) => handleFieldChange("ahpraRegistration", e.target.value)}
+                  value={
+                    editedData.ahpraRegistration ?? profile.ahpraRegistration
+                  }
+                  onChange={(e) =>
+                    handleFieldChange("ahpraRegistration", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="Yes">Yes</option>
@@ -737,8 +1052,12 @@ export default function NurseProfilePage() {
               {isGlobalEdit ? (
                 <input
                   type="text"
-                  value={editedData.registrationNumber ?? profile.registrationNumber}
-                  onChange={(e) => handleFieldChange("registrationNumber", e.target.value)}
+                  value={
+                    editedData.registrationNumber ?? profile.registrationNumber
+                  }
+                  onChange={(e) =>
+                    handleFieldChange("registrationNumber", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               ) : (
@@ -753,14 +1072,19 @@ export default function NurseProfilePage() {
               {isGlobalEdit ? (
                 <input
                   type="date"
-                  value={editedData.ahprRegistrationExpiry ?? profile.ahprRegistrationExpiry}
+                  value={
+                    editedData.ahprRegistrationExpiry ??
+                    profile.ahprRegistrationExpiry
+                  }
                   onChange={(e) =>
                     handleFieldChange("ahprRegistrationExpiry", e.target.value)
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               ) : (
-                <p className="text-gray-900">{profile.ahprRegistrationExpiry}</p>
+                <p className="text-gray-900">
+                  {profile.ahprRegistrationExpiry}
+                </p>
               )}
             </div>
           </div>
@@ -769,14 +1093,14 @@ export default function NurseProfilePage() {
         {/* Education */}
         <CollapsibleSection
           title="Education"
-          icon={<GraduationCap className="w-6 h-6 text-blue-600" />}
+          icon={<GraduationCap className="w-6 h-6 text-blue-400" />}
         >
           <div className="space-y-4">
             <div className="flex justify-end gap-2 mb-4">
               {!isEditingEducation ? (
                 <button
                   onClick={() => setIsEditingEducation(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                   Edit Education
@@ -802,19 +1126,35 @@ export default function NurseProfilePage() {
             </div>
 
             {educationList.map((edu, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
+              <div
+                key={index}
+                className="border border-gray-200 rounded-lg p-4"
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-medium text-gray-900">Education {index + 1}</h3>
+                  <h3 className="font-medium text-gray-900">
+                    Education {index + 1}
+                  </h3>
                   {isEditingEducation && (
-                    <button
-                      onClick={() => {
-                        const newList = educationList.filter((_, i) => i !== index);
-                        setEducationList(newList);
-                      }}
-                      className="text-red-600 hover:text-red-700 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <>
+                      {console.log(
+                        "Delete button rendered for:",
+                        edu.degree_name
+                      )}
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Are you sure you want to delete "${edu.degree_name}" education record?`
+                            )
+                          ) {
+                            handleDeleteEducation(edu.degree_name);
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-700 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
                   )}
                 </div>
 
@@ -915,14 +1255,15 @@ export default function NurseProfilePage() {
         {/* Work Experience */}
         <CollapsibleSection
           title="Work Experience"
-          icon={<Briefcase className="w-6 h-6 text-blue-600" />}
+          icon={<Briefcase className="w-6 h-6 text-blue-400" />}
         >
           <div className="space-y-6">
+            {/* Top buttons */}
             <div className="flex justify-end gap-2 mb-4">
               {!isEditingWorkExperience ? (
                 <button
                   onClick={() => setIsEditingWorkExperience(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                   Edit Work Experience
@@ -937,9 +1278,18 @@ export default function NurseProfilePage() {
                     Cancel
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
+                      // Save all current experiences
+                      for (const exp of workExperienceList) {
+                        if (exp.id) {
+                          await handleEditWorkExperience(exp);
+                        } else {
+                          await handleAddWorkExperience(exp);
+                        }
+                      }
+                      await fetchWorkExperiences(); // Refresh list
                       setIsEditingWorkExperience(false);
-                      alert("Work experience saved!");
+                      alert("Work experience saved successfully!");
                     }}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
@@ -950,15 +1300,26 @@ export default function NurseProfilePage() {
               )}
             </div>
 
+            {/* Work Experience List */}
             {workExperienceList.map((exp, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
+              <div
+                key={exp.id || index}
+                className="border border-gray-200 rounded-lg p-4"
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-medium text-gray-900">Experience {index + 1}</h3>
-                  {isEditingWorkExperience && (
+                  <h3 className="font-medium text-gray-900">
+                    Experience {index + 1}
+                  </h3>
+                  {isEditingWorkExperience && exp.id && (
                     <button
-                      onClick={() => {
-                        const newList = workExperienceList.filter((_, i) => i !== index);
-                        setWorkExperienceList(newList);
+                      onClick={async () => {
+                        if (
+                          window.confirm(
+                            `Are you sure you want to delete "${exp.role_title}" at "${exp.organization_name}"?`
+                          )
+                        ) {
+                          await handleDeleteWorkExperience(exp);
+                        }
                       }}
                       className="text-red-600 hover:text-red-700 transition-colors"
                     >
@@ -968,6 +1329,7 @@ export default function NurseProfilePage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Organization Name */}
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">
                       Organization Name
@@ -985,16 +1347,18 @@ export default function NurseProfilePage() {
                     />
                   </div>
 
+                  {/* Total Years */}
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">
                       Total Years of Experience
                     </label>
                     <input
                       type="text"
-                      value={exp.total_years}
+                      value={exp.total_years_of_experience}
                       onChange={(e) => {
                         const newList = [...workExperienceList];
-                        newList[index].total_years = e.target.value;
+                        newList[index].total_years_of_experience =
+                          e.target.value;
                         setWorkExperienceList(newList);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -1002,6 +1366,7 @@ export default function NurseProfilePage() {
                     />
                   </div>
 
+                  {/* Role Title */}
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">
                       Role Title
@@ -1019,6 +1384,7 @@ export default function NurseProfilePage() {
                     />
                   </div>
 
+                  {/* Start Date */}
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">
                       Start Date
@@ -1036,6 +1402,7 @@ export default function NurseProfilePage() {
                     />
                   </div>
 
+                  {/* End Date */}
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">
                       End Date
@@ -1056,15 +1423,16 @@ export default function NurseProfilePage() {
               </div>
             ))}
 
+            {/* Add Work Experience Button */}
             {isEditingWorkExperience && (
               <button
                 onClick={() => {
-                  setWorkExperienceList([
-                    ...workExperienceList,
+                  setWorkExperienceList((prev) => [
+                    ...prev,
                     {
                       organization_name: "",
                       role_title: "",
-                      total_years: "",
+                      total_years_of_experience: "",
                       start_date: "",
                       end_date: "",
                     },
@@ -1082,105 +1450,102 @@ export default function NurseProfilePage() {
         {/* Certifications */}
         <CollapsibleSection
           title="Certifications"
-          icon={<Award className="w-6 h-6 text-blue-600" />}
+          icon={<Award className="w-6 h-6 text-blue-400" />}
         >
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Select Certifications
               </label>
-              {isGlobalEdit ? (
+
+              {isGlobalEdit && (
                 <select
                   value=""
                   onChange={(e) => {
-                    if (e.target.value && !certificationsArray.includes(e.target.value)) {
-                      handleFieldChange("certifications", [
-                        ...certificationsArray,
-                        e.target.value,
-                      ]);
+                    const value = e.target.value;
+                    if (value && !certificationsArray.includes(value)) {
+                      const updatedCerts = [...certificationsArray, value];
+                      handleFieldChange("certifications", updatedCerts);
                     }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="">Select a certification</option>
+                  <option value="AHPRA Registration">AHPRA Registration</option>
                   <option value="Police Check Certificate">Police Check Certificate</option>
-                  <option value="BLS Certification">BLS Certification</option>
-                  <option value="ACLS Certification">ACLS Certification</option>
-                  <option value="PALS Certification">PALS Certification</option>
+                  <option value="Working with Children Check">Working with Children Check</option>
+                  <option value="First Aid/CPR">First Aid/CPR</option>
+                  <option value="Manual Handling">Manual Handling</option>
+                  <option value="Vaccination / Immunisation">Vaccination / Immunisation</option>
+                  <option value="NDIS Worker Screening">NDIS Worker Screening</option>
                 </select>
-              ) : null}
+              )}
 
+              {/* Display selected certifications */}
               <div className="flex flex-wrap gap-2 mt-3">
-                {certificationsArray.map((cert, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
-                  >
-                    <span>{cert}</span>
-                    {isGlobalEdit && (
-                      <button
-                        onClick={() => {
-                          const newCerts = certificationsArray.filter((_, i) => i !== idx);
-                          handleFieldChange("certifications", newCerts);
-                        }}
-                        className="text-red-500 hover:text-red-700 transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
+                {certificationsArray && certificationsArray.length > 0 ? (
+                  certificationsArray.map((cert, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-500 rounded-lg text-sm font-medium"
+                    >
+                      <span>{cert}</span>
+                      {isGlobalEdit && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newCerts = certificationsArray.filter(
+                              (item) => item !== cert
+                            );
+                            handleFieldChange("certifications", newCerts);
+                          }}
+                          className="text-red-500 hover:text-red-700 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-sm italic">
+                    No certifications specified
+                  </p>
+                )}
               </div>
-
-              {certificationsArray.length === 0 && (
-                <p className="text-gray-400 text-sm italic mt-2">
-                  No certifications specified
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Other Certifications
-              </label>
-              {isGlobalEdit ? (
-                <input
-                  type="text"
-                  placeholder="Enter other certifications"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              ) : (
-                <p className="text-gray-400 text-sm italic">Not specified</p>
-              )}
             </div>
           </div>
         </CollapsibleSection>
 
+
+
         {/* Work Preferences */}
         <CollapsibleSection
           title="Work Preferences"
-          icon={<Clock className="w-6 h-6 text-blue-600" />}
+          icon={<Clock className="w-6 h-6 text-blue-400" />}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Preferred Job Type */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Preferred Job Type
               </label>
               {isGlobalEdit ? (
                 <select
-                  value=""
+                  value={jobTypesArray[jobTypesArray.length - 1] || ""}
                   onChange={(e) => {
-                    if (e.target.value && !jobTypesArray.includes(e.target.value)) {
-                      handleFieldChange("jobTypes", [...jobTypesArray, e.target.value]);
+                    const val = e.target.value;
+                    if (val && !jobTypesArray.includes(val)) {
+                      handleFieldChange("jobTypes", [...jobTypesArray, val]);
                     }
+                    e.target.value = ""; // reset after adding
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="">Select job type</option>
                   <option value="Full time">Full time</option>
                   <option value="Part time">Part time</option>
-                  <option value="Contract">Contract</option>
                   <option value="Casual">Casual</option>
+                  <option value="Contract">Open to any</option>
                 </select>
               ) : null}
 
@@ -1188,7 +1553,7 @@ export default function NurseProfilePage() {
                 {jobTypesArray.map((type, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-500 rounded-lg text-sm font-medium"
                   >
                     <span>{type}</span>
                     {isGlobalEdit && (
@@ -1207,16 +1572,20 @@ export default function NurseProfilePage() {
               </div>
             </div>
 
+            {/* Open to Other Job Types */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Open to Other Job Types
               </label>
               {isGlobalEdit ? (
                 <select
-                  value={editedData.openToOtherTypes ?? profile.openToOtherTypes}
-                  onChange={(e) => handleFieldChange("openToOtherTypes", e.target.value)}
+                  value={editedData.openToOtherTypes ?? profile.openToOtherTypes ?? ""}
+                  onChange={(e) =>
+                    handleFieldChange("openToOtherTypes", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
+                  <option value="">Select option</option>
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
                 </select>
@@ -1225,20 +1594,23 @@ export default function NurseProfilePage() {
               )}
             </div>
 
+            {/* Preferred Shift */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Preferred Shift
               </label>
               {isGlobalEdit ? (
                 <select
-                  value=""
+                  value={shiftPreferencesArray[shiftPreferencesArray.length - 1] || ""}
                   onChange={(e) => {
-                    if (e.target.value && !shiftPreferencesArray.includes(e.target.value)) {
+                    const val = e.target.value;
+                    if (val && !shiftPreferencesArray.includes(val)) {
                       handleFieldChange("shiftPreferences", [
                         ...shiftPreferencesArray,
-                        e.target.value,
+                        val,
                       ]);
                     }
+                    e.target.value = ""; // reset
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
@@ -1253,13 +1625,15 @@ export default function NurseProfilePage() {
                 {shiftPreferencesArray.map((shift, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-500 rounded-lg text-sm font-medium"
                   >
                     <span>{shift}</span>
                     {isGlobalEdit && (
                       <button
                         onClick={() => {
-                          const newShifts = shiftPreferencesArray.filter((_, i) => i !== idx);
+                          const newShifts = shiftPreferencesArray.filter(
+                            (_, i) => i !== idx
+                          );
                           handleFieldChange("shiftPreferences", newShifts);
                         }}
                         className="text-red-500 hover:text-red-700 transition-colors"
@@ -1272,20 +1646,23 @@ export default function NurseProfilePage() {
               </div>
             </div>
 
+            {/* Preferred Locations */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Locations
               </label>
               {isGlobalEdit ? (
                 <select
-                  value=""
+                  value={preferredLocationsArray[preferredLocationsArray.length - 1] || ""}
                   onChange={(e) => {
-                    if (e.target.value && !preferredLocationsArray.includes(e.target.value)) {
+                    const val = e.target.value;
+                    if (val && !preferredLocationsArray.includes(val)) {
                       handleFieldChange("preferredLocations", [
                         ...preferredLocationsArray,
-                        e.target.value,
+                        val,
                       ]);
                     }
+                    e.target.value = ""; // reset
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
@@ -1302,7 +1679,7 @@ export default function NurseProfilePage() {
                 {preferredLocationsArray.map((location, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
+                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-500 rounded-lg text-sm font-medium"
                   >
                     <span>{location}</span>
                     {isGlobalEdit && (
@@ -1323,27 +1700,36 @@ export default function NurseProfilePage() {
               </div>
             </div>
 
+            {/* Available to Start */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
                 Available to Start
               </label>
               {isGlobalEdit ? (
                 <select
-                  value={editedData.startTime ?? profile.startTime}
+                  value={editedData.startTime ?? profile.startTime ?? ""}
                   onChange={(e) => handleFieldChange("startTime", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
+                  <option value="">Select availability</option>
                   <option value="Immediately">Immediately</option>
                   <option value="Within 2 weeks">Within 2 weeks</option>
                   <option value="Within 1 month">Within 1 month</option>
-                  <option value="Within 2 months">Within 2 months</option>
                 </select>
               ) : (
-                <p className="text-gray-900">{profile.startTime || profile.startDate}</p>
+                <p className="text-gray-900">
+                  {profile.startTime || profile.startDate}
+                </p>
               )}
             </div>
           </div>
         </CollapsibleSection>
+
+
+
+      </div>
+      <div className="bg-white">
+        <Footer />
       </div>
     </div>
   );

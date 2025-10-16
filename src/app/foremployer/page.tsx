@@ -56,17 +56,14 @@ export default function EmployerPage() {
     <div>
       <Navbar />
 
-           <div className="min-h-fit flex items-center justify-center   py-10  px-4 sm:px-6">
+      <div className="min-h-fit flex items-center justify-center   py-10  px-4 sm:px-6">
 
 
         <div className="flex flex-col lg:flex-row gap-8 max-w-6xl w-full">
           {/* Left Section */}
 
           <div
-            className="hidden md:flex flex-col justify-between w-full lg:w-[627px] lg:h-[480px] p-10 rounded-2xl shadow-md 
-        
-bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
-"
+            className="hidden md:flex flex-col justify-between w-full lg:w-[627px] lg:h-[480px] p-10 rounded-2xl shadow-md bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]"
           >
             <div className="mt-5 ml-10">
               <h2 className="text-2xl font-bold  text-gray-800 ">
@@ -142,7 +139,7 @@ bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
                     <a
                       href="/privacy"
                       target="_blank"
-                      className="text-blue-600 underline"
+                      className="text-blue-500 underline"
                     >
                       Privacy Policy
                     </a>{" "}
@@ -150,7 +147,7 @@ bg-[linear-gradient(to_top,#61A6FA_0%,#AAD0FD_20%,#F4F9FF_100%)]
                     <a
                       href="/terms"
                       target="_blank"
-                      className="text-blue-600 underline"
+                      className="text-blue-500 underline"
                     >
                       Terms & Conditions
                     </a>

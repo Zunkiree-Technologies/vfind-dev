@@ -255,13 +255,13 @@ export function ContactPasswordStep({ formData, handleChange }: ContactPasswordS
         <button
           type="button"
           onClick={() => handleChange("termsAccepted", !formData.termsAccepted)}
-          className={`w-6 h-6 rounded-full border flex items-center justify-center mr-2 ${formData.termsAccepted ? "bg-blue-700 text-white" : "bg-[#ECEFFD] text-[#2142B9]"}`}
+          className={`w-6 h-6 rounded-full border flex items-center justify-center mr-2 ${formData.termsAccepted ? "bg-blue-400 text-white" : "bg-[#ECEFFD] text-[#2142B9]"}`}
         >
           {formData.termsAccepted && <Check size={16} />}
         </button>
         <label className="text-sm text-gray-700">
           I accept the{" "}
-          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">
             Terms & Conditions
           </a>
         </label>
