@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Calendar, Filter, Search, Mail, User, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import Loader from "../../../../../components/loading";
+import EmployerNavbar from "../../components/EmployerNavbar";
 
 interface JobApplication {
   id: number;
@@ -113,10 +114,12 @@ const JobApplicationsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+       {/* 🔹 Navbar */}
+            <EmployerNavbar />
       {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div className=" ">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between ">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Job Applications</h1>
               <p className="mt-1 text-sm text-gray-500">

@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Loading from "../../../components/loading";
 import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
-import { Briefcase, Calendar, CheckCircle, Clock, Edit, Eye, Mail, Phone, Search, Trash, Pause, Play } from "lucide-react";
+import { Briefcase, Calendar, Clock, Edit, Eye, Mail, Phone, Search, Trash, Pause, Play } from "lucide-react";
 
 interface Job {
   created_at: string;
@@ -444,27 +444,11 @@ export default function EmployerDashboard() {
             {/* Completed Step */}
             {companyProfileStep === "completed" && (
               <>
-                <div
-                  className="flex flex-col sm:flex-row items-start sm:items-center gap-3 
-                      bg-green-50 border border-green-200 rounded-lg p-4"
-                >
-                  <CheckCircle
-                    className="text-green-600 flex-shrink-0"
-                    size={22}
-                  />
-                  <div className="flex-grow">
-                    <h2 className="font-semibold text-green-700 text-sm md:text-base">
-                      Company Profile Completed
-                    </h2>
-                    <p className="mt-1 text-xs md:text-sm text-green-600">
-                      Your company description has been saved successfully.
-                    </p>
-                  </div>
-                </div>
+               
 
                 {/* Company Description Display */}
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <h3 className="font-medium text-gray-800 text-sm mb-2">
+                  <h3 className="font-bold text-gray-800 text-sm mb-2">
                     Company Description
                   </h3>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">
@@ -492,7 +476,7 @@ export default function EmployerDashboard() {
                      text-sm transition flex items-center gap-2"
                   >
                     <Edit size={16} />
-                    Edit Profile
+                    Edit Description
                   </button>
                   <button
                     onClick={handleDeleteCompanyProfile}
@@ -500,7 +484,7 @@ export default function EmployerDashboard() {
                      text-sm transition flex items-center gap-2"
                   >
                     <Trash size={16} />
-                    Delete Profile
+                    Delete Description
                   </button>
                 </div>
               </>
@@ -512,7 +496,7 @@ export default function EmployerDashboard() {
             {/* Talent Pool */}
             <div className="bg-white rounded-lg p-4 shadow-sm flex items-center gap-4">
               <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
-                <Search size={20} className="text-blue-500" />
+                <Search size={20} className="text-blue-400" />
               </div>
               <div>
                 <h2 className="font-semibold text-gray-800">
@@ -525,7 +509,7 @@ export default function EmployerDashboard() {
                   onClick={() =>
                     window.open("/EmployerDashboard/Candidatelist", "_blank")
                   }
-                  className="mt-3 px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
+                  className="mt-3 px-3 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
                 >
                   Search Candidate
                 </button>
@@ -535,7 +519,7 @@ export default function EmployerDashboard() {
             {/* Free Job Posting */}
             <div className="bg-white rounded-lg p-4 shadow-sm flex items-center gap-4">
               <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
-                <Briefcase size={20} className="text-blue-500" />
+                <Briefcase size={20} className="text-blue-400" />
               </div>
               <div>
                 <h2 className="font-semibold text-gray-800">Post a Free Job</h2>
@@ -544,7 +528,7 @@ export default function EmployerDashboard() {
                 </p>
                 <button
                   onClick={() => router.push("/EmployerDashboard/jobposting")}
-                  className="mt-3 px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
+                  className="mt-3 px-3 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
                 >
                   Post a Free Job
                 </button>
@@ -560,7 +544,7 @@ export default function EmployerDashboard() {
 
             {/* Phone */}
             <div className="flex items-start space-x-3">
-              <Phone size={20} className="text-blue-500 mt-1" />
+              <Phone size={20} className="text-blue-400 mt-1" />
               <div>
                 <p className="text-sm font-medium text-gray-800">Phone</p>
                 <p className="mt-2 text-sm text-gray-700">
@@ -572,7 +556,7 @@ export default function EmployerDashboard() {
 
             {/* Hours */}
             <div className="flex items-start space-x-3">
-              <Clock size={20} className="text-blue-500 mt-1" />
+              <Clock size={20} className="text-blue-400 mt-1" />
               <div>
                 <p className="text-sm font-medium text-gray-800">Hours</p>
                 <p className="text-sm text-gray-600">7:00 AM - 6:00 PM</p>
@@ -581,7 +565,7 @@ export default function EmployerDashboard() {
 
             {/* Weekdays */}
             <div className="flex items-start space-x-3">
-              <Calendar size={20} className="text-blue-500 mt-1" />
+              <Calendar size={20} className="text-blue-400 mt-1" />
               <div>
                 <p className="text-sm font-medium text-gray-800">Weekdays</p>
                 <p className="text-sm text-gray-600">Mon - Sat</p>
@@ -590,7 +574,7 @@ export default function EmployerDashboard() {
 
             {/* Email */}
             <div className="flex items-start space-x-3">
-              <Mail size={20} className="text-blue-500 mt-1" />
+              <Mail size={20} className="text-blue-400 mt-1" />
               <div>
                 <p className="text-sm font-medium text-gray-800">Email</p>
                 <a
@@ -607,7 +591,7 @@ export default function EmployerDashboard() {
 
       {/* 🔹 Job Postings Section */}
       <div className=" flex item-center justify-center   container mx-auto ">
-        <div className="bg-white p-5 w-[950px] rounded-lg  shadow-sm ">
+        <div className="bg-white p-5 w-[1125px] rounded-lg  shadow-sm ">
           <h2 className="font-semibold text-gray-800">Job Postings</h2>
 
           {/* Desktop Table */}
@@ -631,12 +615,12 @@ export default function EmployerDashboard() {
                       <td className="py-2 px-3">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            job.is_active !== false
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-700"
+                            job.status === "Active"
+                              ? "border border-green-500 text-green-600 bg-[#6FB7720D] px-3 py-1 w-28 text-center"
+                              : "border border-gray-400 bg-gray-100 text-gray-600 px-2 py-1 w-28 text-center"
                           }`}
                         >
-                          {job.is_active !== false ? "Active" : "Paused"}
+                          {job.status === "Active" ? "Active" : "Paused"}
                         </span>
                       </td>
                       <td className="py-2 px-3">
@@ -651,31 +635,28 @@ export default function EmployerDashboard() {
                       </td>
                       <td className="py-2 px-3">
                         <div className="flex items-center gap-3">
-                          {jobs.map((job) => (
-                            // eslint-disable-next-line react/jsx-key
-                            <button
-                              onClick={() => handleTogglePauseJob(job.id)}
-                              disabled={pausingJobId === job.id}
-                              className={`p-1 rounded cursor-pointer ${
-                                job.status === "Active"
-                                  ? "text-gray-600 hover:text-orange-600"
-                                  : "text-gray-600 hover:text-green-600"
-                              } disabled:opacity-50`}
-                              title={
-                                job.status === "Active"
-                                  ? "Pause Job"
-                                  : "Resume Job"
-                              }
-                            >
-                              {pausingJobId === job.id ? (
-                                <Clock size={16} className="animate-spin" />
-                              ) : job.status === "Active" ? (
-                                <Pause size={16} />
-                              ) : (
-                                <Play size={16} />
-                              )}
-                            </button>
-                          ))}
+                          <button
+                            onClick={() => handleTogglePauseJob(job.id)}
+                            disabled={pausingJobId === job.id}
+                            className={`p-1 rounded cursor-pointer ${
+                              job.status === "Active"
+                                ? "text-gray-600 hover:text-[#61A6FA]"
+                                : "text-gray-600 hover:text-[#61A6FA]"
+                            } disabled:opacity-50`}
+                            title={
+                              job.status === "Active"
+                                ? "Pause Job"
+                                : "Resume Job"
+                            }
+                          >
+                            {pausingJobId === job.id ? (
+                              <Clock size={16} className="animate-spin" />
+                            ) : job.status === "Active" ? (
+                              <Pause size={16} />
+                            ) : (
+                              <Play size={16} />
+                            )}
+                          </button>
 
                           <a
                             href={`/EmployerDashboard/jobPreview/${job.id}`}
@@ -686,6 +667,7 @@ export default function EmployerDashboard() {
                           >
                             <Eye size={16} />
                           </a>
+
                           <button
                             onClick={() => handleEdit(job)}
                             className="text-gray-600 hover:text-blue-600 p-1 rounded cursor-pointer"
@@ -693,6 +675,7 @@ export default function EmployerDashboard() {
                           >
                             <Edit size={16} />
                           </button>
+
                           <button
                             onClick={() => handleDelete(job.id)}
                             className="text-gray-600 hover:text-red-600 p-1 rounded cursor-pointer"
@@ -834,5 +817,7 @@ export default function EmployerDashboard() {
         </div>
       </div>
     </div>
+
+
   );
 }

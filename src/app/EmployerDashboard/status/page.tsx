@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User, Clock, CheckCircle, XCircle } from "lucide-react";
 import Loader from "../../../../components/loading";
+import EmployerNavbar from "../components/EmployerNavbar";
 
 interface StatusItem {
   id: number;
@@ -77,8 +78,10 @@ export default function StatusPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+       {/* 🔹 Navbar */}
+            <EmployerNavbar />
       {/* Header */}
-      <div className="bg-white shadow-sm">
+      <div className=" ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row sm:justify-between sm:items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Status Updates</h1>
@@ -137,7 +140,7 @@ export default function StatusPage() {
               >
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-blue-600" />
+                    <User className="w-5 h-5 text-blue-400" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{item.nurseName}</p>
@@ -155,7 +158,7 @@ export default function StatusPage() {
                       e.stopPropagation();
                       router.push(`/EmployerDashboard/Candidatelist/${item.nurse_profiles_id}`);
                     }}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="text-blue-400 hover:text-blue-800 text-sm font-medium"
                   >
                     View Profile
                   </button>

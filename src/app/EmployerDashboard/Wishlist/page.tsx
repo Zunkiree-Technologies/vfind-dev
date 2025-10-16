@@ -12,6 +12,7 @@ import {
   Clock1,
   ChevronLeft,
   ChevronRight,
+  ArrowLeft,
 } from "lucide-react";
 import Loader from "../../../../components/loading";
 import Link from "next/link";
@@ -88,11 +89,10 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          currentPage === 1
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
             ? "text-gray-400 cursor-not-allowed"
             : "text-gray-600 hover:bg-gray-100"
-        }`}
+          }`}
       >
         <ChevronLeft size={16} />
         Previous
@@ -106,11 +106,10 @@ const Pagination: React.FC<PaginationProps> = ({
             ) : (
               <button
                 onClick={() => onPageChange(page as number)}
-                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${
-                  currentPage === page
+                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
                     ? "bg-gray-900 text-white"
                     : "text-gray-600 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 {page}
               </button>
@@ -122,11 +121,10 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          currentPage === totalPages
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
             ? "text-gray-400 cursor-not-allowed"
             : "text-gray-600 hover:bg-gray-100"
-        }`}
+          }`}
       >
         Next
         <ChevronRight size={16} />
@@ -417,7 +415,17 @@ export default function WishlistNurses() {
   return (
     <div className="p-6 min-h-screen mx-auto bg-[#F5F6FA]">
       {/* Top Search Bar */}
-      <div className="flex justify-center items-center sticky top-0 z-50 bg-[#F5F6FA]">
+      <div className="flex justify-center items-center sticky top-0 z-50 bg-[#F5F6FA]   relative">
+        {/* Back Button on the Left */}
+        <button
+  onClick={() => window.history.back()}
+  className="absolute left-6 flex items-center gap-1 text-sm text-blue-400 hover:text-blue-500"
+>
+  <ArrowLeft size={16} />
+  Back
+</button>
+
+        {/* Search Box */}
         <div className="flex items-center w-[950px] border border-gray-300 rounded-lg bg-white overflow-hidden p-1">
           <div className="flex items-center px-3 w-1/2">
             <Search className="text-gray-400 mr-2" size={18} />
@@ -451,6 +459,7 @@ export default function WishlistNurses() {
           </button>
         </div>
       </div>
+
 
       <div className="flex gap-6 mt-6 mx-auto container">
         {/* Left Filters */}

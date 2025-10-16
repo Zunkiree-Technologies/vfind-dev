@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import RichTextEditor from "../components/RichTextEditor";
+import EmployerNavbar from "../components/EmployerNavbar";
 
 interface Job {
   id: number;
@@ -19,7 +20,7 @@ interface Job {
   JobShift?: string;
   keyResponsibilities: string;
   workEnvironment?: string;
-  created_at?: string;   
+  created_at?: string;
 }
 
 
@@ -239,278 +240,284 @@ function JobPostingContent() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-start bg-gray-50 p-10 gap-5">
-      {/* Stepper */}
-      <div className="w-1/4 p-6 h-fit">
-        <h2 className="font-semibold text-lg mb-6">{jobId ? "Edit Job" : "Post a Job"}</h2>
-        <div className="flex flex-col gap-0 relative">
-          <div className="flex items-center gap-2">
-            <div className={`w-4 h-4 rounded-full border-2 ${step >= 1 ? "bg-blue-600 border-blue-600" : "border-gray-300"}`} />
-            <span className={`${step >= 1 ? "text-blue-600 font-semibold" : "text-gray-400"}`}>Job Details</span>
-          </div>
-          <div className={`h-6 ml-[7px] border-l-2 ${step >= 2 ? "border-blue-600" : "border-gray-300"}`} />
-          <div className="flex items-center gap-2">
-            <div className={`w-4 h-4 rounded-full border-2 ${step >= 2 ? "bg-blue-600 border-blue-600" : "border-gray-300"}`} />
-            <span className={`${step >= 2 ? "text-blue-600 font-semibold" : "text-gray-400"}`}>Candidate Preferences</span>
-          </div>
-          <div className={`h-6 ml-[7px] border-l-2 ${step >= 3 ? "border-blue-600" : "border-gray-300"}`} />
-          <div className="flex items-center gap-2">
-            <div className={`w-4 h-4 rounded-full border-2 ${step >= 3 ? "bg-blue-600 border-blue-600" : "border-gray-300"}`} />
-            <span className={`${step >= 3 ? "text-blue-600 font-semibold" : "text-gray-400"}`}>Job Description</span>
+    <div className="bg-gray-50 ">
+      {/* 🔹 Navbar */}
+      <EmployerNavbar />
+      <div className="min-h-screen flex justify-center items-start bg-gray-50 p-10 gap-5">
+
+        {/* Stepper */}
+        <div className="w-1/4 p-6 h-fit">
+          <h2 className="font-semibold text-lg mb-6">{jobId ? "Edit Job" : "Post a Job"}</h2>
+          <div className="flex flex-col gap-0 relative">
+            <div className="flex items-center gap-2">
+              <div className={`w-4 h-4 rounded-full border-2 ${step >= 1 ? "bg-blue-600 border-blue-600" : "border-gray-300"}`} />
+              <span className={`${step >= 1 ? "text-blue-600 font-semibold" : "text-gray-400"}`}>Job Details</span>
+            </div>
+            <div className={`h-6 ml-[7px] border-l-2 ${step >= 2 ? "border-blue-600" : "border-gray-300"}`} />
+            <div className="flex items-center gap-2">
+              <div className={`w-4 h-4 rounded-full border-2 ${step >= 2 ? "bg-blue-600 border-blue-600" : "border-gray-300"}`} />
+              <span className={`${step >= 2 ? "text-blue-600 font-semibold" : "text-gray-400"}`}>Candidate Preferences</span>
+            </div>
+            <div className={`h-6 ml-[7px] border-l-2 ${step >= 3 ? "border-blue-600" : "border-gray-300"}`} />
+            <div className="flex items-center gap-2">
+              <div className={`w-4 h-4 rounded-full border-2 ${step >= 3 ? "bg-blue-600 border-blue-600" : "border-gray-300"}`} />
+              <span className={`${step >= 3 ? "text-blue-600 font-semibold" : "text-gray-400"}`}>Job Description</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Form */}
-      <div className="bg-white rounded-lg shadow-lg p-8 w-[570px] h-[550px] h-fit max-w-4xl overflow-y-auto">
-        {step === 1 && (
-          <>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Job Title</label>
-              <input
-                type="text"
-                name="title"
-                placeholder="Registered Nurse - Age Care"
-                value={formData.title}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Job Location</label>
-              <input
-                type="text"
-                name="location"
-                placeholder="Melbourne, VIC"
-                value={formData.location}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Company Name</label>
-              <input
-                type="text"
-                name="locality"
-                value={formData.locality}
-                readOnly
-                className="w-full border rounded p-2 bg-gray-100 cursor-not-allowed"
-                placeholder={employer.companyName || "Company name will be loaded..."}
-              />
-
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Job Type</label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              >
-                <option value="" disabled>
-                  -- Select Job Type --
-                </option>
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Contract">Contract</option>
-                <option value="Casual">Casual</option>
-              </select>
-            </div>
-
-            <div className="mb-4 flex gap-3">
-              <div className="w-1/2">
-                <label className="block text-sm font-medium mb-1">Hourly pay rate (Min)</label>
-                <input
-                  type="number"
-                  name="minPay"
-                  placeholder="35 AUD/hour Min"
-                  value={formData.minPay}
-                  onChange={onMinChange}
-                  className="w-full border rounded p-2"
-                />
-              </div>
-              <div className="w-1/2">
-                <label className="block text-sm font-medium mb-1">Hourly pay rate (Max)</label>
-                <input
-                  type="number"
-                  name="maxPay"
-                  placeholder="40 AUD/hour Max"
-                  value={formData.maxPay}
-                  onChange={onMaxChange}
-                  className="w-full border rounded p-2"
-                />
-              </div>
-            </div>
-            {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
-          </>
-        )}
-
-        {step === 2 && (
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Candidate Preferences</label>
-
-            <div className="mb-4">
-              <label className="block text-sm mb-1">Role Category</label>
-
-              {formData.roleCategory === "Other" || isTypingOther ? (
+        {/* Form */}
+        <div className="bg-white rounded-lg shadow-lg p-8 w-[570px] h-[550px] h-fit max-w-4xl overflow-y-auto">
+          {step === 1 && (
+            <>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Job Title</label>
                 <input
                   type="text"
-                  name="roleCategory"
-                  placeholder="Please specify your role"
-                  value={formData.roleCategory === "Other" ? "" : formData.roleCategory}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val.trim() === "") {
-                      setFormData(prev => ({ ...prev, roleCategory: "" }));
-                      setIsTypingOther(false);
-                    } else {
-                      setFormData(prev => ({ ...prev, roleCategory: val }));
-                      setIsTypingOther(true);
-                    }
-                  }}
-                  onBlur={(e) => {
-                    if (!e.target.value.trim()) {
-                      setFormData(prev => ({ ...prev, roleCategory: "" }));
-                      setIsTypingOther(false);
-                    }
-                  }}
+                  name="title"
+                  placeholder="Registered Nurse - Age Care"
+                  value={formData.title}
+                  onChange={handleChange}
                   className="w-full border rounded p-2"
-                  autoFocus
                 />
-              ) : (
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Job Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Melbourne, VIC"
+                  value={formData.location}
+                  onChange={handleChange}
+                  className="w-full border rounded p-2"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Company Name</label>
+                <input
+                  type="text"
+                  name="locality"
+                  value={formData.locality}
+                  readOnly
+                  className="w-full border rounded p-2 bg-gray-100 cursor-not-allowed"
+                  placeholder={employer.companyName || "Company name will be loaded..."}
+                />
+
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Job Type</label>
                 <select
-                  name="roleCategory"
-                  value={formData.roleCategory}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === "Other") {
-                      setFormData(prev => ({ ...prev, roleCategory: "" }));
-                      setIsTypingOther(true);
-                    } else {
-                      setFormData(prev => ({ ...prev, roleCategory: val }));
-                      setIsTypingOther(false);
-                    }
-                  }}
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
                   className="w-full border rounded p-2"
                 >
-                  <option value="">-- Select Role Category --</option>
-                  <option value="Registered Nurse (RN)">Registered Nurse (RN)</option>
-                  <option value="Enrolled Nurse (EN)">Enrolled Nurse (EN)</option>
-                  <option value="Assistant in Nursing (AIN)">Assistant in Nursing (AIN)</option>
-                  <option value="Support Worker">Support Worker</option>
-                  <option value="Clinical / Manager">Clinical / Manager</option>
-                  <option value="Other">Other</option>
+                  <option value="" disabled>
+                    -- Select Job Type --
+                  </option>
+                  <option value="Full-time">Full-time</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Casual">Casual</option>
                 </select>
-              )}
-            </div>
-
-            <div className="mb-4 w-full">
-              <label className="block text-sm mb-1">Minimum Experience Required</label>
-              <select
-                name="experienceMin"
-                value={formData.experienceMin}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              >
-                <option value="">Select experience</option>
-                <option value="No experience">No experience</option>
-                <option value="Less than 1 year">Less than 1 year</option>
-                <option value="1–2 years">1–2 years</option>
-                <option value="2–5 years">2–5 years</option>
-                <option value="5+ years">5+ years</option>
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm mb-2"> Preferred Certification</label>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  "AHPRA Registration",
-                  "Police Check Certificate",
-                  "First Aid / CPR",
-                  "Manual Handling Certificate",
-                  "NDIS Worker Screening",
-                  "Immunisation Card",
-                  "Photo ID",
-                  "Vaccination / Immunisation",
-                  "None",
-                ].map((cert) => (
-                  <label key={cert} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      name="certifications"
-                      value={cert}
-                      checked={formData.certifications.includes(cert)}
-                      onChange={handleChange}
-                      className="h-4 w-4"
-                    />
-                    <span className="text-sm">{cert}</span>
-                  </label>
-                ))}
               </div>
-            </div>
 
+              <div className="mb-4 flex gap-3">
+                <div className="w-1/2">
+                  <label className="block text-sm font-medium mb-1">Hourly pay rate (Min)</label>
+                  <input
+                    type="number"
+                    name="minPay"
+                    placeholder="35 AUD/hour Min"
+                    value={formData.minPay}
+                    onChange={onMinChange}
+                    className="w-full border rounded p-2"
+                  />
+                </div>
+                <div className="w-1/2">
+                  <label className="block text-sm font-medium mb-1">Hourly pay rate (Max)</label>
+                  <input
+                    type="number"
+                    name="maxPay"
+                    placeholder="40 AUD/hour Max"
+                    value={formData.maxPay}
+                    onChange={onMaxChange}
+                    className="w-full border rounded p-2"
+                  />
+                </div>
+              </div>
+              {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+            </>
+          )}
+
+          {step === 2 && (
             <div className="mb-4">
-              <label className="block text-sm mb-1">Job Shift</label>
-              <select
-                name="JobShift"
-                value={formData.JobShift || ""}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
+              <label className="block text-sm font-medium mb-2">Candidate Preferences</label>
+
+              <div className="mb-4">
+                <label className="block text-sm mb-1">Role Category</label>
+
+                {formData.roleCategory === "Other" || isTypingOther ? (
+                  <input
+                    type="text"
+                    name="roleCategory"
+                    placeholder="Please specify your role"
+                    value={formData.roleCategory === "Other" ? "" : formData.roleCategory}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val.trim() === "") {
+                        setFormData(prev => ({ ...prev, roleCategory: "" }));
+                        setIsTypingOther(false);
+                      } else {
+                        setFormData(prev => ({ ...prev, roleCategory: val }));
+                        setIsTypingOther(true);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (!e.target.value.trim()) {
+                        setFormData(prev => ({ ...prev, roleCategory: "" }));
+                        setIsTypingOther(false);
+                      }
+                    }}
+                    className="w-full border rounded p-2"
+                    autoFocus
+                  />
+                ) : (
+                  <select
+                    name="roleCategory"
+                    value={formData.roleCategory}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "Other") {
+                        setFormData(prev => ({ ...prev, roleCategory: "" }));
+                        setIsTypingOther(true);
+                      } else {
+                        setFormData(prev => ({ ...prev, roleCategory: val }));
+                        setIsTypingOther(false);
+                      }
+                    }}
+                    className="w-full border rounded p-2"
+                  >
+                    <option value="">-- Select Role Category --</option>
+                    <option value="Registered Nurse (RN)">Registered Nurse (RN)</option>
+                    <option value="Enrolled Nurse (EN)">Enrolled Nurse (EN)</option>
+                    <option value="Assistant in Nursing (AIN)">Assistant in Nursing (AIN)</option>
+                    <option value="Support Worker">Support Worker</option>
+                    <option value="Clinical / Manager">Clinical / Manager</option>
+                    <option value="Other">Other</option>
+                  </select>
+                )}
+              </div>
+
+              <div className="mb-4 w-full">
+                <label className="block text-sm mb-1">Minimum Experience Required</label>
+                <select
+                  name="experienceMin"
+                  value={formData.experienceMin}
+                  onChange={handleChange}
+                  className="w-full border rounded p-2"
+                >
+                  <option value="">Select experience</option>
+                  <option value="No experience">No experience</option>
+                  <option value="Less than 1 year">Less than 1 year</option>
+                  <option value="1–2 years">1–2 years</option>
+                  <option value="2–5 years">2–5 years</option>
+                  <option value="5+ years">5+ years</option>
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm mb-2"> Preferred Certification</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    "AHPRA Registration",
+                    "Police Check Certificate",
+                    "First Aid / CPR",
+                    "Manual Handling Certificate",
+                    "NDIS Worker Screening",
+                    "Immunisation Card",
+                    "Photo ID",
+                    "Vaccination / Immunisation",
+                    "None",
+                  ].map((cert) => (
+                    <label key={cert} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        name="certifications"
+                        value={cert}
+                        checked={formData.certifications.includes(cert)}
+                        onChange={handleChange}
+                        className="h-4 w-4"
+                      />
+                      <span className="text-sm">{cert}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm mb-1">Job Shift</label>
+                <select
+                  name="JobShift"
+                  value={formData.JobShift || ""}
+                  onChange={handleChange}
+                  className="w-full border rounded p-2"
+                >
+                  <option value="">Select a shift</option>
+                  <option value="Morning">Morning</option>
+                  <option value="Afternoon">Afternoon</option>
+                  <option value="Night">Night</option>
+                </select>
+              </div>
+
+            </div>
+          )}
+
+          {step === 3 && (
+            <>
+              <div className="mt-4  pt-4">
+                <h2 className="text-lg font-semibold mb-2">Job Description</h2>
+
+                <RichTextEditor
+                  value={formData.description}
+                  onChange={(content) =>
+                    setFormData((prev) => ({ ...prev, description: content }))
+                  }
+                />
+              </div>
+            </>
+          )}
+
+          <div className="flex justify-end gap-4 mt-6">
+            {step > 1 && (
+              <button
+                onClick={handleBack}
+                className="px-6 py-2 bg-white text-[#0078DB] border border-[#0078DB] rounded hover:bg-[#0078DB] hover:text-white transition"
               >
-                <option value="">Select a shift</option>
-                <option value="Morning">Morning</option>
-                <option value="Afternoon">Afternoon</option>
-                <option value="Night">Night</option>
-              </select>
-            </div>
-
+                Back
+              </button>
+            )}
+            {step < 3 ? (
+              <button
+                onClick={handleNext}
+                className="px-6 py-2 bg-blue-600 rounded text-white"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                {jobId ? "Update Job" : "Post Job"}
+              </button>
+            )}
           </div>
-        )}
-
-        {step === 3 && (
-          <>
-            <div className="mt-4  pt-4">
-              <h2 className="text-lg font-semibold mb-2">Job Description</h2>
-
-              <RichTextEditor
-                value={formData.description}
-                onChange={(content) =>
-                  setFormData((prev) => ({ ...prev, description: content }))
-                }
-              />
-            </div>
-          </>
-        )}
-
-        <div className="flex justify-end gap-4 mt-6">
-          {step > 1 && (
-            <button
-              onClick={handleBack}
-              className="px-6 py-2 bg-white text-[#0078DB] border border-[#0078DB] rounded hover:bg-[#0078DB] hover:text-white transition"
-            >
-              Back
-            </button>
-          )}
-          {step < 3 ? (
-            <button
-              onClick={handleNext}
-              className="px-6 py-2 bg-blue-600 rounded text-white"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              {jobId ? "Update Job" : "Post Job"}
-            </button>
-          )}
         </div>
       </div>
     </div>
+
   );
 }
 
