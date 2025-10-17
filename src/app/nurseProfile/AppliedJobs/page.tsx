@@ -175,7 +175,7 @@ const AppliedJobs = () => {
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
     if (statusLower.includes('pending') || statusLower.includes('review') || statusLower === 'applied') {
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      return 'bg-blue-400 text-white ';
     }
     if (statusLower.includes('accepted') || statusLower.includes('approved')) {
       return 'bg-green-100 text-green-800 border-green-200';
