@@ -19,6 +19,8 @@ import {
   X,
 } from "lucide-react";
 import Loader from "../../../../components/loading";
+import Footer from "@/app/Admin/components/layout/Footer";
+import EmployerNavbar from "../components/EmployerNavbar";
 
 interface Employer {
   id?: number;
@@ -191,7 +193,9 @@ export default function EmployerProfile() {
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+         {/* 🔹 Navbar */}
+                  <EmployerNavbar />
       {/* Back Button */}
       <div className="p-6">
         <button
@@ -231,7 +235,7 @@ export default function EmployerProfile() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 -mt-8">
+      <div className="container mx-auto px-6 -mt-5">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Personal & Contact Info */}
           <div className="lg:col-span-2 space-y-6">
@@ -374,6 +378,9 @@ export default function EmployerProfile() {
           </div>
         </div>
       </div>
+        <div className="bg-white">
+              <Footer />
+            </div>
     </div>
   );
 }

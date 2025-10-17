@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import RichTextEditor from "../components/RichTextEditor";
 import EmployerNavbar from "../components/EmployerNavbar";
+import Footer from "@/app/Admin/components/layout/Footer";
 
 interface Job {
   id: number;
@@ -243,7 +244,7 @@ function JobPostingContent() {
     <div className="bg-gray-50 ">
       {/* 🔹 Navbar */}
       <EmployerNavbar />
-      <div className="min-h-screen flex justify-center items-start bg-gray-50 p-10 gap-5">
+      <div className="h-fit flex justify-center items-start bg-gray-50 p-10 gap-5">
 
         {/* Stepper */}
         <div className="w-1/4 p-6 h-fit">
@@ -516,6 +517,9 @@ function JobPostingContent() {
           </div>
         </div>
       </div>
+      <div className="bg-white">
+              <Footer />
+            </div>
     </div>
 
   );

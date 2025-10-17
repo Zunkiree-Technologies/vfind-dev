@@ -1481,10 +1481,9 @@ export default function NurseProfilePage() {
               {!isGlobalEdit ? (
                 <button
                   onClick={() => setIsGlobalEdit(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2  rounded-lg  transition-colors"
                 >
-                  <Edit className="w-4 h-4" />
-                  Edit Profile
+                  <Edit className="w-4 h-4 text-black" />
                 </button>
               ) : (
                 <div className="flex gap-2">
@@ -1605,317 +1604,319 @@ export default function NurseProfilePage() {
 
         {/* Work Preferences */}
 
-<CollapsibleSection
-  title="Work Preferences"
-  icon={<Clock className="w-6 h-6 text-blue-400" />}
->
-  <div className="space-y-6">
-    {/* Edit Button */}
-    <div className="flex justify-end">
-      {!isGlobalEdit ? (
-        <button
-          onClick={() => setIsGlobalEdit(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
+        <CollapsibleSection
+          title="Work Preferences"
+          icon={<Clock className="w-6 h-6 text-blue-400" />}
         >
-          <Edit className="w-4 h-4" />
-          Edit Profile
-        </button>
-      ) : (
-        <div className="flex gap-2">
-          <button
-            onClick={handleCancelEdit}
-            disabled={saving}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            <X className="w-4 h-4" />
-            Cancel
-          </button>
-          <button
-            onClick={handleSaveAll}
-            disabled={saving}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50"
-          >
-            <Save className="w-4 h-4" />
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-      )}
-    </div>
+          <div className="space-y-6">
+            {/* Edit Button */}
+            <div className="flex justify-end">
+              {!isGlobalEdit ? (
+                <button
+                  onClick={() => setIsGlobalEdit(true)}
+                  className="flex items-center gap-2 px-4 py-2  rounded-lg  transition-colors"
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Preferred Job Type */}
-      <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          {isGlobalEdit ? "Add Preferred Job Type" : "Preferred Job Type"}
-        </label>
-        
-        {isGlobalEdit && (
-          <select
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value) {
-                const currentJobTypes = editedData.jobTypes
-                  ? (Array.isArray(editedData.jobTypes)
-                      ? editedData.jobTypes
-                      : parseValues(editedData.jobTypes))
-                  : jobTypesArray;
-
-                if (!currentJobTypes.includes(value)) {
-                  handleFieldChange("jobTypes", [...currentJobTypes, value]);
-                }
-                e.target.value = "";
-              }
-            }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select job type </option>
-            <option value="Full time">Full time</option>
-            <option value="Part time">Part time</option>
-            <option value="Casual">Casual</option>
-            <option value="Contract">Contract</option>
-            <option value="Open to any">Open to any</option>
-          </select>
-        )}
-
-        <div className="flex flex-wrap gap-2 mt-3">
-          {(() => {
-            const currentJobTypes = isGlobalEdit && editedData.jobTypes
-              ? (Array.isArray(editedData.jobTypes)
-                  ? editedData.jobTypes
-                  : parseValues(editedData.jobTypes))
-              : jobTypesArray;
-
-            return currentJobTypes && currentJobTypes.length > 0 ? (
-              currentJobTypes.map((type, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-500 rounded-lg text-sm font-medium border border-blue-200"
                 >
-                  <span>{type}</span>
-                  {isGlobalEdit && (
-                    <button
-                      onClick={() => {
-                        const newTypes = currentJobTypes.filter(
-                          (item) => item !== type
-                        );
-                        handleFieldChange("jobTypes", newTypes);
-                      }}
-                      className="text-red-500 hover:text-red-700 transition-colors ml-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
+                  <Edit className="w-4 h-4" />
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCancelEdit}
+                    disabled={saving}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveAll}
+                    disabled={saving}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4" />
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm italic py-2">
-                {isGlobalEdit
-                  ? "No job types added yet. Select at least one location."
-                  : "No job types specified"}
-              </p>
-            );
-          })()}
-        </div>
-      </div>
+              )}
+            </div>
 
-      {/* Open to Other Job Types */}
-      <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          Open to Other Job Types
-        </label>
-        {isGlobalEdit ? (
-          <select
-            value={editedData.openToOtherTypes ?? profile.openToOtherTypes ?? ""}
-            onChange={(e) =>
-              handleFieldChange("openToOtherTypes", e.target.value)
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select option</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-        ) : (
-          <p className="text-gray-900">{profile.openToOtherTypes || "Not specified"}</p>
-        )}
-      </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Preferred Job Type */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  {isGlobalEdit ? "Add Preferred Job Type" : "Preferred Job Type"}
+                </label>
 
-      {/* Preferred Shift */}
-      <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          {isGlobalEdit ? "Add Preferred Shift" : "Preferred Shift"}
-        </label>
-        
-        {isGlobalEdit && (
-          <select
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value) {
-                const currentShifts = editedData.shiftPreferences
-                  ? (Array.isArray(editedData.shiftPreferences)
-                      ? editedData.shiftPreferences
-                      : parseValues(editedData.shiftPreferences))
-                  : shiftPreferencesArray;
+                {isGlobalEdit && (
+                  <select
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value) {
+                        const currentJobTypes = editedData.jobTypes
+                          ? (Array.isArray(editedData.jobTypes)
+                            ? editedData.jobTypes
+                            : parseValues(editedData.jobTypes))
+                          : jobTypesArray;
 
-                if (!currentShifts.includes(value)) {
-                  handleFieldChange("shiftPreferences", [...currentShifts, value]);
-                }
-                e.target.value = "";
-              }
-            }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select shift preference </option>
-            <option value="Morning">Morning</option>
-            <option value="Afternoon">Afternoon</option>
-            <option value="Night">Night</option>
-          </select>
-        )}
+                        if (!currentJobTypes.includes(value)) {
+                          handleFieldChange("jobTypes", [...currentJobTypes, value]);
+                        }
+                        e.target.value = "";
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select job type </option>
+                    <option value="Full time">Full time</option>
+                    <option value="Part time">Part time</option>
+                    <option value="Casual">Casual</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Open to any">Open to any</option>
+                  </select>
+                )}
 
-        <div className="flex flex-wrap gap-2 mt-3">
-          {(() => {
-            const currentShifts = isGlobalEdit && editedData.shiftPreferences
-              ? (Array.isArray(editedData.shiftPreferences)
-                  ? editedData.shiftPreferences
-                  : parseValues(editedData.shiftPreferences))
-              : shiftPreferencesArray;
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {(() => {
+                    const currentJobTypes = isGlobalEdit && editedData.jobTypes
+                      ? (Array.isArray(editedData.jobTypes)
+                        ? editedData.jobTypes
+                        : parseValues(editedData.jobTypes))
+                      : jobTypesArray;
 
-            return currentShifts && currentShifts.length > 0 ? (
-              currentShifts.map((shift, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-500 rounded-lg text-sm font-medium border border-blue-200"
-                >
-                  <span>{shift}</span>
-                  {isGlobalEdit && (
-                    <button
-                      onClick={() => {
-                        const newShifts = currentShifts.filter(
-                          (item) => item !== shift
-                        );
-                        handleFieldChange("shiftPreferences", newShifts);
-                      }}
-                      className="text-red-500 hover:text-red-700 transition-colors ml-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
+                    return currentJobTypes && currentJobTypes.length > 0 ? (
+                      currentJobTypes.map((type, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 px-3 py-2  text-black  text-sm font-medium "
+                        >
+                          <span>{type}</span>
+                          {isGlobalEdit && (
+                            <button
+                              onClick={() => {
+                                const newTypes = currentJobTypes.filter(
+                                  (item) => item !== type
+                                );
+                                handleFieldChange("jobTypes", newTypes);
+                              }}
+                              className="text-red-500 hover:text-red-700 transition-colors ml-1"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-400 text-sm italic py-2">
+                        {isGlobalEdit
+                          ? "No job types added yet. Select at least one location."
+                          : "No job types specified"}
+                      </p>
+                    );
+                  })()}
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm italic py-2">
-                {isGlobalEdit
-                  ? "No shift preferences added yet. Select at least one shift."
-                  : "No shift preferences specified"}
-              </p>
-            );
-          })()}
-        </div>
-      </div>
+              </div>
 
-      {/* Preferred Locations */}
-      <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          {isGlobalEdit ? "Add Preferred Location" : "Preferred Locations"}
-        </label>
-        
-        {isGlobalEdit && (
-          <select
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value) {
-                const currentLocations = editedData.preferredLocations
-                  ? (Array.isArray(editedData.preferredLocations)
-                      ? editedData.preferredLocations
-                      : parseValues(editedData.preferredLocations))
-                  : preferredLocationsArray;
+              {/* Open to Other Job Types */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Open to Other Job Types
+                </label>
+                {isGlobalEdit ? (
+                  <select
+                    value={editedData.openToOtherTypes ?? profile.openToOtherTypes ?? ""}
+                    onChange={(e) =>
+                      handleFieldChange("openToOtherTypes", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select option</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                ) : (
+                  <p className="text-gray-900">{profile.openToOtherTypes || "Not specified"}</p>
+                )}
+              </div>
 
-                if (!currentLocations.includes(value)) {
-                  handleFieldChange("preferredLocations", [...currentLocations, value]);
-                }
-                e.target.value = "";
-              }
-            }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select location </option>
-            <option value="Sydney">Sydney</option>
-            <option value="Melbourne">Melbourne</option>
-            <option value="Brisbane">Brisbane</option>
-            <option value="Perth">Perth</option>
-            <option value="Adelaide">Adelaide</option>
-            <option value="Canberra">Canberra</option>
-            <option value="Hobart">Hobart</option>
-            <option value="Darwin">Darwin</option>
-          </select>
-        )}
+              {/* Preferred Shift */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  {isGlobalEdit ? "Add Preferred Shift" : "Preferred Shift"}
+                </label>
 
-        <div className="flex flex-wrap gap-2 mt-3">
-          {(() => {
-            const currentLocations = isGlobalEdit && editedData.preferredLocations
-              ? (Array.isArray(editedData.preferredLocations)
-                  ? editedData.preferredLocations
-                  : parseValues(editedData.preferredLocations))
-              : preferredLocationsArray;
+                {isGlobalEdit && (
+                  <select
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value) {
+                        const currentShifts = editedData.shiftPreferences
+                          ? (Array.isArray(editedData.shiftPreferences)
+                            ? editedData.shiftPreferences
+                            : parseValues(editedData.shiftPreferences))
+                          : shiftPreferencesArray;
 
-            return currentLocations && currentLocations.length > 0 ? (
-              currentLocations.map((location, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-500 rounded-lg text-sm font-medium border border-blue-200"
-                >
-                  <span>{location}</span>
-                  {isGlobalEdit && (
-                    <button
-                      onClick={() => {
-                        const newLocations = currentLocations.filter(
-                          (item) => item !== location
-                        );
-                        handleFieldChange("preferredLocations", newLocations);
-                      }}
-                      className="text-red-500 hover:text-red-700 transition-colors ml-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
+                        if (!currentShifts.includes(value)) {
+                          handleFieldChange("shiftPreferences", [...currentShifts, value]);
+                        }
+                        e.target.value = "";
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select shift preference </option>
+                    <option value="Morning">Morning</option>
+                    <option value="Afternoon">Afternoon</option>
+                    <option value="Night">Night</option>
+                  </select>
+                )}
+
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {(() => {
+                    const currentShifts = isGlobalEdit && editedData.shiftPreferences
+                      ? (Array.isArray(editedData.shiftPreferences)
+                        ? editedData.shiftPreferences
+                        : parseValues(editedData.shiftPreferences))
+                      : shiftPreferencesArray;
+
+                    return currentShifts && currentShifts.length > 0 ? (
+                      currentShifts.map((shift, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 px-3 py-2  text-black  text-sm font-medium "
+
+                        >
+                          <span>{shift}</span>
+                          {isGlobalEdit && (
+                            <button
+                              onClick={() => {
+                                const newShifts = currentShifts.filter(
+                                  (item) => item !== shift
+                                );
+                                handleFieldChange("shiftPreferences", newShifts);
+                              }}
+                              className="text-red-500 hover:text-red-700 transition-colors ml-1"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-400 text-sm italic py-2">
+                        {isGlobalEdit
+                          ? "No shift preferences added yet. Select at least one shift."
+                          : "No shift preferences specified"}
+                      </p>
+                    );
+                  })()}
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm italic py-2">
-                {isGlobalEdit
-                  ? "No locations added yet. Select at least one location."
-                  : "No locations specified"}
-              </p>
-            );
-          })()}
-        </div>
-      </div>
+              </div>
 
-      {/* Available to Start */}
-      <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          Available to Start
-        </label>
-        {isGlobalEdit ? (
-          <select
-            value={editedData.startTime ?? profile.startTime ?? ""}
-            onChange={(e) => handleFieldChange("startTime", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select availability</option>
-            <option value="Immediately">Immediately</option>
-            <option value="Within 2 weeks">Within a weeks</option>
-            <option value="Within 1 month">Within 1 month</option>
-          </select>
-        ) : (
-          <p className="text-gray-900">
-            {profile.startTime || profile.startDate || "Not specified"}
-          </p>
-        )}
-      </div>
-    </div>
-  </div>
-</CollapsibleSection>
+              {/* Preferred Locations */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  {isGlobalEdit ? "Add Preferred Location" : "Preferred Locations"}
+                </label>
+
+                {isGlobalEdit && (
+                  <select
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value) {
+                        const currentLocations = editedData.preferredLocations
+                          ? (Array.isArray(editedData.preferredLocations)
+                            ? editedData.preferredLocations
+                            : parseValues(editedData.preferredLocations))
+                          : preferredLocationsArray;
+
+                        if (!currentLocations.includes(value)) {
+                          handleFieldChange("preferredLocations", [...currentLocations, value]);
+                        }
+                        e.target.value = "";
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select location </option>
+                    <option value="Sydney">Sydney</option>
+                    <option value="Melbourne">Melbourne</option>
+                    <option value="Brisbane">Brisbane</option>
+                    <option value="Perth">Perth</option>
+                    <option value="Adelaide">Adelaide</option>
+                    <option value="Canberra">Canberra</option>
+                    <option value="Hobart">Hobart</option>
+                    <option value="Darwin">Darwin</option>
+                  </select>
+                )}
+
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {(() => {
+                    const currentLocations = isGlobalEdit && editedData.preferredLocations
+                      ? (Array.isArray(editedData.preferredLocations)
+                        ? editedData.preferredLocations
+                        : parseValues(editedData.preferredLocations))
+                      : preferredLocationsArray;
+
+                    return currentLocations && currentLocations.length > 0 ? (
+                      currentLocations.map((location, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 px-3 py-2  text-black  text-sm font-medium "
+
+                        >
+                          <span>{location}</span>
+                          {isGlobalEdit && (
+                            <button
+                              onClick={() => {
+                                const newLocations = currentLocations.filter(
+                                  (item) => item !== location
+                                );
+                                handleFieldChange("preferredLocations", newLocations);
+                              }}
+                              className="text-red-500 hover:text-red-700 transition-colors ml-1"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-400 text-sm italic py-2">
+                        {isGlobalEdit
+                          ? "No locations added yet. Select at least one location."
+                          : "No locations specified"}
+                      </p>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Available to Start */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Available to Start
+                </label>
+                {isGlobalEdit ? (
+                  <select
+                    value={editedData.startTime ?? profile.startTime ?? ""}
+                    onChange={(e) => handleFieldChange("startTime", e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select availability</option>
+                    <option value="Immediately">Immediately</option>
+                    <option value="Within 2 weeks">Within a weeks</option>
+                    <option value="Within 1 month">Within 1 month</option>
+                  </select>
+                ) : (
+                  <p className="text-gray-900">
+                    {profile.startTime || profile.startDate || "Not specified"}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </CollapsibleSection>
 
 
 

@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Calendar, Filter, Search, Mail, User, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import Loader from "../../../../../components/loading";
 import EmployerNavbar from "../../components/EmployerNavbar";
+import Footer from "@/app/Admin/components/layout/Footer";
 
 interface JobApplication {
   id: number;
@@ -254,6 +255,9 @@ const JobApplicationsPage = () => {
           )}
         </div>
       </div>
+        <div className="bg-white">
+              <Footer />
+            </div>
     </div>
   );
 };

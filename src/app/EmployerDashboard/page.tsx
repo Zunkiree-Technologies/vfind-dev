@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Loading from "../../../components/loading";
 import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
 import { Briefcase, Calendar, Clock, Edit, Eye, Mail, Phone, Search, Trash, Pause, Play } from "lucide-react";
+import Footer from "../Admin/components/layout/Footer";
 
 interface Job {
   created_at: string;
@@ -240,53 +241,53 @@ export default function EmployerDashboard() {
     }
   };
 
- const handleTogglePauseJob = async (jobId: number) => {
-   const job = jobs.find((j) => j.id === jobId);
-   if (!job) return;
+  const handleTogglePauseJob = async (jobId: number) => {
+    const job = jobs.find((j) => j.id === jobId);
+    if (!job) return;
 
-   const newStatus = job.status === "Active" ? "Paused" : "Active";
+    const newStatus = job.status === "Active" ? "Paused" : "Active";
 
-   // Optimistically update UI
-   setJobs((prev) =>
-     prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j))
-   );
-  // console.log(jobId)
-   try {
-     const token = localStorage.getItem("authToken");
-     const res = await fetch(
-       "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/pause_active_job",
-       {
-         method: "POST",
-         headers: {
-           Authorization: `Bearer ${token}`,
-           "Content-Type": "application/json",
-         },
-         body: JSON.stringify({ jobs_id: jobId }),
-       }
-     );
+    // Optimistically update UI
+    setJobs((prev) =>
+      prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j))
+    );
+    // console.log(jobId)
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/pause_active_job",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ jobs_id: jobId }),
+        }
+      );
 
-     // Prevent throwing error to console
-     if (!res.ok) {
-       console.warn(
-         "API returned an error, but frontend already updated optimistically",
-         res.status
-       );
-       return; // do not throw
-     }
+      // Prevent throwing error to console
+      if (!res.ok) {
+        console.warn(
+          "API returned an error, but frontend already updated optimistically",
+          res.status
+        );
+        return; // do not throw
+      }
 
-     const data = await res.json();
-     if (data.result1?.status) {
-       setJobs((prev) =>
-         prev.map((j) =>
-           j.id === jobId ? { ...j, status: data.result1.status } : j
-         )
-       );
-     }
-   } catch (err) {
-     // Silently handle network or fetch errors
-     console.warn("Network/API request failed, but UI already updated", err);
-   }
- };
+      const data = await res.json();
+      if (data.result1?.status) {
+        setJobs((prev) =>
+          prev.map((j) =>
+            j.id === jobId ? { ...j, status: data.result1.status } : j
+          )
+        );
+      }
+    } catch (err) {
+      // Silently handle network or fetch errors
+      console.warn("Network/API request failed, but UI already updated", err);
+    }
+  };
 
 
 
@@ -444,7 +445,7 @@ export default function EmployerDashboard() {
             {/* Completed Step */}
             {companyProfileStep === "completed" && (
               <>
-               
+
 
                 {/* Company Description Display */}
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -614,11 +615,10 @@ export default function EmployerDashboard() {
                       <td className="py-2 px-3">{employer.email}</td>
                       <td className="py-2 px-3">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            job.status === "Active"
-                              ? "border border-green-500 text-green-600 bg-[#6FB7720D] px-3 py-1 w-28 text-center"
-                              : "border border-gray-400 bg-gray-100 text-gray-600 px-2 py-1 w-28 text-center"
-                          }`}
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${job.status === "Active"
+                            ? "border border-green-500 text-green-600 bg-[#6FB7720D] px-3 py-1 w-28 text-center"
+                            : "border border-gray-400 bg-gray-100 text-gray-600 px-2 py-1 w-28 text-center"
+                            }`}
                         >
                           {job.status === "Active" ? "Active" : "Paused"}
                         </span>
@@ -638,11 +638,10 @@ export default function EmployerDashboard() {
                           <button
                             onClick={() => handleTogglePauseJob(job.id)}
                             disabled={pausingJobId === job.id}
-                            className={`p-1 rounded cursor-pointer ${
-                              job.status === "Active"
-                                ? "text-gray-600 hover:text-[#61A6FA]"
-                                : "text-gray-600 hover:text-[#61A6FA]"
-                            } disabled:opacity-50`}
+                            className={`p-1 rounded cursor-pointer ${job.status === "Active"
+                              ? "text-gray-600 hover:text-[#61A6FA]"
+                              : "text-gray-600 hover:text-[#61A6FA]"
+                              } disabled:opacity-50`}
                             title={
                               job.status === "Active"
                                 ? "Pause Job"
@@ -709,11 +708,10 @@ export default function EmployerDashboard() {
                       <p className="text-xs text-gray-500">{employer.email}</p>
                       <div className="mt-1">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            job.is_active !== false
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-700"
-                          }`}
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${job.is_active !== false
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
+                            }`}
                         >
                           {job.is_active !== false ? "Active" : "Paused"}
                         </span>
@@ -746,11 +744,10 @@ export default function EmployerDashboard() {
                           <button
                             onClick={() => handleTogglePauseJob(job.id)} // only pass job.id
                             disabled={pausingJobId === job.id}
-                            className={`p-1 rounded cursor-pointer ${
-                              job.status === "Active"
-                                ? "text-gray-600 hover:text-orange-600"
-                                : "text-gray-600 hover:text-green-600"
-                            } disabled:opacity-50`}
+                            className={`p-1 rounded cursor-pointer ${job.status === "Active"
+                              ? "text-gray-600 hover:text-orange-600"
+                              : "text-gray-600 hover:text-green-600"
+                              } disabled:opacity-50`}
                             title={
                               job.status === "Active"
                                 ? "Pause Job"
@@ -815,6 +812,10 @@ export default function EmployerDashboard() {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="bg-white">
+        <Footer />
       </div>
     </div>
 

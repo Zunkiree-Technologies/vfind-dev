@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Loader from "../../../../components/loading";
 import Link from "next/link";
+import Footer from "@/app/Admin/components/layout/Footer";
 
 interface ProfileImage {
   access: string;
@@ -750,6 +751,9 @@ export default function CandidateList() {
           )}
         </div>
       </div>
+      <div className="bg-white">
+              <Footer />
+            </div>
     </div>
   );
 }

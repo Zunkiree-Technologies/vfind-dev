@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { User, Clock, CheckCircle, XCircle } from "lucide-react";
 import Loader from "../../../../components/loading";
 import EmployerNavbar from "../components/EmployerNavbar";
+import Footer from "@/app/Admin/components/layout/Footer";
 
 interface StatusItem {
   id: number;
@@ -168,6 +169,9 @@ export default function StatusPage() {
           )}
         </div>
       </div>
+      <div className="bg-white">
+              <Footer />
+            </div>
     </div>
   );
 }
