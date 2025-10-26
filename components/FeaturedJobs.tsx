@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, DollarSign, Clock, Briefcase } from "lucide-react";
+import { MapPin, DollarSign, Clock, Briefcase, ArrowRight } from "lucide-react";
 
 interface Job {
   id: number;
@@ -116,12 +116,17 @@ export default function FeaturedJobs() {
                     ? new Date(job.updated_at).toLocaleDateString()
                     : "Recently posted"}
                 </p>
-                <button
-                  className="bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-[#477fff] transition"
-                  onClick={() => router.push(`/nurseProfile/jobapplicationpage/${job.id}`)}
-                >
-                  View Details
-                </button>
+              <button
+      onClick={() => router.push(`/nurseProfile/jobapplicationpage/${job.id}`)}
+      className="group relative flex items-center justify-center px-6 w-[140px] py-2 bg-blue-400 text-white font-medium rounded-[10px] transition-all duration-300 overflow-hidden "
+    >
+      <p className="text-sm transition-all duration-300 group-hover:-translate-x-1">
+        View Details
+      </p>
+      <span className="absolute right-3 flex items-center opacity-0 transition-all duration-300 group-hover:opacity-100">
+        <ArrowRight className="w-4 h-4" strokeWidth={3} />
+      </span>
+    </button>
               </div>
             </div>
           ))}

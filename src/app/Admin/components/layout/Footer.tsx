@@ -40,7 +40,7 @@ export default function Footer() {
 
         {/* Explore Job */}
         <div>
-          <h4 className="text-black font-semibold mb-4">Explore Job</h4>
+          <h4 className="text-black font-bold mb-4">Explore Job</h4>
           <ul className="space-y-2 text-sm">
             <li>
               <a href="#" className="text-black hover:text-blue-600 transition-all duration-200">

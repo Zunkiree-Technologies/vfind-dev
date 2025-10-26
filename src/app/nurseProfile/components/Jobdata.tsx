@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import { MapPin, Briefcase, Clock, DollarSign, Calendar, ChevronLeft, ChevronRight, Clock1 } from "lucide-react";
+import { MapPin, Briefcase, Clock, DollarSign, Calendar, ChevronLeft, ChevronRight, Clock1, ArrowRight } from "lucide-react";
 import Loader from "../../../../components/loading";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -49,7 +49,7 @@ interface Job {
   contact_email?: string;
   roleCategory?: string;
   visaRequirement?: string;
-  created_at?: string;  
+  created_at?: string;
   updated_at?: string;
 
 }
@@ -351,7 +351,7 @@ export default function JobData() {
         <div className="mx-auto container flex justify-center item-center gap-8">
           {/* Filters Sidebar */}
           <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-[60px] h-fit overflow-y-auto scrollbar-hide">
-            <h2 className="font-semibold text-gray-800 flex justify-between">
+            <h2 className="font-normal text-gray-800 flex justify-between">
               All Filters
               <button onClick={clearFilters} className="text-sm text-blue-600">Clear All</button>
             </h2>
@@ -465,7 +465,7 @@ export default function JobData() {
                       </div>
 
 
-                    
+
                       <div className="flex items-center gap-1">
                         <Clock1 size={16} />
                         <span>
@@ -491,9 +491,17 @@ export default function JobData() {
                       }}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
+                      className="group px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] transition-all duration-200 overflow-hidden inline-flex items-center"
                     >
-                      View Details
+                      <span className="flex items-center gap-2">
+                        <span className="transition-all duration-300 group-hover:-translate-x-1">
+                          View Details
+                        </span>
+                        <ArrowRight
+                          className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                          strokeWidth={3}
+                        />
+                      </span>
                     </Link>
                   </div>
                 </div>

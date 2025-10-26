@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
@@ -144,13 +144,19 @@ export default function Navbar() {
               </div>
             )}
           </div>
+
           <button
             onClick={() => router.push("/joblist")}
-            className="px-6 py-2 bg-primary text-white font-medium hover:bg-[#477fff] rounded-[10px]"
-
+            className="group relative flex items-center justify-center px-6 w-[140px] py-2 bg-blue-400 text-white font-medium rounded-[10px] transition-all duration-300  overflow-hidden"
           >
-            <p className="text-sm">Find Jobs</p>
+            <p className="text-sm transition-all duration-300 group-hover:-translate-x-1">
+              Find Jobs
+            </p>
+            <span className="absolute right-5 flex items-center opacity-0 transition-all duration-300 group-hover:opacity-100">
+              <ArrowRight className="w-4 h-4" strokeWidth={3} />
+            </span>
           </button>
+
         </div>
 
         {/* Mobile Hamburger */}

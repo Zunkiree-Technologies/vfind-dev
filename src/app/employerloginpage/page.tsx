@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../../components/navbar";
-import { CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
 import Footer from "../../../components/footer-section";
 
 const EmployerLoginPage = () => {
@@ -297,9 +297,17 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
               </ul>
               <button
                 onClick={() => router.push("/foremployer")}
-                className="mt-6 h-[38px] w-[225px] text-white bg-[#4A90E2] rounded-[8px] shadow hover:bg-blue-500 hover:text-white transition font-medium"
+                className="group mt-6 h-[38px] w-[225px] text-white bg-[#4A90E2] rounded-[8px] shadow transition-all duration-300 overflow-hidden flex items-center justify-center font-medium"
               >
-                Register for Free
+                <span className="flex items-center gap-2">
+                  <span className="transition-all duration-300 group-hover:-translate-x-1">
+                    Register for Free
+                  </span>
+                  <ArrowRight
+                    className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    strokeWidth={3}
+                  />
+                </span>
               </button>
             </div>
           </div>
@@ -370,9 +378,19 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
                 <button
                   onClick={handleLogin}
                   disabled={isLoading || !!emailError || !email || !password}
-                  className="w-full sm:w-[328px] h-[40px] bg-[#4A90E2] text-white rounded-lg font-medium hover:bg-blue-500 transition mt-12 mx-auto block disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="group w-full sm:w-[328px] h-[40px] bg-[#4A90E2] text-white rounded-lg font-medium transition-all duration-300 mt-12 mx-auto block overflow-hidden disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
                 >
-                  {isLoading ? "Processing..." : "Login"}
+                  <span className="flex items-center gap-2">
+                    <span className="transition-all duration-300 group-hover:-translate-x-1">
+                      {isLoading ? "Processing..." : "Login"}
+                    </span>
+                    {!isLoading && !(!!emailError || !email || !password) && (
+                      <ArrowRight
+                        className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                        strokeWidth={3}
+                      />
+                    )}
+                  </span>
                 </button>
 
                 <div className="block text-center mt-4 text-sm text-gray-600">

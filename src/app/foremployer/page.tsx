@@ -2,7 +2,7 @@
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../../components/navbar";
-import { CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
 import Footer from "../../../components/footer-section";
 
 export default function EmployerPage() {
@@ -92,10 +92,19 @@ export default function EmployerPage() {
               </ul>
               <button
                 onClick={() => router.push("/foremployer")}
-                className="mt-6 h-[38px] w-[225px] text-white bg-[#4A90E2] rounded-[8px] shadow hover:bg-blue-500 hover:text-white transition font-medium"
+                className="group mt-6 h-[38px] w-[225px] text-white bg-[#4A90E2] rounded-[8px] shadow transition-all duration-300 overflow-hidden flex items-center justify-center font-medium"
               >
-                Register for Free
+                <span className="flex items-center gap-2">
+                  <span className="transition-all duration-300 group-hover:-translate-x-1">
+                    Register for Free
+                  </span>
+                  <ArrowRight
+                    className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    strokeWidth={3}
+                  />
+                </span>
               </button>
+
             </div>
 
           </div>
@@ -159,12 +168,22 @@ export default function EmployerPage() {
                     setOtpSent(true);
                     // Optional: store the mobile or do other side effects here
                   }}
-                  className={`mt-5 w-full py-2 rounded-lg font-medium transition-colors ${canSendOTP
-                    ? "bg-blue-400 text-white hover:bg-blue-500 cursor-pointer"
+                  className={`group mt-5 w-full py-2 rounded-lg font-medium transition-all duration-300 flex items-center justify-center overflow-hidden ${canSendOTP
+                    ? "bg-blue-400 text-white cursor-pointer"
                     : "bg-gray-200 text-gray-500 cursor-not-allowed"
                     }`}
                 >
-                  Send OTP
+                  <span className="flex items-center gap-2">
+                    <span className="transition-all duration-300 group-hover:-translate-x-1">
+                      Send OTP
+                    </span>
+                    {canSendOTP && (
+                      <ArrowRight
+                        className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                        strokeWidth={3}
+                      />
+                    )}
+                  </span>
                 </button>
 
               </>
@@ -209,9 +228,17 @@ export default function EmployerPage() {
                 </p>
                 <button
                   onClick={handleVerifyOtp}
-                  className="mt-5 w-full py-2 rounded-lg bg-blue-400 text-white hover:bg-blue-500"
+                  className="group mt-5 w-full py-2 rounded-lg bg-blue-400 text-white transition-all duration-300 overflow-hidden flex items-center justify-center"
                 >
-                  Verify OTP
+                  <span className="flex items-center gap-2">
+                    <span className="transition-all duration-300 group-hover:-translate-x-1">
+                      Verify OTP
+                    </span>
+                    <ArrowRight
+                      className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      strokeWidth={3}
+                    />
+                  </span>
                 </button>
               </>
             )}

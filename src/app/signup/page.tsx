@@ -15,7 +15,7 @@ import { WorkingInHealthcareStep } from "./components/WorkingInHealthcareStep";
 import { ShiftPreferenceStep } from "./components/ShiftPreferanceStep";
 import Navbar from "../../../components/navbar";
 import Footer from "../../../components/footer-section";
-import { CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
 
 export default function NurseSignup() {
     const router = useRouter();
@@ -353,7 +353,7 @@ export default function NurseSignup() {
                 <div className="flex flex-col items-center">
                     {/* Main Box */}
                     <div className="hidden lg:flex w-[435px] h-[410px] rounded-lg shadow-md flex-col justify-center items-center text-center text-gray-800 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]">
-                       
+
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">
                             On registering, you can
                         </h2>
@@ -429,12 +429,22 @@ export default function NurseSignup() {
                                     <button
                                         onClick={() => setCurrentStep((prev) => prev + 1)}
                                         disabled={!isStepComplete(currentStep)}
-                                        className={`px-4 lg:px-4 py-2 lg:py-2 rounded text-white text-sm lg:text-base ${isStepComplete(currentStep)
-                                            ? "bg-blue-400 hover:bg-blue-500"
-                                            : "bg-gray-400 cursor-not-allowed"
-                                            } transition-colors`}
+                                        className={`group px-4 lg:px-4 py-2 lg:py-2 rounded text-white text-sm lg:text-base transition-all duration-300 flex items-center justify-center overflow-hidden ${isStepComplete(currentStep)
+                                                ? "bg-[#61A6FA]"
+                                                : "bg-gray-400 cursor-not-allowed"
+                                            }`}
                                     >
-                                        Next
+                                        <span className="flex items-center gap-2">
+                                            <span className="transition-all duration-300 group-hover:-translate-x-1">
+                                                Next
+                                            </span>
+                                            {isStepComplete(currentStep) && (
+                                                <ArrowRight
+                                                    className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                                    strokeWidth={3}
+                                                />
+                                            )}
+                                        </span>
                                     </button>
                                 )}
                                 {currentStep === totalSteps && (

@@ -11,6 +11,7 @@ import FooterPublic from "../../../components/footer-section";
 // Logged-in components
 import { Navbar as NavbarPrivate } from "../nurseProfile/components/Navbar";
 import FooterPrivate from "../Admin/components/layout/Footer";
+import { ArrowRight } from "lucide-react";
 
 export default function ContactUs() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -172,9 +173,17 @@ export default function ContactUs() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-primary hover:bg-[#477fff] text-white py-3 rounded-lg text-lg"
+                  className="group relative w-full bg-primary text-white py-3 rounded-lg text-lg transition-all duration-300 overflow-hidden flex items-center justify-center"
                 >
-                  SEND MESSAGE
+                  <span className="flex items-center gap-2">
+                    <span className="transition-all duration-300 group-hover:-translate-x-1">
+                      SEND MESSAGE
+                    </span>
+                    <ArrowRight
+                      className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      strokeWidth={3}
+                    />
+                  </span>
                 </Button>
               </form>
             </CardContent>

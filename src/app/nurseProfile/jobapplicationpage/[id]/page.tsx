@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import Loader from "../../../../../components/loading";
-import { Building2 } from "lucide-react";
+import { ArrowRight, Building2 } from "lucide-react";
 import { Navbar } from "../../components/Navbar";
 
 interface Job {
@@ -74,8 +74,8 @@ export default function JobApplicationPage() {
   }, []);
   // console.log("Is user logged in?", authToken);
   // Check if job is already bookmarked
-  
-  
+
+
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async () => {
@@ -161,9 +161,9 @@ export default function JobApplicationPage() {
     }
   };
 
- useEffect(() => {
-   if (id) fetchSavedStatus(Number(id));
- }, [id]);
+  useEffect(() => {
+    if (id) fetchSavedStatus(Number(id));
+  }, [id]);
 
 
   // Check if user has already applied
@@ -283,7 +283,7 @@ export default function JobApplicationPage() {
       } else {
         setCompany({ about_company: "Failed to load company information." });
       }
-    } catch  {
+    } catch {
       // console.error("Error fetching company info:", err);
       setCompany({ about_company: "There is no about company information." });
     }
@@ -404,11 +404,10 @@ export default function JobApplicationPage() {
                     onClick={handleBookmarkToggle}
                     disabled={!id || checkingApplication}
                     className={`absolute top-4 right-4 px-3 py-1 rounded-md transition-all text-sm font-medium
-      ${
-        isSaved
-          ? "bg-[#0073FF] text-white border-[#0073FF]"
-          : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF]"
-      }`}
+      ${isSaved
+                        ? "bg-[#0073FF] text-white border-[#0073FF]"
+                        : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF]"
+                      }`}
                     title={isSaved ? "Remove from saved jobs" : "Save job"}
                   >
                     {isSaved ? "Unsave Job" : "Save for later"}
@@ -457,10 +456,10 @@ export default function JobApplicationPage() {
                           {job.minPay && job.maxPay
                             ? `AUD ${job.minPay}-${job.maxPay}/hr`
                             : job.minPay
-                            ? `From AUD ${job.minPay}/hr`
-                            : job.maxPay
-                            ? `Up to AUD ${job.maxPay}/hr`
-                            : "Not specified"}
+                              ? `From AUD ${job.minPay}/hr`
+                              : job.maxPay
+                                ? `Up to AUD ${job.maxPay}/hr`
+                                : "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -501,13 +500,13 @@ export default function JobApplicationPage() {
                         <p className="text-gray-900">
                           {job.created_at
                             ? new Date(job.created_at).toLocaleDateString(
-                                "en-AU",
-                                {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                }
-                              )
+                              "en-AU",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )
                             : "Not specified"}
                         </p>
                       </div>
@@ -573,19 +572,25 @@ export default function JobApplicationPage() {
               {/* Apply Button */}
               <button
                 onClick={handleButtonClick}
-                disabled={
-                  isLoggedIn &&
-                  (submitting || hasApplied || checkingApplication)
-                }
-                className={`${
-                  !isLoggedIn
-                    ? "bg-blue-400 hover:bg-blue-500"
+                disabled={isLoggedIn && (submitting || hasApplied || checkingApplication)}
+                className={`group text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm font-medium mt-3 flex items-center justify-center overflow-hidden ${!isLoggedIn
+                    ? "bg-blue-400"
                     : hasApplied
-                    ? "bg-primary cursor-not-allowed"
-                    : "bg-blue-400 hover:bg-blue-500"
-                } text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium mt-3`}
+                      ? "bg-primary"
+                      : "bg-blue-400"
+                  }`}
               >
-                {getButtonText()}
+                <span className="flex items-center gap-2">
+                  <span className="transition-all duration-300 group-hover:-translate-x-1">
+                    {getButtonText()}
+                  </span>
+                  {!(isLoggedIn && (submitting || hasApplied || checkingApplication)) && (
+                    <ArrowRight
+                      className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      strokeWidth={3}
+                    />
+                  )}
+                </span>
               </button>
             </div>
 

@@ -18,6 +18,7 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
+  ArrowRight,
 } from "lucide-react";
 import Footer from "@/app/Admin/components/layout/Footer";
 import { Navbar } from "../components/Navbar";
@@ -667,12 +668,19 @@ export default function NurseProfilePage() {
             {!isGlobalEdit ? (
               <button
                 onClick={() => setIsGlobalEdit(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
+                className="group flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg transition-all duration-300 overflow-hidden"
               >
                 <Edit className="w-4 h-4" />
-                Edit Profile
-              </button>
-            ) : (
+                <span className="flex items-center gap-2">
+                  <span className="transition-all duration-300 group-hover:-translate-x-1">
+                    Edit Profile
+                  </span>
+                  <ArrowRight
+                    className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    strokeWidth={3}
+                  />
+                </span>
+              </button>) : (
               <div className="flex gap-2">
                 <button
                   onClick={handleCancelEdit}

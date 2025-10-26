@@ -11,6 +11,7 @@ import FooterPublic from "../../../components/footer-section";
 // Logged-in components
 import { Navbar as NavbarPrivate } from "../nurseProfile/components/Navbar";
 import FooterPrivate from "../Admin/components/layout/Footer";
+import { ArrowRight } from "lucide-react";
 
 export default function AboutPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -186,7 +187,7 @@ export default function AboutPage() {
 
           {/* Left Content */}
           <div className="flex-1 text-center lg:text-left space-y-7 min-w-4xl h-[415px] flex flex-col justify-center">
-                          <h1 className="text-[32px] md:text-4xl font-semibold leading-tight">
+            <h1 className="text-[32px] md:text-4xl font-semibold leading-tight">
 
               Have questions or want to partner with <span className="text-[#61A6FA]">us</span>?<br />
             </h1>
@@ -197,9 +198,17 @@ export default function AboutPage() {
 
               <a
                 href="/contact"
-                className="inline-block mt-4 px-6 py-3 bg-[#58A6F9] text-white font-semibold rounded-lg hover:bg-blue-500 transition-colors w-fit"
+                className="group relative inline-flex items-center px-6 py-3 mt-2 bg-[#58A6F9] text-white font-semibold rounded-lg transition-all duration-300 hover:bg-blue-500 overflow-hidden w-fit"
               >
-                Contact Us
+                <span className="flex items-center gap-2">
+                  <span className="text-sm transition-all duration-300 group-hover:-translate-x-1">
+                    Contact Us
+                  </span>
+                  <ArrowRight
+                    className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    strokeWidth={3}
+                  />
+                </span>
               </a>
             </div>
           </div>
@@ -220,11 +229,11 @@ export default function AboutPage() {
 
         </div>
       </section>
-        {/* -------------------------- Footer Section -------------------------- */}
+      {/* -------------------------- Footer Section -------------------------- */}
       <div >
         {isLoggedIn ? <FooterPrivate /> : <FooterPublic />}
       </div>
-    
+
 
     </main>
   );

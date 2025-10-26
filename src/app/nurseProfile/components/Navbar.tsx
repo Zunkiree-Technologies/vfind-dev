@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import NotificationSidebar from "./NotificationSidebar";
-import { MapPin, Search, UserRound, Menu, X } from "lucide-react";
+import { MapPin, Search, UserRound, Menu, X, ArrowRight } from "lucide-react";
 import Image from "next/image";
 
 export const Navbar = () => {
@@ -150,9 +150,17 @@ export const Navbar = () => {
               <>
                 <button
                   onClick={() => router.push("/nurseProfile/connectedstatus")}
-                  className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px] text-sm whitespace-nowrap"
+                  className="group px-6 py-2 bg-blue-400 text-white font-medium rounded-[10px] text-sm whitespace-nowrap transition-all duration-300 overflow-hidden flex items-center justify-center"
                 >
-                  Connection Request
+                  <span className="flex items-center gap-2">
+                    <span className="transition-all duration-300 group-hover:-translate-x-1">
+                      Connection Request
+                    </span>
+                    <ArrowRight
+                      className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      strokeWidth={3}
+                    />
+                  </span>
                 </button>
 
                 {/* User Menu */}
