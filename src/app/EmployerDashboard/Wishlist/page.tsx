@@ -12,11 +12,12 @@ import {
   Clock1,
   ChevronLeft,
   ChevronRight,
-  ArrowLeft,
 } from "lucide-react";
 import Loader from "../../../../components/loading";
 import Link from "next/link";
 import Footer from "@/app/Admin/components/layout/Footer";
+import EmployerNavbar from "../components/EmployerNavbar";
+import MainButton from "@/components/ui/MainButton";
 
 interface ProfileImage {
   access: string;
@@ -91,8 +92,8 @@ const Pagination: React.FC<PaginationProps> = ({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
           }`}
       >
         <ChevronLeft size={16} />
@@ -108,8 +109,8 @@ const Pagination: React.FC<PaginationProps> = ({
               <button
                 onClick={() => onPageChange(page as number)}
                 className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-gray-900 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
                   }`}
               >
                 {page}
@@ -123,8 +124,8 @@ const Pagination: React.FC<PaginationProps> = ({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
           }`}
       >
         Next
@@ -415,49 +416,55 @@ export default function WishlistNurses() {
 
   return (
     <div className="p-6 min-h-screen mx-auto bg-[#F5F6FA]">
-      {/* Top Search Bar */}
-      <div className="flex justify-center items-center sticky top-0 z-50 bg-[#F5F6FA]   relative">
-        {/* Back Button on the Left */}
-        <button
-  onClick={() => window.history.back()}
-  className="absolute left-6 flex items-center gap-1 text-sm text-blue-400 hover:text-blue-500"
->
-  <ArrowLeft size={16} />
-  Back
-</button>
+      {/* Navbar - sticky */}
+      <div className="sticky top-0 z-50">
+        <EmployerNavbar />
+      </div>
+      {/* Search Bar - sticky below navbar */}
+      <div className="sticky top-[64px] z-40 bg-[#F5F6FA] py-3">
+        <div className="flex justify-center">
 
-        {/* Search Box */}
-        <div className="flex items-center w-[950px] border border-gray-300 rounded-lg bg-white overflow-hidden p-1">
-          <div className="flex items-center px-3 w-1/2">
-            <Search className="text-gray-400 mr-2" size={18} />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              type="text"
-              placeholder="Search by keyword, designation, company name"
-              className="w-full outline-none py-2"
-            />
+          <div className="flex items-center justify-between w-[95%] max-w-[950px] border border-gray-300 rounded-lg bg-white overflow-hidden p-1">
+            {/* Search Input */}
+            <div className="flex items-center px-3 w-1/2">
+              <Search className="text-gray-400 mr-2" size={18} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                type="text"
+                placeholder="Search by keyword, designation, company name"
+                className="w-full outline-none py-2"
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-6 bg-gray-300" />
+
+            {/* Location Input */}
+            <div className="flex items-center px-3 w-1/3">
+              <MapPin className="text-gray-400 mr-2" size={18} />
+              <input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                type="text"
+                placeholder="City, State or ZIP code"
+                className="w-full outline-none py-2"
+              />
+            </div>
+
+            {/* Search Button */}
+            <MainButton
+              onClick={() => applyFilters()}
+            >
+              <span className="flex items-center gap-2">
+                {" "}
+                <span className="transition-all duration-300 group-hover:-translate-x-1">
+                  {" "}
+                  Search{" "}
+                </span>{" "}
+              </span>
+            </MainButton>
           </div>
-
-          <div className="w-px h-6 bg-gray-300" />
-
-          <div className="flex items-center px-3 w-1/3">
-            <MapPin className="text-gray-400 mr-2" size={18} />
-            <input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              type="text"
-              placeholder="City, State or ZIP code"
-              className="w-full outline-none py-2"
-            />
-          </div>
-
-          <button
-            onClick={() => applyFilters()}
-            className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
-          >
-            Search
-          </button>
         </div>
       </div>
 
@@ -467,7 +474,7 @@ export default function WishlistNurses() {
         <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
           <h2 className="font-semibold text-gray-800 flex justify-between">
             All Filters
-            <button onClick={clearFilters} className="text-sm text-blue-600">
+            <button onClick={clearFilters} className="text-sm text-blue-400">
               Clear All
             </button>
           </h2>
@@ -687,8 +694,8 @@ export default function WishlistNurses() {
         </div>
       </div>
       <div className="bg-white">
-              <Footer />
-            </div>
+        <Footer />
+      </div>
     </div>
   );
 }

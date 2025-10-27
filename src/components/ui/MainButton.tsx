@@ -51,7 +51,7 @@ const MainButton: React.FC<MainButtonProps> = ({
       <span className="relative z-10 transition-all duration-300 group-hover:-translate-x-2">
         {children}
       </span>
-      <span className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 transform translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 text-blue-400 group-hover:text-blue-400">
+      <span className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 transform translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 text-blue-400 group-hover:text-blue-400">
         <ArrowRight className="w-4 h-4" strokeWidth={3} />
       </span>
     </button>

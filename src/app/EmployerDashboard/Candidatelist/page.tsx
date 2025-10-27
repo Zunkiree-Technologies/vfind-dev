@@ -753,13 +753,15 @@ export default function CandidateList() {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                         <span className="flex items-center gap-2">
-                                {" "}
-                                <span className="transition-all duration-300 group-hover:-translate-x-1">
-                                  {" "}
-                                  View Details{" "}
-                                </span>{" "}
-                              </span>
+
+                        <span className="flex items-center gap-2">
+                          {" "}
+                          <span className="transition-all duration-300 group-hover:-translate-x-1">
+                            {" "}
+                            View Details{" "}
+
+                          </span>{" "}
+                        </span>
                       </MainButton>
                     </div>
                   </div>

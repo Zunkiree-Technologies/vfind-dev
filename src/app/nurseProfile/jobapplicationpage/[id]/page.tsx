@@ -574,10 +574,10 @@ export default function JobApplicationPage() {
                 onClick={handleButtonClick}
                 disabled={isLoggedIn && (submitting || hasApplied || checkingApplication)}
                 className={`group text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm font-medium mt-3 flex items-center justify-center overflow-hidden ${!isLoggedIn
-                    ? "bg-blue-400"
-                    : hasApplied
-                      ? "bg-primary"
-                      : "bg-blue-400"
+                  ? "bg-blue-400"
+                  : hasApplied
+                    ? "bg-primary"
+                    : "bg-blue-400"
                   }`}
               >
                 <span className="flex items-center gap-2">

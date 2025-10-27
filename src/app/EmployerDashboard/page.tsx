@@ -5,6 +5,7 @@ import Loading from "../../../components/loading";
 import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
 import { Briefcase, Calendar, Clock, Edit, Eye, Mail, Phone, Search, Trash, Pause, Play } from "lucide-react";
 import Footer from "../Admin/components/layout/Footer";
+import MainButton from "@/components/ui/MainButton";
 
 interface Job {
   created_at: string;
@@ -359,9 +360,9 @@ export default function EmployerDashboard() {
       {/* 🔹 Main container */}
       <div className="p-4 mt-15 md:p-6   flex flex-col lg:flex-row gap-6 mx-auto container justify-center ">
         {/* 👉 Left section */}
-        <div className="space-y-5">
+        <div className="space-y-5 w-full px-4 md:px-4 md:min-w-[770px] md:max-w-[770px]">
           {/* KYC Section */}
-          <div className="bg-white rounded-lg p-6 md:p-8 shadow-sm min-h-[195px]">
+          <div className="bg-white rounded-lg p-4 sm:p-6 md:p-8 shadow-sm min-h-[195px] w-full">
             {/* Initial Step */}
             {companyProfileStep === "initial" && (
               <>
@@ -369,14 +370,13 @@ export default function EmployerDashboard() {
                   Complete Your Company Profile
                 </h2>
                 <p className="text-sm md:text-base text-gray-600 mt-1">
-                  Provide your company details to make your job postings stand
-                  out.
+                  Provide your company details to make your job postings stand out.
                 </p>
 
                 <button
                   onClick={() => setCompanyProfileStep("editing")}
                   className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-400 text-white rounded-md 
-                   hover:bg-blue-500 text-sm md:text-base transition"
+          hover:bg-blue-500 text-sm md:text-base transition"
                 >
                   Complete Profile
                 </button>
@@ -387,32 +387,26 @@ export default function EmployerDashboard() {
             {companyProfileStep === "editing" && (
               <>
                 <h2 className="font-semibold text-gray-800 text-base md:text-lg">
-                  {isEditingExisting
-                    ? "Edit Company Profile"
-                    : "Complete Your Company Profile"}
+                  {isEditingExisting ? "Edit Company Profile" : "Complete Your Company Profile"}
                 </h2>
                 <p className="text-sm md:text-base text-gray-600 mt-1">
-                  Provide your company details to make your job postings stand
-                  out.
+                  Provide your company details to make your job postings stand out.
                 </p>
 
-                {/* Textarea */}
                 <textarea
                   placeholder="Provide a brief description of your company"
                   value={companyDescription}
                   onChange={(e) => setCompanyDescription(e.target.value)}
                   rows={4}
-                  className="mt-4 w-full border border-gray-300 rounded-lg px-3 py-2 
-                   text-sm md:text-base text-gray-800 
-                   focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
+                  className="mt-4 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm md:text-base text-gray-800 
+          focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
                 />
 
-                {/* Save button */}
                 <button
                   onClick={handleSaveCompanyProfile}
                   disabled={saveLoading}
                   className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md 
-                   hover:bg-blue-600 text-sm md:text-base transition disabled:opacity-50"
+          hover:bg-blue-600 text-sm md:text-base transition disabled:opacity-50"
                 >
                   {saveLoading ? "Saving..." : "Save & Continue"}
                 </button>
@@ -423,8 +417,8 @@ export default function EmployerDashboard() {
                       setCompanyProfileStep("completed");
                       setIsEditingExisting(false);
                     }}
-                    className="mt-4 ml-2 w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded-md 
-                     hover:bg-gray-600 text-sm md:text-base transition"
+                    className="mt-4 ml-0 sm:ml-2 w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded-md 
+            hover:bg-gray-600 text-sm md:text-base transition"
                   >
                     Cancel
                   </button>
@@ -439,24 +433,20 @@ export default function EmployerDashboard() {
             {/* Completed Step */}
             {companyProfileStep === "completed" && (
               <>
-
-
                 {/* Company Description Display */}
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <h3 className="font-bold text-gray-800 text-sm mb-2">
-                    Company Description
-                  </h3>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                    {showFullDescription
-                      ? companyDescription
-                      : getTruncatedDescription(companyDescription)}
-                  </p>
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 w-full overflow-hidden">
+                  <h3 className="font-bold text-gray-800 text-sm mb-2">Company Description</h3>
+
+                  <div className="max-h-48 overflow-y-auto">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                      {showFullDescription ? companyDescription : getTruncatedDescription(companyDescription)}
+                    </p>
+                  </div>
+
                   {companyDescription.length > 150 && (
                     <button
-                      onClick={() =>
-                        setShowFullDescription(!showFullDescription)
-                      }
-                      className="mt-2 text-blue-500 hover:text-blue-600 text-sm font-medium"
+                      onClick={() => setShowFullDescription(!showFullDescription)}
+                      className="mt-2 text-blue-400 hover:text-blue-500 text-sm font-medium"
                     >
                       {showFullDescription ? "Show Less" : "Show More"}
                     </button>
@@ -465,72 +455,93 @@ export default function EmployerDashboard() {
 
                 {/* Action buttons */}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button
+                  <MainButton
                     onClick={handleEditCompanyProfile}
-                    className="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 
-                     text-sm transition flex items-center gap-2"
+
                   >
-                    <Edit size={16} />
-                    Edit Description
-                  </button>
-                  <button
+
+                    <span className="flex items-center gap-2">
+                      {" "}
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        {" "}
+                        Edit Description{" "}
+                      </span>{" "}
+                    </span>
+                  </MainButton>
+                  <MainButton
                     onClick={handleDeleteCompanyProfile}
-                    className="px-4 py-2 bg-red-400 text-white rounded-md hover:bg-red-500 
-                     text-sm transition flex items-center gap-2"
+
                   >
-                    <Trash size={16} />
-                    Delete Description
-                  </button>
+                    <span className="flex items-center gap-2">
+                      {" "}
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        {" "}
+                        Delete Description
+                        {" "}
+                      </span>{" "}
+                    </span>
+
+                  </MainButton>
                 </div>
               </>
             )}
           </div>
 
           {/* Talent Pool + Free Job Posting */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Talent Pool */}
-            <div className="bg-white rounded-lg p-4 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
+            <div className="bg-white rounded-lg p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg flex-shrink-0">
                 <Search size={20} className="text-blue-400" />
               </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">
-                  VFind Talent Pool
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Discover talent, start free.
-                </p>
-                <button
-                  onClick={() =>
-                    window.open("/EmployerDashboard/Candidatelist", "_blank")
-                  }
-                  className="mt-3 px-3 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
+              <div className="flex-1">
+                <h2 className="font-semibold text-gray-800">VFind Talent Pool</h2>
+                <p className="text-sm text-gray-600">Discover talent, start free.</p>
+                <MainButton
+                  onClick={() => window.open("/EmployerDashboard/Candidatelist", "_blank")}
+                  className="mt-3 "
                 >
-                  Search Candidate
-                </button>
+                  <span className="flex items-center gap-2">
+                    {" "}
+                    <span className="transition-all duration-300 group-hover:-translate-x-1">
+                      {" "}
+                      Search Candidate
+
+                      {" "}
+                    </span>{" "}
+                  </span>
+                </MainButton>
               </div>
             </div>
 
             {/* Free Job Posting */}
-            <div className="bg-white rounded-lg p-4 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
+            <div className="bg-white rounded-lg p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg flex-shrink-0">
                 <Briefcase size={20} className="text-blue-400" />
               </div>
-              <div>
-                <h2 className="font-semibold text-gray-800">Post a  Job</h2>
-                <p className="text-sm text-gray-600">
-                  Start posting a jobs.
-                </p>
-                <button
+              <div className="flex-1">
+                <h2 className="font-semibold text-gray-800">Post a Job</h2>
+                <p className="text-sm text-gray-600">Start posting jobs.</p>
+                <MainButton
                   onClick={() => router.push("/EmployerDashboard/jobposting")}
-                  className="mt-3 px-3 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
+                  className="mt-3"
+
                 >
-                  Post a Job
-                </button>
+                   <span className="flex items-center gap-2">
+                    {" "}
+                    <span className="transition-all duration-300 group-hover:-translate-x-1">
+                      {" "}
+                      Post a Job
+
+                      {" "}
+                    </span>{" "}
+                  </span>
+                </MainButton>
               </div>
             </div>
           </div>
         </div>
+
 
         {/* 👉 Right section */}
         <div className="hidden lg:block lg:w-80  ">
@@ -620,7 +631,7 @@ export default function EmployerDashboard() {
                       <td className="py-2 px-3">
                         <a
                           href={`/EmployerDashboard/Applicants/${job.id}`}
-                          className="text-blue-600 hover:underline"
+                          className="text-blue-400 hover:underline"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -712,7 +723,7 @@ export default function EmployerDashboard() {
                       </div>
                       <a
                         href={`/EmployerDashboard/Applicants/${job.id}`}
-                        className="text-xs text-blue-600 hover:underline inline-block mt-1"
+                        className="text-xs text-blue-400 hover:underline inline-block mt-1"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -798,12 +809,12 @@ export default function EmployerDashboard() {
 
           {/* Show All Button */}
           {jobs.length > 4 && (
-            <button
+            <MainButton
               onClick={() => setShowAllJobs(!showAllJobs)}
-              className="mt-4 px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
+              className="mt-4  gap-3 text-primary  text-sm md:text-base"
             >
-              {showAllJobs ? "Show Less" : "View All Jobs"}
-            </button>
+              {showAllJobs ? "Show Less" : "View all Jobs"}
+            </MainButton>
           )}
         </div>
       </div>

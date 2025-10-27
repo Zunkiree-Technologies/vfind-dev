@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import RichTextEditor from "../components/RichTextEditor";
 import EmployerNavbar from "../components/EmployerNavbar";
 import Footer from "@/app/Admin/components/layout/Footer";
+import MainButton from "@/components/ui/MainButton";
 
 interface Job {
   id: number;
@@ -244,25 +245,25 @@ function JobPostingContent() {
     <div className="bg-gray-50 ">
       {/* 🔹 Navbar */}
       <EmployerNavbar />
-      <div className="h-fit flex justify-center items-start bg-gray-50 p-10 gap-5">
+      <div className="h-fit flex justify-center items-start bg-gray-50 p-10 gap-5 mt-10">
 
         {/* Stepper */}
         <div className="w-1/4 p-6 h-fit">
-          <h2 className="font-semibold text-lg mb-6">{jobId ? "Edit Job" : "Post a Job"}</h2>
+          <h2 className="font-semibold text-lg mb-6 ">{jobId ? "Edit Job" : "Post a Job"}</h2>
           <div className="flex flex-col gap-0 relative">
             <div className="flex items-center gap-2">
-              <div className={`w-4 h-4 rounded-full border-2 ${step >= 1 ? "bg-blue-600 border-blue-600" : "border-gray-300"}`} />
-              <span className={`${step >= 1 ? "text-blue-600 font-semibold" : "text-gray-400"}`}>Job Details</span>
+              <div className={`w-4 h-4 rounded-full border-2 ${step >= 1 ? "bg-blue-400 border-blue-400" : "border-gray-300"}`} />
+              <span className={`${step >= 1 ? "text-blue-400 font-semibold" : "text-gray-400"}`}>Job Details</span>
             </div>
-            <div className={`h-6 ml-[7px] border-l-2 ${step >= 2 ? "border-blue-600" : "border-gray-300"}`} />
+            <div className={`h-6 ml-[7px] border-l-2 ${step >= 2 ? "border-blue-400" : "border-gray-300"}`} />
             <div className="flex items-center gap-2">
-              <div className={`w-4 h-4 rounded-full border-2 ${step >= 2 ? "bg-blue-600 border-blue-600" : "border-gray-300"}`} />
-              <span className={`${step >= 2 ? "text-blue-600 font-semibold" : "text-gray-400"}`}>Candidate Preferences</span>
+              <div className={`w-4 h-4 rounded-full border-2 ${step >= 2 ? "bg-blue-400 border-blue-400" : "border-gray-300"}`} />
+              <span className={`${step >= 2 ? "text-blue-400 font-semibold" : "text-gray-400"}`}>Candidate Preferences</span>
             </div>
-            <div className={`h-6 ml-[7px] border-l-2 ${step >= 3 ? "border-blue-600" : "border-gray-300"}`} />
+            <div className={`h-6 ml-[7px] border-l-2 ${step >= 3 ? "border-blue-400" : "border-gray-300"}`} />
             <div className="flex items-center gap-2">
-              <div className={`w-4 h-4 rounded-full border-2 ${step >= 3 ? "bg-blue-600 border-blue-600" : "border-gray-300"}`} />
-              <span className={`${step >= 3 ? "text-blue-600 font-semibold" : "text-gray-400"}`}>Job Description</span>
+              <div className={`w-4 h-4 rounded-full border-2 ${step >= 3 ? "bg-blue-400 border-blue-400" : "border-gray-300"}`} />
+              <span className={`${step >= 3 ? "text-blue-400 font-semibold" : "text-gray-400"}`}>Job Description</span>
             </div>
           </div>
         </div>
@@ -348,7 +349,7 @@ function JobPostingContent() {
                   />
                 </div>
               </div>
-              {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+              {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
             </>
           )}
 
@@ -420,11 +421,11 @@ function JobPostingContent() {
                   className="w-full border rounded p-2"
                 >
                   <option value="">Select experience</option>
-                  <option value="No experience">No experience</option>
-                  <option value="Less than 1 year">Less than 1 year</option>
-                  <option value="1–2 years">1–2 years</option>
-                  <option value="2–5 years">2–5 years</option>
-                  <option value="5+ years">5+ years</option>
+                  <option value="Less than 6 months">Less than 6 months</option>
+                  <option value="6 months">6 months - 1 year</option>
+                  <option value="1-3 years">1–3 years</option>
+                  <option value="3–5 years">3–5 years</option>
+                  <option value="Over 5 years">Over 5 years</option>
                 </select>
               </div>
 
@@ -492,34 +493,31 @@ function JobPostingContent() {
 
           <div className="flex justify-end gap-4 mt-6">
             {step > 1 && (
-              <button
+              <MainButton
                 onClick={handleBack}
-                className="px-6 py-2 bg-white text-[#0078DB] border border-[#0078DB] rounded hover:bg-[#0078DB] hover:text-white transition"
               >
                 Back
-              </button>
+              </MainButton>
             )}
             {step < 3 ? (
-              <button
+              <MainButton
                 onClick={handleNext}
-                className="px-6 py-2 bg-blue-600 rounded text-white"
               >
                 Next
-              </button>
+              </MainButton>
             ) : (
-              <button
+              <MainButton
                 onClick={handleSubmit}
-                className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
               >
                 {jobId ? "Update Job" : "Post Job"}
-              </button>
+              </MainButton>
             )}
           </div>
         </div>
       </div>
       <div className="bg-white">
-              <Footer />
-            </div>
+        <Footer />
+      </div>
     </div>
 
   );
