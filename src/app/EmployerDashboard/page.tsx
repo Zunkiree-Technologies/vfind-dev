@@ -357,7 +357,7 @@ export default function EmployerDashboard() {
       <EmployerNavbar />
 
       {/* 🔹 Main container */}
-      <div className="p-4 mt-5 md:p-6   flex flex-col lg:flex-row gap-6 mx-auto container justify-center ">
+      <div className="p-4 mt-15 md:p-6   flex flex-col lg:flex-row gap-6 mx-auto container justify-center ">
         {/* 👉 Left section */}
         <div className="space-y-5">
           {/* KYC Section */}

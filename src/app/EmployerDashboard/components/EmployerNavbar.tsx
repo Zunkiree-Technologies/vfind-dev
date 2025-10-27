@@ -11,28 +11,46 @@ interface NavbarProps {
 
 export default function EmployerNavbar({}: NavbarProps) {
   const router = useRouter();
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showDesktopProfileMenu, setShowDesktopProfileMenu] = useState(false);
+  const [showMobileProfileMenu, setShowMobileProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const toggleProfileMenu = () => setShowProfileMenu(!showProfileMenu);
+  const desktopDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
+
   const toggleMobileMenu = () => setShowMobileMenu(!showMobileMenu);
 
-  // Close dropdown if clicked outside
+  // Close desktop profile menu if clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowProfileMenu(false);
+      if (
+        desktopDropdownRef.current &&
+        !desktopDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDesktopProfileMenu(false);
       }
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
+  // Close mobile profile menu if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileDropdownRef.current &&
+        !mobileDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowMobileProfileMenu(false);
+      }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
- <nav className="bg-white shadow-md w-full fixed  ">
-     <div className="mx-auto container flex justify-around items-center px-4 md:px-6 py-3">
+    <nav className="bg-white shadow-md w-full fixed top-0 z-50">
+      <div className="mx-auto container flex justify-around items-center px-5 md:px-6 py-3 ">
         {/* Left: Logo */}
         <div
           className="flex items-center space-x-2 cursor-pointer"
@@ -84,9 +102,12 @@ export default function EmployerNavbar({}: NavbarProps) {
 
           {/* Desktop Profile & Notification */}
           <div className="hidden lg:flex items-center gap-5">
-            <div className="relative">
+            <div className="relative" ref={desktopDropdownRef}>
               <button
-                onClick={toggleProfileMenu}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDesktopProfileMenu(!showDesktopProfileMenu);
+                }}
                 className="flex items-center gap-1 focus:outline-none"
               >
                 <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-400 hover:bg-gray-50">
@@ -95,15 +116,12 @@ export default function EmployerNavbar({}: NavbarProps) {
                 <ChevronDown size={20} className="text-gray-700 hover:text-blue-600" />
               </button>
 
-              {showProfileMenu && (
-                <div
-                  ref={dropdownRef}
-                  className="absolute right-0 mt-2 w-36 bg-white border rounded-md shadow-lg z-50"
-                >
+              {showDesktopProfileMenu && (
+                <div className="absolute right-0 mt-2 w-36 bg-white border rounded-md shadow-lg z-50">
                   <button
                     onClick={() => {
                       router.push("/EmployerDashboard/employprofile");
-                      setShowProfileMenu(false);
+                      setShowDesktopProfileMenu(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
@@ -129,23 +147,23 @@ export default function EmployerNavbar({}: NavbarProps) {
           {/* Mobile Profile & Notification */}
           <div className="flex lg:hidden items-center gap-3">
             <NotificationSidebar />
-            <div className="relative">
+            <div className="relative" ref={mobileDropdownRef}>
               <button
-                onClick={toggleProfileMenu}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMobileProfileMenu(!showMobileProfileMenu);
+                }}
                 className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-400 hover:bg-gray-50"
               >
                 <UserRound size={20} className="text-gray-700" />
               </button>
 
-              {showProfileMenu && (
-                <div
-                  ref={dropdownRef}
-                  className="absolute right-0 mt-2 w-36 bg-white border rounded-md shadow-lg z-50"
-                >
+              {showMobileProfileMenu && (
+                <div className="absolute right-0 mt-2 w-38 bg-white  rounded-md shadow-lg z-50">
                   <button
                     onClick={() => {
                       router.push("/EmployerDashboard/employprofile");
-                      setShowProfileMenu(false);
+                      setShowMobileProfileMenu(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
