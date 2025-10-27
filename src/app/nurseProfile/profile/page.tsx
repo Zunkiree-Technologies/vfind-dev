@@ -14,7 +14,6 @@ import {
   Edit,
   Save,
   X,
-  Plus,
   Trash2,
   ChevronDown,
   ChevronUp,
@@ -22,6 +21,7 @@ import {
 } from "lucide-react";
 import Footer from "@/app/Admin/components/layout/Footer";
 import { Navbar } from "../components/Navbar";
+import MainButton from "@/components/ui/MainButton";
 
 interface ProfileImage {
   url: string;
@@ -90,7 +90,7 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   title,
   icon,
   children,
-  defaultOpen = true,
+  defaultOpen = false,
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
@@ -119,14 +119,42 @@ export default function NurseProfilePage() {
   const [profile, setProfile] = useState<NurseProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isGlobalEdit, setIsGlobalEdit] = useState(false);
-  const [editedData, setEditedData] = useState<Partial<NurseProfile>>({});
   const [saving, setSaving] = useState(false);
   const [educationList, setEducationList] = useState<Education[]>([]);
-  const [workExperienceList, setWorkExperienceList] = useState<WorkExperience[]>([]);
-  const [isEditingEducation, setIsEditingEducation] = useState<number | null>(null);
+  const [workExperienceList, setWorkExperienceList] = useState<
+    WorkExperience[]
+  >([]);
+  const [isEditingEducation, setIsEditingEducation] = useState<number | null>(
+    null
+  );
+  const [isEditingWorkExperience, setIsEditingWorkExperience] = useState<
+    number | null
+  >(null);
 
-  const [isEditingWorkExperience, setIsEditingWorkExperience] = useState<number | null>(null);
+  // Independent edit states for each section
+  const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false);
+  const [isEditingVisaResidency, setIsEditingVisaResidency] = useState(false);
+  const [isEditingAhpraReg, setIsEditingAhpraReg] = useState(false);
+  const [isEditingCertifications, setIsEditingCertifications] = useState(false);
+  const [isEditingWorkPreferences, setIsEditingWorkPreferences] =
+    useState(false);
+
+  // Separate edited data for each section
+  const [editedBasicInfo, setEditedBasicInfo] = useState<Partial<NurseProfile>>(
+    {}
+  );
+  const [editedVisaInfo, setEditedVisaInfo] = useState<Partial<NurseProfile>>(
+    {}
+  );
+  const [editedAhpraInfo, setEditedAhpraInfo] = useState<Partial<NurseProfile>>(
+    {}
+  );
+  const [editedCertInfo, setEditedCertInfo] = useState<Partial<NurseProfile>>(
+    {}
+  );
+  const [editedWorkPrefInfo, setEditedWorkPrefInfo] = useState<
+    Partial<NurseProfile>
+  >({});
 
   // Fetch work experiences helper function
   const fetchWorkExperiences = async () => {
@@ -202,13 +230,16 @@ export default function NurseProfilePage() {
 
         // Fetch education and work experience in parallel
         const [eduRes, workRes] = await Promise.all([
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }),
+          fetch(
+            "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          ),
           fetch(
             "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/get_workExperience",
             {
@@ -233,7 +264,8 @@ export default function NurseProfilePage() {
           const workData = await workRes.json();
           const mapped = workData.map((exp: any) => ({
             id: exp.id,
-            organization_name: exp.organizationName || exp.organization_name || "",
+            organization_name:
+              exp.organizationName || exp.organization_name || "",
             role_title: exp.roleTitle || exp.role_title || "",
             total_years_of_experience:
               exp.totalYearsOfExperience || exp.total_years_of_experience || "",
@@ -253,91 +285,6 @@ export default function NurseProfilePage() {
 
     fetchProfile();
   }, []); // Run only once on mount
-
-  const handleFieldChange = (
-    field: keyof NurseProfile,
-    value: string | string[]
-  ) => {
-    console.log("✏️ Field Changed:", field, "=>", value);
-    setEditedData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleSaveAll = async () => {
-    if (!profile) return;
-
-    setSaving(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("No authentication token found");
-        return;
-      }
-
-      console.log("📝 Saving Profile with Data:", editedData);
-
-      const updatedProfile = { ...profile, ...editedData };
-
-      const apiPayload = {
-        ...updatedProfile,
-        jobTypes: Array.isArray(updatedProfile.jobTypes)
-          ? JSON.stringify(updatedProfile.jobTypes)
-          : updatedProfile.jobTypes,
-        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
-          ? JSON.stringify(updatedProfile.preferredLocations)
-          : updatedProfile.preferredLocations,
-        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
-          ? JSON.stringify(updatedProfile.shiftPreferences)
-          : updatedProfile.shiftPreferences,
-        licenses: Array.isArray(updatedProfile.licenses)
-          ? JSON.stringify(updatedProfile.licenses)
-          : updatedProfile.licenses,
-        certifications: Array.isArray(updatedProfile.certifications)
-          ? JSON.stringify(updatedProfile.certifications)
-          : updatedProfile.certifications,
-      };
-
-      console.log("📦 Final Payload to API:", apiPayload);
-
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiPayload),
-        }
-      );
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Failed to update profile: ${res.status} ${errorText}`);
-      }
-
-      const updatedData = await res.json();
-      console.log("✅ Profile successfully updated:", updatedData);
-
-      setProfile(updatedData);
-      setEditedData({});
-      setIsGlobalEdit(false);
-      alert("Profile updated successfully!");
-    } catch (err: any) {
-      console.error("❌ Save Error:", err);
-      alert(err.message || "Failed to update profile");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    console.log("🚫 Edit cancelled");
-    setEditedData({});
-    setIsGlobalEdit(false);
-  };
 
   const handleImageEdit = async (file: File) => {
     if (!profile) return;
@@ -382,7 +329,337 @@ export default function NurseProfilePage() {
     }
   };
 
-  // EDUCATION FUNCTIONALITY
+  // ==================== BASIC INFO HANDLERS ====================
+  const handleBasicInfoChange = (
+    field: keyof NurseProfile,
+    value: string | string[]
+  ) => {
+    setEditedBasicInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveBasicInfo = async () => {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      const updatedProfile = { ...profile, ...editedBasicInfo };
+      const apiPayload = {
+        ...updatedProfile,
+        jobTypes: Array.isArray(updatedProfile.jobTypes)
+          ? JSON.stringify(updatedProfile.jobTypes)
+          : updatedProfile.jobTypes,
+        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
+          ? JSON.stringify(updatedProfile.preferredLocations)
+          : updatedProfile.preferredLocations,
+        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
+          ? JSON.stringify(updatedProfile.shiftPreferences)
+          : updatedProfile.shiftPreferences,
+        licenses: Array.isArray(updatedProfile.licenses)
+          ? JSON.stringify(updatedProfile.licenses)
+          : updatedProfile.licenses,
+        certifications: Array.isArray(updatedProfile.certifications)
+          ? JSON.stringify(updatedProfile.certifications)
+          : updatedProfile.certifications,
+      };
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiPayload),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update profile");
+      const updatedData = await res.json();
+      setProfile(updatedData);
+      setEditedBasicInfo({});
+      setIsEditingBasicInfo(false);
+      alert("Basic information updated successfully!");
+    } catch (err: any) {
+      console.error("❌ Save Error:", err);
+      alert(err.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelBasicInfo = () => {
+    setEditedBasicInfo({});
+    setIsEditingBasicInfo(false);
+  };
+
+  // ==================== VISA & RESIDENCY HANDLERS ====================
+  const handleVisaInfoChange = (
+    field: keyof NurseProfile,
+    value: string | string[]
+  ) => {
+    setEditedVisaInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveVisaInfo = async () => {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      const updatedProfile = { ...profile, ...editedVisaInfo };
+      const apiPayload = {
+        ...updatedProfile,
+        jobTypes: Array.isArray(updatedProfile.jobTypes)
+          ? JSON.stringify(updatedProfile.jobTypes)
+          : updatedProfile.jobTypes,
+        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
+          ? JSON.stringify(updatedProfile.preferredLocations)
+          : updatedProfile.preferredLocations,
+        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
+          ? JSON.stringify(updatedProfile.shiftPreferences)
+          : updatedProfile.shiftPreferences,
+        licenses: Array.isArray(updatedProfile.licenses)
+          ? JSON.stringify(updatedProfile.licenses)
+          : updatedProfile.licenses,
+        certifications: Array.isArray(updatedProfile.certifications)
+          ? JSON.stringify(updatedProfile.certifications)
+          : updatedProfile.certifications,
+      };
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiPayload),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update profile");
+      const updatedData = await res.json();
+      setProfile(updatedData);
+      setEditedVisaInfo({});
+      setIsEditingVisaResidency(false);
+      alert("Visa & Residency information updated successfully!");
+    } catch (err: any) {
+      console.error("❌ Save Error:", err);
+      alert(err.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelVisaInfo = () => {
+    setEditedVisaInfo({});
+    setIsEditingVisaResidency(false);
+  };
+
+  // ==================== AHPRA REGISTRATION HANDLERS ====================
+  const handleAhpraInfoChange = (
+    field: keyof NurseProfile,
+    value: string | string[]
+  ) => {
+    setEditedAhpraInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveAhpraInfo = async () => {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      const updatedProfile = { ...profile, ...editedAhpraInfo };
+      const apiPayload = {
+        ...updatedProfile,
+        jobTypes: Array.isArray(updatedProfile.jobTypes)
+          ? JSON.stringify(updatedProfile.jobTypes)
+          : updatedProfile.jobTypes,
+        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
+          ? JSON.stringify(updatedProfile.preferredLocations)
+          : updatedProfile.preferredLocations,
+        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
+          ? JSON.stringify(updatedProfile.shiftPreferences)
+          : updatedProfile.shiftPreferences,
+        licenses: Array.isArray(updatedProfile.licenses)
+          ? JSON.stringify(updatedProfile.licenses)
+          : updatedProfile.licenses,
+        certifications: Array.isArray(updatedProfile.certifications)
+          ? JSON.stringify(updatedProfile.certifications)
+          : updatedProfile.certifications,
+      };
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiPayload),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update AHPRA registration");
+      const updatedData = await res.json();
+      setProfile(updatedData);
+      setEditedAhpraInfo({});
+      setIsEditingAhpraReg(false);
+      alert("AHPRA registration updated successfully!");
+    } catch (err: any) {
+      console.error("❌ Save Error:", err);
+      alert(err.message || "Failed to update AHPRA registration");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelAhpraInfo = () => {
+    setEditedAhpraInfo({});
+    setIsEditingAhpraReg(false);
+  };
+
+  // ==================== CERTIFICATIONS HANDLERS ====================
+  const handleCertInfoChange = (
+    field: keyof NurseProfile,
+    value: string | string[]
+  ) => {
+    setEditedCertInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveCertInfo = async () => {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      const updatedProfile = { ...profile, ...editedCertInfo };
+      const apiPayload = {
+        ...updatedProfile,
+        jobTypes: Array.isArray(updatedProfile.jobTypes)
+          ? JSON.stringify(updatedProfile.jobTypes)
+          : updatedProfile.jobTypes,
+        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
+          ? JSON.stringify(updatedProfile.preferredLocations)
+          : updatedProfile.preferredLocations,
+        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
+          ? JSON.stringify(updatedProfile.shiftPreferences)
+          : updatedProfile.shiftPreferences,
+        licenses: Array.isArray(updatedProfile.licenses)
+          ? JSON.stringify(updatedProfile.licenses)
+          : updatedProfile.licenses,
+        certifications: Array.isArray(updatedProfile.certifications)
+          ? JSON.stringify(updatedProfile.certifications)
+          : updatedProfile.certifications,
+      };
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiPayload),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update certifications");
+      const updatedData = await res.json();
+      setProfile(updatedData);
+      setEditedCertInfo({});
+      setIsEditingCertifications(false);
+      alert("Certifications updated successfully!");
+    } catch (err: any) {
+      console.error("❌ Save Error:", err);
+      alert(err.message || "Failed to update certifications");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelCertInfo = () => {
+    setEditedCertInfo({});
+    setIsEditingCertifications(false);
+  };
+
+  // ==================== WORK PREFERENCES HANDLERS ====================
+  const handleWorkPrefChange = (
+    field: keyof NurseProfile,
+    value: string | string[]
+  ) => {
+    setEditedWorkPrefInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveWorkPref = async () => {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No authentication token found");
+
+      const updatedProfile = { ...profile, ...editedWorkPrefInfo };
+      const apiPayload = {
+        ...updatedProfile,
+        jobTypes: Array.isArray(updatedProfile.jobTypes)
+          ? JSON.stringify(updatedProfile.jobTypes)
+          : updatedProfile.jobTypes,
+        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
+          ? JSON.stringify(updatedProfile.preferredLocations)
+          : updatedProfile.preferredLocations,
+        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
+          ? JSON.stringify(updatedProfile.shiftPreferences)
+          : updatedProfile.shiftPreferences,
+        licenses: Array.isArray(updatedProfile.licenses)
+          ? JSON.stringify(updatedProfile.licenses)
+          : updatedProfile.licenses,
+        certifications: Array.isArray(updatedProfile.certifications)
+          ? JSON.stringify(updatedProfile.certifications)
+          : updatedProfile.certifications,
+      };
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiPayload),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update work preferences");
+      const updatedData = await res.json();
+      setProfile(updatedData);
+      setEditedWorkPrefInfo({});
+      setIsEditingWorkPreferences(false);
+      alert("Work preferences updated successfully!");
+    } catch (err: any) {
+      console.error("❌ Save Error:", err);
+      alert(err.message || "Failed to update work preferences");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelWorkPref = () => {
+    setEditedWorkPrefInfo({});
+    setIsEditingWorkPreferences(false);
+  };
+
+  // ==================== EDUCATION FUNCTIONALITY ====================
   const handleAddEducation = async (education: Education) => {
     try {
       const token = localStorage.getItem("token");
@@ -443,7 +720,6 @@ export default function NurseProfilePage() {
     }
   };
 
-
   const handleDeleteEducation = async (degree_name: string) => {
     try {
       const token = localStorage.getItem("token");
@@ -469,7 +745,9 @@ export default function NurseProfilePage() {
 
       if (!education_id) {
         console.error("❌ Education ID not found for degree:", degree_name);
-        alert("Could not find education ID. Make sure the degree name matches exactly.");
+        alert(
+          "Could not find education ID. Make sure the degree name matches exactly."
+        );
         return;
       }
 
@@ -499,7 +777,7 @@ export default function NurseProfilePage() {
     }
   };
 
-  // WORK EXPERIENCE FUNCTIONALITY
+  // ==================== WORK EXPERIENCE FUNCTIONALITY ====================
   const handleAddWorkExperience = async (experience: WorkExperience) => {
     try {
       const token = localStorage.getItem("token");
@@ -559,7 +837,6 @@ export default function NurseProfilePage() {
       throw err;
     }
   };
-
 
   const handleDeleteWorkExperience = async (experience: WorkExperience) => {
     try {
@@ -648,56 +925,55 @@ export default function NurseProfilePage() {
   const shiftPreferencesArray = renderArray(profile.shiftPreferences);
   const certificationsArray = renderArray(profile.certifications);
 
+  // ==================== RETURN STATEMENT STARTS HERE ====================
+
   return (
-
-
     <div className="min-h-screen bg-[#F5F6FA] ">
       <Navbar />
       <div className="container mx-auto mt-5 ">
-        {/* Profile Picture & Basic Information */}
+        {/* Basic Information Section */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-5">
           {/* Section Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <User className="w-6 h-6 text-blue-400" />
               <h2 className="text-lg font-semibold text-gray-800">
-                Profile Picture & Basic Information
+                Basic Information
               </h2>
             </div>
 
-            {!isGlobalEdit ? (
-              <button
-                onClick={() => setIsGlobalEdit(true)}
-                className="group flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg transition-all duration-300 overflow-hidden"
+            {!isEditingBasicInfo ? (
+              <MainButton
+                onClick={() => setIsEditingBasicInfo(true)}
+                className="group flex items-center gap-2 px-4  text-black rounded-lg transition-all duration-300"
               >
-                <Edit className="w-4 h-4" />
-                <span className="flex items-center gap-2">
-                  <span className="transition-all duration-300 group-hover:-translate-x-1">
-                    Edit Profile
-                  </span>
-                  <ArrowRight
-                    className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                    strokeWidth={3}
-                  />
-                </span>
-              </button>) : (
+                <span>Edit</span>
+              </MainButton>
+            ) : (
               <div className="flex gap-2">
-                <button
-                  onClick={handleCancelEdit}
+                <MainButton
+                  onClick={handleCancelBasicInfo}
                   disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  className="group px-4 py-2 flex items-center justify-center border border-blue-400 rounded-lg text-blue-400 font-medium text-sm transition-all duration-300 overflow-hidden disabled:opacity-50"
                 >
-                  <X className="w-4 h-4" />
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveAll}
+                  <span className="flex items-center gap-2">
+                    <span className="transition-all duration-300 group-hover:-translate-x-1">
+                      Cancel
+                    </span>
+                  </span>
+                </MainButton>
+
+                <MainButton
+                  onClick={handleSaveBasicInfo}
                   disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50"
+                  className="group px-4 py-2 min-w-[80px] flex items-center justify-center border border-blue-400 rounded-lg text-blue-400 font-medium text-sm transition-all duration-300 overflow-hidden disabled:opacity-50"
                 >
-                  <Save className="w-4 h-4" />
-                  {saving ? "Saving..." : "Save Changes"}
-                </button>
+                  <span className="flex items-center gap-2">
+                    <span className="transition-all duration-300 group-hover:-translate-x-1">
+                      {saving ? "Saving..." : "Save"}
+                    </span>
+                  </span>
+                </MainButton>
               </div>
             )}
           </div>
@@ -723,18 +999,21 @@ export default function NurseProfilePage() {
                 )}
               </div>
 
-              <label className="mt-3 bg-white border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
-                <Edit className="w-4 h-4" />
-                Upload/Change Picture
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) handleImageEdit(e.target.files[0]);
-                  }}
-                />
-              </label>
+              {isEditingBasicInfo && (
+                <label className="mt-3 bg-white border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
+                  <Edit className="w-4 h-4" />
+                  Upload/Change Picture
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.[0])
+                        handleImageEdit(e.target.files[0]);
+                    }}
+                  />
+                </label>
+              )}
             </div>
 
             {/* Basic Info Grid */}
@@ -743,12 +1022,14 @@ export default function NurseProfilePage() {
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
                   Full Name
                 </label>
-                {isGlobalEdit ? (
+                {isEditingBasicInfo ? (
                   <input
                     type="text"
-                    value={editedData.fullName ?? profile.fullName}
-                    onChange={(e) => handleFieldChange("fullName", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    value={editedBasicInfo.fullName ?? profile.fullName}
+                    onChange={(e) =>
+                      handleBasicInfoChange("fullName", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   />
                 ) : (
                   <p className="text-gray-900">{profile.fullName}</p>
@@ -766,12 +1047,14 @@ export default function NurseProfilePage() {
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
                   Phone Number
                 </label>
-                {isGlobalEdit ? (
+                {isEditingBasicInfo ? (
                   <input
                     type="text"
-                    value={editedData.phoneNumber ?? profile.phoneNumber}
-                    onChange={(e) => handleFieldChange("phoneNumber", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    value={editedBasicInfo.phoneNumber ?? profile.phoneNumber}
+                    onChange={(e) =>
+                      handleBasicInfoChange("phoneNumber", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   />
                 ) : (
                   <p className="text-gray-900">{profile.phoneNumber}</p>
@@ -782,20 +1065,25 @@ export default function NurseProfilePage() {
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
                   Current Location
                 </label>
-                {isGlobalEdit ? (
+                {isEditingBasicInfo ? (
                   <input
                     type="text"
                     value={
-                      editedData.currentResidentialLocation ??
+                      editedBasicInfo.currentResidentialLocation ??
                       profile.currentResidentialLocation
                     }
                     onChange={(e) =>
-                      handleFieldChange("currentResidentialLocation", e.target.value)
+                      handleBasicInfoChange(
+                        "currentResidentialLocation",
+                        e.target.value
+                      )
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   />
                 ) : (
-                  <p className="text-gray-900">{profile.currentResidentialLocation}</p>
+                  <p className="text-gray-900">
+                    {profile.currentResidentialLocation}
+                  </p>
                 )}
               </div>
 
@@ -803,12 +1091,14 @@ export default function NurseProfilePage() {
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
                   Postcode
                 </label>
-                {isGlobalEdit ? (
+                {isEditingBasicInfo ? (
                   <input
                     type="text"
-                    value={editedData.postcode ?? profile.postcode}
-                    onChange={(e) => handleFieldChange("postcode", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    value={editedBasicInfo.postcode ?? profile.postcode}
+                    onChange={(e) =>
+                      handleBasicInfoChange("postcode", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   />
                 ) : (
                   <p className="text-gray-900">
@@ -821,13 +1111,16 @@ export default function NurseProfilePage() {
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
                   Willing to Relocate
                 </label>
-                {isGlobalEdit ? (
+                {isEditingBasicInfo ? (
                   <select
-                    value={editedData.willingToRelocate ?? profile.willingToRelocate}
-                    onChange={(e) =>
-                      handleFieldChange("willingToRelocate", e.target.value)
+                    value={
+                      editedBasicInfo.willingToRelocate ??
+                      profile.willingToRelocate
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    onChange={(e) =>
+                      handleBasicInfoChange("willingToRelocate", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   >
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -840,117 +1133,162 @@ export default function NurseProfilePage() {
           </div>
         </div>
 
-
-
-
         {/* Visa & Residency */}
         <CollapsibleSection
           title="Visa & Residency"
           icon={<Shield className="w-6 h-6 text-blue-400" />}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Residency / Visa Status
-              </label>
-              {isGlobalEdit ? (
-                <input
-                  type="text"
-                  value={editedData.residencyStatus ?? profile.residencyStatus}
-                  onChange={(e) =>
-                    handleFieldChange("residencyStatus", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              ) : (
-                <p className="text-gray-900">{profile.residencyStatus}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Visa Type
-              </label>
-              {isGlobalEdit ? (
-                <input
-                  type="text"
-                  value={editedData.visaType ?? profile.visaType}
-                  onChange={(e) =>
-                    handleFieldChange("visaType", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              ) : (
-                <p className="text-gray-900">
-                  {profile.visaType || "Not specified"}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Visa Expiry
-              </label>
-              {isGlobalEdit ? (
-                <input
-                  type="date"
-                  value={editedData.visaExpiry ?? profile.visaExpiry}
-                  onChange={(e) =>
-                    handleFieldChange("visaExpiry", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              ) : (
-                <p className="text-gray-900">
-                  {profile.visaExpiry || "Not specified"}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Work Restriction
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value={
-                    editedData.workHoursRestricted ??
-                    profile.workHoursRestricted
-                  }
-                  onChange={(e) =>
-                    handleFieldChange("workHoursRestricted", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+          <div className="space-y-6">
+            {/* Edit Button */}
+            <div className="flex justify-end">
+              {!isEditingVisaResidency ? (
+                <MainButton
+                  onClick={() => setIsEditingVisaResidency(true)}
+                  className="flex items-center gap-2 px-4 text-black rounded-lg  transition-colors"
                 >
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
+                  <span>Edit</span>
+                </MainButton>
               ) : (
-                <p className="text-gray-900">{profile.workHoursRestricted}</p>
+                <div className="flex gap-2">
+                  <MainButton onClick={handleCancelVisaInfo} disabled={saving}>
+                    <span className="flex items-center gap-2">
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        Cancel
+                      </span>
+                    </span>
+                  </MainButton>
+
+                  <MainButton onClick={handleSaveVisaInfo} disabled={saving}>
+                    <span className="flex items-center gap-2">
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        {saving ? "Saving..." : "Save"}
+                      </span>
+                    </span>
+                  </MainButton>
+                </div>
               )}
             </div>
 
-            {profile.workHoursRestricted === "Yes" && (
+            {/* Visa & Residency Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Work Restriction Details
+                  Residency / Visa Status
                 </label>
-                {isGlobalEdit ? (
+                {isEditingVisaResidency ? (
                   <input
                     type="text"
-                    value={editedData.maxWorkHours ?? profile.maxWorkHours}
-                    onChange={(e) =>
-                      handleFieldChange("maxWorkHours", e.target.value)
+                    value={
+                      editedVisaInfo.residencyStatus ?? profile.residencyStatus
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    onChange={(e) =>
+                      handleVisaInfoChange("residencyStatus", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   />
                 ) : (
                   <p className="text-gray-900">
-                    {profile.maxWorkHours || "Not specified"}
+                    {profile.residencyStatus || "Not specified"}
                   </p>
                 )}
               </div>
-            )}
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Visa Type
+                </label>
+                {isEditingVisaResidency ? (
+                  <input
+                    type="text"
+                    value={editedVisaInfo.visaType ?? profile.visaType}
+                    onChange={(e) =>
+                      handleVisaInfoChange("visaType", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  />
+                ) : (
+                  <p className="text-gray-900">
+                    {profile.visaType || "Not specified"}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Visa Expiry
+                </label>
+                {isEditingVisaResidency ? (
+                  <input
+                    type="date"
+                    value={editedVisaInfo.visaExpiry ?? profile.visaExpiry}
+                    onChange={(e) =>
+                      handleVisaInfoChange("visaExpiry", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  />
+                ) : (
+                  <p className="text-gray-900">
+                    {profile.visaExpiry || "Not specified"}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Work Restriction
+                </label>
+                {isEditingVisaResidency ? (
+                  <select
+                    value={
+                      editedVisaInfo.workHoursRestricted ??
+                      profile.workHoursRestricted
+                    }
+                    onChange={(e) =>
+                      handleVisaInfoChange(
+                        "workHoursRestricted",
+                        e.target.value
+                      )
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  >
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                ) : (
+                  <p className="text-gray-900">
+                    {profile.workHoursRestricted || "Not specified"}
+                  </p>
+                )}
+              </div>
+
+              {((isEditingVisaResidency &&
+                editedVisaInfo.workHoursRestricted === "Yes") ||
+                (!isEditingVisaResidency &&
+                  profile.workHoursRestricted === "Yes")) && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Work Restriction Details
+                  </label>
+                  {isEditingVisaResidency ? (
+                    <input
+                      type="text"
+                      value={
+                        editedVisaInfo.maxWorkHours ?? profile.maxWorkHours
+                      }
+                      onChange={(e) =>
+                        handleVisaInfoChange("maxWorkHours", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                      placeholder="e.g., 20 hours per week"
+                    />
+                  ) : (
+                    <p className="text-gray-900">
+                      {profile.maxWorkHours || "Not specified"}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </CollapsibleSection>
 
@@ -959,70 +1297,116 @@ export default function NurseProfilePage() {
           title="AHPRA Registration"
           icon={<Award className="w-6 h-6 text-blue-400" />}
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                AHPRA Registration
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value={
-                    editedData.ahpraRegistration ?? profile.ahpraRegistration
-                  }
-                  onChange={(e) =>
-                    handleFieldChange("ahpraRegistration", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+          <div className="space-y-6">
+            {/* Edit Button */}
+            <div className="flex justify-end">
+              {!isEditingAhpraReg ? (
+                <MainButton
+                  onClick={() => setIsEditingAhpraReg(true)}
+                  className="flex items-center gap-2 px-4 text-black rounded-lg  transition-colors"
                 >
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
+                  <span>Edit</span>
+                </MainButton>
               ) : (
-                <p className="text-gray-900">{profile.ahpraRegistration}</p>
+                <div className="flex gap-2">
+                  <MainButton onClick={handleCancelAhpraInfo} disabled={saving}>
+                    <span className="flex items-center gap-2">
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        Cancel
+                      </span>
+                    </span>
+                  </MainButton>
+
+                  <MainButton onClick={handleSaveAhpraInfo} disabled={saving}>
+                    <span className="flex items-center gap-2">
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        {saving ? "Saving..." : "Save"}
+                      </span>
+                    </span>
+                  </MainButton>
+                </div>
               )}
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                AHPRA Registration Number
-              </label>
-              {isGlobalEdit ? (
-                <input
-                  type="text"
-                  value={
-                    editedData.registrationNumber ?? profile.registrationNumber
-                  }
-                  onChange={(e) =>
-                    handleFieldChange("registrationNumber", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              ) : (
-                <p className="text-gray-900">{profile.registrationNumber}</p>
-              )}
-            </div>
+            {/* AHPRA Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  AHPRA Registration
+                </label>
+                {isEditingAhpraReg ? (
+                  <select
+                    value={
+                      editedAhpraInfo.ahpraRegistration ??
+                      profile.ahpraRegistration
+                    }
+                    onChange={(e) =>
+                      handleAhpraInfoChange("ahpraRegistration", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  >
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                ) : (
+                  <p className="text-gray-900">
+                    {profile.ahpraRegistration || "Not specified"}
+                  </p>
+                )}
+              </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Registration Expiry
-              </label>
-              {isGlobalEdit ? (
-                <input
-                  type="date"
-                  value={
-                    editedData.ahprRegistrationExpiry ??
-                    profile.ahprRegistrationExpiry
-                  }
-                  onChange={(e) =>
-                    handleFieldChange("ahprRegistrationExpiry", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              ) : (
-                <p className="text-gray-900">
-                  {profile.ahprRegistrationExpiry}
-                </p>
-              )}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  AHPRA Registration Number
+                </label>
+                {isEditingAhpraReg ? (
+                  <input
+                    type="text"
+                    value={
+                      editedAhpraInfo.registrationNumber ??
+                      profile.registrationNumber
+                    }
+                    onChange={(e) =>
+                      handleAhpraInfoChange(
+                        "registrationNumber",
+                        e.target.value
+                      )
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    placeholder="Enter registration number"
+                  />
+                ) : (
+                  <p className="text-gray-900">
+                    {profile.registrationNumber || "Not specified"}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Registration Expiry
+                </label>
+                {isEditingAhpraReg ? (
+                  <input
+                    type="date"
+                    value={
+                      editedAhpraInfo.ahprRegistrationExpiry ??
+                      profile.ahprRegistrationExpiry
+                    }
+                    onChange={(e) =>
+                      handleAhpraInfoChange(
+                        "ahprRegistrationExpiry",
+                        e.target.value
+                      )
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  />
+                ) : (
+                  <p className="text-gray-900">
+                    {profile.ahprRegistrationExpiry || "Not specified"}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </CollapsibleSection>
@@ -1053,13 +1437,11 @@ export default function NurseProfilePage() {
                       <div className="flex items-center gap-2">
                         {!isEditingThis ? (
                           <>
-                            <button
+                            <MainButton
                               onClick={() => setIsEditingEducation(index)}
-                              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
                             >
-                              <Edit className="w-4 h-4" />
                               Edit
-                            </button>
+                            </MainButton>
                             <button
                               onClick={() => {
                                 if (
@@ -1070,21 +1452,23 @@ export default function NurseProfilePage() {
                                   handleDeleteEducation(edu.degree_name);
                                 }
                               }}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-2 text-blue-400 hover:bg-blue-50 rounded-lg transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </>
                         ) : (
                           <>
-                            <button
+                            <MainButton
                               onClick={() => setIsEditingEducation(null)}
-                              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                             >
-                              <X className="w-4 h-4" />
-                              Cancel
-                            </button>
-                            <button
+                              <span className="flex items-center gap-2">
+                                <span className="transition-all duration-300 group-hover:-translate-x-1">
+                                  Cancel
+                                </span>
+                              </span>
+                            </MainButton>
+                            <MainButton
                               onClick={async () => {
                                 try {
                                   if (edu.id) {
@@ -1098,11 +1482,11 @@ export default function NurseProfilePage() {
                                   console.error("Save failed:", err);
                                 }
                               }}
-                              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
                             >
-                              <Save className="w-4 h-4" />
-                              Save
-                            </button>
+                              <span className="transition-all duration-300 group-hover:-translate-x-1">
+                                Save
+                              </span>
+                            </MainButton>
                           </>
                         )}
                       </div>
@@ -1113,7 +1497,7 @@ export default function NurseProfilePage() {
                       <div className="space-y-3">
                         <div className="flex items-start">
                           <span className="text-sm font-medium text-gray-600 w-40">
-                            Highest Qualification:
+                            Qualification:
                           </span>
                           <span className="text-sm text-gray-600 font-medium">
                             {edu.degree_name || "N/A"}
@@ -1149,7 +1533,7 @@ export default function NurseProfilePage() {
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                           <label className="text-sm font-medium text-gray-700 mb-1 block">
-                            Highest Qualification
+                            Qualification
                           </label>
                           <input
                             type="text"
@@ -1217,7 +1601,7 @@ export default function NurseProfilePage() {
               })
             )}
 
-            <button
+            <MainButton
               onClick={() => {
                 setEducationList([
                   ...educationList,
@@ -1228,17 +1612,19 @@ export default function NurseProfilePage() {
                     to_year: "",
                   },
                 ]);
-                setIsEditingEducation(educationList.length); // Auto-edit the new entry
+                setIsEditingEducation(educationList.length);
               }}
-              className="flex items-center gap-2 px-4 py-2 text-blue-400 border border-blue-400 rounded-lg hover:bg-blue-50 transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              Add Education
-            </button>
+              <span className="flex items-center gap-2 py-1 px-1">
+                {" "}
+                <span className="transition-all duration-300 group-hover:-translate-x-1">
+                  {" "}
+                  Add Education{" "}
+                </span>{" "}
+              </span>
+            </MainButton>
           </div>
         </CollapsibleSection>
-
-
 
         {/* Work Experience */}
         <CollapsibleSection
@@ -1266,13 +1652,11 @@ export default function NurseProfilePage() {
                       <div className="flex items-center gap-2">
                         {!isEditingThis ? (
                           <>
-                            <button
+                            <MainButton
                               onClick={() => setIsEditingWorkExperience(index)}
-                              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
                             >
-                              <Edit className="w-4 h-4" />
                               Edit
-                            </button>
+                            </MainButton>
                             <button
                               onClick={async () => {
                                 if (
@@ -1283,21 +1667,25 @@ export default function NurseProfilePage() {
                                   await handleDeleteWorkExperience(exp);
                                 }
                               }}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-2 text-blue-400 hover:bg-blue-50 rounded-lg transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </>
                         ) : (
                           <>
-                            <button
+                            <MainButton
                               onClick={() => setIsEditingWorkExperience(null)}
-                              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                             >
-                              <X className="w-4 h-4" />
-                              Cancel
-                            </button>
-                            <button
+                              <span className="flex items-center gap-2">
+                                {" "}
+                                <span className="transition-all duration-300 group-hover:-translate-x-1">
+                                  {" "}
+                                  Cancel{" "}
+                                </span>{" "}
+                              </span>
+                            </MainButton>
+                            <MainButton
                               onClick={async () => {
                                 try {
                                   if (exp.id) {
@@ -1312,11 +1700,12 @@ export default function NurseProfilePage() {
                                   console.error("Save failed:", err);
                                 }
                               }}
-                              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
                             >
-                              <Save className="w-4 h-4" />
-                              Save
-                            </button>
+                              <span className="transition-all duration-300 group-hover:-translate-x-1">
+                                {" "}
+                                Save{" "}
+                              </span>
+                            </MainButton>
                           </>
                         )}
                       </div>
@@ -1410,7 +1799,8 @@ export default function NurseProfilePage() {
                             value={exp.total_years_of_experience}
                             onChange={(e) => {
                               const newList = [...workExperienceList];
-                              newList[index].total_years_of_experience = e.target.value;
+                              newList[index].total_years_of_experience =
+                                e.target.value;
                               setWorkExperienceList(newList);
                             }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -1455,7 +1845,7 @@ export default function NurseProfilePage() {
               })
             )}
 
-            <button
+            <MainButton
               onClick={() => {
                 setWorkExperienceList([
                   ...workExperienceList,
@@ -1467,16 +1857,19 @@ export default function NurseProfilePage() {
                     end_date: "",
                   },
                 ]);
-                setIsEditingWorkExperience(workExperienceList.length); // Auto-edit the new entry
+                setIsEditingWorkExperience(workExperienceList.length);
               }}
-              className="flex items-center gap-2 px-4 py-2 text-blue-500 border border-blue-500 rounded-lg hover:bg-blue-50 transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              Add Experience
-            </button>
+              <span className="flex items-center gap-2 py-1 px-1">
+                {" "}
+                <span className="transition-all duration-300 group-hover:-translate-x-1">
+                  {" "}
+                  Add Experience{" "}
+                </span>{" "}
+              </span>
+            </MainButton>
           </div>
         </CollapsibleSection>
-
 
         {/* Certifications */}
         <CollapsibleSection
@@ -1486,37 +1879,45 @@ export default function NurseProfilePage() {
           <div className="space-y-4">
             {/* Edit Button */}
             <div className="flex justify-end">
-              {!isGlobalEdit ? (
+              {!isEditingCertifications ? (
                 <button
-                  onClick={() => setIsGlobalEdit(true)}
-                  className="flex items-center gap-2 px-4 py-2  rounded-lg  transition-colors"
+                  onClick={() => setIsEditingCertifications(true)}
+                  className="relative group flex items-center justify-center px-4 py-1 min-w-[80px] border border-blue-400 rounded-lg overflow-hidden transition-colors duration-300 text-blue-400 hover:text-blue-400"
                 >
-                  <Edit className="w-4 h-4 text-black" />
+                  {/* Button text */}
+                  <span className="relative z-10 transition-all duration-300 group-hover:-translate-x-2">
+                    Edit
+                  </span>
+
+                  {/* Arrow overlay */}
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 transform translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 text-blue-400 group-hover:text-blue-400">
+                    <ArrowRight className="w-4 h-4" strokeWidth={3} />
+                  </span>
                 </button>
               ) : (
                 <div className="flex gap-2">
                   <button
-                    onClick={handleCancelEdit}
+                    onClick={handleCancelCertInfo}
                     disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
                   >
                     <X className="w-4 h-4" />
                     Cancel
                   </button>
                   <button
-                    onClick={handleSaveAll}
+                    onClick={handleSaveCertInfo}
                     disabled={saving}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50"
                   >
                     <Save className="w-4 h-4" />
-                    {saving ? "Saving..." : "Save Changes"}
+                    {saving ? "Saving..." : "Save"}
                   </button>
                 </div>
               )}
             </div>
 
             {/* Certification Selection */}
-            {isGlobalEdit && (
+            {isEditingCertifications && (
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Add Certification
@@ -1525,33 +1926,41 @@ export default function NurseProfilePage() {
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value) {
-                      // Get current certifications from editedData or profile
-                      const currentCerts = editedData.certifications
-                        ? (Array.isArray(editedData.certifications)
-                          ? editedData.certifications
-                          : parseValues(editedData.certifications))
+                      // Get current certifications from editedCertInfo or profile
+                      const currentCerts = editedCertInfo.certifications
+                        ? Array.isArray(editedCertInfo.certifications)
+                          ? editedCertInfo.certifications
+                          : parseValues(editedCertInfo.certifications)
                         : certificationsArray;
 
                       // Check if certification already exists
                       if (!currentCerts.includes(value)) {
                         const updatedCerts = [...currentCerts, value];
-                        handleFieldChange("certifications", updatedCerts);
+                        handleCertInfoChange("certifications", updatedCerts);
                       }
 
                       // Reset select value
                       e.target.value = "";
                     }
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                 >
-                  <option value="">Select a certification </option>
+                  <option value="">Select a certification</option>
                   <option value="AHPRA Registration">AHPRA Registration</option>
-                  <option value="Police Check Certificate">Police Check Certificate</option>
-                  <option value="Working with Children Check">Working with Children Check</option>
+                  <option value="Police Check Certificate">
+                    Police Check Certificate
+                  </option>
+                  <option value="Working with Children Check">
+                    Working with Children Check
+                  </option>
                   <option value="First Aid/CPR">First Aid/CPR</option>
                   <option value="Manual Handling">Manual Handling</option>
-                  <option value="Vaccination / Immunisation">Vaccination / Immunisation</option>
-                  <option value="NDIS Worker Screening">NDIS Worker Screening</option>
+                  <option value="Vaccination / Immunisation">
+                    Vaccination / Immunisation
+                  </option>
+                  <option value="NDIS Worker Screening">
+                    NDIS Worker Screening
+                  </option>
                 </select>
               </div>
             )}
@@ -1559,35 +1968,37 @@ export default function NurseProfilePage() {
             {/* Display Selected Certifications */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">
-                {isGlobalEdit ? "Selected Certifications" : "Certifications"}
+                {isEditingCertifications
+                  ? "Selected Certifications"
+                  : "Certifications"}
               </label>
               <div className="flex flex-wrap gap-2">
                 {(() => {
                   // Get the current certification list based on edit state
-                  const currentCerts = isGlobalEdit && editedData.certifications
-                    ? (Array.isArray(editedData.certifications)
-                      ? editedData.certifications
-                      : parseValues(editedData.certifications))
-                    : certificationsArray;
+                  const currentCerts =
+                    isEditingCertifications && editedCertInfo.certifications
+                      ? Array.isArray(editedCertInfo.certifications)
+                        ? editedCertInfo.certifications
+                        : parseValues(editedCertInfo.certifications)
+                      : certificationsArray;
 
                   return currentCerts && currentCerts.length > 0 ? (
                     currentCerts.map((cert, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-500 rounded-lg text-sm font-medium border border-blue-200"
+                        className="flex items-center gap-2 px-3 py-2  rounded-lg text-sm font-medium "
                       >
-                        <Award className="w-4 h-4" />
                         <span>{cert}</span>
-                        {isGlobalEdit && (
+                        {isEditingCertifications && (
                           <button
                             type="button"
                             onClick={() => {
                               const newCerts = currentCerts.filter(
                                 (item) => item !== cert
                               );
-                              handleFieldChange("certifications", newCerts);
+                              handleCertInfoChange("certifications", newCerts);
                             }}
-                            className="text-red-500 hover:text-red-700 transition-colors ml-1"
+                            className="text-blue-400 hover: transition-colors ml-1"
                             aria-label={`Remove ${cert}`}
                           >
                             <X className="w-4 h-4" />
@@ -1597,7 +2008,7 @@ export default function NurseProfilePage() {
                     ))
                   ) : (
                     <p className="text-gray-400 text-sm italic py-2">
-                      {isGlobalEdit
+                      {isEditingCertifications
                         ? "No certifications added yet. Select from dropdown above."
                         : "No certifications specified"}
                     </p>
@@ -1608,10 +2019,7 @@ export default function NurseProfilePage() {
           </div>
         </CollapsibleSection>
 
-
-
         {/* Work Preferences */}
-
         <CollapsibleSection
           title="Work Preferences"
           icon={<Clock className="w-6 h-6 text-blue-400" />}
@@ -1619,32 +2027,24 @@ export default function NurseProfilePage() {
           <div className="space-y-6">
             {/* Edit Button */}
             <div className="flex justify-end">
-              {!isGlobalEdit ? (
-                <button
-                  onClick={() => setIsGlobalEdit(true)}
-                  className="flex items-center gap-2 px-4 py-2  rounded-lg  transition-colors"
-
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
+              {!isEditingWorkPreferences ? (
+                <MainButton onClick={() => setIsEditingWorkPreferences(true)}>
+                  <span>Edit</span>
+                </MainButton>
               ) : (
                 <div className="flex gap-2">
-                  <button
-                    onClick={handleCancelEdit}
-                    disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveAll}
-                    disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50"
-                  >
-                    <Save className="w-4 h-4" />
-                    {saving ? "Saving..." : "Save Changes"}
-                  </button>
+                  <MainButton onClick={handleCancelWorkPref} disabled={saving}>
+                    <span className="flex items-center gap-2">
+                      {" "}
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        {" "}
+                        Cancel{" "}
+                      </span>{" "}
+                    </span>
+                  </MainButton>
+                  <MainButton onClick={handleSaveWorkPref} disabled={saving}>
+                    {saving ? "Saving..." : "Save"}
+                  </MainButton>
                 </div>
               )}
             </div>
@@ -1653,29 +2053,34 @@ export default function NurseProfilePage() {
               {/* Preferred Job Type */}
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  {isGlobalEdit ? "Add Preferred Job Type" : "Preferred Job Type"}
+                  {isEditingWorkPreferences
+                    ? "Add Preferred Job Type"
+                    : "Preferred Job Type"}
                 </label>
 
-                {isGlobalEdit && (
+                {isEditingWorkPreferences && (
                   <select
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value) {
-                        const currentJobTypes = editedData.jobTypes
-                          ? (Array.isArray(editedData.jobTypes)
-                            ? editedData.jobTypes
-                            : parseValues(editedData.jobTypes))
+                        const currentJobTypes = editedWorkPrefInfo.jobTypes
+                          ? Array.isArray(editedWorkPrefInfo.jobTypes)
+                            ? editedWorkPrefInfo.jobTypes
+                            : parseValues(editedWorkPrefInfo.jobTypes)
                           : jobTypesArray;
 
                         if (!currentJobTypes.includes(value)) {
-                          handleFieldChange("jobTypes", [...currentJobTypes, value]);
+                          handleWorkPrefChange("jobTypes", [
+                            ...currentJobTypes,
+                            value,
+                          ]);
                         }
                         e.target.value = "";
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   >
-                    <option value="">Select job type </option>
+                    <option value="">Select job type</option>
                     <option value="Full time">Full time</option>
                     <option value="Part time">Part time</option>
                     <option value="Casual">Casual</option>
@@ -1686,28 +2091,29 @@ export default function NurseProfilePage() {
 
                 <div className="flex flex-wrap gap-2 mt-3">
                   {(() => {
-                    const currentJobTypes = isGlobalEdit && editedData.jobTypes
-                      ? (Array.isArray(editedData.jobTypes)
-                        ? editedData.jobTypes
-                        : parseValues(editedData.jobTypes))
-                      : jobTypesArray;
+                    const currentJobTypes =
+                      isEditingWorkPreferences && editedWorkPrefInfo.jobTypes
+                        ? Array.isArray(editedWorkPrefInfo.jobTypes)
+                          ? editedWorkPrefInfo.jobTypes
+                          : parseValues(editedWorkPrefInfo.jobTypes)
+                        : jobTypesArray;
 
                     return currentJobTypes && currentJobTypes.length > 0 ? (
                       currentJobTypes.map((type, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center gap-2 px-3 py-2  text-black  text-sm font-medium "
+                          className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200"
                         >
                           <span>{type}</span>
-                          {isGlobalEdit && (
+                          {isEditingWorkPreferences && (
                             <button
                               onClick={() => {
                                 const newTypes = currentJobTypes.filter(
                                   (item) => item !== type
                                 );
-                                handleFieldChange("jobTypes", newTypes);
+                                handleWorkPrefChange("jobTypes", newTypes);
                               }}
-                              className="text-red-500 hover:text-red-700 transition-colors ml-1"
+                              className="text-blue-500 transition-colors ml-1"
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -1716,8 +2122,8 @@ export default function NurseProfilePage() {
                       ))
                     ) : (
                       <p className="text-gray-400 text-sm italic py-2">
-                        {isGlobalEdit
-                          ? "No job types added yet. Select at least one location."
+                        {isEditingWorkPreferences
+                          ? "No job types added yet. Select at least one."
                           : "No job types specified"}
                       </p>
                     );
@@ -1730,49 +2136,61 @@ export default function NurseProfilePage() {
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Open to Other Job Types
                 </label>
-                {isGlobalEdit ? (
+                {isEditingWorkPreferences ? (
                   <select
-                    value={editedData.openToOtherTypes ?? profile.openToOtherTypes ?? ""}
-                    onChange={(e) =>
-                      handleFieldChange("openToOtherTypes", e.target.value)
+                    value={
+                      editedWorkPrefInfo.openToOtherTypes ??
+                      profile.openToOtherTypes ??
+                      ""
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) =>
+                      handleWorkPrefChange("openToOtherTypes", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   >
                     <option value="">Select option</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
                   </select>
                 ) : (
-                  <p className="text-gray-900">{profile.openToOtherTypes || "Not specified"}</p>
+                  <p className="text-gray-900">
+                    {profile.openToOtherTypes || "Not specified"}
+                  </p>
                 )}
               </div>
 
               {/* Preferred Shift */}
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  {isGlobalEdit ? "Add Preferred Shift" : "Preferred Shift"}
+                  {isEditingWorkPreferences
+                    ? "Add Preferred Shift"
+                    : "Preferred Shift"}
                 </label>
 
-                {isGlobalEdit && (
+                {isEditingWorkPreferences && (
                   <select
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value) {
-                        const currentShifts = editedData.shiftPreferences
-                          ? (Array.isArray(editedData.shiftPreferences)
-                            ? editedData.shiftPreferences
-                            : parseValues(editedData.shiftPreferences))
-                          : shiftPreferencesArray;
+                        const currentShifts =
+                          editedWorkPrefInfo.shiftPreferences
+                            ? Array.isArray(editedWorkPrefInfo.shiftPreferences)
+                              ? editedWorkPrefInfo.shiftPreferences
+                              : parseValues(editedWorkPrefInfo.shiftPreferences)
+                            : shiftPreferencesArray;
 
                         if (!currentShifts.includes(value)) {
-                          handleFieldChange("shiftPreferences", [...currentShifts, value]);
+                          handleWorkPrefChange("shiftPreferences", [
+                            ...currentShifts,
+                            value,
+                          ]);
                         }
                         e.target.value = "";
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   >
-                    <option value="">Select shift preference </option>
+                    <option value="">Select shift preference</option>
                     <option value="Morning">Morning</option>
                     <option value="Afternoon">Afternoon</option>
                     <option value="Night">Night</option>
@@ -1781,29 +2199,33 @@ export default function NurseProfilePage() {
 
                 <div className="flex flex-wrap gap-2 mt-3">
                   {(() => {
-                    const currentShifts = isGlobalEdit && editedData.shiftPreferences
-                      ? (Array.isArray(editedData.shiftPreferences)
-                        ? editedData.shiftPreferences
-                        : parseValues(editedData.shiftPreferences))
-                      : shiftPreferencesArray;
+                    const currentShifts =
+                      isEditingWorkPreferences &&
+                      editedWorkPrefInfo.shiftPreferences
+                        ? Array.isArray(editedWorkPrefInfo.shiftPreferences)
+                          ? editedWorkPrefInfo.shiftPreferences
+                          : parseValues(editedWorkPrefInfo.shiftPreferences)
+                        : shiftPreferencesArray;
 
                     return currentShifts && currentShifts.length > 0 ? (
                       currentShifts.map((shift, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center gap-2 px-3 py-2  text-black  text-sm font-medium "
-
+                          className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200"
                         >
                           <span>{shift}</span>
-                          {isGlobalEdit && (
+                          {isEditingWorkPreferences && (
                             <button
                               onClick={() => {
                                 const newShifts = currentShifts.filter(
                                   (item) => item !== shift
                                 );
-                                handleFieldChange("shiftPreferences", newShifts);
+                                handleWorkPrefChange(
+                                  "shiftPreferences",
+                                  newShifts
+                                );
                               }}
-                              className="text-red-500 hover:text-red-700 transition-colors ml-1"
+                              className="text-blue-400  transition-colors ml-1"
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -1812,8 +2234,8 @@ export default function NurseProfilePage() {
                       ))
                     ) : (
                       <p className="text-gray-400 text-sm italic py-2">
-                        {isGlobalEdit
-                          ? "No shift preferences added yet. Select at least one shift."
+                        {isEditingWorkPreferences
+                          ? "No shift preferences added yet. Select at least one."
                           : "No shift preferences specified"}
                       </p>
                     );
@@ -1824,29 +2246,39 @@ export default function NurseProfilePage() {
               {/* Preferred Locations */}
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  {isGlobalEdit ? "Add Preferred Location" : "Preferred Locations"}
+                  {isEditingWorkPreferences
+                    ? "Add Preferred Location"
+                    : "Preferred Locations"}
                 </label>
 
-                {isGlobalEdit && (
+                {isEditingWorkPreferences && (
                   <select
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value) {
-                        const currentLocations = editedData.preferredLocations
-                          ? (Array.isArray(editedData.preferredLocations)
-                            ? editedData.preferredLocations
-                            : parseValues(editedData.preferredLocations))
-                          : preferredLocationsArray;
+                        const currentLocations =
+                          editedWorkPrefInfo.preferredLocations
+                            ? Array.isArray(
+                                editedWorkPrefInfo.preferredLocations
+                              )
+                              ? editedWorkPrefInfo.preferredLocations
+                              : parseValues(
+                                  editedWorkPrefInfo.preferredLocations
+                                )
+                            : preferredLocationsArray;
 
                         if (!currentLocations.includes(value)) {
-                          handleFieldChange("preferredLocations", [...currentLocations, value]);
+                          handleWorkPrefChange("preferredLocations", [
+                            ...currentLocations,
+                            value,
+                          ]);
                         }
                         e.target.value = "";
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   >
-                    <option value="">Select location </option>
+                    <option value="">Select location</option>
                     <option value="Sydney">Sydney</option>
                     <option value="Melbourne">Melbourne</option>
                     <option value="Brisbane">Brisbane</option>
@@ -1860,29 +2292,33 @@ export default function NurseProfilePage() {
 
                 <div className="flex flex-wrap gap-2 mt-3">
                   {(() => {
-                    const currentLocations = isGlobalEdit && editedData.preferredLocations
-                      ? (Array.isArray(editedData.preferredLocations)
-                        ? editedData.preferredLocations
-                        : parseValues(editedData.preferredLocations))
-                      : preferredLocationsArray;
+                    const currentLocations =
+                      isEditingWorkPreferences &&
+                      editedWorkPrefInfo.preferredLocations
+                        ? Array.isArray(editedWorkPrefInfo.preferredLocations)
+                          ? editedWorkPrefInfo.preferredLocations
+                          : parseValues(editedWorkPrefInfo.preferredLocations)
+                        : preferredLocationsArray;
 
                     return currentLocations && currentLocations.length > 0 ? (
                       currentLocations.map((location, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center gap-2 px-3 py-2  text-black  text-sm font-medium "
-
+                          className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200"
                         >
                           <span>{location}</span>
-                          {isGlobalEdit && (
+                          {isEditingWorkPreferences && (
                             <button
                               onClick={() => {
                                 const newLocations = currentLocations.filter(
                                   (item) => item !== location
                                 );
-                                handleFieldChange("preferredLocations", newLocations);
+                                handleWorkPrefChange(
+                                  "preferredLocations",
+                                  newLocations
+                                );
                               }}
-                              className="text-red-500 hover:text-red-700 transition-colors ml-1"
+                              className="text-blue-400  transition-colors ml-1"
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -1891,8 +2327,8 @@ export default function NurseProfilePage() {
                       ))
                     ) : (
                       <p className="text-gray-400 text-sm italic py-2">
-                        {isGlobalEdit
-                          ? "No locations added yet. Select at least one location."
+                        {isEditingWorkPreferences
+                          ? "No locations added yet. Select at least one."
                           : "No locations specified"}
                       </p>
                     );
@@ -1905,15 +2341,19 @@ export default function NurseProfilePage() {
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Available to Start
                 </label>
-                {isGlobalEdit ? (
+                {isEditingWorkPreferences ? (
                   <select
-                    value={editedData.startTime ?? profile.startTime ?? ""}
-                    onChange={(e) => handleFieldChange("startTime", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={
+                      editedWorkPrefInfo.startTime ?? profile.startTime ?? ""
+                    }
+                    onChange={(e) =>
+                      handleWorkPrefChange("startTime", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   >
                     <option value="">Select availability</option>
                     <option value="Immediately">Immediately</option>
-                    <option value="Within 2 weeks">Within a weeks</option>
+                    <option value="Within 2 weeks">Within 2 weeks</option>
                     <option value="Within 1 month">Within 1 month</option>
                   </select>
                 ) : (
@@ -1925,9 +2365,6 @@ export default function NurseProfilePage() {
             </div>
           </div>
         </CollapsibleSection>
-
-
-
       </div>
       <div className="bg-white">
         <Footer />

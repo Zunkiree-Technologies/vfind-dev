@@ -1,1474 +1,197 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
-import { useEffect, useState } from "react";
-import { parseValues } from "../utils/profileHelpers";
-import Loading from "../../../../components/loading";
-import Image from "next/image";
-import {
-  GraduationCap,
-  User,
-  Award,
-  Briefcase,
-  Clock,
-  Shield,
-  Edit,
-  Save,
-  X,
-  Plus,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import React, { useState } from 'react';
+import { Search, MapPin, Mail, DollarSign, Clock, Clock1, Briefcase } from 'lucide-react';
 
-interface ProfileImage {
-  url: string;
-}
+const IndependentScrollDemo = () => {
+  const [search, setSearch] = useState('');
+  const [location, setLocation] = useState('');
 
-interface Education {
-  id?: number;
-  institution_name: string;
-  degree_name: string;
-  from_year: string;
-  to_year: string;
-}
+  // Sample data for demonstration
+  const candidates = Array.from({ length: 15 }, (_, i) => ({
+    id: i + 1,
+    fullName: `Candidate ${i + 1}`,
+    qualification: 'Registered Nurse',
+    location: 'Sydney, NSW',
+    email: `candidate${i + 1}@example.com`,
+    payRate: 45 + i * 2,
+    experience: `${2 + i} years`,
+    jobType: 'Full-Time',
+    shift: 'Morning'
+  }));
 
-interface WorkExperience {
-  id?: number;
-  organizationName: string;
-  roleTitle: string;
-  totalYearsOfExperience: string;
-  startDate: string;
-  endDate: string;
-}
-
-interface NurseProfile {
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  qualification: string;
-  otherQualification?: string;
-  experience: string;
-  workingInHealthcare: string;
-  jobTypes: string[] | string;
-  openToOtherTypes?: string;
-  startDate: string;
-  startTime: string;
-  jobSearchStatus: string;
-  preferredLocations: string[];
-  shiftPreferences: string[] | string;
-  licenses?: string[] | string;
-  certifications?: string[] | string;
-  education?: Education[];
-  residencyStatus?: string;
-  visaType?: string;
-  visaDuration?: string;
-  visaExpiry?: string;
-  maxWorkHours?: string;
-  workHoursRestricted?: string;
-  postcode?: string;
-  organisation?: string;
-  currentResidentialLocation?: string;
-  profileImage?: ProfileImage | null;
-  willingToRelocate: string;
-  ahpraRegistration: string;
-  registrationNumber: string;
-  ahprRegistrationExpiry: string;
-  workExperiences?: WorkExperience[];
-}
-
-interface CollapsibleSectionProps {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-}
-
-const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
-  title,
-  icon,
-  children,
-  defaultOpen = true,
-}) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const filterOptions = Array.from({ length: 20 }, (_, i) => `Filter Option ${i + 1}`);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-5">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
-      >
-        <div className="flex items-center space-x-2">
-          {icon}
-          <h2 className="text-lg font-medium text-gray-900">{title}</h2>
+    <div className="min-h-screen bg-[#F5F6FA]">
+      {/* Navbar - sticky */}
+      <div className="sticky top-0 z-50 bg-white shadow-sm">
+        <div className="h-16 flex items-center px-6">
+          <h1 className="text-xl font-bold text-gray-800">Employer Dashboard</h1>
         </div>
-        {isOpen ? (
-          <ChevronUp className="w-5 h-5 text-gray-500" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500" />
-        )}
-      </button>
-      {isOpen && <div className="px-6 pb-6">{children}</div>}
+      </div>
+
+      {/* Search Bar - sticky below navbar */}
+      <div className="sticky top-16 z-40 bg-[#F5F6FA] py-3 shadow-sm">
+        <div className="flex justify-center">
+          <div className="flex items-center w-[95%] max-w-[950px] border border-gray-300 rounded-lg bg-white overflow-hidden p-1">
+            <div className="flex items-center px-3 w-1/2">
+              <Search className="text-gray-400 mr-2" size={18} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                type="text"
+                placeholder="Search by keyword, designation, company name"
+                className="w-full outline-none py-2"
+              />
+            </div>
+            <div className="w-px h-6 bg-gray-300" />
+            <div className="flex items-center px-3 w-1/3">
+              <MapPin className="text-gray-400 mr-2" size={18} />
+              <input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                type="text"
+                placeholder="City, State or ZIP code"
+                className="w-full outline-none py-2"
+              />
+            </div>
+            <button className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-lg transition-colors">
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Container - Fixed height with independent scroll areas */}
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex gap-6" style={{ height: 'calc(100vh - 180px)' }}>
+          
+          {/* Left Filters - Independent scrollable area */}
+          <div className="hidden md:block w-[320px] flex-shrink-0">
+            <div className="h-full overflow-y-auto bg-white rounded-lg p-4 shadow-sm">
+              <div className="space-y-6">
+                <div className="flex justify-between items-center sticky top-0 bg-white pb-3 -mt-1 pt-1 z-10">
+                  <h2 className="font-semibold text-gray-800">All Filters</h2>
+                  <button className="text-sm text-blue-600 hover:text-blue-700">
+                    Clear All
+                  </button>
+                </div>
+                <div className="h-px bg-gray-300" />
+
+                {/* Filter sections */}
+                <div>
+                  <h3 className="font-medium text-sm text-gray-700 mb-3">Job Type</h3>
+                  {["Full-Time", "Part-Time", "Casual", "Open to any"].map((type) => (
+                    <div key={type} className="flex items-center gap-2 text-sm mb-2">
+                      <input type="checkbox" className="rounded" />
+                      <label>{type}</label>
+                    </div>
+                  ))}
+                </div>
+                <div className="h-px bg-gray-300" />
+
+                <div>
+                  <h3 className="font-medium text-sm text-gray-700 mb-3">Shift</h3>
+                  {["Morning", "Afternoon", "Night"].map((shift) => (
+                    <div key={shift} className="flex items-center gap-2 text-sm mb-2">
+                      <input type="checkbox" className="rounded" />
+                      <label>{shift}</label>
+                    </div>
+                  ))}
+                </div>
+                <div className="h-px bg-gray-300" />
+
+                <div>
+                  <h3 className="font-medium text-sm text-gray-700 mb-3">Role Category</h3>
+                  {[
+                    "Clinical Lead / Manager",
+                    "Registered Nurse (RN)",
+                    "Enrolled Nurse (EN)",
+                    "Assistant in Nursing (AIN)",
+                    "Personal Care Assistant (PCA)",
+                    "Attendant",
+                    "Support Worker",
+                    "Nursing Assistant",
+                  ].map((role) => (
+                    <div key={role} className="flex items-center gap-2 text-sm mb-2">
+                      <input type="checkbox" className="rounded" />
+                      <label>{role}</label>
+                    </div>
+                  ))}
+                </div>
+                <div className="h-px bg-gray-300" />
+
+                {/* Extra filters for scrolling demo */}
+                <div>
+                  <h3 className="font-medium text-sm text-gray-700 mb-3">Additional Filters</h3>
+                  {filterOptions.map((option) => (
+                    <div key={option} className="flex items-center gap-2 text-sm mb-2">
+                      <input type="checkbox" className="rounded" />
+                      <label>{option}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Candidate List - Independent scrollable area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="space-y-4 pr-2">
+              {candidates.map((candidate) => (
+                <div
+                  key={candidate.id}
+                  className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex-1">
+                    <h2 className="font-semibold text-lg text-[#61A6FA] mb-1">
+                      {candidate.fullName}
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-3">{candidate.qualification}</p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
+                      <div className="flex items-center gap-2">
+                        <MapPin size={16} />
+                        <span>{candidate.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Mail size={16} />
+                        <span>{candidate.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DollarSign size={16} />
+                        <span>${candidate.payRate}/hr</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock1 size={16} />
+                        <span>{candidate.experience}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Briefcase size={16} />
+                        <span>{candidate.jobType}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} />
+                        <span>{candidate.shift}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 ml-6 flex-col">
+                    <div className="h-16 w-16 rounded-full overflow-hidden border flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                      <span className="text-xs text-gray-500">No Photo</span>
+                    </div>
+                    <button className="px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition-colors">
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default function NurseProfilePage() {
-  const [profile, setProfile] = useState<NurseProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isGlobalEdit, setIsGlobalEdit] = useState(false);
-  const [editedData, setEditedData] = useState<Partial<NurseProfile>>({});
-  const [saving, setSaving] = useState(false);
-  const [educationList, setEducationList] = useState<Education[]>([]);
-  const [workExperienceList, setWorkExperienceList] = useState<WorkExperience[]>([]);
-  const [isEditingEducation, setIsEditingEducation] = useState(false);
-  const [isEditingWorkExperience, setIsEditingWorkExperience] = useState(false);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        console.log("Token:", token ? "Found" : "Not found");
-        
-        if (!token) {
-          setError("No authentication token found");
-          setLoading(false);
-          return;
-        }
-
-        // Fetch main profile
-        console.log("Fetching nurse profile...");
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_profile",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!res.ok) throw new Error("Failed to fetch profile");
-        const data = await res.json();
-        console.log("Profile data:", data);
-        setProfile(data);
-
-        // Fetch education
-        console.log("Fetching education...");
-        const eduRes = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (eduRes.ok) {
-          const eduData = await eduRes.json();
-          console.log("Education data:", eduData);
-          setEducationList(eduData || []);
-        } else {
-          console.error("Failed to fetch education:", eduRes.status);
-        }
-
-        // Fetch work experience
-        console.log("Fetching work experience...");
-        const workRes = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_work_experience",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (workRes.ok) {
-          const workData = await workRes.json();
-          console.log("Work experience data:", workData);
-          setWorkExperienceList(workData || []);
-        } else {
-          console.error("Failed to fetch work experience:", workRes.status);
-        }
-      } catch (err: any) {
-        console.error("Error fetching profile:", err);
-        setError(err.message || "Failed to fetch profile");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  const handleFieldChange = (field: keyof NurseProfile, value: string | string[]) => {
-    setEditedData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleSaveAll = async () => {
-    if (!profile) return;
-
-    setSaving(true);
-    console.log("Saving profile changes...", editedData);
-    
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("No authentication token found");
-        return;
-      }
-
-      const updatedProfile = { ...profile, ...editedData };
-
-      const apiPayload = {
-        ...updatedProfile,
-        jobTypes: Array.isArray(updatedProfile.jobTypes)
-          ? JSON.stringify(updatedProfile.jobTypes)
-          : updatedProfile.jobTypes,
-        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
-          ? JSON.stringify(updatedProfile.preferredLocations)
-          : updatedProfile.preferredLocations,
-        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
-          ? JSON.stringify(updatedProfile.shiftPreferences)
-          : updatedProfile.shiftPreferences,
-        licenses: Array.isArray(updatedProfile.licenses)
-          ? JSON.stringify(updatedProfile.licenses)
-          : updatedProfile.licenses,
-        certifications: Array.isArray(updatedProfile.certifications)
-          ? JSON.stringify(updatedProfile.certifications)
-          : updatedProfile.certifications,
-      };
-
-      console.log("API Payload:", apiPayload);
-
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiPayload),
-        }
-      );
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Profile update error:", errorText);
-        throw new Error(`Failed to update profile: ${res.status} ${errorText}`);
-      }
-
-      const updatedData = await res.json();
-      console.log("Profile updated:", updatedData);
-      setProfile(updatedData);
-      setEditedData({});
-      setIsGlobalEdit(false);
-      alert("Profile updated successfully!");
-    } catch (err: any) {
-      console.error("Error updating profile:", err);
-      alert(err.message || "Failed to update profile");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditedData({});
-    setIsGlobalEdit(false);
-  };
-
-  const handleImageEdit = async (file: File) => {
-    if (!profile) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("No authentication token found");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("profileImage", file);
-
-      Object.entries(profile).forEach(([key, value]) => {
-        if (key !== "profileImage" && value !== null && value !== undefined) {
-          if (Array.isArray(value)) {
-            formData.append(key, JSON.stringify(value));
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
-
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/image_edit",
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to update profile image");
-      const updatedData = await res.json();
-      setProfile(updatedData);
-      console.log("Profile image updated:", updatedData);
-    } catch (err: any) {
-      console.error("Error uploading image:", err);
-      alert(err.message || "Error uploading image");
-    }
-  };
-
-  const handleSaveEducation = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
-
-      console.log("Saving education...", educationList);
-
-      // Save all education entries
-      for (const edu of educationList) {
-        const payload = {
-          institution_name: edu.institution_name,
-          degree_name: edu.degree_name,
-          from_year: edu.from_year,
-          to_year: edu.to_year,
-        };
-
-        if (edu.id) {
-          // Edit existing
-          console.log("Editing education:", { ...payload, id: edu.id });
-          await fetch(
-            "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/edit_education",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ ...payload, id: edu.id }),
-            }
-          );
-        } else {
-          // Add new
-          console.log("Adding education:", payload);
-          await fetch(
-            "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/add_education",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(payload),
-            }
-          );
-        }
-      }
-
-      // Refetch education list
-      const eduRes = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (eduRes.ok) {
-        const eduData = await eduRes.json();
-        console.log("Refetched education:", eduData);
-        setEducationList(eduData || []);
-      }
-
-      setIsEditingEducation(false);
-      alert("Education saved successfully!");
-    } catch (err: any) {
-      console.error("Error saving education:", err);
-      alert(err.message || "Failed to save education");
-    }
-  };
-
-  const handleSaveWorkExperience = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
-
-      console.log("Saving work experience...", workExperienceList);
-
-      // Save all work experience entries
-      for (const exp of workExperienceList) {
-        const payload = {
-          organizationName: exp.organizationName,
-          roleTitle: exp.roleTitle,
-          totalYearsOfExperience: exp.totalYearsOfExperience,
-          startDate: exp.startDate,
-          endDate: exp.endDate,
-        };
-
-        if (exp.id) {
-          // Edit existing
-          console.log("Editing work experience:", { ...payload, id: exp.id });
-          await fetch(
-            "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_work_experience",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ ...payload, id: exp.id }),
-            }
-          );
-        } else {
-          // Add new
-          console.log("Adding work experience:", payload);
-          await fetch(
-            "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/add_work_experience",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(payload),
-            }
-          );
-        }
-      }
-
-      // Refetch work experience list
-      const workRes = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_work_experience",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (workRes.ok) {
-        const workData = await workRes.json();
-        console.log("Refetched work experience:", workData);
-        setWorkExperienceList(workData || []);
-      }
-
-      setIsEditingWorkExperience(false);
-      alert("Work experience saved successfully!");
-    } catch (err: any) {
-      console.error("Error saving work experience:", err);
-      alert(err.message || "Failed to save work experience");
-    }
-  };
-
-  if (loading) return <Loading />;
-  if (error)
-    return (
-      <div className="flex justify-center items-center h-screen text-red-600 font-semibold">
-        {error}
-      </div>
-    );
-  if (!profile)
-    return (
-      <div className="flex justify-center items-center h-screen text-gray-600">
-        No profile data found
-      </div>
-    );
-
-  const renderArray = (value: string[] | string | undefined) => parseValues(value) || [];
-
-  const preferredLocationsArray = renderArray(profile.preferredLocations);
-  const jobTypesArray = renderArray(profile.jobTypes);
-  const shiftPreferencesArray = renderArray(profile.shiftPreferences);
-  const certificationsArray = renderArray(profile.certifications);
-
-  // Determine current residency status for conditional rendering
-  const currentResidencyStatus = isGlobalEdit 
-    ? (editedData.residencyStatus ?? profile.residencyStatus)
-    : profile.residencyStatus;
-
-  const isPermanentResident = currentResidencyStatus?.toLowerCase().includes('permanent') || 
-                              currentResidencyStatus?.toLowerCase().includes('citizen') ||
-                              currentResidencyStatus === 'Permanent';
-
-  return (
-    <div className="min-h-screen bg-[#F5F6FA] p-4">
-      <div className="container mx-auto">
-        {/* Profile Picture & Basic Information */}
-        <CollapsibleSection
-          title="Profile Picture & Basic Information"
-          icon={<User className="w-6 h-6 text-blue-600" />}
-        >
-          <div className="relative">
-            {/* Edit Profile Button */}
-            {!isGlobalEdit ? (
-              <button
-                onClick={() => setIsGlobalEdit(true)}
-                className="absolute top-0 right-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-                Edit Profile
-              </button>
-            ) : (
-              <div className="absolute top-0 right-0 flex gap-2">
-                <button
-                  onClick={handleCancelEdit}
-                  disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveAll}
-                  disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  {saving ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            )}
-
-            {/* Profile Content */}
-            <div className="flex flex-col items-center gap-4 pt-12">
-              {/* Profile Image */}
-              <div className="flex flex-col items-center">
-                <div className="relative h-32 w-32 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200">
-                  {profile.profileImage?.url ? (
-                    <Image
-                      priority
-                      src={profile.profileImage.url}
-                      alt={profile.fullName}
-                      width={128}
-                      height={128}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-blue-500 flex items-center justify-center text-white text-3xl font-semibold">
-                      {profile.fullName?.charAt(0) || "N"}
-                    </div>
-                  )}
-                </div>
-
-                <label className="mt-3 bg-white border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
-                  <Edit className="w-4 h-4" />
-                  Upload/Change Picture
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        handleImageEdit(e.target.files[0]);
-                      }
-                    }}
-                  />
-                </label>
-              </div>
-
-              {/* Basic Info Grid */}
-              <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Full Name
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="text"
-                      value={editedData.fullName ?? profile.fullName}
-                      onChange={(e) => handleFieldChange("fullName", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.fullName}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Email
-                  </label>
-                  <p className="text-gray-900">{profile.email}</p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Phone Number
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="text"
-                      value={editedData.phoneNumber ?? profile.phoneNumber}
-                      onChange={(e) => handleFieldChange("phoneNumber", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.phoneNumber}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Current Location
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="text"
-                      value={
-                        editedData.currentResidentialLocation ??
-                        profile.currentResidentialLocation
-                      }
-                      onChange={(e) =>
-                        handleFieldChange("currentResidentialLocation", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.currentResidentialLocation}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Postcode
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="text"
-                      value={editedData.postcode ?? profile.postcode}
-                      onChange={(e) => handleFieldChange("postcode", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.postcode || "Not specified"}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Willing to Relocate
-                  </label>
-                  {isGlobalEdit ? (
-                    <select
-                      value={editedData.willingToRelocate ?? profile.willingToRelocate}
-                      onChange={(e) => handleFieldChange("willingToRelocate", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </select>
-                  ) : (
-                    <p className="text-gray-900">{profile.willingToRelocate}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </CollapsibleSection>
-
-        {/* Visa & Residency */}
-        <CollapsibleSection
-          title="Visa & Residency"
-          icon={<Shield className="w-6 h-6 text-blue-600" />}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Residency / Visa Status
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value={editedData.residencyStatus ?? profile.residencyStatus}
-                  onChange={(e) => {
-                    handleFieldChange("residencyStatus", e.target.value);
-                    console.log("Residency status changed to:", e.target.value);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="">Select status</option>
-                  <option value="Permanent">Permanent Resident</option>
-                  <option value="Citizen">Citizen</option>
-                  <option value="Student Visa">Student Visa</option>
-                  <option value="Work Visa">Work Visa</option>
-                  <option value="Working Holiday Visa">Working Holiday Visa</option>
-                  <option value="Temporary Visa">Temporary Visa</option>
-                </select>
-              ) : (
-                <p className="text-gray-900">{profile.residencyStatus}</p>
-              )}
-            </div>
-
-            {!isPermanentResident && (
-              <>
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Visa Type
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="text"
-                      value={editedData.visaType ?? profile.visaType}
-                      onChange={(e) => handleFieldChange("visaType", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                      placeholder="e.g., 482, 457, 485"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.visaType || "Not specified"}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Visa Expiry
-                  </label>
-                  {isGlobalEdit ? (
-                    <input
-                      type="date"
-                      value={editedData.visaExpiry ?? profile.visaExpiry}
-                      onChange={(e) => handleFieldChange("visaExpiry", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{profile.visaExpiry || "Not specified"}</p>
-                  )}
-                </div>
-              </>
-            )}
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Work Hours Restricted
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value={editedData.workHoursRestricted ?? profile.workHoursRestricted}
-                  onChange={(e) => {
-                    handleFieldChange("workHoursRestricted", e.target.value);
-                    console.log("Work hours restricted changed to:", e.target.value);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-              ) : (
-                <p className="text-gray-900">{profile.workHoursRestricted}</p>
-              )}
-            </div>
-
-            {(profile.workHoursRestricted === "Yes" || 
-              (isGlobalEdit && (editedData.workHoursRestricted ?? profile.workHoursRestricted) === "Yes")) && (
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Work Restriction Details
-                </label>
-                {isGlobalEdit ? (
-                  <input
-                    type="text"
-                    value={editedData.maxWorkHours ?? profile.maxWorkHours}
-                    onChange={(e) => handleFieldChange("maxWorkHours", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    placeholder="e.g., 20 hours per week"
-                  />
-                ) : (
-                  <p className="text-gray-900">{profile.maxWorkHours || "Not specified"}</p>
-                )}
-              </div>
-            )}
-          </div>
-        </CollapsibleSection>
-
-        {/* AHPRA Registration */}
-        <CollapsibleSection
-          title="AHPRA Registration"
-          icon={<Award className="w-6 h-6 text-blue-600" />}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                AHPRA Registration
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value={editedData.ahpraRegistration ?? profile.ahpraRegistration}
-                  onChange={(e) => handleFieldChange("ahpraRegistration", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-              ) : (
-                <p className="text-gray-900">{profile.ahpraRegistration}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                AHPRA Registration Number
-              </label>
-              {isGlobalEdit ? (
-                <input
-                  type="text"
-                  value={editedData.registrationNumber ?? profile.registrationNumber}
-                  onChange={(e) => handleFieldChange("registrationNumber", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              ) : (
-                <p className="text-gray-900">{profile.registrationNumber}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 block">
-                Registration Expiry
-              </label>
-              {isGlobalEdit ? (
-                <input
-                  type="date"
-                  value={editedData.ahprRegistrationExpiry ?? profile.ahprRegistrationExpiry}
-                  onChange={(e) =>
-                    handleFieldChange("ahprRegistrationExpiry", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              ) : (
-                <p className="text-gray-900">{profile.ahprRegistrationExpiry}</p>
-              )}
-            </div>
-          </div>
-        </CollapsibleSection>
-
-        {/* Education */}
-        <CollapsibleSection
-          title="Education"
-          icon={<GraduationCap className="w-6 h-6 text-blue-600" />}
-        >
-          <div className="space-y-4">
-            <div className="flex justify-end gap-2 mb-4">
-              {!isEditingEducation ? (
-                <button
-                  onClick={() => setIsEditingEducation(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit Education
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => {
-                      setIsEditingEducation(false);
-                      // Reset to original data
-                      const token = localStorage.getItem("token");
-                      if (token) {
-                        fetch("https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education", {
-                          method: "GET",
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                          },
-                        })
-                          .then((res) => res.json())
-                          .then((data) => setEducationList(data || []))
-                          .catch((err) => console.error("Error refetching education:", err));
-                      }
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveEducation}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <Save className="w-4 h-4" />
-                    Save Changes
-                  </button>
-                </>
-              )}
-            </div>
-
-            {educationList.length === 0 && !isEditingEducation ? (
-              <p className="text-gray-400 text-center py-4 italic">No education entries added yet</p>
-            ) : (
-              educationList.map((edu, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium text-gray-900">Education {index + 1}</h3>
-                    {isEditingEducation && (
-                      <button
-                        onClick={() => {
-                          const newList = educationList.filter((_, i) => i !== index);
-                          setEducationList(newList);
-                        }}
-                        className="text-red-600 hover:text-red-700 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        Highest Qualification
-                      </label>
-                      <input
-                        type="text"
-                        value={edu.degree_name}
-                        onChange={(e) => {
-                          const newList = [...educationList];
-                          newList[index].degree_name = e.target.value;
-                          setEducationList(newList);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!isEditingEducation}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        Institution
-                      </label>
-                      <input
-                        type="text"
-                        value={edu.institution_name}
-                        onChange={(e) => {
-                          const newList = [...educationList];
-                          newList[index].institution_name = e.target.value;
-                          setEducationList(newList);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!isEditingEducation}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        From Year
-                      </label>
-                      <input
-                        type="text"
-                        value={edu.from_year}
-                        onChange={(e) => {
-                          const newList = [...educationList];
-                          newList[index].from_year = e.target.value;
-                          setEducationList(newList);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!isEditingEducation}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        To Year
-                      </label>
-                      <input
-                        type="text"
-                        value={edu.to_year}
-                        onChange={(e) => {
-                          const newList = [...educationList];
-                          newList[index].to_year = e.target.value;
-                          setEducationList(newList);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!isEditingEducation}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-
-            {isEditingEducation && (
-              <button
-                onClick={() => {
-                  setEducationList([
-                    ...educationList,
-                    {
-                      institution_name: "",
-                      degree_name: "",
-                      from_year: "",
-                      to_year: "",
-                    },
-                  ]);
-                }}
-                className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Add Education
-              </button>
-            )}
-          </div>
-        </CollapsibleSection>
-
-        {/* Work Experience */}
-        <CollapsibleSection
-          title="Work Experience"
-          icon={<Briefcase className="w-6 h-6 text-blue-600" />}
-        >
-          <div className="space-y-6">
-            <div className="flex justify-end gap-2 mb-4">
-              {!isEditingWorkExperience ? (
-                <button
-                  onClick={() => setIsEditingWorkExperience(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit Work Experience
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => {
-                      setIsEditingWorkExperience(false);
-                      // Reset to original data
-                      const token = localStorage.getItem("token");
-                      if (token) {
-                        fetch("https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_work_experience", {
-                          method: "GET",
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                          },
-                        })
-                          .then((res) => res.json())
-                          .then((data) => setWorkExperienceList(data || []))
-                          .catch((err) => console.error("Error refetching work experience:", err));
-                      }
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveWorkExperience}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <Save className="w-4 h-4" />
-                    Save Changes
-                  </button>
-                </>
-              )}
-            </div>
-
-            {workExperienceList.length === 0 && !isEditingWorkExperience ? (
-              <p className="text-gray-400 text-center py-4 italic">No work experience entries added yet</p>
-            ) : (
-              workExperienceList.map((exp, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium text-gray-900">Experience {index + 1}</h3>
-                    {isEditingWorkExperience && (
-                      <button
-                        onClick={() => {
-                          const newList = workExperienceList.filter((_, i) => i !== index);
-                          setWorkExperienceList(newList);
-                        }}
-                        className="text-red-600 hover:text-red-700 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        Organization Name
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.organizationName}
-                        onChange={(e) => {
-                          const newList = [...workExperienceList];
-                          newList[index].organizationName = e.target.value;
-                          setWorkExperienceList(newList);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!isEditingWorkExperience}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        Total Years of Experience
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.totalYearsOfExperience}
-                        onChange={(e) => {
-                          const newList = [...workExperienceList];
-                          newList[index].totalYearsOfExperience = e.target.value;
-                          setWorkExperienceList(newList);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!isEditingWorkExperience}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        Role Title
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.roleTitle}
-                        onChange={(e) => {
-                          const newList = [...workExperienceList];
-                          newList[index].roleTitle = e.target.value;
-                          setWorkExperienceList(newList);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!isEditingWorkExperience}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        Start Date
-                      </label>
-                      <input
-                        type="date"
-                        value={exp.startDate}
-                        onChange={(e) => {
-                          const newList = [...workExperienceList];
-                          newList[index].startDate = e.target.value;
-                          setWorkExperienceList(newList);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!isEditingWorkExperience}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-1 block">
-                        End Date
-                      </label>
-                      <input
-                        type="date"
-                        value={exp.endDate}
-                        onChange={(e) => {
-                          const newList = [...workExperienceList];
-                          newList[index].endDate = e.target.value;
-                          setWorkExperienceList(newList);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        disabled={!isEditingWorkExperience}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-
-            {isEditingWorkExperience && (
-              <button
-                onClick={() => {
-                  setWorkExperienceList([
-                    ...workExperienceList,
-                    {
-                      organizationName: "",
-                      roleTitle: "",
-                      totalYearsOfExperience: "",
-                      startDate: "",
-                      endDate: "",
-                    },
-                  ]);
-                }}
-                className="flex items-center gap-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Add Experience
-              </button>
-            )}
-          </div>
-        </CollapsibleSection>
-
-        {/* Certifications */}
-        <CollapsibleSection
-          title="Certifications"
-          icon={<Award className="w-6 h-6 text-blue-600" />}
-        >
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Select Certifications
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value && !certificationsArray.includes(e.target.value)) {
-                      handleFieldChange("certifications", [
-                        ...certificationsArray,
-                        e.target.value,
-                      ]);
-                    }
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="">Select a certification</option>
-                  <option value="Police Check Certificate">Police Check Certificate</option>
-                  <option value="BLS Certification">BLS Certification</option>
-                  <option value="ACLS Certification">ACLS Certification</option>
-                  <option value="PALS Certification">PALS Certification</option>
-                </select>
-              ) : null}
-
-              <div className="flex flex-wrap gap-2 mt-3">
-                {certificationsArray.map((cert, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
-                  >
-                    <span>{cert}</span>
-                    {isGlobalEdit && (
-                      <button
-                        onClick={() => {
-                          const newCerts = certificationsArray.filter((_, i) => i !== idx);
-                          handleFieldChange("certifications", newCerts);
-                        }}
-                        className="text-red-500 hover:text-red-700 transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {certificationsArray.length === 0 && (
-                <p className="text-gray-400 text-sm italic mt-2">
-                  No certifications specified
-                </p>
-              )}
-            </div>
-
-           <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Other Certifications
-              </label>
-              {isGlobalEdit ? (
-                <input
-                  type="text"
-                  placeholder="Enter other certifications"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              ) : (
-                <p className="text-gray-400 text-sm italic">Not specified</p>
-              )}
-            </div>
-          </div>
-        </CollapsibleSection>
-
-        {/* Work Preferences */}
-        <CollapsibleSection
-          title="Work Preferences"
-          icon={<Clock className="w-6 h-6 text-blue-600" />}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Preferred Job Type
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value && !jobTypesArray.includes(e.target.value)) {
-                      handleFieldChange("jobTypes", [...jobTypesArray, e.target.value]);
-                    }
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="">Select job type</option>
-                  <option value="Full time">Full time</option>
-                  <option value="Part time">Part time</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Casual">Casual</option>
-                </select>
-              ) : null}
-
-              <div className="flex flex-wrap gap-2 mt-2">
-                {jobTypesArray.map((type, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
-                  >
-                    <span>{type}</span>
-                    {isGlobalEdit && (
-                      <button
-                        onClick={() => {
-                          const newTypes = jobTypesArray.filter((_, i) => i !== idx);
-                          handleFieldChange("jobTypes", newTypes);
-                        }}
-                        className="text-red-500 hover:text-red-700 transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Open to Other Job Types
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value={editedData.openToOtherTypes ?? profile.openToOtherTypes}
-                  onChange={(e) => handleFieldChange("openToOtherTypes", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-              ) : (
-                <p className="text-gray-900">{profile.openToOtherTypes}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Preferred Shift
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value && !shiftPreferencesArray.includes(e.target.value)) {
-                      handleFieldChange("shiftPreferences", [
-                        ...shiftPreferencesArray,
-                        e.target.value,
-                      ]);
-                    }
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="">Select shift preference</option>
-                  <option value="Morning">Morning</option>
-                  <option value="Afternoon">Afternoon</option>
-                  <option value="Night">Night</option>
-                </select>
-              ) : null}
-
-              <div className="flex flex-wrap gap-2 mt-2">
-                {shiftPreferencesArray.map((shift, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
-                  >
-                    <span>{shift}</span>
-                    {isGlobalEdit && (
-                      <button
-                        onClick={() => {
-                          const newShifts = shiftPreferencesArray.filter((_, i) => i !== idx);
-                          handleFieldChange("shiftPreferences", newShifts);
-                        }}
-                        className="text-red-500 hover:text-red-700 transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Locations
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value && !preferredLocationsArray.includes(e.target.value)) {
-                      handleFieldChange("preferredLocations", [
-                        ...preferredLocationsArray,
-                        e.target.value,
-                      ]);
-                    }
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="">Select location</option>
-                  <option value="Sydney">Sydney</option>
-                  <option value="Melbourne">Melbourne</option>
-                  <option value="Brisbane">Brisbane</option>
-                  <option value="Perth">Perth</option>
-                  <option value="Adelaide">Adelaide</option>
-                </select>
-              ) : null}
-
-              <div className="flex flex-wrap gap-2 mt-2">
-                {preferredLocationsArray.map((location, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium"
-                  >
-                    <span>{location}</span>
-                    {isGlobalEdit && (
-                      <button
-                        onClick={() => {
-                          const newLocations = preferredLocationsArray.filter(
-                            (_, i) => i !== idx
-                          );
-                          handleFieldChange("preferredLocations", newLocations);
-                        }}
-                        className="text-red-500 hover:text-red-700 transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
-                Available to Start
-              </label>
-              {isGlobalEdit ? (
-                <select
-                  value={editedData.startTime ?? profile.startTime}
-                  onChange={(e) => handleFieldChange("startTime", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                >
-                  <option value="Immediately">Immediately</option>
-                  <option value="Within 2 weeks">Within 2 weeks</option>
-                  <option value="Within 1 month">Within 1 month</option>
-                  <option value="Within 2 months">Within 2 months</option>
-                </select>
-              ) : (
-                <p className="text-gray-900">{profile.startTime || profile.startDate}</p>
-              )}
-            </div>
-          </div>
-        </CollapsibleSection>
-      </div>
-    </div>
-  );
-}
+export default IndependentScrollDemo;

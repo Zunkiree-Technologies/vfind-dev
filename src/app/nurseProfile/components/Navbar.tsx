@@ -4,8 +4,9 @@ import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import NotificationSidebar from "./NotificationSidebar";
-import { MapPin, Search, UserRound, Menu, X, ArrowRight } from "lucide-react";
+import { MapPin, Search, UserRound, Menu, X } from "lucide-react";
 import Image from "next/image";
+import MainButton from "@/components/ui/MainButton";
 
 export const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -113,7 +114,7 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center flex-1 max-w-3xl bg-white rounded-xl shadow border border-gray-300 px-2 py-1.5 gap-3">
             {/* Job Search */}
             <div className="flex items-center flex-1">
-              <Search size={22} className="m-2 text-blue-600" />
+              <Search size={22} className="m-2 text-[#61A6FA]" />
               <input
                 type="text"
                 placeholder="Search by keyword, specialty, job title"
@@ -130,7 +131,7 @@ export const Navbar = () => {
 
             {/* Location Search */}
             <div className="flex items-center flex-1">
-              <MapPin size={22} className="m-2 text-blue-600" />
+              <MapPin size={22} className="m-2 text-[#61A6FA]" />
               <input
                 type="text"
                 placeholder="City, State or Zip code"
@@ -148,20 +149,17 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-3">
             {authToken ? (
               <>
-                <button
+                <MainButton 
                   onClick={() => router.push("/nurseProfile/connectedstatus")}
-                  className="group px-6 py-2 bg-blue-400 text-white font-medium rounded-[10px] text-sm whitespace-nowrap transition-all duration-300 overflow-hidden flex items-center justify-center"
+                  className="group px-6 py-2 w-fit text-blue-400 border font-medium rounded-[10px] text-sm whitespace-nowrap transition-all duration-300 overflow-hidden flex items-center justify-center"
                 >
                   <span className="flex items-center gap-2">
                     <span className="transition-all duration-300 group-hover:-translate-x-1">
                       Connection Request
                     </span>
-                    <ArrowRight
-                      className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                      strokeWidth={3}
-                    />
+                   
                   </span>
-                </button>
+                </MainButton>
 
                 {/* User Menu */}
                 <div ref={userMenuRef} className="relative flex items-center">

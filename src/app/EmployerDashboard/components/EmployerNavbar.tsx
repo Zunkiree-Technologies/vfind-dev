@@ -3,18 +3,20 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import NotificationSidebar from "./NotificationSidebar";
-import { ChevronDown, UserRound } from "lucide-react";
+import { ChevronDown, UserRound, Menu, X } from "lucide-react";
 
 interface NavbarProps {
   companyName?: string;
 }
 
-export default function EmployerNavbar({ }: NavbarProps) {
+export default function EmployerNavbar({}: NavbarProps) {
   const router = useRouter();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleProfileMenu = () => setShowProfileMenu(!showProfileMenu);
+  const toggleMobileMenu = () => setShowMobileMenu(!showMobileMenu);
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -29,96 +31,186 @@ export default function EmployerNavbar({ }: NavbarProps) {
   }, []);
 
   return (
-    <nav className="bg-white shadow-md w-full mx-auto container">
-      <div className="mx-auto container flex justify-around items-center px-4 md:px-6 py-3">
+ <nav className="bg-white shadow-md w-full fixed  ">
+     <div className="mx-auto container flex justify-around items-center px-4 md:px-6 py-3">
         {/* Left: Logo */}
         <div
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => router.push("/EmployerDashboard")}
         >
-
-
           <span className="text-lg font-bold">
             <span className="text-primary">V</span>FIND
           </span>
         </div>
 
-
-        {/* Right: Profile Icon */}
-        <div className="relative flex  gap-5">
-          <div className="hidden md:flex space-x-6">
-            <button
-              onClick={() => router.push("/EmployerDashboard/status")}
-              className="px-6 py-2 bg-primary text-white font-medium hover:bg-blue-500 rounded-[10px]"
-            >
-              <p className="text-sm"> Connection Request</p>
-            </button>
-
-            <button
-              onClick={() => router.push("/EmployerDashboard/Wishlist")}
-              className="flex items-center gap-2 px-6 py-2 bg-primary text-white font-medium hover:bg-blue-500 rounded-[10px] transition-colors duration-200"
-            >
-              {/* <Heart className="w-6 h-6" /> */}
-              <span>Wishlist</span>
-            </button>
-
-          </div>
-
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex items-center gap-2">
           <button
-            onClick={toggleProfileMenu}
-            className="flex items-center gap-1 focus:outline-none"
+            onClick={() => router.push("/EmployerDashboard/Candidatelist")}
+            className="px-4 xl:px-6 py-2 text-gray-700 hover:text-[#477fff] text-sm font-medium whitespace-nowrap"
           >
-            {/* User circle */}
-            <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-400 hover:bg-gray-50">
-              <UserRound size={20} className="text-gray-700" />
-            </div>
+            Search Candidate
+          </button>
+          <button
+            onClick={() => router.push("/EmployerDashboard/jobposting")}
+            className="px-4 xl:px-6 py-2 text-gray-700 hover:text-[#477fff] text-sm font-medium whitespace-nowrap"
+          >
+            Post a Job
+          </button>
+          <button
+            onClick={() => router.push("/EmployerDashboard/status")}
+            className="px-4 xl:px-6 py-2 text-gray-700 hover:text-[#477fff] text-sm font-medium whitespace-nowrap"
+          >
+            Connection Request
+          </button>
+          <button
+            onClick={() => router.push("/EmployerDashboard/Wishlist")}
+            className="px-4 xl:px-6 py-2 text-gray-700 hover:text-[#477fff] text-sm font-medium whitespace-nowrap"
+          >
+            Saved Candidates
+          </button>
+        </div>
 
-            {/* Dropdown arrow */}
-            <ChevronDown size={20} className="text-gray-700 hover:text-blue-600" />
+        {/* Right: Profile Icon & Mobile Menu Button */}
+        <div className="flex items-center gap-3">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleMobileMenu}
+            className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md"
+            aria-label="Toggle menu"
+          >
+            {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          <div>
+          {/* Desktop Profile & Notification */}
+          <div className="hidden lg:flex items-center gap-5">
+            <div className="relative">
+              <button
+                onClick={toggleProfileMenu}
+                className="flex items-center gap-1 focus:outline-none"
+              >
+                <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-400 hover:bg-gray-50">
+                  <UserRound size={20} className="text-gray-700" />
+                </div>
+                <ChevronDown size={20} className="text-gray-700 hover:text-blue-600" />
+              </button>
+
+              {showProfileMenu && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute right-0 mt-2 w-36 bg-white border rounded-md shadow-lg z-50"
+                >
+                  <button
+                    onClick={() => {
+                      router.push("/EmployerDashboard/employprofile");
+                      setShowProfileMenu(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("authToken");
+                      sessionStorage.clear();
+                      router.push("/employerloginpage");
+                    }}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+
             <NotificationSidebar />
           </div>
 
-          {showProfileMenu && (
-            <div
-              ref={dropdownRef}
-              className="absolute right-0 mt-15 w-36 bg-white border rounded-md shadow-lg z-50"
-            >
+          {/* Mobile Profile & Notification */}
+          <div className="flex lg:hidden items-center gap-3">
+            <NotificationSidebar />
+            <div className="relative">
               <button
-                onClick={() => {
-                  router.push("/EmployerDashboard/employprofile");
-                  setShowProfileMenu(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                onClick={toggleProfileMenu}
+                className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-400 hover:bg-gray-50"
               >
-                Profile
+                <UserRound size={20} className="text-gray-700" />
               </button>
 
-              <button
-                onClick={() => {
-                  // Only remove auth token, keep hidden notifications
-                  localStorage.removeItem("authToken");
-                  sessionStorage.clear();
-                  router.push("/employerloginpage");
-                }}
-                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-              >
-                Logout
-              </button>
-
-
-              <button
-                onClick={() => router.push("/EmployerDashboard/status")}
-                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 md:hidden"
-              >
-                Candidate Request
-              </button>
+              {showProfileMenu && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute right-0 mt-2 w-36 bg-white border rounded-md shadow-lg z-50"
+                >
+                  <button
+                    onClick={() => {
+                      router.push("/EmployerDashboard/employprofile");
+                      setShowProfileMenu(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("authToken");
+                      sessionStorage.clear();
+                      router.push("/employerloginpage");
+                    }}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {showMobileMenu && (
+        <div className="lg:hidden border-t border-gray-200 bg-white">
+          <div className="flex flex-col px-4 py-2">
+            <button
+              onClick={() => {
+                router.push("/EmployerDashboard/Candidatelist");
+                setShowMobileMenu(false);
+              }}
+              className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md text-sm font-medium"
+            >
+              Search Candidate
+            </button>
+            <button
+              onClick={() => {
+                router.push("/EmployerDashboard/jobposting");
+                setShowMobileMenu(false);
+              }}
+              className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md text-sm font-medium"
+            >
+              Post a Job
+            </button>
+            <button
+              onClick={() => {
+                router.push("/EmployerDashboard/status");
+                setShowMobileMenu(false);
+              }}
+              className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md text-sm font-medium"
+            >
+              Connection Request
+            </button>
+            <button
+              onClick={() => {
+                router.push("/EmployerDashboard/Wishlist");
+                setShowMobileMenu(false);
+              }}
+              className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md text-sm font-medium"
+            >
+              Saved Candidates
+            </button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

@@ -289,12 +289,6 @@ export default function EmployerDashboard() {
     }
   };
 
-
-
-
-
-
-
   const handleSaveCompanyProfile = async () => {
     if (companyDescription.trim() === "") {
       alert("Please provide a brief description before saving.");
@@ -523,15 +517,15 @@ export default function EmployerDashboard() {
                 <Briefcase size={20} className="text-blue-400" />
               </div>
               <div>
-                <h2 className="font-semibold text-gray-800">Post a Free Job</h2>
+                <h2 className="font-semibold text-gray-800">Post a  Job</h2>
                 <p className="text-sm text-gray-600">
-                  Start for free upgrade anytime
+                  Start posting a jobs.
                 </p>
                 <button
                   onClick={() => router.push("/EmployerDashboard/jobposting")}
                   className="mt-3 px-3 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm md:text-base"
                 >
-                  Post a Free Job
+                  Post a Job
                 </button>
               </div>
             </div>

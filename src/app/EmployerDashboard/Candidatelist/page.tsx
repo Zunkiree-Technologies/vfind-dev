@@ -14,8 +14,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Loader from "../../../../components/loading";
-import Link from "next/link";
 import Footer from "@/app/Admin/components/layout/Footer";
+import EmployerNavbar from "../../EmployerDashboard/components/EmployerNavbar";
+import MainButton from "../../../components/ui/MainButton";
+
+
 
 interface ProfileImage {
   access: string;
@@ -93,8 +96,8 @@ const Pagination: React.FC<PaginationProps> = ({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
           }`}
       >
         <ChevronLeft size={16} />
@@ -111,8 +114,8 @@ const Pagination: React.FC<PaginationProps> = ({
               <button
                 onClick={() => onPageChange(page as number)}
                 className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-gray-900 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
                   }`}
               >
                 {page}
@@ -127,8 +130,8 @@ const Pagination: React.FC<PaginationProps> = ({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
           }`}
       >
         Next
@@ -451,175 +454,194 @@ export default function CandidateList() {
     );
 
   return (
-    <div className="p-6 min-h-screen mx-auto bg-[#F5F6FA]">
-      {/* Top Search Bar */}
-      <div className="flex justify-center items-center sticky top-0 z-50 bg-[#F5F6FA]">
-        <div className="flex items-center w-[950px] border border-gray-300 rounded-lg bg-white overflow-hidden p-1">
-          {/* Search input with icon */}
-          <div className="flex items-center px-3 w-1/2">
-            <Search className="text-gray-400 mr-2" size={18} />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              type="text"
-              placeholder="Search by keyword, designation, company name"
-              className="w-full outline-none py-2"
-            />
+
+    <div className="min-h-screen bg-[#F5F6FA]">
+      {/* Navbar - sticky */}
+      <div className="sticky top-0 z-50">
+        <EmployerNavbar />
+      </div>
+
+      {/* Search Bar - sticky below navbar */}
+      <div className="sticky top-[64px] z-40 bg-[#F5F6FA] py-3">
+        <div className="flex justify-center">
+
+          <div className="flex items-center justify-between w-[95%] max-w-[950px] border border-gray-300 rounded-lg bg-white overflow-hidden p-1">
+            {/* Search Input */}
+            <div className="flex items-center px-3 w-1/2">
+              <Search className="text-gray-400 mr-2" size={18} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                type="text"
+                placeholder="Search by keyword, designation, company name"
+                className="w-full outline-none py-2"
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-6 bg-gray-300" />
+
+            {/* Location Input */}
+            <div className="flex items-center px-3 w-1/3">
+              <MapPin className="text-gray-400 mr-2" size={18} />
+              <input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                type="text"
+                placeholder="City, State or ZIP code"
+                className="w-full outline-none py-2"
+              />
+            </div>
+
+            {/* Search Button */}
+            <MainButton
+              onClick={() => applyFilters()}
+            >
+              <span className="flex items-center gap-2">
+                {" "}
+                <span className="transition-all duration-300 group-hover:-translate-x-1">
+                  {" "}
+                  Search{" "}
+                </span>{" "}
+              </span>
+            </MainButton>
           </div>
-
-          {/* Divider */}
-          <div className="w-px h-6 bg-gray-300" />
-
-          {/* Location input with icon */}
-          <div className="flex items-center px-3 w-1/3">
-            <MapPin className="text-gray-400 mr-2" size={18} />
-            <input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              type="text"
-              placeholder="City, State or ZIP code"
-              className="w-full outline-none py-2"
-            />
-          </div>
-
-          {/* Search button */}
-          <button
-            onClick={() => applyFilters()}
-            className="px-6 py-2 bg-blue-400 text-white font-medium hover:bg-blue-500 rounded-[10px]"
-          >
-            Search
-          </button>
         </div>
       </div>
 
-      <div className="flex gap-6 mt-6 mx-auto container">
-        {/* Left Filters */}
-        <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
-          <h2 className="font-semibold text-gray-800 flex justify-between">
-            All Filters
-            <button onClick={clearFilters} className="text-sm text-blue-600">
-              Clear All
-            </button>
-          </h2>
-          <div className="w-py h-0.5 bg-gray-300" />
+      <div className=" mx-auto bg-[#F5F6FA]">
 
-          {/* Job Type */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
-            {["Full-Time", "Part-Time", "Casual", "Open to any"].map((type) => (
-              <div key={type} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={jobTypes.includes(type)}
-                  onChange={() => handleCheckboxChange(type, setJobTypes)}
-                  className="rounded"
-                />
-                <label>{type}</label>
-              </div>
-            ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Shift */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Shift</h3>
-            {["Morning", "Afternoon", "Night"].map((shift) => (
-              <div key={shift} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={shifts.includes(shift)}
-                  onChange={() => handleCheckboxChange(shift, setShifts)}
-                  className="rounded"
-                />
-                <label>{shift}</label>
-              </div>
-            ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Role Category */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">
-              Role Category
-            </h3>
-            {[
-              "Clinical Lead / Manager",
-              "Registered Nurse (RN)",
-              "Enrolled Nurse (EN)",
-              "Assistant in Nursing (AIN)",
-              "Personal Care Assistant (PCA)",
-              "Attendant",
-              "Support Worker",
-              "Nursing Assistant",
-            ].map((role) => (
-              <div key={role} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={roleCategories.includes(role)}
-                  onChange={() =>
-                    handleCheckboxChange(role, setRoleCategories)
-                  }
-                  className="rounded"
-                />
-                <label>{role}</label>
-              </div>
-            ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Experience */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">
-              Experience
-            </h3>
-            {Object.keys(experienceRanges).map((exp) => (
-              <div key={exp} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={experience.includes(exp)}
-                  onChange={() => handleCheckboxChange(exp, setExperience)}
-                  className="rounded"
-                />
-                <label>{exp}</label>
-              </div>
-            ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
+        <div className="flex gap-6 mt-18 mx-auto container ">
+          {/* Left Filters */}
+          <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-18 h-[calc(100vh-3rem)] overflow-y-auto">
+            <h2 className="font-semibold text-gray-800 flex justify-between">
+              All Filters
+              <button onClick={clearFilters} className="text-sm text-blue-400">
+                Clear All
+              </button>
+            </h2>
+            <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Visa Status */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">
-              Visa Status
-            </h3>
-            {["Permanent", "Temporary", "Citizen"].map((status) => (
-              <div key={status} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={visaStatus.includes(status)}
-                  onChange={() => handleCheckboxChange(status, setVisaStatus)}
-                  className="rounded"
-                />
-                <label>{status}</label>
-              </div>
-            ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
+            {/* Job Type */}
+            <div>
+              <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
+              {["Full-Time", "Part-Time", "Casual", "Open to any"].map((type) => (
+                <div key={type} className="flex items-center gap-2 text-sm mb-1">
+                  <input
+                    type="checkbox"
+                    checked={jobTypes.includes(type)}
+                    onChange={() => handleCheckboxChange(type, setJobTypes)}
+                    className="rounded"
+                  />
+                  <label>{type}</label>
+                </div>
+              ))}
+            </div>
+            <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Pay Rate Slider */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Pay Rate</h3>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={payRate}
-              onChange={(e) => setPayRate(Number(e.target.value))}
-              className="w-full"
-            />
-            <div className="text-sm text-gray-600">${payRate}+/hr</div>
-          </div>
+            {/* Shift */}
+            <div>
+              <h3 className="font-medium text-sm text-gray-700 mb-2">Shift</h3>
+              {["Morning", "Afternoon", "Night"].map((shift) => (
+                <div key={shift} className="flex items-center gap-2 text-sm mb-1">
+                  <input
+                    type="checkbox"
+                    checked={shifts.includes(shift)}
+                    onChange={() => handleCheckboxChange(shift, setShifts)}
+                    className="rounded"
+                  />
+                  <label>{shift}</label>
+                </div>
+              ))}
+            </div>
+            <div className="w-py h-0.5 bg-gray-300" />
 
-          {/* Radius Slider
+            {/* Role Category */}
+            <div>
+              <h3 className="font-medium text-sm text-gray-700 mb-2">
+                Role Category
+              </h3>
+              {[
+                "Clinical Lead / Manager",
+                "Registered Nurse (RN)",
+                "Enrolled Nurse (EN)",
+                "Assistant in Nursing (AIN)",
+                "Personal Care Assistant (PCA)",
+                "Attendant",
+                "Support Worker",
+                "Nursing Assistant",
+              ].map((role) => (
+                <div key={role} className="flex items-center gap-2 text-sm mb-1">
+                  <input
+                    type="checkbox"
+                    checked={roleCategories.includes(role)}
+                    onChange={() =>
+                      handleCheckboxChange(role, setRoleCategories)
+                    }
+                    className="rounded"
+                  />
+                  <label>{role}</label>
+                </div>
+              ))}
+            </div>
+            <div className="w-py h-0.5 bg-gray-300" />
+
+            {/* Experience */}
+            <div>
+              <h3 className="font-medium text-sm text-gray-700 mb-2">
+                Experience
+              </h3>
+              {Object.keys(experienceRanges).map((exp) => (
+                <div key={exp} className="flex items-center gap-2 text-sm mb-1">
+                  <input
+                    type="checkbox"
+                    checked={experience.includes(exp)}
+                    onChange={() => handleCheckboxChange(exp, setExperience)}
+                    className="rounded"
+                  />
+                  <label>{exp}</label>
+                </div>
+              ))}
+            </div>
+            <div className="w-py h-0.5 bg-gray-300" />
+
+            {/* Visa Status */}
+            <div>
+              <h3 className="font-medium text-sm text-gray-700 mb-2">
+                Visa Status
+              </h3>
+              {["Permanent", "Temporary", "Citizen"].map((status) => (
+                <div key={status} className="flex items-center gap-2 text-sm mb-1">
+                  <input
+                    type="checkbox"
+                    checked={visaStatus.includes(status)}
+                    onChange={() => handleCheckboxChange(status, setVisaStatus)}
+                    className="rounded"
+                  />
+                  <label>{status}</label>
+                </div>
+              ))}
+            </div>
+            <div className="w-py h-0.5 bg-gray-300" />
+
+            {/* Pay Rate Slider */}
+            <div>
+              <h3 className="font-medium text-sm text-gray-700 mb-2">Pay Rate</h3>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={payRate}
+                onChange={(e) => setPayRate(Number(e.target.value))}
+                className="w-full"
+              />
+              <div className="text-sm text-gray-600">${payRate}+/hr</div>
+            </div>
+
+            {/* Radius Slider
           <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Radius</h3>
             <input
@@ -632,128 +654,137 @@ export default function CandidateList() {
             />
             <div className="text-sm text-gray-600">{radius} km</div>
           </div> */}
-        </div>
-
-        {/* Right Candidate List */}
-        <div className="flex-1">
-          {/* Candidates */}
-          <div className="space-y-4">
-            {currentCandidates.map((candidate) => {
-              let jobTypesArray: string[] = [];
-              try {
-                if (candidate.jobTypes) {
-                  jobTypesArray = JSON.parse(candidate.jobTypes);
-                }
-              } catch {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                jobTypesArray = [];
-              }
-
-              return (
-                <div
-                  key={candidate.id}
-                  className="flex justify-between items-center bg-white max-w-[983px] rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2 "
-                >
-                  {/* Left side content */}
-                  <div className="flex-1">
-                    <h2 className="font-semibold text-lg text-[#61A6FA] mb-1">
-                      {candidate.fullName}
-                    </h2>
-                    <p className="text-regular mb-3">
-                      {candidate.qualification || "Qualification not specified"}
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
-                      {/* Location */}
-                      <div className="flex items-center gap-1">
-                        <MapPin size={16} />
-                        <span>{candidate.currentResidentialLocation || "Location not specified"}</span>
-                      </div>
-
-                      {/* Email */}
-                      <div className="flex items-center gap-1">
-                        <Mail size={16} />
-                        <span>{candidate.email || "Not specified"}</span>
-                      </div>
-
-                      {/* Pay Rate */}
-                      <div className="flex items-center gap-1">
-                        <DollarSign size={16} />
-                        <span>{candidate.maxWorkHours ? `$${candidate.maxWorkHours}/hr` : "Not specified"}</span>
-                      </div>
-
-                      {/* Experience */}
-                      <div className="flex items-center gap-1">
-                        <Clock1 size={16} className="text-blue-500" />
-                        <span>{candidate.experience || "Not specified"}</span>
-                      </div>
-
-                      {/* Job Type */}
-                      <div className="flex items-center gap-1">
-                        <Briefcase size={16} />
-                        <span>{candidate.jobTypes || "Not specified"}</span>
-                      </div>
-
-                      {/* Shift */}
-                      <div className="flex items-center gap-1">
-                        <Clock size={16} />
-                        <span>
-                          {candidate.shiftPreferences.length > 0
-                            ? candidate.shiftPreferences.join(", ")
-                            : "Not specified"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right side - Photo and button */}
-                  <div className="flex items-center gap-4 ml-6 flex-col">
-                    {/* Circular Profile Image */}
-                    <div className="h-16 w-16 rounded-full overflow-hidden border flex-shrink-0">
-                      {candidate.profileImage ? (
-                        <Image
-                          src={BASE_IMAGE_URL + candidate.profileImage.path}
-                          alt={candidate.fullName}
-                          className="h-full w-full object-cover"
-                          width={64}
-                          height={64}
-                        />
-                      ) : (
-                        <div className="h-full w-full bg-gray-300 flex items-center justify-center text-gray-500 text-xs">
-                          No Photo
-                        </div>
-                      )}
-                    </div>
-
-                    {/* View Details Button */}
-                    <Link
-                      href={`/EmployerDashboard/Candidatelist/${candidate.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                </div>
-              );
-
-            })}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          )}
+          {/* Right Candidate List */}
+          <div className="flex-1">
+            {/* Candidates */}
+            <div className="space-y-4">
+              {currentCandidates.map((candidate) => {
+                let jobTypesArray: string[] = [];
+                try {
+                  if (candidate.jobTypes) {
+                    jobTypesArray = JSON.parse(candidate.jobTypes);
+                  }
+                } catch {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  jobTypesArray = [];
+                }
+
+                return (
+                  <div
+                    key={candidate.id}
+                    className="flex justify-between items-center bg-white max-w-[983px] rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2 "
+                  >
+                    {/* Left side content */}
+                    <div className="flex-1">
+                      <h2 className="font-semibold text-lg text-[#61A6FA] mb-1">
+                        {candidate.fullName}
+                      </h2>
+                      <p className="text-regular mb-3">
+                        {candidate.qualification || "Qualification not specified"}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
+                        {/* Location */}
+                        <div className="flex items-center gap-1">
+                          <MapPin size={16} />
+                          <span>{candidate.currentResidentialLocation || "Location not specified"}</span>
+                        </div>
+
+                        {/* Email */}
+                        <div className="flex items-center gap-1">
+                          <Mail size={16} />
+                          <span>{candidate.email || "Not specified"}</span>
+                        </div>
+
+                        {/* Pay Rate */}
+                        <div className="flex items-center gap-1">
+                          <DollarSign size={16} />
+                          <span>{candidate.maxWorkHours ? `$${candidate.maxWorkHours}/hr` : "Not specified"}</span>
+                        </div>
+
+                        {/* Experience */}
+                        <div className="flex items-center gap-1">
+                          <Clock1 size={16} className="text-blue-500" />
+                          <span>{candidate.experience || "Not specified"}</span>
+                        </div>
+
+                        {/* Job Type */}
+                        <div className="flex items-center gap-1">
+                          <Briefcase size={16} />
+                          <span>{candidate.jobTypes || "Not specified"}</span>
+                        </div>
+
+                        {/* Shift */}
+                        <div className="flex items-center gap-1">
+                          <Clock size={16} />
+                          <span>
+                            {candidate.shiftPreferences.length > 0
+                              ? candidate.shiftPreferences.join(", ")
+                              : "Not specified"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right side - Photo and button */}
+                    <div className="flex items-center gap-4 ml-6 flex-col">
+                      {/* Circular Profile Image */}
+                      <div className="h-16 w-16 rounded-full overflow-hidden border flex-shrink-0">
+                        {candidate.profileImage ? (
+                          <Image
+                            src={BASE_IMAGE_URL + candidate.profileImage.path}
+                            alt={candidate.fullName}
+                            className="h-full w-full object-cover"
+                            width={64}
+                            height={64}
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-gray-300 flex items-center justify-center text-gray-500 text-xs">
+                            No Photo
+                          </div>
+                        )}
+                      </div>
+
+                      {/* View Details Button */}
+                      <MainButton
+                        href={`/EmployerDashboard/Candidatelist/${candidate.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                         <span className="flex items-center gap-2">
+                                {" "}
+                                <span className="transition-all duration-300 group-hover:-translate-x-1">
+                                  {" "}
+                                  View Details{" "}
+                                </span>{" "}
+                              </span>
+                      </MainButton>
+                    </div>
+                  </div>
+                );
+
+              })}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </div>
+        </div>
+
+
+        <div className="bg-white">
+          <Footer />
         </div>
       </div>
-      <div className="bg-white">
-              <Footer />
-            </div>
     </div>
+
   );
 }
