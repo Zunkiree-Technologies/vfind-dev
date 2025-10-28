@@ -83,8 +83,8 @@ const Pagination: React.FC<PaginationProps> = ({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
           }`}
       >
         <ChevronLeft size={16} />
@@ -100,8 +100,8 @@ const Pagination: React.FC<PaginationProps> = ({
               <button
                 onClick={() => onPageChange(page as number)}
                 className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-gray-900 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
                   }`}
               >
                 {page}
@@ -115,8 +115,8 @@ const Pagination: React.FC<PaginationProps> = ({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
           }`}
       >
         Next
@@ -248,7 +248,7 @@ const AppliedJobs = () => {
         <div className="flex gap-6 mt-6 items-start">
           <div className="mx-auto container flex justify-center items-center">
             <div className="flex-1 max-w-[983px]">
-              <h1 className="text-3xl font-bold text-gray-900 mb-6">Applied Jobs</h1>
+              <h1 className="text-3xl font-bold ml-2 text-primary mb-6">Applied Jobs</h1>
 
               {jobs.length === 0 ? (
                 <div className="text-center bg-white rounded-lg p-12 shadow-sm">

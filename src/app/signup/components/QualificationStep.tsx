@@ -3,11 +3,13 @@ import { Check } from "lucide-react";
 
 export function QualificationStep({ formData, handleChange }: StepProps) {
     const options = [
+        "AIN (Assistant in Nursing)",
+        "EN (Enrolled Nurse)",
+        "RN (Registered Nurse)",
+        "SW (Support Worker)",
         "Clinical Lead / Manager",
-        "Registered Nurse (RN)",
-        "Enrolled Nurse (EN)",
-        "Assistant in Nursing (AIN)",
-        "Other",
+        "Other"
+
     ];
 
     return (
@@ -22,9 +24,8 @@ export function QualificationStep({ formData, handleChange }: StepProps) {
                     return (
                         <label key={opt} className="flex items-center gap-2 cursor-pointer">
                             <div
-                                className={`w-5 h-5 flex items-center justify-center border-2 ${
-                                    isSelected ? "border-blue-500 bg-blue-500" : "border-gray-400"
-                                }`}
+                                className={`w-5 h-5 flex items-center justify-center border-2 ${isSelected ? "border-blue-500 bg-blue-500" : "border-gray-400"
+                                    }`}
                                 onClick={() => handleChange("qualification", opt)}
                             >
                                 {isSelected && <Check className="h-3 w-3 text-white" />}

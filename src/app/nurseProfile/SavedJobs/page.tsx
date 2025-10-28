@@ -93,11 +93,10 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          currentPage === 1
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
             ? "text-gray-400 cursor-not-allowed"
             : "text-gray-600 hover:bg-gray-100"
-        }`}
+          }`}
       >
         <ChevronLeft size={16} /> Previous
       </button>
@@ -109,11 +108,10 @@ const Pagination: React.FC<PaginationProps> = ({
             ) : (
               <button
                 onClick={() => onPageChange(page as number)}
-                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${
-                  currentPage === page
+                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
                     ? "bg-gray-900 text-white"
                     : "text-gray-600 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 {page}
               </button>
@@ -124,11 +122,10 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          currentPage === totalPages
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
             ? "text-gray-400 cursor-not-allowed"
             : "text-gray-600 hover:bg-gray-100"
-        }`}
+          }`}
       >
         Next <ChevronRight size={16} />
       </button>
@@ -181,11 +178,11 @@ export default function SavedJobs() {
       const list = Array.isArray(data.result1)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? data.result1.map((item: any) => ({
-            ...item._jobs, // spread the actual job details
-            savedId: item.id, // optional: keep the saved job record id
-            
-            
-          }))
+          ...item._jobs, // spread the actual job details
+          savedId: item.id, // optional: keep the saved job record id
+
+
+        }))
         : [];
 
       console.log("Jobs list:", list);
@@ -252,8 +249,8 @@ export default function SavedJobs() {
       temp = temp.filter((job) =>
         job.type
           ? typeFilter.some((t) =>
-              normalizeStr(job.type).includes(normalizeStr(t))
-            )
+            normalizeStr(job.type).includes(normalizeStr(t))
+          )
           : false
       );
     }
@@ -350,8 +347,12 @@ export default function SavedJobs() {
     <div>
       <Navbar />
       <div className="p-4 min-h-screen bg-[#F5F6FA]">
+        <h1 className="text-3xl font-bold  ml-158  text-primary mb-6">Saved Jobs</h1>
+
         <div className="flex gap-6 mt-6 items-start">
+
           <div className="mx-auto container flex justify-center item-center gap-8">
+
             {/* Filters Sidebar */}
             <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-[60px] h-fit overflow-y-auto scrollbar-hide">
               <h2 className="font-semibold text-gray-800 flex justify-between">
@@ -492,11 +493,10 @@ export default function SavedJobs() {
                           <Calendar size={16} />
                           <span>
                             {job.experienceMin
-                              ? `${job.experienceMin}${
-                                  job.experienceMax
-                                    ? ` - ${job.experienceMax}`
-                                    : ""
-                                } years`
+                              ? `${job.experienceMin}${job.experienceMax
+                                ? ` - ${job.experienceMax}`
+                                : ""
+                              } years`
                               : "Not specified"}
                           </span>
                         </div>
@@ -517,13 +517,13 @@ export default function SavedJobs() {
                           <span>
                             {job.created_at
                               ? new Date(job.created_at).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                  }
-                                )
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                }
+                              )
                               : "Date not available"}
                           </span>
                         </div>
@@ -562,9 +562,9 @@ export default function SavedJobs() {
           </div>
         </div>
       </div>
-         <div>
-              <Footer/>
-            </div>
+      <div>
+        <Footer />
+      </div>
     </div>
   );
 }

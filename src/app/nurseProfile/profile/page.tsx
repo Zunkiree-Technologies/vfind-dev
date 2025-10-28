@@ -12,7 +12,6 @@ import {
   Clock,
   Shield,
   Edit,
-  Save,
   X,
   Trash2,
   ChevronDown,
@@ -77,6 +76,8 @@ interface NurseProfile {
   registrationNumber: string;
   ahprRegistrationExpiry: string;
   workExperiences?: WorkExperience[];
+  isCustomResidency?: boolean;
+  isCustomDate?: boolean;
 }
 
 interface CollapsibleSectionProps {
@@ -121,6 +122,7 @@ export default function NurseProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [educationList, setEducationList] = useState<Education[]>([]);
+
   const [workExperienceList, setWorkExperienceList] = useState<
     WorkExperience[]
   >([]);
@@ -130,6 +132,7 @@ export default function NurseProfilePage() {
   const [isEditingWorkExperience, setIsEditingWorkExperience] = useState<
     number | null
   >(null);
+
 
   // Independent edit states for each section
   const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false);
@@ -1029,7 +1032,7 @@ export default function NurseProfilePage() {
                     onChange={(e) =>
                       handleBasicInfoChange("fullName", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 ) : (
                   <p className="text-gray-900">{profile.fullName}</p>
@@ -1054,7 +1057,7 @@ export default function NurseProfilePage() {
                     onChange={(e) =>
                       handleBasicInfoChange("phoneNumber", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 ) : (
                   <p className="text-gray-900">{profile.phoneNumber}</p>
@@ -1078,7 +1081,7 @@ export default function NurseProfilePage() {
                         e.target.value
                       )
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 ) : (
                   <p className="text-gray-900">
@@ -1098,7 +1101,7 @@ export default function NurseProfilePage() {
                     onChange={(e) =>
                       handleBasicInfoChange("postcode", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 ) : (
                   <p className="text-gray-900">
@@ -1120,7 +1123,7 @@ export default function NurseProfilePage() {
                     onChange={(e) =>
                       handleBasicInfoChange("willingToRelocate", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -1171,21 +1174,62 @@ export default function NurseProfilePage() {
 
             {/* Visa & Residency Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
                   Residency / Visa Status
                 </label>
+
                 {isEditingVisaResidency ? (
-                  <input
-                    type="text"
-                    value={
-                      editedVisaInfo.residencyStatus ?? profile.residencyStatus
-                    }
-                    onChange={(e) =>
-                      handleVisaInfoChange("residencyStatus", e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                  />
+                  <div className="relative">
+                    {editedVisaInfo.isCustomResidency ? (
+                      <input
+                        type="text"
+                        placeholder="Type your residency status"
+                        value={editedVisaInfo.residencyStatus || ""}
+                        onChange={(e) =>
+                          handleVisaInfoChange("residencyStatus", e.target.value)
+                        }
+                        onBlur={() => {
+                          if (!editedVisaInfo.residencyStatus) {
+                            setEditedVisaInfo((prev) => ({
+                              ...prev,
+                              isCustomResidency: false,
+                            }));
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg "
+                      />
+                    ) : (
+                      <select
+                        value={editedVisaInfo.residencyStatus ?? profile.residencyStatus}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === "Other") {
+                            setEditedVisaInfo((prev) => ({
+                              ...prev,
+                              residencyStatus: "",
+                              isCustomResidency: true,
+                            }));
+                          } else {
+                            handleVisaInfoChange("residencyStatus", value);
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg "
+                      >
+                        <option value="">Select Residency / Visa Status</option>
+                        <option value="Australian Citizen / Permanent Resident">
+                          Australian Citizen / Permanent Resident
+                        </option>
+                        <option value="Temporary Resident">Temporary Resident</option>
+                        <option value="Student Visa">Student Visa</option>
+                        <option value="Student Dependent Visa">Student Dependent Visa</option>
+                        <option value="Working Holiday Visa">Working Holiday Visa</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    )}
+                  </div>
                 ) : (
                   <p className="text-gray-900">
                     {profile.residencyStatus || "Not specified"}
@@ -1193,9 +1237,11 @@ export default function NurseProfilePage() {
                 )}
               </div>
 
+
+
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  Visa Type
+                  Visa Number
                 </label>
                 {isEditingVisaResidency ? (
                   <input
@@ -1204,7 +1250,7 @@ export default function NurseProfilePage() {
                     onChange={(e) =>
                       handleVisaInfoChange("visaType", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 ) : (
                   <p className="text-gray-900">
@@ -1224,7 +1270,7 @@ export default function NurseProfilePage() {
                     onChange={(e) =>
                       handleVisaInfoChange("visaExpiry", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 ) : (
                   <p className="text-gray-900">
@@ -1249,7 +1295,7 @@ export default function NurseProfilePage() {
                         e.target.value
                       )
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -1265,29 +1311,29 @@ export default function NurseProfilePage() {
                 editedVisaInfo.workHoursRestricted === "Yes") ||
                 (!isEditingVisaResidency &&
                   profile.workHoursRestricted === "Yes")) && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">
-                    Work Restriction Details
-                  </label>
-                  {isEditingVisaResidency ? (
-                    <input
-                      type="text"
-                      value={
-                        editedVisaInfo.maxWorkHours ?? profile.maxWorkHours
-                      }
-                      onChange={(e) =>
-                        handleVisaInfoChange("maxWorkHours", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                      placeholder="e.g., 20 hours per week"
-                    />
-                  ) : (
-                    <p className="text-gray-900">
-                      {profile.maxWorkHours || "Not specified"}
-                    </p>
-                  )}
-                </div>
-              )}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Work Restriction Details
+                    </label>
+                    {isEditingVisaResidency ? (
+                      <input
+                        type="text"
+                        value={
+                          editedVisaInfo.maxWorkHours ?? profile.maxWorkHours
+                        }
+                        onChange={(e) =>
+                          handleVisaInfoChange("maxWorkHours", e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                        placeholder="e.g., 20 hours per week"
+                      />
+                    ) : (
+                      <p className="text-gray-900">
+                        {profile.maxWorkHours || "Not specified"}
+                      </p>
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         </CollapsibleSection>
@@ -1343,7 +1389,7 @@ export default function NurseProfilePage() {
                     onChange={(e) =>
                       handleAhpraInfoChange("ahpraRegistration", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -1372,7 +1418,7 @@ export default function NurseProfilePage() {
                         e.target.value
                       )
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     placeholder="Enter registration number"
                   />
                 ) : (
@@ -1399,7 +1445,7 @@ export default function NurseProfilePage() {
                         e.target.value
                       )
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 ) : (
                   <p className="text-gray-900">
@@ -1543,7 +1589,7 @@ export default function NurseProfilePage() {
                               newList[index].degree_name = e.target.value;
                               setEducationList(newList);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg "
                           />
                         </div>
 
@@ -1559,7 +1605,7 @@ export default function NurseProfilePage() {
                               newList[index].institution_name = e.target.value;
                               setEducationList(newList);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg "
                           />
                         </div>
 
@@ -1568,30 +1614,31 @@ export default function NurseProfilePage() {
                             From Year
                           </label>
                           <input
-                            type="text"
+                            type="date"
                             value={edu.from_year}
                             onChange={(e) => {
                               const newList = [...educationList];
                               newList[index].from_year = e.target.value;
                               setEducationList(newList);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg "
                           />
                         </div>
+
 
                         <div>
                           <label className="text-sm font-medium text-gray-700 mb-1 block">
                             To Year
                           </label>
                           <input
-                            type="text"
+                            type="date"
                             value={edu.to_year}
                             onChange={(e) => {
                               const newList = [...educationList];
                               newList[index].to_year = e.target.value;
                               setEducationList(newList);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg "
                           />
                         </div>
                       </div>
@@ -1770,7 +1817,7 @@ export default function NurseProfilePage() {
                               newList[index].organization_name = e.target.value;
                               setWorkExperienceList(newList);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg "
                           />
                         </div>
 
@@ -1786,7 +1833,7 @@ export default function NurseProfilePage() {
                               newList[index].role_title = e.target.value;
                               setWorkExperienceList(newList);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg "
                           />
                         </div>
 
@@ -1803,7 +1850,7 @@ export default function NurseProfilePage() {
                                 e.target.value;
                               setWorkExperienceList(newList);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg "
                           />
                         </div>
 
@@ -1819,7 +1866,7 @@ export default function NurseProfilePage() {
                               newList[index].start_date = e.target.value;
                               setWorkExperienceList(newList);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg "
                           />
                         </div>
 
@@ -1835,7 +1882,7 @@ export default function NurseProfilePage() {
                               newList[index].end_date = e.target.value;
                               setWorkExperienceList(newList);
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg "
                           />
                         </div>
                       </div>
@@ -1896,22 +1943,24 @@ export default function NurseProfilePage() {
                 </button>
               ) : (
                 <div className="flex gap-2">
-                  <button
+                  <MainButton
                     onClick={handleCancelCertInfo}
                     disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
                   >
-                    <X className="w-4 h-4" />
-                    Cancel
-                  </button>
-                  <button
+                    <span className="flex items-center gap-2 ">
+                      {" "}
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        {" "}
+                        Cancel{" "}
+                      </span>{" "}
+                    </span>
+                  </MainButton>
+                  <MainButton
                     onClick={handleSaveCertInfo}
                     disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50"
                   >
-                    <Save className="w-4 h-4" />
                     {saving ? "Saving..." : "Save"}
-                  </button>
+                  </MainButton>
                 </div>
               )}
             </div>
@@ -1943,7 +1992,7 @@ export default function NurseProfilePage() {
                       e.target.value = "";
                     }
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="">Select a certification</option>
                   <option value="AHPRA Registration">AHPRA Registration</option>
@@ -1960,6 +2009,12 @@ export default function NurseProfilePage() {
                   </option>
                   <option value="NDIS Worker Screening">
                     NDIS Worker Screening
+                  </option>
+                  <option value=" Certificate lll in Individual Support">
+                    Certificate lll in Individual Support
+                  </option>
+                  <option value=" Certificate lV in Individual Support">
+                    Certificate lV in Individual Support
                   </option>
                 </select>
               </div>
@@ -1986,25 +2041,27 @@ export default function NurseProfilePage() {
                     currentCerts.map((cert, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 px-3 py-2  rounded-lg text-sm font-medium "
+                        className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200"
+
                       >
+
                         <span>{cert}</span>
+
                         {isEditingCertifications && (
                           <button
                             type="button"
                             onClick={() => {
-                              const newCerts = currentCerts.filter(
-                                (item) => item !== cert
-                              );
+                              const newCerts = currentCerts.filter((item) => item !== cert);
                               handleCertInfoChange("certifications", newCerts);
                             }}
-                            className="text-blue-400 hover: transition-colors ml-1"
+                            className="text-blue-400 hover:text-blue-600 transition-colors ml-1"
                             aria-label={`Remove ${cert}`}
                           >
                             <X className="w-4 h-4" />
                           </button>
                         )}
                       </div>
+
                     ))
                   ) : (
                     <p className="text-gray-400 text-sm italic py-2">
@@ -2078,13 +2135,13 @@ export default function NurseProfilePage() {
                         e.target.value = "";
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="">Select job type</option>
                     <option value="Full time">Full time</option>
                     <option value="Part time">Part time</option>
                     <option value="Casual">Casual</option>
-                    <option value="Contract">Contract</option>
+                    <option value="Temporary Contract">Temporary Contract</option>
                     <option value="Open to any">Open to any</option>
                   </select>
                 )}
@@ -2103,22 +2160,26 @@ export default function NurseProfilePage() {
                         <div
                           key={idx}
                           className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200"
+
+
                         >
+
                           <span>{type}</span>
+
                           {isEditingWorkPreferences && (
                             <button
                               onClick={() => {
-                                const newTypes = currentJobTypes.filter(
-                                  (item) => item !== type
-                                );
+                                const newTypes = currentJobTypes.filter((item) => item !== type);
                                 handleWorkPrefChange("jobTypes", newTypes);
                               }}
                               className="text-blue-500 transition-colors ml-1"
+                              aria-label={`Remove ${type}`}
                             >
                               <X className="w-4 h-4" />
                             </button>
                           )}
                         </div>
+
                       ))
                     ) : (
                       <p className="text-gray-400 text-sm italic py-2">
@@ -2146,14 +2207,14 @@ export default function NurseProfilePage() {
                     onChange={(e) =>
                       handleWorkPrefChange("openToOtherTypes", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="">Select option</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
                   </select>
                 ) : (
-                  <p className="text-gray-900">
+                  <p className="flex items-center w-fit gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200">
                     {profile.openToOtherTypes || "Not specified"}
                   </p>
                 )}
@@ -2188,7 +2249,7 @@ export default function NurseProfilePage() {
                         e.target.value = "";
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="">Select shift preference</option>
                     <option value="Morning">Morning</option>
@@ -2201,7 +2262,7 @@ export default function NurseProfilePage() {
                   {(() => {
                     const currentShifts =
                       isEditingWorkPreferences &&
-                      editedWorkPrefInfo.shiftPreferences
+                        editedWorkPrefInfo.shiftPreferences
                         ? Array.isArray(editedWorkPrefInfo.shiftPreferences)
                           ? editedWorkPrefInfo.shiftPreferences
                           : parseValues(editedWorkPrefInfo.shiftPreferences)
@@ -2212,6 +2273,8 @@ export default function NurseProfilePage() {
                         <div
                           key={idx}
                           className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200"
+
+
                         >
                           <span>{shift}</span>
                           {isEditingWorkPreferences && (
@@ -2259,12 +2322,12 @@ export default function NurseProfilePage() {
                         const currentLocations =
                           editedWorkPrefInfo.preferredLocations
                             ? Array.isArray(
-                                editedWorkPrefInfo.preferredLocations
-                              )
+                              editedWorkPrefInfo.preferredLocations
+                            )
                               ? editedWorkPrefInfo.preferredLocations
                               : parseValues(
-                                  editedWorkPrefInfo.preferredLocations
-                                )
+                                editedWorkPrefInfo.preferredLocations
+                              )
                             : preferredLocationsArray;
 
                         if (!currentLocations.includes(value)) {
@@ -2276,17 +2339,17 @@ export default function NurseProfilePage() {
                         e.target.value = "";
                       }
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
                     <option value="">Select location</option>
-                    <option value="Sydney">Sydney</option>
-                    <option value="Melbourne">Melbourne</option>
-                    <option value="Brisbane">Brisbane</option>
-                    <option value="Perth">Perth</option>
-                    <option value="Adelaide">Adelaide</option>
-                    <option value="Canberra">Canberra</option>
-                    <option value="Hobart">Hobart</option>
-                    <option value="Darwin">Darwin</option>
+                    <option value="New South Wales (NSW)"> New South Wales (NSW)</option>
+                    <option value="Victoria (VIC)">Victoria (VIC)</option>
+                    <option value="Queensland (QLD)">Queensland (QLD)</option>
+                    <option value="Western Australia (WA)">Western Australia (WA)</option>
+                    <option value="South Australia (SA)">South Australia (SA)</option>
+                    <option value="Tasmania (TAS)">Tasmania (TAS)</option>
+                    <option value="Australian Capital Territory (ACT)">Australian Capital Territory (ACT)</option>
+                    <option value="Northern Territory (NT)">Northern Territory (NT)</option>
                   </select>
                 )}
 
@@ -2294,7 +2357,7 @@ export default function NurseProfilePage() {
                   {(() => {
                     const currentLocations =
                       isEditingWorkPreferences &&
-                      editedWorkPrefInfo.preferredLocations
+                        editedWorkPrefInfo.preferredLocations
                         ? Array.isArray(editedWorkPrefInfo.preferredLocations)
                           ? editedWorkPrefInfo.preferredLocations
                           : parseValues(editedWorkPrefInfo.preferredLocations)
@@ -2305,8 +2368,11 @@ export default function NurseProfilePage() {
                         <div
                           key={idx}
                           className="flex items-center gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200"
+
+
                         >
                           <span>{location}</span>
+
                           {isEditingWorkPreferences && (
                             <button
                               onClick={() => {
@@ -2341,33 +2407,65 @@ export default function NurseProfilePage() {
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Available to Start
                 </label>
+
                 {isEditingWorkPreferences ? (
-                  <select
-                    value={
-                      editedWorkPrefInfo.startTime ?? profile.startTime ?? ""
-                    }
-                    onChange={(e) =>
-                      handleWorkPrefChange("startTime", e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                  >
-                    <option value="">Select availability</option>
-                    <option value="Immediately">Immediately</option>
-                    <option value="Within 2 weeks">Within 2 weeks</option>
-                    <option value="Within 1 month">Within 1 month</option>
-                  </select>
+                  <div className="relative">
+                    {/* Dropdown */}
+                    <select
+                      value={
+                        editedWorkPrefInfo.startTime ?? profile.startTime ?? ""
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "Pick a date") {
+                          // trigger date mode
+                          handleWorkPrefChange("startTime", "");
+                          setEditedWorkPrefInfo((prev) => ({
+                            ...prev,
+                            isCustomDate: true,
+                          }));
+                        } else {
+                          setEditedWorkPrefInfo((prev) => ({
+                            ...prev,
+                            isCustomDate: false,
+                          }));
+                          handleWorkPrefChange("startTime", value);
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="">Select availability</option>
+                      <option value="Immediately">Immediately</option>
+                      <option value="Within 2 weeks">Within 2 weeks</option>
+                      <option value="Within 1 month">Within 1 month</option>
+                      <option value="Pick a date">Pick a specific date</option>
+                    </select>
+
+                    {/* Date picker (only shows when “Pick a date” is selected) */}
+                    {editedWorkPrefInfo.isCustomDate && (
+                      <input
+                        type="date"
+                        value={editedWorkPrefInfo.startTime || ""}
+                        onChange={(e) => handleWorkPrefChange("startTime", e.target.value)}
+                        className="w-full mt-3 px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    )}
+                  </div>
                 ) : (
-                  <p className="text-gray-900">
+                  <p className="flex w-fit items-center gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200"
+                  >
                     {profile.startTime || profile.startDate || "Not specified"}
                   </p>
                 )}
               </div>
+
+
             </div>
           </div>
         </CollapsibleSection>
       </div>
 
-      
+
       <div className="bg-white">
         <Footer />
       </div>

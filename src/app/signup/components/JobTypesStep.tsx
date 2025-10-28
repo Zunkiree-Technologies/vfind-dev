@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 
 
 export function JobTypesStep({ formData, handleChange }: StepProps) {
-    const jobOptions = ["Full-time", "Part-time", "Casual", "Open to any"];
+    const jobOptions = ["Full-time", "Part-time", "Casual"," Temporary Contract", "Open to any"];
 
     return (
         <>

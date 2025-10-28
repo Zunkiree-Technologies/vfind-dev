@@ -40,6 +40,7 @@ interface NurseProfile {
   phoneNumber?: string;
   qualification?: string;
   profileImage?: ProfileImage | null;
+  openToOtherTypes?:string;
 }
 
 interface PaginationProps {
@@ -470,7 +471,7 @@ export default function WishlistNurses() {
 
       <div className="flex gap-6 mt-12 mx-auto container">
         {/* Left Filters */}
-        <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
+        <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-18 h-[calc(100vh-3rem)] overflow-y-auto">
           <h2 className="font-semibold text-gray-800 flex justify-between">
             All Filters
             <button onClick={clearFilters} className="text-sm text-blue-400">
@@ -482,7 +483,7 @@ export default function WishlistNurses() {
           {/* Job Type */}
           <div>
             <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
-            {["Full-Time", "Part-Time", "Casual", "Open to any"].map((type) => (
+            {["Full-time", "Part-time", "Casual", " Temporary Contract", "Open to any"].map((type) => (
               <div key={type} className="flex items-center gap-2 text-sm mb-1">
                 <input
                   type="checkbox"
@@ -567,17 +568,22 @@ export default function WishlistNurses() {
             <h3 className="font-medium text-sm text-gray-700 mb-2">
               Visa Status
             </h3>
-            {["Permanent", "Temporary", "Citizen"].map((status) => (
-              <div key={status} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={visaStatus.includes(status)}
-                  onChange={() => handleCheckboxChange(status, setVisaStatus)}
-                  className="rounded"
-                />
-                <label>{status}</label>
-              </div>
-            ))}
+            {["Australian Citizen / Permanent Resident",
+              "Temporary Resident",
+              "Student Visa ",
+              "Student Dependent Visa ",
+              "Working Holiday Visa ",
+              "Other",].map((status) => (
+                <div key={status} className="flex items-center gap-2 text-sm mb-1">
+                  <input
+                    type="checkbox"
+                    checked={visaStatus.includes(status)}
+                    onChange={() => handleCheckboxChange(status, setVisaStatus)}
+                    className="rounded"
+                  />
+                  <label>{status}</label>
+                </div>
+              ))}
           </div>
           <div className="w-py h-0.5 bg-gray-300" />
 
@@ -594,6 +600,20 @@ export default function WishlistNurses() {
             />
             <div className="text-sm text-gray-600">${payRate}+/hr</div>
           </div>
+
+          {/* Radius Slider
+          <div>
+            <h3 className="font-medium text-sm text-gray-700 mb-2">Radius</h3>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={radius}
+              onChange={(e) => setRadius(Number(e.target.value))}
+              className="w-full"
+            />
+            <div className="text-sm text-gray-600">{radius} km</div>
+          </div> */}
         </div>
 
         {/* Right Nurse List */}
@@ -617,32 +637,36 @@ export default function WishlistNurses() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
                       <div className="flex items-center gap-1">
-                        <MapPin size={16} />
+                        <MapPin size={16} className="text-blue-500" />
                         <span>{nurse.currentResidentialLocation || "Location not specified"}</span>
                       </div>
 
                       <div className="flex items-center gap-1">
-                        <Mail size={16} />
+                        <Mail size={16} className="text-blue-500" />
                         <span>{nurse.email || "Not specified"}</span>
                       </div>
 
                       <div className="flex items-center gap-1">
-                        <DollarSign size={16} />
+                        <DollarSign size={16} className="text-blue-500" />
                         <span>{nurse.maxWorkHours ? `$${nurse.maxWorkHours}/hr` : "Not specified"}</span>
                       </div>
 
-                      <div className="flex items-center gap-1">
+                      {/* <div className="flex items-center gap-1">
                         <Clock1 size={16} className="text-blue-500" />
-                        <span>{nurse.experience || "Not specified"}</span>
-                      </div>
+                        <span>{nurse.openToOtherTypes || "Not specified"}</span>
+                      </div> */}
+
+                      {/* <div className="flex items-center gap-1">
+                        <Briefcase size={16} className="text-blue-500" />
+                        <span>
+                          {Array.isArray(nurse.jobTypes) && nurse.jobTypes.length > 0
+                            ? nurse.jobTypes.join(", ")
+                            : "Not specified"}
+                        </span>
+                      </div> */}
 
                       <div className="flex items-center gap-1">
-                        <Briefcase size={16} />
-                        <span>{nurse.jobTypes || "Not specified"}</span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <Clock size={16} />
+                        <Clock size={16} className="text-blue-500" />
                         <span>
                           {nurse.shiftPreferences.length > 0
                             ? nurse.shiftPreferences.join(", ")
@@ -674,14 +698,14 @@ export default function WishlistNurses() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                       <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2">
+                        {" "}
+                        <span className="transition-all duration-300 group-hover:-translate-x-1">
                           {" "}
-                          <span className="transition-all duration-300 group-hover:-translate-x-1">
-                            {" "}
-                            View Details{" "}
+                          View Details{" "}
 
-                          </span>{" "}
-                        </span>
+                        </span>{" "}
+                      </span>
                     </MainButton>
                   </div>
                 </div>

@@ -20,7 +20,9 @@ export default function StatusPage() {
   const [data, setData] = useState<StatusItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "accepted" | "rejected">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "pending" | "accepted" | "rejected"
+  >("all");
   const [, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
@@ -39,7 +41,10 @@ export default function StatusPage() {
       if (!res.ok) throw new Error(`Failed to fetch data: ${await res.text()}`);
 
       const apiData: StatusItem[] = await res.json();
-      apiData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      apiData.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
       setData(apiData);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
@@ -63,10 +68,14 @@ export default function StatusPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "pending": return <Clock className="w-4 h-4 text-yellow-500" />;
-      case "accepted": return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case "rejected": return <XCircle className="w-4 h-4 text-red-500" />;
-      default: return <Clock className="w-4 h-4 text-gray-400" />;
+      case "pending":
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case "accepted":
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "rejected":
+        return <XCircle className="w-4 h-4 text-red-500" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-400" />;
     }
   };
 
@@ -79,99 +88,110 @@ export default function StatusPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-       {/* 🔹 Navbar */}
-            <EmployerNavbar />
-      {/* Header */}
-      <div className=" ">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+      <EmployerNavbar />
+
+      {/* Header + Search + Filter + Total Badge */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          {/* Left: Title + Subtitle */}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Status Updates</h1>
+            <h1 className="text-2xl font-bold text-primary">Connection Requests</h1>
             <p className="mt-1 text-sm text-gray-500">
-              View latest applicant statuses
+              Manage requests from nurses
             </p>
           </div>
-          <span className="mt-4 sm:mt-0 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-            {data.length} Total Updates
-          </span>
+
+          {/* Right: Search + Filter + Total Badge */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+            {/* Search */}
+            <div className="flex-1 sm:w-64 relative">
+              <input
+                type="text"
+                placeholder="Search by nurse name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="accepted">Accepted</option>
+              <option value="rejected">Rejected</option>
+            </select>
+
+            {/* Total Badge */}
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              {filteredData.length} Total Notifications
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Filters/Search */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-          <div className="flex-1 max-w-md relative">
-            <input
-              type="text"
-              placeholder="Search by applicant name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+      {/* Status Cards */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+        {filteredData.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+            <User className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-4 text-lg font-medium text-gray-900">No status updates found</h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Try adjusting your filters or search terms.
+            </p>
           </div>
-
-          <select
-            value={statusFilter}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="accepted">Accepted</option>
-            <option value="rejected">Rejected</option>
-          </select>
-        </div>
-
-        {/* Status Cards */}
-        <div className="mt-6 space-y-4">
-          {filteredData.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-              <User className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium text-gray-900">No status updates found</h3>
-              <p className="mt-2 text-sm text-gray-500">
-                Try adjusting your filters or search terms.
-              </p>
-            </div>
-          ) : (
-            filteredData.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white rounded-lg shadow-sm p-4 sm:p-6 hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center sm:justify-between cursor-pointer"
-                onClick={() => router.push(`/EmployerDashboard/Candidatelist/${item.nurse_profiles_id}`)}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{item.nurseName}</p>
-                    <p className="text-xs text-gray-500 mt-1">{new Date(item.created_at).toLocaleString()}</p>
-                  </div>
+        ) : (
+          filteredData.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-lg shadow-sm p-4 sm:p-6 hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center sm:justify-between cursor-pointer"
+              onClick={() =>
+                router.push(`/EmployerDashboard/Candidatelist/${item.nurse_profiles_id}`)
+              }
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-blue-400" />
                 </div>
-
-                <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-                  <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-medium border border-gray-300">
-                    {getStatusIcon(item.status)}
-                    <span className="capitalize">{item.status}</span>
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/EmployerDashboard/Candidatelist/${item.nurse_profiles_id}`);
-                    }}
-                    className="text-blue-400 hover:text-blue-800 text-sm font-medium"
-                  >
-                    View Profile
-                  </button>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {item.nurseName}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {new Date(item.created_at).toLocaleString()}
+                  </p>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      </div>
-      <div className="bg-white">
-              <Footer />
+
+              <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+                <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-medium border border-gray-300">
+                  {getStatusIcon(item.status)}
+                  <span className="capitalize">{item.status}</span>
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/EmployerDashboard/Candidatelist/${item.nurse_profiles_id}`);
+                  }}
+                  className="text-blue-400 hover:text-blue-800 text-sm font-medium"
+                >
+                  View Profile
+                </button>
+              </div>
             </div>
+          ))
+        )}
+      </div>
+
+      <div className="bg-white">
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -16,7 +16,7 @@ export function StartTimeStep({ formData, handleChange }: StepProps) {
 
     const options = [
         "Immediately",
-        "Within a weeks",
+        "Within a week",
         "I have a specific date in mind",
     ];
 

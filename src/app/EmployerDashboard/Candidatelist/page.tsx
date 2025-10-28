@@ -29,6 +29,7 @@ interface ProfileImage {
 }
 
 interface Candidate {
+  
   residencyStatus: string;
   shiftPreferences: string[];
   experience: string;
@@ -44,7 +45,6 @@ interface Candidate {
   profileImage?: ProfileImage | null;
 }
 
-// ✅ Pagination props typing
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -515,6 +515,7 @@ export default function CandidateList() {
 
 
         <div className="flex gap-6 mt-18 mx-auto container ">
+
           {/* Left Filters */}
           <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-18 h-[calc(100vh-3rem)] overflow-y-auto">
             <h2 className="font-semibold text-gray-800 flex justify-between">
@@ -528,7 +529,7 @@ export default function CandidateList() {
             {/* Job Type */}
             <div>
               <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
-              {["Full-Time", "Part-Time", "Casual", "Open to any"].map((type) => (
+              {["Full-time", "Part-time", "Casual", " Temporary Contract", "Open to any"].map((type) => (
                 <div key={type} className="flex items-center gap-2 text-sm mb-1">
                   <input
                     type="checkbox"
@@ -613,17 +614,22 @@ export default function CandidateList() {
               <h3 className="font-medium text-sm text-gray-700 mb-2">
                 Visa Status
               </h3>
-              {["Permanent", "Temporary", "Citizen"].map((status) => (
-                <div key={status} className="flex items-center gap-2 text-sm mb-1">
-                  <input
-                    type="checkbox"
-                    checked={visaStatus.includes(status)}
-                    onChange={() => handleCheckboxChange(status, setVisaStatus)}
-                    className="rounded"
-                  />
-                  <label>{status}</label>
-                </div>
-              ))}
+              {["Australian Citizen / Permanent Resident",
+                "Temporary Resident",
+                "Student Visa ",
+                "Student Dependent Visa ",
+                "Working Holiday Visa ",
+                "Other",].map((status) => (
+                  <div key={status} className="flex items-center gap-2 text-sm mb-1">
+                    <input
+                      type="checkbox"
+                      checked={visaStatus.includes(status)}
+                      onChange={() => handleCheckboxChange(status, setVisaStatus)}
+                      className="rounded"
+                    />
+                    <label>{status}</label>
+                  </div>
+                ))}
             </div>
             <div className="w-py h-0.5 bg-gray-300" />
 
@@ -688,37 +694,39 @@ export default function CandidateList() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
                         {/* Location */}
                         <div className="flex items-center gap-1">
-                          <MapPin size={16} />
+                          <MapPin size={16} className="text-blue-500" />
                           <span>{candidate.currentResidentialLocation || "Location not specified"}</span>
                         </div>
 
                         {/* Email */}
                         <div className="flex items-center gap-1">
-                          <Mail size={16} />
+                          <Mail size={16} className="text-blue-500" />
                           <span>{candidate.email || "Not specified"}</span>
                         </div>
 
                         {/* Pay Rate */}
                         <div className="flex items-center gap-1">
-                          <DollarSign size={16} />
+                          <DollarSign size={16} className="text-blue-500" />
                           <span>{candidate.maxWorkHours ? `$${candidate.maxWorkHours}/hr` : "Not specified"}</span>
                         </div>
 
-                        {/* Experience */}
-                        <div className="flex items-center gap-1">
-                          <Clock1 size={16} className="text-blue-500" />
-                          <span>{candidate.experience || "Not specified"}</span>
-                        </div>
 
-                        {/* Job Type */}
+
+                        {/* Job Type
                         <div className="flex items-center gap-1">
-                          <Briefcase size={16} />
-                          <span>{candidate.jobTypes || "Not specified"}</span>
-                        </div>
+                          <Briefcase size={16} className="text-blue-500" />
+                          <span>
+                            {Array.isArray(candidate.jobTypes) && candidate.jobTypes.length > 0
+                              ? candidate.jobTypes.join(", ")
+                              : "Not specified"}
+                          </span>
+                        </div> */}
+
 
                         {/* Shift */}
                         <div className="flex items-center gap-1">
-                          <Clock size={16} />
+                          <Clock1 size={16} className="text-blue-500" />
+
                           <span>
                             {candidate.shiftPreferences.length > 0
                               ? candidate.shiftPreferences.join(", ")

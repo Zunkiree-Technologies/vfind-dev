@@ -486,104 +486,103 @@ export default function CandidateDetailPage() {
         <EmployerNavbar />
       </div>
       <div className="container mx-auto mt-23">
-      {/* Basic Information Section */}
-<div className="bg-white rounded-xl shadow-sm p-6 mb-5">
-  {/* Section Header with Buttons */}
-  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-    <div className="flex items-center gap-2">
-      <User className="w-6 h-6 text-blue-400" />
-      <h2 className="text-lg font-semibold text-gray-800">
-        Basic Information
-      </h2>
-    </div>
+        {/* Basic Information Section */}
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-5">
+          {/* Section Header with Buttons */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              <User className="w-6 h-6 text-blue-400" />
+              <h2 className="text-lg font-semibold text-gray-800">
+                Basic Information
+              </h2>
+            </div>
 
-    {/* Connection & Wishlist Buttons */}
-    <div className="flex flex-wrap items-center gap-3">
-      {/* Connection Buttons */}
-      {connectionStatus === "pending" && (
-        <button
-          disabled
-          className="px-4 py-1 rounded-lg  text-blue-400 border border-blue-400"
-        >
-          Request Pending
-        </button>
-      )}
+            {/* Connection & Wishlist Buttons */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Connection Buttons */}
+              {connectionStatus === "pending" && (
+                <button
+                  disabled
+                  className="px-4 py-1 rounded-lg  text-blue-400 border border-blue-400"
+                >
+                  Request Pending
+                </button>
+              )}
 
-      {connectionStatus === "accepted" && (
-        <button
-          disabled
-       className="px-4 py-1 rounded-lg  text-green-400 border border-green-400"
-        >
-          Connected
-        </button>
-      )}
+              {connectionStatus === "accepted" && (
+                <button
+                  disabled
+                  className="px-4 py-1 rounded-lg  text-green-400 border border-green-400"
+                >
+                  Connected
+                </button>
+              )}
 
-      {(connectionStatus === "rejected" || connectionStatus === "none") && (
-        <MainButton
-          onClick={handleSendConnection}
-          disabled={sendingConnection}
-        >
-          {sendingConnection ? "Sending..." : "Connect With Candidate"}
-        </MainButton>
-      )}
+              {(connectionStatus === "rejected" || connectionStatus === "none") && (
+                <MainButton
+                  onClick={handleSendConnection}
+                  disabled={sendingConnection}
+                >
+                  {sendingConnection ? "Sending..." : "Connect With Candidate"}
+                </MainButton>
+              )}
 
-      {/* Wishlist Button */}
-      <MainButton
-        onClick={handleWishlistToggle}
-        disabled={!nurseId || !employerId}
-        className={`${
-          wishlisted
-            ? " text-blue-400 border-[#0073FF]"
-            : "bg-white hover:text-blue-400 text-blue-400  border-blue-400"
-        }`}
-      >
-        {wishlisted ? "UnSave" : "Save Candidate"}
-      </MainButton>
-    </div>
-  </div>
-
-  {/* Profile Content */}
-  <div className="flex flex-col items-center gap-4 sm:gap-6">
-    {/* Profile Image */}
-    <div className="flex flex-col items-center">
-      <div className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200">
-        {profileImageUrl ? (
-          <Image
-            priority
-            src={profileImageUrl}
-            alt={candidate.fullName}
-            width={128}
-            height={128}
-            className="object-cover w-full h-full"
-          />
-        ) : (
-          <div className="h-full w-full bg-blue-500 flex items-center justify-center text-white text-2xl sm:text-3xl font-semibold">
-            {candidate.fullName?.charAt(0) || "N"}
+              {/* Wishlist Button */}
+              <MainButton
+                onClick={handleWishlistToggle}
+                disabled={!nurseId || !employerId}
+                className={`${wishlisted
+                  ? " text-blue-400 border-[#0073FF]"
+                  : "bg-white hover:text-blue-400 text-blue-400  border-blue-400"
+                  }`}
+              >
+                {wishlisted ? "UnSave" : "Save Candidate"}
+              </MainButton>
+            </div>
           </div>
-        )}
-      </div>
-    </div>
 
-    {/* Basic Info Grid */}
-    <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
-      {[
-        { label: "Full Name", value: candidate.fullName },
-        { label: "Email", value: candidate.email || "Not specified" },
-        { label: "Phone Number", value: candidate.phoneNumber || "Not specified" },
-        { label: "Current Location", value: candidate.currentResidentialLocation || "Not specified" },
-        { label: "Postcode", value: candidate.postcode || "Not specified" },
-        { label: "Willing to Relocate", value: candidate.willingToRelocate || "Not specified" },
-      ].map((item, index) => (
-        <div key={index}>
-          <label className="text-sm font-medium text-gray-700 mb-1 block">
-            {item.label}
-          </label>
-          <p className="text-gray-900 break-words">{item.value}</p>
+          {/* Profile Content */}
+          <div className="flex flex-col items-center gap-4 sm:gap-6">
+            {/* Profile Image */}
+            <div className="flex flex-col items-center">
+              <div className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200">
+                {profileImageUrl ? (
+                  <Image
+                    priority
+                    src={profileImageUrl}
+                    alt={candidate.fullName}
+                    width={128}
+                    height={128}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-blue-500 flex items-center justify-center text-white text-2xl sm:text-3xl font-semibold">
+                    {candidate.fullName?.charAt(0) || "N"}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Basic Info Grid */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
+              {[
+                { label: "Full Name", value: candidate.fullName },
+                { label: "Email", value: candidate.email || "Not specified" },
+                { label: "Phone Number", value: candidate.phoneNumber || "Not specified" },
+                { label: "Current Location", value: candidate.currentResidentialLocation || "Not specified" },
+                { label: "Postcode", value: candidate.postcode || "Not specified" },
+                { label: "Willing to Relocate", value: candidate.willingToRelocate || "Not specified" },
+              ].map((item, index) => (
+                <div key={index}>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    {item.label}
+                  </label>
+                  <p className="text-gray-900 break-words">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      ))}
-    </div>
-  </div>
-</div>
 
 
         {/* Visa & Residency */}
@@ -879,7 +878,8 @@ export default function CandidateDetailPage() {
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Open to Other Job Types
                 </label>
-                <p className="text-gray-900">
+                <p className="flex items-center w-fit gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200">
+
                   {candidate.openToOtherTypes || "Not specified"}
                 </p>
               </div>
@@ -935,7 +935,8 @@ export default function CandidateDetailPage() {
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Available to Start
                 </label>
-                <p className="text-gray-900">
+                <p className="flex items-center w-fit gap-2 px-3 py-2 bg-gray-50 text-black rounded-lg text-sm font-medium border border-gray-200">
+
                   {candidate.startTime || candidate.startDate || "Not specified"}
                 </p>
               </div>
@@ -943,9 +944,10 @@ export default function CandidateDetailPage() {
           </div>
         </CollapsibleSection>
       </div>
-       <div className="bg-white">
-                <Footer />
-              </div>
+
+      <div className="bg-white">
+        <Footer />
+      </div>
     </div>
   );
 }

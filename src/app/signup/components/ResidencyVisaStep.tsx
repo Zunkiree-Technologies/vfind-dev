@@ -5,9 +5,9 @@ export function ResidencyVisaStep({ formData, handleChange }: StepProps) {
   const residencyOptions = [
     "Australian Citizen / Permanent Resident",
     "Temporary Resident",
-    "Student Visa Holder",
-    "Student Dependent Visa Holder",
-    "Working Visa Holder",
+    "Student Visa ",
+    "Student Dependent Visa ",
+    "Working Holiday Visa ",
     "Other",
   ];
 

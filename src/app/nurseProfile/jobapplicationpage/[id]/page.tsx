@@ -5,6 +5,8 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Loader from "../../../../../components/loading";
 import { ArrowRight, Building2 } from "lucide-react";
 import { Navbar } from "../../components/Navbar";
+import Footer from '@/app/Admin/components/layout/Footer';
+
 
 interface Job {
   id: number;
@@ -393,11 +395,11 @@ export default function JobApplicationPage() {
     <div>
       <Navbar />
 
-      <div className="min-h-screen bg-white py-8">
+      <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Main Job Details */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 bg-white rounded-lg">
               <div className="shadow-sm relative">
                 {isLoggedIn && (
                   <button
@@ -596,7 +598,7 @@ export default function JobApplicationPage() {
 
             {/* Right Column - About Company */}
             <div className="lg:col-span-1">
-              <div className="bg-[#F5F6FA] rounded-lg shadow-sm p-6">
+              <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   About Company
                 </h3>
@@ -611,6 +613,9 @@ export default function JobApplicationPage() {
             </div>
           </div>
         </div>
+      </div>
+      <div>
+        <Footer />
       </div>
     </div>
   );
