@@ -14,7 +14,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Loader from "../../../../components/loading";
-import Link from "next/link";
 import Footer from "@/app/Admin/components/layout/Footer";
 import EmployerNavbar from "../components/EmployerNavbar";
 import MainButton from "@/components/ui/MainButton";
@@ -415,13 +414,13 @@ export default function WishlistNurses() {
     );
 
   return (
-    <div className="p-6 min-h-screen mx-auto bg-[#F5F6FA]">
+    <div className="p-6 min-h-screen mx-auto bg-gray-50">
       {/* Navbar - sticky */}
       <div className="sticky top-0 z-50">
         <EmployerNavbar />
       </div>
       {/* Search Bar - sticky below navbar */}
-      <div className="sticky top-[64px] z-40 bg-[#F5F6FA] py-3">
+      <div className="sticky top-[64px] z-40 bg-gray-50 py-3">
         <div className="flex justify-center">
 
           <div className="flex items-center justify-between w-[95%] max-w-[950px] border border-gray-300 rounded-lg bg-white overflow-hidden p-1">
@@ -469,7 +468,7 @@ export default function WishlistNurses() {
       </div>
 
 
-      <div className="flex gap-6 mt-6 mx-auto container">
+      <div className="flex gap-6 mt-12 mx-auto container">
         {/* Left Filters */}
         <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-15 h-[calc(100vh-3rem)] overflow-y-auto">
           <h2 className="font-semibold text-gray-800 flex justify-between">
@@ -670,14 +669,20 @@ export default function WishlistNurses() {
                       )}
                     </div>
 
-                    <Link
+                    <MainButton
                       href={`/EmployerDashboard/Candidatelist/${nurse.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
                     >
-                      View Details
-                    </Link>
+                       <span className="flex items-center gap-2">
+                          {" "}
+                          <span className="transition-all duration-300 group-hover:-translate-x-1">
+                            {" "}
+                            View Details{" "}
+
+                          </span>{" "}
+                        </span>
+                    </MainButton>
                   </div>
                 </div>
               ))
@@ -696,6 +701,8 @@ export default function WishlistNurses() {
       <div className="bg-white">
         <Footer />
       </div>
+
     </div>
+
   );
 }

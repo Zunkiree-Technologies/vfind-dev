@@ -79,7 +79,7 @@ export default function EmployerNavbar({}: NavbarProps) {
             onClick={() => router.push("/EmployerDashboard/status")}
             className="px-4 xl:px-6 py-2 text-gray-700 hover:text-[#477fff] text-sm font-medium whitespace-nowrap"
           >
-            Connection Request
+            Connection Requests
           </button>
           <button
             onClick={() => router.push("/EmployerDashboard/Wishlist")}
@@ -101,7 +101,7 @@ export default function EmployerNavbar({}: NavbarProps) {
           </button>
 
           {/* Desktop Profile & Notification */}
-          <div className="hidden lg:flex items-center gap-5">
+          <div className="hidden lg:flex items-center ">
             <div className="relative" ref={desktopDropdownRef}>
               <button
                 onClick={(e) => {
@@ -215,7 +215,7 @@ export default function EmployerNavbar({}: NavbarProps) {
               }}
               className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md text-sm font-medium"
             >
-              Connection Request
+              Connection Requests
             </button>
             <button
               onClick={() => {

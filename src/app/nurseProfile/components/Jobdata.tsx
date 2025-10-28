@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import { MapPin, Briefcase, Clock, DollarSign, Calendar, ChevronLeft, ChevronRight, Clock1, ArrowRight } from "lucide-react";
+import { MapPin, Briefcase, Clock, DollarSign, Calendar, ChevronLeft, ChevronRight, Clock1 } from "lucide-react";
 import Loader from "../../../../components/loading";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import MainButton from "@/components/ui/MainButton";
 
 const EXPERIENCE_RANGES: Record<string, [number, number]> = {
   "Less than 6 months": [0, 0.5],
@@ -353,7 +353,7 @@ export default function JobData() {
           <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-[60px] h-fit overflow-y-auto scrollbar-hide">
             <h2 className="font-normal text-gray-800 flex justify-between">
               All Filters
-              <button onClick={clearFilters} className="text-sm text-blue-600">Clear All</button>
+              <button onClick={clearFilters} className="text-sm text-blue-400">Clear All</button>
             </h2>
             <div className="h-0.5 bg-gray-300" />
 
@@ -402,7 +402,7 @@ export default function JobData() {
             {/* Pay Rate slider */}
             <div>
               <h3 className="font-medium text-sm text-gray-700 mb-2">Pay Rate</h3>
-              <input type="range" min={0} max={100} value={isNaN(payRate) ? 0 : payRate} onChange={(e) => setPayRate(Number(e.target.value) || 0)} className="w-full accent-blue-600" />
+              <input type="range" min={0} max={100} value={isNaN(payRate) ? 0 : payRate} onChange={(e) => setPayRate(Number(e.target.value) || 0)} className="w-full primary-blue-400" />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>Any</span>
                 <span>${payRate}+</span>
@@ -484,25 +484,18 @@ export default function JobData() {
 
                   {/* CTA button */}
                   <div className="flex items-center gap-4 ml-6 flex-col">
-                    <Link
-                      href={{
-                        pathname: `/nurseProfile/jobapplicationpage/${job.id}`,
-                        query: { company: getCompanyName(job) },
-                      }}
+                    <MainButton
+                      href={`/nurseProfile/jobapplicationpage/${job.id}?company=${encodeURIComponent(getCompanyName(job))}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] transition-all duration-200 overflow-hidden inline-flex items-center"
                     >
                       <span className="flex items-center gap-2">
                         <span className="transition-all duration-300 group-hover:-translate-x-1">
                           View Details
                         </span>
-                        <ArrowRight
-                          className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                          strokeWidth={3}
-                        />
                       </span>
-                    </Link>
+                    </MainButton>
+
                   </div>
                 </div>
               ))}

@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import NotificationSidebar from "./NotificationSidebar";
 import { MapPin, Search, UserRound, Menu, X } from "lucide-react";
 import Image from "next/image";
-import MainButton from "@/components/ui/MainButton";
 
 export const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -110,135 +109,33 @@ export const Navbar = () => {
             </span>
           </div>
 
-          {/* Search Bar - Hidden on mobile, visible on tablet */}
-          <div className="hidden md:flex items-center flex-1 max-w-3xl bg-white rounded-xl shadow border border-gray-300 px-2 py-1.5 gap-3">
-            {/* Job Search */}
-            <div className="flex items-center flex-1">
-              <Search size={22} className="m-2 text-[#61A6FA]" />
-              <input
-                type="text"
-                placeholder="Search by keyword, specialty, job title"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  updateQuery(e.target.value, locationTerm);
-                }}
-                className="w-full text-gray-700 placeholder-gray-400 text-sm focus:outline-none focus:ring-0"
-              />
-            </div>
+          {/* Left Side: Small Search Bar - Hidden on mobile, visible on tablet */}
 
-            <div className="w-px h-5 bg-gray-300"></div>
 
-            {/* Location Search */}
-            <div className="flex items-center flex-1">
-              <MapPin size={22} className="m-2 text-[#61A6FA]" />
-              <input
-                type="text"
-                placeholder="City, State or Zip code"
-                value={locationTerm}
-                onChange={(e) => {
-                  setLocationTerm(e.target.value);
-                  updateQuery(searchTerm, e.target.value);
-                }}
-                className="w-full text-gray-700 placeholder-gray-400 text-sm focus:outline-none focus:ring-0"
-              />
-            </div>
-          </div>
 
-          {/* Desktop Right Side - Hidden on mobile, visible on tablet */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-6">
             {authToken ? (
               <>
-                <MainButton 
-                  onClick={() => router.push("/nurseProfile/connectedstatus")}
-                  className="group px-6 py-2 w-fit text-blue-400 border font-medium rounded-[10px] text-sm whitespace-nowrap transition-all duration-300 overflow-hidden flex items-center justify-center"
+                <Link
+                  href="/nurseProfile/connectedstatus"
+                  className="text-gray-700 hover:text-blue-400 font-medium text-sm transition-colors"
                 >
-                  <span className="flex items-center gap-2">
-                    <span className="transition-all duration-300 group-hover:-translate-x-1">
-                      Connection Request
-                    </span>
-                   
-                  </span>
-                </MainButton>
+                  Connection Requests
+                </Link>
+                <Link
+                  href="/nurseProfile/SavedJobs"
+                  className="text-gray-700 hover:text-blue-400 font-medium text-sm transition-colors ml-4"
+                >
+                  Saved Jobs
+                </Link>
+                <Link
+                  href="/nurseProfile/AppliedJobs"
+                  className="text-gray-700 hover:text-blue-400 font-medium text-sm transition-colors ml-4"
+                >
+                  Applied Jobs
+                </Link>
 
-                {/* User Menu */}
-                <div ref={userMenuRef} className="relative flex items-center">
-                  <button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center space-x-1 cursor-pointer"
-                  >
-                    <div className="relative w-10 h-10 rounded-full border border-gray-400 overflow-hidden hover:bg-gray-50">
-                      {profileImage ? (
-                        <Image
-                          src={profileImage}
-                          alt="User Profile"
-                          width={40}
-                          height={40}
-                          className="object-cover rounded-full"
-                          priority
-                          quality={100}
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center w-full h-full bg-gray-100">
-                          <UserRound size={20} className="text-gray-700" />
-                        </div>
-                      )}
-                    </div>
 
-                    <svg
-                      className={`w-4 h-4 text-gray-600 transition-transform ${userMenuOpen ? "rotate-180" : ""
-                        }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  {userMenuOpen && (
-                    <div className="absolute right-0 top-12 bg-white shadow-lg rounded-md w-40 z-50">
-                      <Link
-                        href="/nurseProfile/profile"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        href="/nurseProfile/connectedstatus"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      >
-                        Connections
-                      </Link>
-                      <Link
-                        href="/nurseProfile/SavedJobs"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      >
-                        Saved Jobs
-                      </Link>
-                      <Link
-                        href="/nurseProfile/AppliedJobs"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      >
-                        Applied Jobs
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <NotificationSidebar />
               </>
             ) : (
               <>
@@ -258,17 +155,116 @@ export const Navbar = () => {
             )}
           </div>
 
+          {/* Right Side - Navigation Links + Profile - Hidden on mobile, visible on tablet */}
+          <div className="hidden md:flex items-center max-w-md bg-white rounded-xl shadow border border-gray-300 px-2 py-1.5 gap-2">
+            {/* Job Search */}
+            <div className="flex items-center flex-1">
+              <Search size={18} className="mx-2 text-[#61A6FA]" />
+              <input
+                type="text"
+                placeholder="Search jobs..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  updateQuery(e.target.value, locationTerm);
+                }}
+                className="w-full text-gray-700 placeholder-gray-400 text-sm focus:outline-none focus:ring-0"
+              />
+            </div>
+
+            <div className="w-px h-4 bg-gray-300"></div>
+
+            {/* Location Search */}
+            <div className="flex items-center flex-1">
+              <MapPin size={18} className="mx-2 text-[#61A6FA]" />
+              <input
+                type="text"
+                placeholder="Location"
+                value={locationTerm}
+                onChange={(e) => {
+                  setLocationTerm(e.target.value);
+                  updateQuery(searchTerm, e.target.value);
+                }}
+                className="w-full text-gray-700 placeholder-gray-400 text-sm focus:outline-none focus:ring-0"
+              />
+            </div>
+          </div>
+
+
+          {/* User Menu */}
+          <div className="flex items-center  ">
+
+            <div ref={userMenuRef} className="relative flex items-center ">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center space-x-1 cursor-pointer"
+              >
+                <div className="relative w-10 h-10 rounded-full border border-gray-400 overflow-hidden hover:bg-gray-50">
+                  {profileImage ? (
+                    <Image
+                      src={profileImage}
+                      alt="User Profile"
+                      width={40}
+                      height={40}
+                      className="object-cover rounded-full"
+                      priority
+                      quality={100}
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full bg-gray-100">
+                      <UserRound size={20} className="text-gray-700" />
+                    </div>
+                  )}
+                </div>
+
+                <svg
+                  className={`w-4 h-4 text-gray-600 transition-transform ${userMenuOpen ? "rotate-180" : ""
+                    }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 top-12 bg-white shadow-lg rounded-md w-40 z-50">
+                  <Link
+                    href="/nurseProfile/profile"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+            <NotificationSidebar />
+
+          </div>
+
+
           {/* Mobile Search Icon - Only visible on mobile */}
           <button
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
             className="md:hidden p-2 hover:bg-gray-100 rounded-md"
           >
-            <div className="flex items-center gap-2 px-3   border border-gray-300 rounded-md bg-white shadow-md rounded-[10px]">
+            <div className="flex items-center gap-2 px-3 border border-gray-300 rounded-md bg-white shadow-md rounded-[10px]">
               <Search size={15} className="text-gray-400" />
               <span className="text-gray-400 text-sm">Search</span>
             </div>
-
-
           </button>
 
           {/* Mobile Menu Button - Only visible on mobile */}
@@ -353,13 +349,6 @@ export const Navbar = () => {
               </div>
 
               <Link
-                href="/nurseProfile/connectedstatus"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md"
-              >
-                Connection Request
-              </Link>
-              <Link
                 href="/nurseProfile/profile"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md"
@@ -371,7 +360,7 @@ export const Navbar = () => {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md"
               >
-                Connections
+                Connection Requests
               </Link>
               <Link
                 href="/nurseProfile/SavedJobs"

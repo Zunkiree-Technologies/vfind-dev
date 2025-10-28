@@ -2366,6 +2366,8 @@ export default function NurseProfilePage() {
           </div>
         </CollapsibleSection>
       </div>
+
+      
       <div className="bg-white">
         <Footer />
       </div>

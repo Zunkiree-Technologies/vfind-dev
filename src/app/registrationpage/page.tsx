@@ -2,79 +2,73 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Image from "next/image";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
+import Navbar from "../../../components/navbar";
+import Footer from "../../../components/footer-section";
+import { Building2, Mail, MapPinned, User } from "lucide-react";
 
 type FormData = {
   mobile: string;
-  creatingAccountAs: string;
-  fullName: string;
-  email: string;
-  password: string;
   companyName: string;
+  email: string;
+  AustralianBusinessNumber: string;
+  businessType: string;
   numberOfEmployees: string;
+  fullName: string;
   yourDesignation: string;
-  country: string;
+  state: string;
   city: string;
   pinCode: string;
   companyAddress: string;
+  password: string;
   organizationWebsite: string;
-  AustralianBusinessNumber: string;
+  creatingAccountAs: string;
 };
 
 function RegistrationComponent() {
   const searchParams = useSearchParams();
-  const [step, setStep] = useState<number>(1);
+  const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [emailOtp, setEmailOtp] = useState<string[]>(new Array(6).fill(""));
+  const [, setOtpSent] = useState(false);
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const [formData, setFormData] = useState<FormData>({
     mobile: "",
-    creatingAccountAs: "company",
-    fullName: "",
-    email: "",
-    password: "",
     companyName: "",
+    email: "",
+    AustralianBusinessNumber: "",
+    businessType: "",
     numberOfEmployees: "",
+    fullName: "",
     yourDesignation: "",
-    country: "Australia",
+    state: "",
     city: "",
     pinCode: "",
     companyAddress: "",
+    password: "",
     organizationWebsite: "",
-    AustralianBusinessNumber: "",
+    creatingAccountAs: "company",
   });
 
   // Pre-fill mobile from query params
   useEffect(() => {
     const mobileFromQuery = searchParams.get("mobile");
-
     if (mobileFromQuery) {
       setFormData((prev) => ({ ...prev, mobile: mobileFromQuery }));
-      sessionStorage.setItem("registrationMobile", mobileFromQuery);
-
-      // Remove mobile from URL using native browser API
-      window.history.replaceState({}, "", window.location.pathname);
-    } else {
-      const savedMobile = sessionStorage.getItem("registrationMobile");
-      if (savedMobile) {
-        setFormData((prev) => ({ ...prev, mobile: savedMobile }));
-      }
     }
   }, [searchParams]);
 
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
-
-  const nextStep = () => setStep((prev) => prev + 1);
-  const prevStep = () => setStep((prev) => prev - 1);
-
-  // Password states
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordsMatch, setPasswordsMatch] = useState(true);
 
   const onPasswordChange = (value: string) => {
     handleChange("password", value);
@@ -85,11 +79,6 @@ function RegistrationComponent() {
     setConfirmPassword(value);
     setPasswordsMatch(formData.password === value);
   };
-
-  // Email OTP states
-  const [emailOtpSent, setEmailOtpSent] = useState(false);
-  const [emailOtp, setEmailOtp] = useState<string[]>(new Array(6).fill(""));
-  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const handleEmailOtpChange = (element: HTMLInputElement, index: number) => {
     const value = element.value;
@@ -112,587 +101,573 @@ function RegistrationComponent() {
     }
   };
 
-  // Simulate sending OTP (replace with your API call)
-  const sendEmailOtp = () => {
+  // Send OTP to email
+  const sendEmailOtp = async () => {
     if (!formData.email) {
-      alert("Please enter a valid email address first");
+      alert("Please enter a valid email address");
       return;
     }
-    setEmailOtpSent(true);
+
+    setOtpSent(true);
+    // TODO: Replace with actual API call to send OTP
     alert(`OTP sent to ${formData.email}`);
   };
 
-  // Simulate verifying OTP (replace with your API call/logic)
-  const verifyEmailOtp = () => {
+  // Verify OTP and submit form
+  const verifyOtpAndSubmit = async () => {
     const enteredOtp = emailOtp.join("");
     if (enteredOtp.length !== 6) {
       alert("Please enter the complete 6-digit OTP");
       return;
     }
-    alert(`Verifying OTP: ${enteredOtp}`);
-    nextStep();
+
+    // TODO: Replace with actual OTP verification API call
+    // For now, proceeding to submit
+    await handleSubmit();
   };
 
-  // Submit to Xano (last step)
-  const router = useRouter();
+  // Validate form and show OTP modal
+  const handleRegisterClick = async () => {
+    // Validate all required fields
+    if (!formData.companyName) {
+      alert("Please enter organization name");
+      return;
+    }
+    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+    if (!formData.AustralianBusinessNumber) {
+      alert("Please enter Australian Business Number");
+      return;
+    }
+    if (!formData.businessType) {
+      alert("Please select business type");
+      return;
+    }
+    if (!formData.numberOfEmployees) {
+      alert("Please select organization size");
+      return;
+    }
+    if (!formData.fullName) {
+      alert("Please enter contact name");
+      return;
+    }
+    if (!formData.yourDesignation) {
+      alert("Please select your role at organization");
+      return;
+    }
+    if (!formData.state) {
+      alert("Please select state");
+      return;
+    }
+    if (!formData.city) {
+      alert("Please enter city");
+      return;
+    }
+    if (!formData.pinCode) {
+      alert("Please enter postal code");
+      return;
+    }
+    if (!formData.companyAddress) {
+      alert("Please enter company address");
+      return;
+    }
+    if (!formData.password || formData.password.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+    if (!passwordsMatch) {
+      alert("Passwords do not match");
+      return;
+    }
+    if (!agreedToTerms) {
+      alert("Please agree to the terms and privacy policy");
+      return;
+    }
 
+    // All validations passed, send OTP
+    await sendEmailOtp();
+    setShowOtpModal(true);
+  };
+
+  // Submit form to backend
   const handleSubmit = async () => {
-  // Validate all required fields
-  if (!formData.companyName || !formData.numberOfEmployees || 
-      !formData.yourDesignation || !formData.city || 
-      !formData.pinCode || !formData.companyAddress) {
-    alert("Please fill all required company details");
-    return;
-  }
+    setLoading(true);
+    setMessage("");
 
-  setLoading(true);
-  setMessage("");
-  try {
-    const response = await fetch(
-      "https://x76o-gnx4-xrav.a2.xano.io/api:5OnHwV4U/employerOnboarding",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+    try {
+      const response = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:5OnHwV4U/employerOnboarding",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.error && data.error.toLowerCase().includes("email")) {
+          alert("This email is already registered. Please use a different email or login.");
+          setShowOtpModal(false);
+          return;
+        }
+        if (data.error && data.error.toLowerCase().includes("phone")) {
+          alert("This phone number is already registered. Please use a different number or login.");
+          setShowOtpModal(false);
+          return;
+        }
+        throw new Error(data.message || "Failed to submit form");
       }
-    );
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      // Check for duplicate email error
-      if (data.error && data.error.toLowerCase().includes("email")) {
-        alert("This email is already registered. Please use a different email or login.");
-        return;
-      } 
-      // Check for duplicate phone number error
-      if (data.error && data.error.toLowerCase().includes("phone")) {
-        alert("This phone number is already registered. Please use a different number or login.");
-        return;
+      setMessage("Registration successful!");
+      console.log("Response:", data);
+
+      // Redirect after success
+      setTimeout(() => {
+        router.push("/congratulation");
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("Failed to submit form. Please try again.");
       }
-      // Generic error
-      throw new Error(data.message || "Failed to submit form");
+      setShowOtpModal(false);
+    } finally {
+      setLoading(false);
     }
-
-    setMessage("Registration successful!");
-    console.log("Response:", data);
-
-    // Redirect after success
-    setTimeout(() => {
-      router.push("/congratulation"); 
-    }, 1500);
-  } catch (err) {
-    console.error(err);
-    if (err instanceof Error) {
-      alert(err.message);
-    } else {
-      alert("Failed to submit form. Please try again.");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-4">
-      {/* Step Indicator */}
-      <div className="w-full max-w-md h-10 flex items-center justify-center text-center mt-2 mb-4 gap-2 text-xs sm:text-sm font-semibold">
-        {/* Step 1 */}
-        <div
-          className={`flex items-center gap-1 ${
-            step === 1
-              ? "text-blue-600"
-              : step > 1
-              ? "text-green-600"
-              : "text-gray-500"
-          }`}
-        >
-          <div
-            className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${
-              step > 1
-                ? "bg-green-600"
-                : step === 1
-                ? "bg-blue-600"
-                : "bg-gray-300"
-            }`}
-          >
-            {step > 1 ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-2 h-2 sm:w-3 sm:h-3 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={3}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            ) : null}
-          </div>
-          <span className="hidden sm:inline">Personal Details</span>
-        </div>
+    <>
+      <Navbar />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-8">
+        <div className="w-full max-w-3xl space-y-4">
 
-        <span className="text-xs">—</span>
-
-        {/* Step 2 */}
-        <div
-          className={`flex items-center gap-1 ${
-            step === 2
-              ? "text-blue-600"
-              : step > 2
-              ? "text-green-600"
-              : "text-gray-500"
-          }`}
-        >
-          <div
-            className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${
-              step > 2
-                ? "bg-green-600"
-                : step === 2
-                ? "bg-blue-600"
-                : "bg-gray-300"
-            }`}
-          >
-            {step > 2 ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-2 h-2 sm:w-3 sm:h-3 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={3}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            ) : null}
-          </div>
-          <span className="hidden sm:inline">Verify Email</span>
-        </div>
-
-        <span className="text-xs">—</span>
-
-        {/* Step 3 */}
-        <div
-          className={`flex items-center gap-1 ${
-            step === 3 ? "text-blue-600" : "text-gray-500"
-          }`}
-        >
-          <div
-            className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ${
-              step === 3 ? "bg-blue-600" : "bg-gray-300"
-            }`}
-          ></div>
-          <span className="hidden sm:inline">Organization Details</span>
-        </div>
-      </div>
-
-      {/* Steps container */}
-      <div className="w-full max-w-md min-h-[500px] bg-white rounded-xl shadow-md px-4 sm:px-6 py-6 overflow-auto">
-        {/* STEP 1: Basic Details */}
-        {step === 1 && (
-          <div className="space-y-4">
-            <div className="flex flex-col items-center text-center"></div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs sm:text-sm">Mobile Number</label>
-                <input
-                  type="text"
-                  value={formData.mobile}
-                  readOnly
-                  className="w-full mt-1 px-3 py-2 rounded-md text-sm bg-gray-100"
-                />
-              </div>
-
-              {/* <div>
-                <label className="text-xs font-bold">Account Type</label>
-                <div className="flex gap-4 mt-1 text-xs sm:text-sm">
-                  <label className="flex items-center font-bold gap-1">
-                    <input
-                      type="radio"
-                      name="type"
-                      checked={formData.creatingAccountAs === "company"}
-                      onChange={() => handleChange("creatingAccountAs", "company")}
-                      className="w-3 h-3"
-                    />
-                    Company/Organization
-                  </label>
-                </div>
-              </div> */}
-
-              <div>
-                <label className="text-xs sm:text-sm">Full Name</label>
-                <input
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(e) => handleChange("fullName", e.target.value)}
-                  placeholder="Enter name"
-                  className="w-full mt-1 px-3 py-2 rounded-md bg-gray-100 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs sm:text-sm">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
-                  placeholder="Enter email"
-                  className="w-full mt-1 px-3 py-2 rounded-md bg-gray-100 text-sm"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <div className="relative">
-                  <label className="text-xs sm:text-sm block mb-1">
-                    Create Password
-                  </label>
-                  <div className="flex items-center w-full rounded-md bg-gray-100 px-3">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={formData.password}
-                      onChange={(e) => onPasswordChange(e.target.value)}
-                      placeholder="Enter password"
-                      className="flex-1 py-2 bg-transparent text-sm outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="text-blue-600 text-xs px-2"
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
-                  </div>
+          <form className="space-y-4">
+            {/* Company Details Section */}
+            <div className="bg-white  rounded-lg shadow-sm">
+              <div className="flex items-center justify-between p-4 cursor-pointer ">
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-blue-400" />
+                  <h2 className="text-lg font-semibold">Company Details</h2>
                 </div>
 
-                <div className="relative">
-                  <label className="text-xs sm:text-sm block mb-1">
-                    Confirm Password
-                  </label>
-                  <div className="flex items-center w-full rounded-md bg-gray-100 px-3">
-                    <input
-                      type={showConfirm ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => onConfirmChange(e.target.value)}
-                      placeholder="Confirm password"
-                      className="flex-1 py-2 bg-transparent text-sm outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirm(!showConfirm)}
-                      className="text-blue-600 text-xs px-2"
-                    >
-                      {showConfirm ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                </div>
-
-                {!passwordsMatch && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Passwords do not match
-                  </p>
-                )}
               </div>
-            </div>
 
-            <button
-              className="w-full mt-4 py-2 bg-blue-600 text-white font-medium rounded-md text-sm sm:text-base"
-              onClick={() => {
-                if (!formData.fullName) {
-                  alert("Please enter your full name");
-                  return;
-                }
-                if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
-                  alert("Please enter a valid email address");
-                  return;
-                }
-                if (!formData.password || formData.password.length < 1) {
-                  alert("Password must be at least 1 characters");
-                  return;
-                }
-                if (!passwordsMatch) {
-                  alert("Passwords do not match");
-                  return;
-                }
-                nextStep();
-              }}
-            >
-              Continue
-            </button>
-          </div>
-        )}
 
-        {/* STEP 2: Email OTP Verification */}
-        {step === 2 && (
-          <div className="space-y-5">
-            <div className="flex flex-col items-center text-center">
-              <Image
-                src="/icons/badgeIcon.png"
-                alt="Badge Icon"
-                width={50}
-                height={35}
-              />
-              <h2 className="mt-2 text-[#6B7794] text-sm sm:text-base">
-                We need these details to identify you and create your account
-              </h2>
-            </div>
-
-            <h2 className="text-lg sm:text-xl font-semibold text-center">
-              Verify email ID
-            </h2>
-            <p className="text-gray-600 text-center text-sm">
-              We sent an OTP to: <strong>{formData.email}</strong>
-            </p>
-
-            {!emailOtpSent ? (
-              <button
-                className="w-full py-2 bg-blue-600 text-white rounded-md text-sm sm:text-base"
-                onClick={sendEmailOtp}
-              >
-                Send OTP
-              </button>
-            ) : (
-              <>
-                <div className="flex gap-2 justify-center max-w-xs mx-auto">
-                  {emailOtp.map((digit, index) => (
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500 text-gray-500">
+                      Company Name <span className="text-red-500">*</span>
+                    </label>
                     <input
-                      key={index}
                       type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      className="w-10 h-10 sm:w-12 sm:h-12 text-center border rounded-md text-lg outline-none"
-                      value={digit}
-                      onChange={(e) => handleEmailOtpChange(e.target, index)}
-                      onKeyDown={(e) => handleEmailOtpKeyDown(e, index)}
-                      ref={(el) => {
-                        if (el) inputRefs.current[index] = el;
-                      }}
+                      value={formData.companyName}
+                      onChange={(e) => handleChange("companyName", e.target.value)}
+                      placeholder="ABC healthcare"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
                     />
-                  ))}
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleChange("email", e.target.value)}
+                      placeholder="abc@gmail.com"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.mobile}
+                      readOnly
+                      placeholder="+61 444444444"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm bg-gray-100 cursor-not-allowed"
+                    />
+                  </div>
+
+
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Australian Business Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.AustralianBusinessNumber}
+                      onChange={(e) => handleChange("AustralianBusinessNumber", e.target.value)}
+                      placeholder="04 000000"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Business Type 
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.businessType}
+                      onChange={(e) => handleChange("businessType", e.target.value)}
+                      placeholder=" e.g., Healthcare, Agecare"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+
+                    />
+                  </div>
+
+
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Number of Employees 
+                    </label>
+                    <select
+                      value={formData.numberOfEmployees}
+                      onChange={(e) => handleChange("numberOfEmployees", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+                    >
+                      <option value="0-5">Less than 5 employees</option>
+                      <option value="5-20">Less than 20 employees</option>
+                      <option value="20-50">Less than 50 employees</option>
+                      <option value="50-100">Less than 100 employees</option>
+                      <option value="100-200">Less than 200 employees</option>
+                      <option value="200+">More than 200 employees</option>
+                      
+                    </select>
+                  </div>
+
+                  <div className="md:col-span-3">
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Password <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex items-center w-full rounded-md border px-3 ">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) => onPasswordChange(e.target.value)}
+                        placeholder="Enter password"
+                        className="flex-1 py-2 text-sm outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-blue-400 text-xs px-2 "
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-3">
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Confirm Password <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex items-center w-full rounded-md border px-3 ">
+                      <input
+                        type={showConfirm ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => onConfirmChange(e.target.value)}
+                        placeholder="Confirm password"
+                        className="flex-1 py-2 text-sm outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirm(!showConfirm)}
+                        className="text-blue-400 text-xs px-2 "
+                      >
+                        {showConfirm ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {!passwordsMatch && confirmPassword && (
+                      <p className="text-red-500 text-xs mt-1">Passwords do not match</p>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-3">
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Organization Website / Social Media Link
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.organizationWebsite}
+                      onChange={(e) => handleChange("organizationWebsite", e.target.value)}
+                      placeholder="https://www.example.com or social media link"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Primary Contact Person Section */}
+            <div className="bg-white rounded-lg ">
+              <div className="flex items-center justify-between p-4 cursor-pointer ">
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-blue-400" />
+
+                  <h2 className="text-lg font-semibold">Primary Contact Person</h2>
                 </div>
 
-                <button
-                  className="w-full py-2 bg-green-600 text-white rounded-md text-sm sm:text-base"
-                  onClick={verifyEmailOtp}
-                >
-                  Verify OTP
-                </button>
-              </>
-            )}
+              </div>
 
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Contact Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.fullName}
+                      onChange={(e) => handleChange("fullName", e.target.value)}
+                      placeholder="Enter contact name"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Designation <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.yourDesignation}
+                      onChange={(e) => handleChange("yourDesignation", e.target.value)}
+                      placeholder=" (e.g: HR Manager, Director)"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+
+                    />
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {/* Location Information Section */}
+            <div className="bg-white  rounded-lg ">
+              <div className="flex items-center justify-between p-4 cursor-pointer ">
+                <div className="flex items-center gap-2">
+                  <MapPinned className="w-5 h-5 text-blue-400" />
+
+                  <h2 className="text-lg font-semibold">Location Information</h2>
+                </div>
+
+              </div>
+
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      State <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={formData.state}
+                      onChange={(e) => handleChange("state", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+                    >
+                      <option value="NSW">New South Wales</option>
+                      <option value="VIC">Victoria</option>
+                      <option value="QLD">Queensland</option>
+                      <option value="SA">South Australia</option>
+                      <option value="WA">Western Australia</option>
+                      <option value="TAS">Tasmania</option>
+                      <option value="NT">Northern Territory</option>
+                      <option value="ACT">Australian Capital Territory</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      City <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => handleChange("city", e.target.value)}
+                      placeholder="Sydney"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Post Code <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.pinCode}
+                      onChange={(e) => handleChange("pinCode", e.target.value)}
+                      placeholder="0000"
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+                    />
+                  </div>
+
+                  <div className="md:col-span-3">
+                    <label className="text-sm font-medium block mb-1 text-gray-500">
+                      Company Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.companyAddress}
+                      onChange={(e) => handleChange("companyAddress", e.target.value)}
+                      placeholder="Enter your company address..."
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
+                    />
+                    <p className="text-gray-500 text-sm mt-2"> eg: 123 High Street, Carlton North, VIC 3054</p>
+                  </div> 
+
+                </div>
+              </div>
+            </div>
+
+            {/* Terms and Conditions */}
+            <div className="bg-white rounded-lg shadow-sm p-4">
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 text-blue-400 rounded "
+                />
+                <label htmlFor="terms" className="text-sm text-gray-700">
+                  I have read and agree to the{" "}
+                  <a href="/terms" className="text-blue-400 hover:underline">
+                    Terms & Conditions
+                  </a>{" "}
+                  and{" "}
+                  <a href="/privacy" className="text-blue-400 hover:underline">
+                    Privacy Policy
+                  </a>
+                </label>
+              </div>
+            </div>
+
+            {/* Register Button */}
             <button
-              onClick={prevStep}
-              className="w-full py-2 bg-gray-200 text-gray-700 rounded-md text-sm sm:text-base"
+              type="button"
+              onClick={handleRegisterClick}
+              disabled={!agreedToTerms || loading}
+              className={`w-fit py-3 px-5 rounded-md font-semibold text-white transition-colors ${agreedToTerms && !loading
+                ? "bg-blue-400 hover:bg-blue-400"
+                : "bg-gray-300 cursor-not-allowed"
+                }`}
             >
-              Back
+              {loading ? "Processing..." : "Register"}
             </button>
-          </div>
-        )}
-
-        {/* STEP 3: Company Details */}
-        {step === 3 && (
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs sm:text-sm">
-                  Organization Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.companyName}
-                  onChange={(e) => handleChange("companyName", e.target.value)}
-                  placeholder="Enter Organization name"
-                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="text-xs sm:text-sm">Organization Size</label>
-                <select
-                  value={formData.numberOfEmployees}
-                  onChange={(e) =>
-                    handleChange("numberOfEmployees", e.target.value)
-                  }
-                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                >
-                  <option value="">Select organization size</option>
-                  <option value="Less than 5 employees">
-                    Less than 5 employees
-                  </option>
-                  <option value="Less than 20 employees">
-                    Less than 20 employees
-                  </option>
-                  <option value="Less than 50 employees">
-                    Less than 50 employees
-                  </option>
-                  <option value="Less than 100 employees">
-                    Less than 100 employees
-                  </option>
-                  <option value="Less than 200 employees">
-                    Less than 200 employees
-                  </option>
-                  <option value="More than 200 employees">
-                    More than 200 employees
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs sm:text-sm">
-                  Your Role at Organization{" "}
-                </label>
-                <select
-                  value={formData.yourDesignation}
-                  onChange={(e) =>
-                    handleChange("yourDesignation", e.target.value)
-                  }
-                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                >
-                  <option value="Australia">Your role at organization</option>
-                  <option value="I own this organization">
-                    I own this organization
-                  </option>
-                  <option value="I am an employee of this organization">
-                    I am an employee of this organization
-                  </option>
-                  <option value="I am an external recruiter for this organization">
-                    I am an external recruiter for this organization
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs sm:text-sm">Country</label>
-                <select
-                  value={formData.country}
-                  onChange={(e) => handleChange("country", e.target.value)}
-                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                >
-                  <option value="Australia">Australia</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs sm:text-sm">City</label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => handleChange("city", e.target.value)}
-                  placeholder="Enter city"
-                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs sm:text-sm">Postal Code</label>
-                <select
-                  value={formData.pinCode}
-                  onChange={(e) => handleChange("pinCode", e.target.value)}
-                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                >
-                  <option value="">Select Postal Code</option>
-                  <option value="2000">2000 - Sydney, NSW</option>
-                  <option value="3000">3000 - Melbourne, VIC</option>
-                  <option value="4000">4000 - Brisbane, QLD</option>
-                  <option value="5000">5000 - Adelaide, SA</option>
-                  <option value="6000">6000 - Perth, WA</option>
-                  <option value="7000">7000 - Hobart, TAS</option>
-                  <option value="0800">0800 - Darwin, NT</option>
-                  <option value="2600">2600 - Canberra, ACT</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs sm:text-sm">
-                  Company Address <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.companyAddress}
-                  onChange={(e) =>
-                    handleChange("companyAddress", e.target.value)
-                  }
-                  placeholder="Enter company address"
-                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-xs sm:text-sm">
-                  Organization website/ Social media link
-                </label>
-                <input
-                  type="text"
-                  value={formData.organizationWebsite}
-                  onChange={(e) =>
-                    handleChange("organizationWebsite", e.target.value)
-                  }
-                  placeholder="Enter organization website/ social media link"
-                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-xs sm:text-sm">
-                  Australian Business Number (ABN) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.AustralianBusinessNumber}
-                  onChange={(e) =>
-                    handleChange("AustralianBusinessNumber", e.target.value)
-                  }
-                  placeholder="Enter Australian Business Number"
-                  className="w-full mt-1 px-3 py-2 rounded-md border text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={prevStep}
-                className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-md text-sm sm:text-base"
-              >
-                Back
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="flex-1 py-2 bg-blue-600 text-white rounded-md text-sm sm:text-base"
-              >
-                {loading ? "Submitting..." : "Submit"}
-              </button>
-            </div>
 
             {message && (
-              <p className="text-center mt-2 text-sm text-gray-600">
+              <p className="text-center text-sm text-green-600 font-medium">
                 {message}
               </p>
             )}
-          </div>
-        )}
+          </form>
+        </div>
+
       </div>
-    </div>
+      <div className="bg-[#1F3C88] ">
+        <Footer />
+      </div>
+
+      {/* OTP Verification Modal */}
+      {showOtpModal && (
+
+
+        <div className="fixed inset-0   bg-white  flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-5 h-5 text-blue-400" />
+
+              </div>
+              <h2 className="text-xl font-bold mb-2">Verify Your Email</h2>
+              <p className="text-gray-600 text-sm">
+                We have sent a 6-digit OTP to
+              </p>
+              <p className="text-blue-400 font-semibold">{formData.email}</p>
+            </div>
+
+            <div className="flex gap-2 justify-center mb-6">
+              {emailOtp.map((digit, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  className="w-12 h-12 text-center border border-gray-500 rounded-lg text-lg font-semibold outline-none"
+                  value={digit}
+                  onChange={(e) => handleEmailOtpChange(e.target, index)}
+                  onKeyDown={(e) => handleEmailOtpKeyDown(e, index)}
+                  ref={(el) => {
+                    if (el) inputRefs.current[index] = el;
+                  }}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={verifyOtpAndSubmit}
+              disabled={loading || emailOtp.join("").length !== 6}
+              className={`w-full py-3 rounded-md font-semibold text-white mb-3 ${loading || emailOtp.join("").length !== 6
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-blue-400 hover:bg-blue-500"
+                }`}
+            >
+              {loading ? "Verifying..." : "Verify & Complete Registration"}
+            </button>
+
+            <button
+              onClick={() => setShowOtpModal(false)}
+              disabled={loading}
+              className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm"
+            >
+              Cancel
+            </button>
+
+            <div className="text-center mt-4">
+              <button
+                onClick={sendEmailOtp}
+                className="text-blue-400 text-sm hover:underline"
+              >
+                Resend OTP
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+
+
+      )}
+    </>
   );
 }
 
 export default function RegistrationPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading registration form...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading registration form...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <RegistrationComponent />
     </Suspense>
   );

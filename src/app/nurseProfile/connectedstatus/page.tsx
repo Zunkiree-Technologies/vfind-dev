@@ -216,7 +216,7 @@ function NurseStatusContent() {
                       <User className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-gray-900 hover:text-blue-400">
                         {req._employer_profiles?.companyName ||
                           req._employer_profiles?.fullName ||
                           "Unknown"}
