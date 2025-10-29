@@ -4,14 +4,12 @@ import Image from "next/image";
 import Cookies from "js-cookie";
 import {
   MapPin,
-  Briefcase,
-  Clock,
   Search,
   Mail,
-  DollarSign,
   Clock1,
   ChevronLeft,
   ChevronRight,
+  BriefcaseBusiness,
 } from "lucide-react";
 import Loader from "../../../../components/loading";
 import Footer from "@/app/Admin/components/layout/Footer";
@@ -706,8 +704,8 @@ export default function CandidateList() {
 
                         {/* Pay Rate */}
                         <div className="flex items-center gap-1">
-                          <DollarSign size={16} className="text-blue-500" />
-                          <span>{candidate.maxWorkHours ? `$${candidate.maxWorkHours}/hr` : "Not specified"}</span>
+                          <BriefcaseBusiness size={16} className="text-blue-500" />
+                          <span>{candidate.experience}</span>
                         </div>
 
 

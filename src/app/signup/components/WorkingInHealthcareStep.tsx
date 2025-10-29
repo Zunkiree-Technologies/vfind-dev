@@ -30,17 +30,17 @@ export function WorkingInHealthcareStep({ formData, handleChange }: StepProps) {
 
   const yesNoOptions = ["Yes", "No"];
   const experienceOptions = [
-    "Less than 6 months",
-    "6 months – 1 year",
-    "1–3 years",
-    "3 - 5 years",
-    "Over 5 years",
+    "Fresher",
+    "Less than 1 year",
+    "1 – 2 years",
+    "2 - 5 years",
+    "Above 5 years",
   ];
 
   return (
     <>
       <h2 className="font-[16px] font-semibold text-[#121224]">
-        Are you currently working in the healthcare field in Australia?
+        Do you have prior experience working in the healthcare field in Australia?
       </h2>
 
       <div className="flex flex-col gap-3  mt-5 w-fit">
@@ -65,7 +65,7 @@ export function WorkingInHealthcareStep({ formData, handleChange }: StepProps) {
       {formData.workingInHealthcare === "Yes" && (
         <>
           <h2 className="mt-4 font-[16px] font-semibold text-[#121224]">
-            How long have you been working in your current/most recent role?
+           How many years of experience do you have in healthcare field?
           </h2>
           <div className="flex flex-col gap-3 mt-5 w-fit">
             {experienceOptions.map((opt) => {
@@ -88,7 +88,7 @@ export function WorkingInHealthcareStep({ formData, handleChange }: StepProps) {
 
           {/* Organisation Combo Box */}
           <div className="relative mt-5 w-full max-w-md">
-            <h3 className="font-medium mb-2">Name of Organisation</h3>
+            <h3 className="font-medium mb-2">What is the name of the organization where you are currently working or have most recently worked?</h3>
 
             {formData.organisation === "" && (
               <p className="text-red-500 text-sm mt-1">

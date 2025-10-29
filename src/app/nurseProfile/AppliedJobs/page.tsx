@@ -1,8 +1,19 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { Building2, MapPin, DollarSign, Calendar, Clock, Briefcase, ChevronLeft, ChevronRight, Clock1 } from 'lucide-react';
-import { Navbar } from '../components/Navbar';
-import Footer from '@/app/Admin/components/layout/Footer';
+import { useState, useEffect } from "react";
+import {
+  Building2,
+  MapPin,
+  DollarSign,
+  Calendar,
+  Clock,
+  Briefcase,
+  ChevronLeft,
+  ChevronRight,
+  Clock1,
+} from "lucide-react";
+import { Navbar } from "../components/Navbar";
+import Footer from "@/app/Admin/components/layout/Footer";
+import { JobFilters } from "@/app/nurseProfile/components/JobFilters"; 
 
 interface JobDetails {
   id: number;
@@ -82,10 +93,11 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
-          ? "text-gray-400 cursor-not-allowed"
-          : "text-gray-600 hover:bg-gray-100"
-          }`}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+          currentPage === 1
+            ? "text-gray-400 cursor-not-allowed"
+            : "text-gray-600 hover:bg-gray-100"
+        }`}
       >
         <ChevronLeft size={16} />
         Previous
@@ -99,10 +111,11 @@ const Pagination: React.FC<PaginationProps> = ({
             ) : (
               <button
                 onClick={() => onPageChange(page as number)}
-                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${
+                  currentPage === page
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 {page}
               </button>
@@ -114,10 +127,11 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
-          ? "text-gray-400 cursor-not-allowed"
-          : "text-gray-600 hover:bg-gray-100"
-          }`}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+          currentPage === totalPages
+            ? "text-gray-400 cursor-not-allowed"
+            : "text-gray-600 hover:bg-gray-100"
+        }`}
       >
         Next
         <ChevronRight size={16} />
@@ -133,6 +147,28 @@ const AppliedJobs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
+  // ✅ Filter states
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
+  const [roleCategories, setRoleCategories] = useState<string[]>([]);
+  const [experience, setExperience] = useState<string[]>([]);
+  const [payRate, setPayRate] = useState<number>(0);
+
+  const clearFilters = () => {
+    setTypeFilter([]);
+    setRoleCategories([]);
+    setExperience([]);
+    setPayRate(0);
+  };
+
+  const handleCheckboxChange = (
+    value: string,
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    setter((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+  };
+
   useEffect(() => {
     fetchAppliedJobs();
   }, []);
@@ -142,19 +178,19 @@ const AppliedJobs = () => {
       setLoading(true);
       setError(null);
 
-      const authToken = localStorage.getItem('token');
+      const authToken = localStorage.getItem("token");
 
       if (!authToken) {
-        throw new Error('Authentication token not found. Please login.');
+        throw new Error("Authentication token not found. Please login.");
       }
 
       const response = await fetch(
-        'https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/get_applied_jobs_for_nurse',
+        "https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/get_applied_jobs_for_nurse",
         {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -166,7 +202,7 @@ const AppliedJobs = () => {
       const data = await response.json();
       setJobs(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -174,24 +210,31 @@ const AppliedJobs = () => {
 
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
-    if (statusLower.includes('pending') || statusLower.includes('review') || statusLower === 'applied') {
-      return 'bg-blue-400 text-white ';
+    if (
+      statusLower.includes("pending") ||
+      statusLower.includes("review") ||
+      statusLower === "applied"
+    ) {
+      return "bg-blue-400 text-white ";
     }
-    if (statusLower.includes('accepted') || statusLower.includes('approved')) {
-      return 'bg-green-100 text-green-800 border-green-200';
+    if (
+      statusLower.includes("accepted") ||
+      statusLower.includes("approved")
+    ) {
+      return "bg-green-100 text-green-800 border-green-200";
     }
-    if (statusLower.includes('rejected') || statusLower.includes('declined')) {
-      return 'bg-red-100 text-red-800 border-red-200';
+    if (statusLower.includes("rejected") || statusLower.includes("declined")) {
+      return "bg-red-100 text-red-800 border-red-200";
     }
-    return 'bg-gray-100 text-gray-800 border-gray-200';
+    return "bg-gray-100 text-gray-800 border-gray-200";
   };
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
       });
     } catch {
       return dateString;
@@ -199,19 +242,35 @@ const AppliedJobs = () => {
   };
 
   const getCompanyName = (job: AppliedJob) => {
-    return job._jobs?.locality || job._jobs?.location || 'Healthcare Facility';
+    return job._jobs?.locality || job._jobs?.location || "Healthcare Facility";
   };
-
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const totalPages = Math.ceil(jobs.length / itemsPerPage);
+  // ✅ Filtering logic
+  const filteredJobs = jobs.filter((job) => {
+    const j = job._jobs;
+    return (
+      (typeFilter.length === 0 || typeFilter.includes(j?.type ?? "")) &&
+      (roleCategories.length === 0 ||
+        roleCategories.includes(j?.roleCategory ?? "")) &&
+      (experience.length === 0 ||
+        experience.includes(
+          j?.experienceMin || j?.experienceMax || "Not specified"
+        )) &&
+      (payRate === 0 ||
+        (parseInt(j?.minPay ?? "0") >= payRate ||
+          parseInt(j?.maxPay ?? "0") >= payRate))
+    );
+  });
+
+  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentJobs = jobs.slice(startIndex, endIndex);
+  const currentJobs = filteredJobs.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -243,14 +302,31 @@ const AppliedJobs = () => {
   return (
     <div>
       <Navbar />
-
       <div className="p-4 min-h-screen bg-[#F5F6FA]">
         <div className="flex gap-6 mt-6 items-start">
-          <div className="mx-auto container flex justify-center items-center">
-            <div className="flex-1 max-w-[983px]">
-              <h1 className="text-3xl font-bold ml-2 text-primary mb-6">Applied Jobs</h1>
+          <div className="mx-auto container flex justify-center items-start gap-8">
 
-              {jobs.length === 0 ? (
+            {/* ✅ Filters Sidebar */}
+            <JobFilters
+              typeFilter={typeFilter}
+              setTypeFilter={setTypeFilter}
+              roleCategories={roleCategories}
+              setRoleCategories={setRoleCategories}
+              experience={experience}
+              setExperience={setExperience}
+              payRate={payRate}
+              setPayRate={setPayRate}
+              clearFilters={clearFilters}
+              handleCheckboxChange={handleCheckboxChange}
+            />
+
+            {/* ✅ Job Cards */}
+            <div className="flex-1 max-w-[983px]">
+              <h1 className="text-3xl font-bold ml-2 text-primary mb-6">
+                Applied Jobs
+              </h1>
+
+              {filteredJobs.length === 0 ? (
                 <div className="text-center bg-white rounded-lg p-12 shadow-sm">
                   <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -268,14 +344,16 @@ const AppliedJobs = () => {
                       return (
                         <a
                           key={job.id}
-                          href={`/nurseProfile/jobapplicationpage/${job.jobs_id}?company=${encodeURIComponent(getCompanyName(job))}`}
+                          href={`/nurseProfile/jobapplicationpage/${job.jobs_id}?company=${encodeURIComponent(
+                            getCompanyName(job)
+                          )}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2 cursor-pointer"
                         >
                           <div className="flex-1">
                             <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
-                              {jobDetails?.title || 'Job Title'}
+                              {jobDetails?.title || "Job Title"}
                             </h2>
 
                             <p className="text-gray-600 text-sm mb-3 font-medium">
@@ -297,13 +375,18 @@ const AppliedJobs = () => {
                                 </div>
                               )}
 
-                              {(jobDetails?.experienceMin || jobDetails?.experienceMax) && (
+                              {(jobDetails?.experienceMin ||
+                                jobDetails?.experienceMax) && (
                                 <div className="flex items-center gap-1">
                                   <Calendar size={16} />
                                   <span>
                                     {jobDetails.experienceMin
-                                      ? `${jobDetails.experienceMin}${jobDetails.experienceMax ? ` - ${jobDetails.experienceMax}` : ''} years`
-                                      : 'Not specified'}
+                                      ? `${jobDetails.experienceMin}${
+                                          jobDetails.experienceMax
+                                            ? ` - ${jobDetails.experienceMax}`
+                                            : ""
+                                        } years`
+                                      : "Not specified"}
                                   </span>
                                 </div>
                               )}
@@ -313,8 +396,10 @@ const AppliedJobs = () => {
                                   <DollarSign size={16} />
                                   <span>
                                     {jobDetails.minPay || jobDetails.maxPay
-                                      ? `${jobDetails.minPay || '0'} - ${jobDetails.maxPay || '0'}/hr`
-                                      : 'Not specified'}
+                                      ? `${jobDetails.minPay || "0"} - ${
+                                          jobDetails.maxPay || "0"
+                                        }/hr`
+                                      : "Not specified"}
                                   </span>
                                 </div>
                               )}
@@ -328,7 +413,9 @@ const AppliedJobs = () => {
 
                               <div className="flex items-center gap-1">
                                 <Clock1 size={16} />
-                                <span>Applied {formatDate(job.applied_date)}</span>
+                                <span>
+                                  Applied {formatDate(job.applied_date)}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -356,21 +443,13 @@ const AppliedJobs = () => {
                   )}
                 </>
               )}
-
-              {jobs.length > 0 && currentJobs.length === 0 && (
-                <div className="text-center text-gray-500 mt-8">
-                  No jobs found on this page.
-                </div>
-              )}
             </div>
           </div>
         </div>
       </div>
-      <div>
-        <Footer />
-      </div>
-    </div>
 
+      <Footer />
+    </div>
   );
 };
 

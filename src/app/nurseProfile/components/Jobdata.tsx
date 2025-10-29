@@ -4,13 +4,14 @@ import { MapPin, Briefcase, Clock, DollarSign, Calendar, ChevronLeft, ChevronRig
 import Loader from "../../../../components/loading";
 import { useSearchParams } from "next/navigation";
 import MainButton from "@/components/ui/MainButton";
+import { JobFilters } from "./JobFilters";
 
 const EXPERIENCE_RANGES: Record<string, [number, number]> = {
-  "Less than 6 months": [0, 0.5],
-  "6 months – 1 year": [0.5, 1],
-  "1–3 years": [1, 3],
-  "3 - 5 years": [3, 5],
-  "Over 5 years": [5, Infinity],
+  "Fresher": [0, 0.5],
+  "Less than 1 year": [0, 1],
+  "1 - 2 years": [1, 3],
+  "2 - 5 years": [3, 5],
+  "Above 5 years": [5, Infinity],
 };
 
 function normalizeStr(s?: string) {
@@ -350,65 +351,18 @@ export default function JobData() {
       <div className="flex gap-6 mt-6 items-start">
         <div className="mx-auto container flex justify-center item-center gap-8">
           {/* Filters Sidebar */}
-          <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-[60px] h-fit overflow-y-auto scrollbar-hide">
-            <h2 className="font-normal text-gray-800 flex justify-between">
-              All Filters
-              <button onClick={clearFilters} className="text-sm text-blue-400">Clear All</button>
-            </h2>
-            <div className="h-0.5 bg-gray-300" />
-
-            {/* Job Type */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
-              {["Full-time", "Part-time", "Contract", "Casual", "Open to any"].map((t) => (
-                <div key={t} className="flex items-center gap-2 text-sm mb-1">
-                  <input type="checkbox" checked={typeFilter.includes(t)} onChange={() => handleCheckboxChange(t, setTypeFilter)} className="rounded" />
-                  <label>{t}</label>
-                </div>
-              ))}
-            </div>
-            <div className="h-0.5 bg-gray-300" />
-
-            {/* Role Category */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">Role Category</h3>
-              {[
-                "Clinical Lead / Manager",
-                "Registered Nurse (RN)",
-                "Enrolled Nurse (EN)",
-                "Assistant in Nursing (AIN)",
-                "Others",
-              ].map((role) => (
-                <div key={role} className="flex items-center gap-2 text-sm mb-1">
-                  <input type="checkbox" checked={roleCategories.includes(role)} onChange={() => handleCheckboxChange(role, setRoleCategories)} className="rounded" />
-                  <label>{role}</label>
-                </div>
-              ))}
-            </div>
-            <div className="h-0.5 bg-gray-300" />
-
-            {/* Experience */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">Experience</h3>
-              {Object.keys(EXPERIENCE_RANGES).map((exp) => (
-                <div key={exp} className="flex items-center gap-2 text-sm mb-1">
-                  <input type="checkbox" checked={experience.includes(exp)} onChange={() => handleCheckboxChange(exp, setExperience)} className="rounded" />
-                  <label>{exp}</label>
-                </div>
-              ))}
-            </div>
-            <div className="h-0.5 bg-gray-300" />
-
-            {/* Pay Rate slider */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">Pay Rate</h3>
-              <input type="range" min={0} max={100} value={isNaN(payRate) ? 0 : payRate} onChange={(e) => setPayRate(Number(e.target.value) || 0)} className="w-full primary-blue-400" />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>Any</span>
-                <span>${payRate}+</span>
-              </div>
-            </div>
-          </div>
+          <JobFilters
+            typeFilter={typeFilter}
+            setTypeFilter={setTypeFilter}
+            roleCategories={roleCategories}
+            setRoleCategories={setRoleCategories}
+            experience={experience}
+            setExperience={setExperience}
+            payRate={payRate}
+            setPayRate={setPayRate}
+            clearFilters={clearFilters}
+            handleCheckboxChange={handleCheckboxChange}
+          />
 
           {/* Job Cards */}
           <div className="flex-1 max-w-[983px]">

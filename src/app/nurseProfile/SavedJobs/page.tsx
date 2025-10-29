@@ -14,13 +14,14 @@ import Loader from "../../../../components/loading";
 import Link from "next/link";
 import { Navbar } from "../components/Navbar";
 import Footer from "@/app/Admin/components/layout/Footer";
+import { JobFilters } from "../components/JobFilters";
 
 const EXPERIENCE_RANGES: Record<string, [number, number]> = {
-  "Less than 6 months": [0, 0.5],
-  "6 months – 1 year": [0.5, 1],
-  "1–3 years": [1, 3],
-  "3 - 5 years": [3, 5],
-  "Over 5 years": [5, Infinity],
+  "Fresher": [0, 0.5],
+  "Less than 1 year": [0, 1],
+  "1 - 2 years": [1, 3],
+  "2 - 5 years": [3, 5],
+  "Above 5 years": [5, Infinity],
 };
 
 function normalizeStr(s?: string) {
@@ -94,8 +95,8 @@ const Pagination: React.FC<PaginationProps> = ({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
           }`}
       >
         <ChevronLeft size={16} /> Previous
@@ -109,8 +110,8 @@ const Pagination: React.FC<PaginationProps> = ({
               <button
                 onClick={() => onPageChange(page as number)}
                 className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-gray-900 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
                   }`}
               >
                 {page}
@@ -123,8 +124,8 @@ const Pagination: React.FC<PaginationProps> = ({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
           }`}
       >
         Next <ChevronRight size={16} />
@@ -347,150 +348,59 @@ export default function SavedJobs() {
     <div>
       <Navbar />
       <div className="p-4 min-h-screen bg-[#F5F6FA]">
-        <h1 className="text-3xl font-bold  ml-158  text-primary mb-6">Saved Jobs</h1>
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-[1600px] mx-auto">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl lg:ml-125 font-bold text-blue-400">
+              Saved Jobs
+            </h1>
+          </div>
+        </div>
 
         <div className="flex gap-6 mt-6 items-start">
 
           <div className="mx-auto container flex justify-center item-center gap-8">
 
             {/* Filters Sidebar */}
-            <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-[60px] h-fit overflow-y-auto scrollbar-hide">
-              <h2 className="font-semibold text-gray-800 flex justify-between">
-                All Filters
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-blue-600"
-                >
-                  Clear All
-                </button>
-              </h2>
-              <div className="h-0.5 bg-gray-300" />
-
-              {/* Job Type */}
-              <div>
-                <h3 className="font-medium text-sm text-gray-700 mb-2">
-                  Job Type
-                </h3>
-                {[
-                  "Full-time",
-                  "Part-time",
-                  "Contract",
-                  "Casual",
-                  "Open to any",
-                ].map((t) => (
-                  <div key={t} className="flex items-center gap-2 text-sm mb-1">
-                    <input
-                      type="checkbox"
-                      checked={typeFilter.includes(t)}
-                      onChange={() => handleCheckboxChange(t, setTypeFilter)}
-                      className="rounded"
-                    />
-                    <label>{t}</label>
-                  </div>
-                ))}
-              </div>
-              <div className="h-0.5 bg-gray-300" />
-
-              {/* Role Category */}
-              <div>
-                <h3 className="font-medium text-sm text-gray-700 mb-2">
-                  Role Category
-                </h3>
-                {[
-                  "Clinical Lead / Manager",
-                  "Registered Nurse (RN)",
-                  "Enrolled Nurse (EN)",
-                  "Assistant in Nursing (AIN)",
-                  "Others",
-                ].map((role) => (
-                  <div
-                    key={role}
-                    className="flex items-center gap-2 text-sm mb-1"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={roleCategories.includes(role)}
-                      onChange={() =>
-                        handleCheckboxChange(role, setRoleCategories)
-                      }
-                      className="rounded"
-                    />
-                    <label>{role}</label>
-                  </div>
-                ))}
-              </div>
-              <div className="h-0.5 bg-gray-300" />
-
-              {/* Experience */}
-              <div>
-                <h3 className="font-medium text-sm text-gray-700 mb-2">
-                  Experience
-                </h3>
-                {Object.keys(EXPERIENCE_RANGES).map((exp) => (
-                  <div
-                    key={exp}
-                    className="flex items-center gap-2 text-sm mb-1"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={experience.includes(exp)}
-                      onChange={() => handleCheckboxChange(exp, setExperience)}
-                      className="rounded"
-                    />
-                    <label>{exp}</label>
-                  </div>
-                ))}
-              </div>
-              <div className="h-0.5 bg-gray-300" />
-
-              {/* Pay Rate slider */}
-              <div>
-                <h3 className="font-medium text-sm text-gray-700 mb-2">
-                  Pay Rate
-                </h3>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={isNaN(payRate) ? 0 : payRate}
-                  onChange={(e) => setPayRate(Number(e.target.value) || 0)}
-                  className="w-full accent-blue-600"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>Any</span>
-                  <span>${payRate}+</span>
-                </div>
-              </div>
-            </div>
-
+            <JobFilters
+              typeFilter={typeFilter}
+              setTypeFilter={setTypeFilter}
+              roleCategories={roleCategories}
+              setRoleCategories={setRoleCategories}
+              experience={experience}
+              setExperience={setExperience}
+              payRate={payRate}
+              setPayRate={setPayRate}
+              clearFilters={clearFilters}
+              handleCheckboxChange={handleCheckboxChange}
+            />
             {/* Job Cards */}
             <div className="flex-1 max-w-[983px]">
               <div className="grid grid-cols-1 gap-4">
                 {currentJobs.map((job) => (
                   <div
                     key={job.id}
-                    className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2"
+                    className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-lg p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2 gap-4"
                   >
-                    <div className="flex-1">
+                    <div className="flex-1 w-full">
                       <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
                         {job.title}
                       </h2>
                       <p className="text-gray-600 text-sm mb-3 font-medium">
                         {getCompanyName(job)}
                       </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 text-gray-600 text-sm">
                         <div className="flex items-center gap-1">
-                          <MapPin size={16} />
-                          <span>
+                          <MapPin size={16} className="flex-shrink-0" />
+                          <span className="truncate">
                             {job.location || "Location not specified"}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Clock size={16} />
+                          <Clock size={16} className="flex-shrink-0" />
                           <span>{job.type || "Not specified"}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Calendar size={16} />
+                          <Calendar size={16} className="flex-shrink-0" />
                           <span>
                             {job.experienceMin
                               ? `${job.experienceMin}${job.experienceMax
@@ -501,7 +411,7 @@ export default function SavedJobs() {
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <DollarSign size={16} />
+                          <DollarSign size={16} className="flex-shrink-0" />
                           <span>
                             {job.minPay || job.maxPay
                               ? `${job.minPay || "0"} - ${job.maxPay || "0"}/hr`
@@ -509,11 +419,11 @@ export default function SavedJobs() {
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Briefcase size={16} />
+                          <Briefcase size={16} className="flex-shrink-0" />
                           <span>{job.roleCategory || "General"}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Clock1 size={16} />
+                          <Clock1 size={16} className="flex-shrink-0" />
                           <span>
                             {job.created_at
                               ? new Date(job.created_at).toLocaleDateString(
@@ -529,7 +439,7 @@ export default function SavedJobs() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 ml-6 flex-col">
+                    <div className="flex items-center w-full md:w-auto md:ml-6">
                       <Link
                         href={{
                           pathname: `/nurseProfile/jobapplicationpage/${job.id}`,
@@ -537,7 +447,7 @@ export default function SavedJobs() {
                         }}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
+                        className="w-full md:w-auto text-center px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
                       >
                         View Details
                       </Link>
@@ -559,6 +469,7 @@ export default function SavedJobs() {
                 </div>
               )}
             </div>
+
           </div>
         </div>
       </div>
