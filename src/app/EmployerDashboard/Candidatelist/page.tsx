@@ -15,8 +15,7 @@ import Loader from "../../../../components/loading";
 import Footer from "@/app/Admin/components/layout/Footer";
 import EmployerNavbar from "../../EmployerDashboard/components/EmployerNavbar";
 import MainButton from "../../../components/ui/MainButton";
-
-
+import CandidateFilters from "../components/CandidateFilters";
 
 interface ProfileImage {
   access: string;
@@ -27,7 +26,6 @@ interface ProfileImage {
 }
 
 interface Candidate {
-  
   residencyStatus: string;
   shiftPreferences: string[];
   experience: string;
@@ -89,7 +87,6 @@ const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <div className="flex items-center justify-center gap-2 mt-8 mb-6">
-      {/* Previous Button */}
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
@@ -102,7 +99,6 @@ const Pagination: React.FC<PaginationProps> = ({
         Previous
       </button>
 
-      {/* Page Numbers */}
       <div className="flex items-center gap-1">
         {getVisiblePages().map((page, index) => (
           <React.Fragment key={index}>
@@ -123,7 +119,6 @@ const Pagination: React.FC<PaginationProps> = ({
         ))}
       </div>
 
-      {/* Next Button */}
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
@@ -141,13 +136,13 @@ const Pagination: React.FC<PaginationProps> = ({
 
 const BASE_IMAGE_URL = "https://x76o-gnx4-xrav.a2.xano.io";
 
-// ✅ moved outside to avoid eslint warning
+// Updated experience ranges to match the form
 const experienceRanges: Record<string, [number, number]> = {
-  "Less than 6 months": [0, 0.5],
-  "6 months – 1 year": [0.5, 1],
-  "1–3 years": [1, 3],
-  "3 - 5 years": [3, 5],
-  "Over 5 years": [5, Infinity],
+  "Fresher": [0, 0.5],
+  "Less than 1 year": [0, 1],
+  "1 – 2 years": [1, 3],
+  "2 - 5 years": [3, 5],
+  "Above 5 years": [5, Infinity],
 };
 
 export default function CandidateList() {
@@ -156,14 +151,12 @@ export default function CandidateList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
 
-  // Updated filter states to match new layout
   const [jobTypes, setJobTypes] = useState<string[]>([]);
   const [shifts, setShifts] = useState<string[]>([]);
   const [roleCategories, setRoleCategories] = useState<string[]>([]);
@@ -173,13 +166,11 @@ export default function CandidateList() {
   const [experience, setExperience] = useState<string[]>([]);
   const [visaStatus, setVisaStatus] = useState<string[]>([]);
 
-  // Calculate pagination values
   const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentCandidates = filteredCandidates.slice(startIndex, endIndex);
 
-  // Load cookies and employerId
   useEffect(() => {
     const savedSearch = Cookies.get("search") || "";
     const savedLocation = Cookies.get("location") || "";
@@ -211,7 +202,6 @@ export default function CandidateList() {
       setRadius(Number(savedRadius));
   }, []);
 
-  // Fetch candidates
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
@@ -254,12 +244,11 @@ export default function CandidateList() {
 
   function parseExperienceToYears(exp: string): number {
     const normalized = exp.trim().toLowerCase().replace(/–/g, "-");
-
-    if (normalized.includes("less than 6 months")) return 0.25;
-    if (normalized.includes("6 months")) return 0.75;
-    if (normalized.includes("1-3 years")) return 2;
-    if (normalized.includes("3-5 years")) return 4;
-    if (normalized.includes("over 5 years") || normalized.includes("5+"))
+    if (normalized.includes("fresher")) return 0.25;
+    if (normalized.includes("less than 1 year")) return 0.75;
+    if (normalized.includes("1 – 2 years") || normalized.includes("1 - 2 years")) return 2;
+    if (normalized.includes("2 - 5 years")) return 4;
+    if (normalized.includes("above 5 years") || normalized.includes("5+"))
       return 6;
 
     return 0;
@@ -269,7 +258,6 @@ export default function CandidateList() {
     (instant = false) => {
       let filtered = [...candidates];
 
-      // 🔹 SEARCH filter
       if (search.trim()) {
         filtered = filtered.filter((c) =>
           [c.fullName, c.qualification, c.jobTypes]
@@ -279,7 +267,6 @@ export default function CandidateList() {
         );
       }
 
-      // 🔹 LOCATION filter
       if (location.trim()) {
         filtered = filtered.filter((c) =>
           [c.currentResidentialLocation]
@@ -289,7 +276,6 @@ export default function CandidateList() {
         );
       }
 
-      // 🔹 JOB TYPE filter
       if (jobTypes.length > 0) {
         filtered = filtered.filter((c) => {
           try {
@@ -303,7 +289,6 @@ export default function CandidateList() {
         });
       }
 
-      // 🔹 SHIFT filter
       if (shifts.length > 0) {
         filtered = filtered.filter((c) =>
           c.shiftPreferences?.some((pref: string) =>
@@ -312,7 +297,6 @@ export default function CandidateList() {
         );
       }
 
-      // 🔹 EXPERIENCE filter
       if (experience.length > 0) {
         filtered = filtered.filter((c) => {
           if (!c.experience) return false;
@@ -326,7 +310,6 @@ export default function CandidateList() {
         });
       }
 
-      // 🔹 ROLE filter
       if (roleCategories.length > 0) {
         filtered = filtered.filter((c) =>
           roleCategories.some((role) =>
@@ -337,7 +320,6 @@ export default function CandidateList() {
         );
       }
 
-      // 🔹 VISA filter
       if (visaStatus.length > 0) {
         filtered = filtered.filter((c) =>
           visaStatus.some((status) =>
@@ -348,7 +330,6 @@ export default function CandidateList() {
         );
       }
 
-      // 🔹 PAY RATE filter
       if (payRate > 0) {
         filtered = filtered.filter((c) => {
           const rate = parseFloat(c.maxWorkHours || "0");
@@ -357,9 +338,8 @@ export default function CandidateList() {
       }
 
       setFilteredCandidates(filtered);
-      setCurrentPage(1); // Reset to first page when filters change
+      setCurrentPage(1);
 
-      // Save cookies if not instant
       if (!instant) {
         Cookies.set("search", search, { expires: 7 });
         Cookies.set("location", location, { expires: 7 });
@@ -403,14 +383,6 @@ export default function CandidateList() {
     applyFilters,
   ]);
 
-  const handleCheckboxChange = (
-    value: string,
-    setter: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    setter((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-    );
-  };
 
   const clearFilters = () => {
     setSearch("");
@@ -423,9 +395,8 @@ export default function CandidateList() {
     setPayRate(0);
     setRadius(0);
     setFilteredCandidates(candidates);
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
 
-    // Clear all cookies
     Cookies.remove("search");
     Cookies.remove("location");
     Cookies.remove("jobTypes");
@@ -439,7 +410,6 @@ export default function CandidateList() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -452,7 +422,6 @@ export default function CandidateList() {
     );
 
   return (
-
     <div className="min-h-screen bg-[#F5F6FA]">
       {/* Navbar - sticky */}
       <div className="sticky top-0 z-50">
@@ -508,156 +477,24 @@ export default function CandidateList() {
       </div>
 
       <div className=" mx-auto bg-[#F5F6FA]">
-
-
-
-
-        <div className="flex gap-6 mt-18 mx-auto container ">
-
+        <div className="flex gap-6 mt-10 mx-auto container">
           {/* Left Filters */}
-          <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-18 h-[calc(100vh-3rem)] overflow-y-auto">
-            <h2 className="font-semibold text-gray-800 flex justify-between">
-              All Filters
-              <button onClick={clearFilters} className="text-sm text-blue-400">
-                Clear All
-              </button>
-            </h2>
-            <div className="w-py h-0.5 bg-gray-300" />
-
-            {/* Job Type */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
-              {["Full-time", "Part-time", "Casual", " Temporary Contract", "Open to any"].map((type) => (
-                <div key={type} className="flex items-center gap-2 text-sm mb-1">
-                  <input
-                    type="checkbox"
-                    checked={jobTypes.includes(type)}
-                    onChange={() => handleCheckboxChange(type, setJobTypes)}
-                    className="rounded"
-                  />
-                  <label>{type}</label>
-                </div>
-              ))}
-            </div>
-            <div className="w-py h-0.5 bg-gray-300" />
-
-            {/* Shift */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">Shift</h3>
-              {["Morning", "Afternoon", "Night"].map((shift) => (
-                <div key={shift} className="flex items-center gap-2 text-sm mb-1">
-                  <input
-                    type="checkbox"
-                    checked={shifts.includes(shift)}
-                    onChange={() => handleCheckboxChange(shift, setShifts)}
-                    className="rounded"
-                  />
-                  <label>{shift}</label>
-                </div>
-              ))}
-            </div>
-            <div className="w-py h-0.5 bg-gray-300" />
-
-            {/* Role Category */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">
-                Role Category
-              </h3>
-              {[
-                "Clinical Lead / Manager",
-                "Registered Nurse (RN)",
-                "Enrolled Nurse (EN)",
-                "Assistant in Nursing (AIN)",
-                "Personal Care Assistant (PCA)",
-                "Attendant",
-                "Support Worker",
-                "Nursing Assistant",
-              ].map((role) => (
-                <div key={role} className="flex items-center gap-2 text-sm mb-1">
-                  <input
-                    type="checkbox"
-                    checked={roleCategories.includes(role)}
-                    onChange={() =>
-                      handleCheckboxChange(role, setRoleCategories)
-                    }
-                    className="rounded"
-                  />
-                  <label>{role}</label>
-                </div>
-              ))}
-            </div>
-            <div className="w-py h-0.5 bg-gray-300" />
-
-            {/* Experience */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">
-                Experience
-              </h3>
-              {Object.keys(experienceRanges).map((exp) => (
-                <div key={exp} className="flex items-center gap-2 text-sm mb-1">
-                  <input
-                    type="checkbox"
-                    checked={experience.includes(exp)}
-                    onChange={() => handleCheckboxChange(exp, setExperience)}
-                    className="rounded"
-                  />
-                  <label>{exp}</label>
-                </div>
-              ))}
-            </div>
-            <div className="w-py h-0.5 bg-gray-300" />
-
-            {/* Visa Status */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">
-                Visa Status
-              </h3>
-              {["Australian Citizen / Permanent Resident",
-                "Temporary Resident",
-                "Student Visa ",
-                "Student Dependent Visa ",
-                "Working Holiday Visa ",
-                "Other",].map((status) => (
-                  <div key={status} className="flex items-center gap-2 text-sm mb-1">
-                    <input
-                      type="checkbox"
-                      checked={visaStatus.includes(status)}
-                      onChange={() => handleCheckboxChange(status, setVisaStatus)}
-                      className="rounded"
-                    />
-                    <label>{status}</label>
-                  </div>
-                ))}
-            </div>
-            <div className="w-py h-0.5 bg-gray-300" />
-
-            {/* Pay Rate Slider */}
-            <div>
-              <h3 className="font-medium text-sm text-gray-700 mb-2">Pay Rate</h3>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={payRate}
-                onChange={(e) => setPayRate(Number(e.target.value))}
-                className="w-full"
-              />
-              <div className="text-sm text-gray-600">${payRate}+/hr</div>
-            </div>
-
-            {/* Radius Slider
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Radius</h3>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={radius}
-              onChange={(e) => setRadius(Number(e.target.value))}
-              className="w-full"
+          <div className="hidden md:block">
+            <CandidateFilters
+              jobTypes={jobTypes}
+              setJobTypes={setJobTypes}
+              shifts={shifts}
+              setShifts={setShifts}
+              roleCategories={roleCategories}
+              setRoleCategories={setRoleCategories}
+              experience={experience}
+              setExperience={setExperience}
+              visaStatus={visaStatus}
+              setVisaStatus={setVisaStatus}
+              payRate={payRate}
+              setPayRate={setPayRate}
+              clearFilters={clearFilters}
             />
-            <div className="text-sm text-gray-600">{radius} km</div>
-          </div> */}
           </div>
 
           {/* Right Candidate List */}

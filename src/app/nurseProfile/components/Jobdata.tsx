@@ -23,11 +23,11 @@ function parseExperienceStringToYears(exp?: string): number {
   const n = normalizeStr(exp);
   const numericMatch = n.match(/^\s*(\d+(\.\d+)?)/);
   if (numericMatch) return parseFloat(numericMatch[1]);
-  if (n.includes("less than 6")) return 0.25;
-  if (n.includes("6 months") && !n.includes("1-3")) return 0.75;
-  if (n.includes("1-3") || n.includes("1–3")) return 2;
-  if (n.includes("3-5") || n.includes("3 - 5") || n.includes("3–5")) return 4;
-  if (n.includes("over 5") || n.includes("5+")) return 6;
+  if (n.includes("Fresher")) return 0.25;
+  if (n.includes("Less than 1 year") && !n.includes("0-1")) return 0.75;
+  if (n.includes("1-2") || n.includes("1–2")) return 2;
+  if (n.includes("3-5") || n.includes("2 - 5") || n.includes("1–5")) return 4;
+  if (n.includes("Above 5 years") || n.includes("5+")) return 6;
   return 0;
 }
 
@@ -52,6 +52,7 @@ interface Job {
   visaRequirement?: string;
   created_at?: string;
   updated_at?: string;
+  expiryDate?: string;
 
 }
 
@@ -193,6 +194,7 @@ export default function JobData() {
         const res = await fetch("https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs");
         if (!res.ok) throw new Error("Failed to fetch jobs");
         const data = await res.json();
+        console.log(data)
         const list = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
         setJobs(list);
         setFilteredJobs(list);
@@ -367,92 +369,97 @@ export default function JobData() {
           {/* Job Cards */}
           <div className="flex-1 max-w-[983px]">
             <div className="grid grid-cols-1 gap-4">
-              {currentJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2"
-                >
-                  {/* Job info */}
-                  <div className="flex-1">
-                    <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
-                      {job.title}
-                    </h2>
+              {currentJobs.map((job) => {
+                const isExpired = job.expiryDate && new Date(job.expiryDate) < new Date();
 
-                    {/* Updated company name display */}
-                    <p className="text-gray-600 text-sm mb-3 font-medium">
-                      {getCompanyName(job)}
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
-                      <div className="flex items-center gap-1">
-                        <MapPin size={16} />
-                        <span>{job.location || "Location not specified"}</span>
+                return (
+                  <div
+                    key={job.id}
+                    className="relative flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2"
+                  >
+                    {/* Expired badge */}
+                    {isExpired && (
+                      <div className="absolute top-3 right-3 bg-red-100 text-red-600 text-xs font-semibold px-2 py-1 rounded">
+                        Expired
                       </div>
+                    )}
 
-                      <div className="flex items-center gap-1">
-                        <Clock size={16} />
-                        <span>{job.type || "Not specified"}</span>
+                    {/* Job info */}
+                    <div className="flex-1">
+                      <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
+                        {job.title}
+                      </h2>
+
+                      <p className="text-gray-600 text-sm mb-3 font-medium">
+                        {getCompanyName(job)}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
+                        <div className="flex items-center gap-1">
+                          <MapPin size={16} />
+                          <span>{job.location || "Location not specified"}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <Clock size={16} />
+                          <span>{job.type || "Not specified"}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <Calendar size={16} />
+                          <span>
+                            {job.experienceMin
+                              ? `${job.experienceMin}${job.experienceMax ? ` - ${job.experienceMax}` : ""} years`
+                              : "Not specified"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <DollarSign size={16} />
+                          <span>
+                            {job.minPay || job.maxPay
+                              ? `${job.minPay || "0"} - ${job.maxPay || "0"}/hr`
+                              : "Not specified"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <Briefcase size={16} />
+                          <span>{job.roleCategory || "General"}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <Clock1 size={16} />
+                          <span>
+                            {job.created_at
+                              ? new Date(job.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })
+                              : "Date not available"}
+                          </span>
+                        </div>
                       </div>
+                    </div>
 
-                      <div className="flex items-center gap-1">
-                        <Calendar size={16} />
-                        <span>
-                          {job.experienceMin
-                            ? `${job.experienceMin}${job.experienceMax ? ` - ${job.experienceMax}` : ""
-                            } years`
-                            : "Not specified"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <DollarSign size={16} />
-                        <span>
-                          {job.minPay || job.maxPay
-                            ? `${job.minPay || "0"} - ${job.maxPay || "0"}/hr`
-                            : "Not specified"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <Briefcase size={16} />
-                        <span>{job.roleCategory || "General"}</span>
-                      </div>
-
-
-
-                      <div className="flex items-center gap-1">
-                        <Clock1 size={16} />
-                        <span>
-                          {job.created_at
-                            ? new Date(job.created_at).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })
-                            : "Date not available"}
-                        </span>
-                      </div>
-
+                    {/* CTA button */}
+                    <div className="flex items-center gap-4 ml-6 flex-col">
+                      <MainButton
+                        href={`/nurseProfile/jobapplicationpage/${job.id}?company=${encodeURIComponent(getCompanyName(job))}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`px-4 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${isExpired
+                            ? "bg-gray-400 text-white cursor-not-allowed"
+                            : " "
+                          }`}
+                      >
+                        View Details
+                      </MainButton>
                     </div>
                   </div>
-
-                  {/* CTA button */}
-                  <div className="flex items-center gap-4 ml-6 flex-col">
-                    <MainButton
-                      href={`/nurseProfile/jobapplicationpage/${job.id}?company=${encodeURIComponent(getCompanyName(job))}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className="transition-all duration-300 group-hover:-translate-x-1">
-                          View Details
-                        </span>
-                      </span>
-                    </MainButton>
-
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Pagination */}
@@ -470,8 +477,10 @@ export default function JobData() {
               </div>
             )}
           </div>
+
+
         </div>
       </div>
-    </div>
+    </div >
   );
 }

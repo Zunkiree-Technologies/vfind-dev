@@ -5,7 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Navbar from "../../../components/navbar";
 import Footer from "../../../components/footer-section";
-import { Building2, Mail, MapPinned, User } from "lucide-react";
+import { Building2, Globe, Mail, MapPinned, User } from "lucide-react";
+import Image from "next/image";
 
 type FormData = {
   mobile: string;
@@ -39,6 +40,9 @@ function RegistrationComponent() {
   const [emailOtp, setEmailOtp] = useState<string[]>(new Array(6).fill(""));
   const [, setOtpSent] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const [logo, setLogo] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
 
   const [formData, setFormData] = useState<FormData>({
     mobile: "",
@@ -57,6 +61,14 @@ function RegistrationComponent() {
     organizationWebsite: "",
     creatingAccountAs: "company",
   });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setLogo(file);
+    if (file) setPreview(URL.createObjectURL(file));
+    else setPreview(null);
+  };
+
 
   // Pre-fill mobile from query params
   useEffect(() => {
@@ -197,50 +209,41 @@ function RegistrationComponent() {
     setMessage("");
 
     try {
+      const form = new FormData();
+
+      // Add normal fields
+      Object.entries(formData).forEach(([key, value]) => {
+        form.append(key, value as string);
+      });
+
+      // Add logo only if exists
+      if (logo) {
+        form.append("image", logo); // make sure "image" matches backend input name
+      }
+
       const response = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:5OnHwV4U/employerOnboarding",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: form, // Note: no JSON headers for multipart
         }
       );
 
       const data = await response.json();
-
-      if (!response.ok) {
-        if (data.error && data.error.toLowerCase().includes("email")) {
-          alert("This email is already registered. Please use a different email or login.");
-          setShowOtpModal(false);
-          return;
-        }
-        if (data.error && data.error.toLowerCase().includes("phone")) {
-          alert("This phone number is already registered. Please use a different number or login.");
-          setShowOtpModal(false);
-          return;
-        }
-        throw new Error(data.message || "Failed to submit form");
-      }
+      if (!response.ok) throw new Error(data.message || "Failed to submit form");
 
       setMessage("Registration successful!");
-      console.log("Response:", data);
+      setTimeout(() => router.push("/congratulation"), 1500);
 
-      // Redirect after success
-      setTimeout(() => {
-        router.push("/congratulation");
-      }, 1500);
     } catch (err) {
       console.error(err);
-      if (err instanceof Error) {
-        alert(err.message);
-      } else {
-        alert("Failed to submit form. Please try again.");
-      }
-      setShowOtpModal(false);
+      alert(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
+
+
 
   return (
     <>
@@ -317,7 +320,7 @@ function RegistrationComponent() {
 
                   <div>
                     <label className="text-sm font-medium block mb-1 text-gray-500">
-                      Business Type 
+                      Business Type
                     </label>
                     <input
                       type="text"
@@ -332,7 +335,7 @@ function RegistrationComponent() {
 
                   <div>
                     <label className="text-sm font-medium block mb-1 text-gray-500">
-                      Number of Employees 
+                      Number of Employees
                     </label>
                     <select
                       value={formData.numberOfEmployees}
@@ -345,7 +348,7 @@ function RegistrationComponent() {
                       <option value="50-100">Less than 100 employees</option>
                       <option value="100-200">Less than 200 employees</option>
                       <option value="200+">More than 200 employees</option>
-                      
+
                     </select>
                   </div>
 
@@ -527,9 +530,39 @@ function RegistrationComponent() {
                       className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
                     />
                     <p className="text-gray-500 text-sm mt-2"> eg: 123 High Street, Carlton North, VIC 3054</p>
-                  </div> 
+                  </div>
 
                 </div>
+              </div>
+            </div>
+
+            {/* Image or Profile Picture */}
+            <div className="bg-white rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-4 ">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-blue-400" />
+
+                  <h2 className="text-lg font-semibold">Organization Photo / Logo (Optional) </h2>
+                </div>
+              </div>
+
+              <div className="p-4 flex flex-col items-center gap-4">
+                {/* Preview */}
+                <div className="w-32 h-32 rounded-full border border-gray-300 overflow-hidden bg-gray-100 flex items-center justify-center">
+                  {preview ? (
+                    <Image width={50} height={50} src={preview} alt="Logo Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-gray-400 text-sm">Choose Photo</span>
+                  )}
+                </div>
+
+                {/* File Input */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="text-sm text-gray-600"
+                />
               </div>
             </div>
 

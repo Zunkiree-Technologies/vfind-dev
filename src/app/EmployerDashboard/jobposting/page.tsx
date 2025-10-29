@@ -23,6 +23,7 @@ interface Job {
   keyResponsibilities: string;
   workEnvironment?: string;
   created_at?: string;
+   expiryDate?: string;
 }
 
 
@@ -52,6 +53,7 @@ function JobPostingContent() {
     certifications: [],
     keyResponsibilities: "",
     workEnvironment: "",
+    expiryDate: "",
   });
 
   const JOB_POST_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs";
@@ -472,6 +474,18 @@ function JobPostingContent() {
                   <option value="Night">Night</option>
                 </select>
               </div>
+
+              <div className="mb-4">
+                <label className="block text-sm mb-1">Job Expiration Date</label>
+                <input
+                  type="date"
+                  name="expiryDate"
+                  value={formData.expiryDate || ""}
+                  onChange={handleChange}
+                  className="w-full border rounded p-2"
+                />
+              </div>
+
 
             </div>
           )}

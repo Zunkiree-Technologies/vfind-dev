@@ -8,7 +8,7 @@ export function QualificationStep({ formData, handleChange }: StepProps) {
         "RN (Registered Nurse)",
         "SW (Support Worker)",
         "Clinical Lead / Manager",
-        "Other"
+        "Other",
 
     ];
 

@@ -4,12 +4,10 @@ import Image from "next/image";
 import Cookies from "js-cookie";
 import {
   MapPin,
-  Briefcase,
   Clock,
   Search,
   Mail,
   DollarSign,
-  Clock1,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -17,6 +15,7 @@ import Loader from "../../../../components/loading";
 import Footer from "@/app/Admin/components/layout/Footer";
 import EmployerNavbar from "../components/EmployerNavbar";
 import MainButton from "@/components/ui/MainButton";
+import CandidateFilters from "../components/CandidateFilters";
 
 interface ProfileImage {
   access: string;
@@ -40,7 +39,7 @@ interface NurseProfile {
   phoneNumber?: string;
   qualification?: string;
   profileImage?: ProfileImage | null;
-  openToOtherTypes?:string;
+  openToOtherTypes?: string;
 }
 
 interface PaginationProps {
@@ -138,11 +137,11 @@ const Pagination: React.FC<PaginationProps> = ({
 const BASE_IMAGE_URL = "https://x76o-gnx4-xrav.a2.xano.io";
 
 const experienceRanges: Record<string, [number, number]> = {
-  "Less than 6 months": [0, 0.5],
-  "6 months – 1 year": [0.5, 1],
-  "1–3 years": [1, 3],
-  "3 - 5 years": [3, 5],
-  "Over 5 years": [5, Infinity],
+  "Fresher": [0, 0.5],
+  "Less than 1 year": [0, 1],
+  "1 - 2 years": [1, 3],
+  "2 - 5 years": [3, 5],
+  "Above 5 years": [5, Infinity],
 };
 
 export default function WishlistNurses() {
@@ -233,11 +232,11 @@ export default function WishlistNurses() {
   function parseExperienceToYears(exp: string): number {
     const normalized = exp.trim().toLowerCase().replace(/–/g, "-");
 
-    if (normalized.includes("less than 6 months")) return 0.25;
-    if (normalized.includes("6 months")) return 0.75;
-    if (normalized.includes("1-3 years")) return 2;
-    if (normalized.includes("3-5 years")) return 4;
-    if (normalized.includes("over 5 years") || normalized.includes("5+"))
+    if (normalized.includes("Fresher")) return 0.25;
+    if (normalized.includes("Less than 1 year")) return 0.75;
+    if (normalized.includes("1 - 2 years")) return 2;
+    if (normalized.includes("2 - 5 years")) return 4;
+    if (normalized.includes("Above 5 years") || normalized.includes("5+"))
       return 6;
 
     return 0;
@@ -368,14 +367,6 @@ export default function WishlistNurses() {
     applyFilters,
   ]);
 
-  const handleCheckboxChange = (
-    value: string,
-    setter: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    setter((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-    );
-  };
 
   const clearFilters = () => {
     setSearch("");
@@ -415,7 +406,7 @@ export default function WishlistNurses() {
     );
 
   return (
-    <div className="p-6 min-h-screen mx-auto bg-gray-50">
+    <div className=" min-h-screen mx-auto bg-gray-50">
       {/* Navbar - sticky */}
       <div className="sticky top-0 z-50">
         <EmployerNavbar />
@@ -469,151 +460,24 @@ export default function WishlistNurses() {
       </div>
 
 
-      <div className="flex gap-6 mt-12 mx-auto container">
+      <div className="flex gap-6 mt-10 mx-auto container bg-gray-50">
         {/* Left Filters */}
-        <div className="hidden md:block w-[320px] bg-white rounded-lg p-4 shadow-sm space-y-6 sticky top-18 h-[calc(100vh-3rem)] overflow-y-auto">
-          <h2 className="font-semibold text-gray-800 flex justify-between">
-            All Filters
-            <button onClick={clearFilters} className="text-sm text-blue-400">
-              Clear All
-            </button>
-          </h2>
-          <div className="w-py h-0.5 bg-gray-300" />
-
-          {/* Job Type */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Job Type</h3>
-            {["Full-time", "Part-time", "Casual", " Temporary Contract", "Open to any"].map((type) => (
-              <div key={type} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={jobTypes.includes(type)}
-                  onChange={() => handleCheckboxChange(type, setJobTypes)}
-                  className="rounded"
-                />
-                <label>{type}</label>
-              </div>
-            ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
-
-          {/* Shift */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Shift</h3>
-            {["Morning", "Afternoon", "Night"].map((shift) => (
-              <div key={shift} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={shifts.includes(shift)}
-                  onChange={() => handleCheckboxChange(shift, setShifts)}
-                  className="rounded"
-                />
-                <label>{shift}</label>
-              </div>
-            ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
-
-          {/* Role Category */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">
-              Role Category
-            </h3>
-            {[
-              "Clinical Lead / Manager",
-              "Registered Nurse (RN)",
-              "Enrolled Nurse (EN)",
-              "Assistant in Nursing (AIN)",
-              "Personal Care Assistant (PCA)",
-              "Attendant",
-              "Support Worker",
-              "Nursing Assistant",
-            ].map((role) => (
-              <div key={role} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={roleCategories.includes(role)}
-                  onChange={() =>
-                    handleCheckboxChange(role, setRoleCategories)
-                  }
-                  className="rounded"
-                />
-                <label>{role}</label>
-              </div>
-            ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
-
-          {/* Experience */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">
-              Experience
-            </h3>
-            {Object.keys(experienceRanges).map((exp) => (
-              <div key={exp} className="flex items-center gap-2 text-sm mb-1">
-                <input
-                  type="checkbox"
-                  checked={experience.includes(exp)}
-                  onChange={() => handleCheckboxChange(exp, setExperience)}
-                  className="rounded"
-                />
-                <label>{exp}</label>
-              </div>
-            ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
-
-          {/* Visa Status */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">
-              Visa Status
-            </h3>
-            {["Australian Citizen / Permanent Resident",
-              "Temporary Resident",
-              "Student Visa ",
-              "Student Dependent Visa ",
-              "Working Holiday Visa ",
-              "Other",].map((status) => (
-                <div key={status} className="flex items-center gap-2 text-sm mb-1">
-                  <input
-                    type="checkbox"
-                    checked={visaStatus.includes(status)}
-                    onChange={() => handleCheckboxChange(status, setVisaStatus)}
-                    className="rounded"
-                  />
-                  <label>{status}</label>
-                </div>
-              ))}
-          </div>
-          <div className="w-py h-0.5 bg-gray-300" />
-
-          {/* Pay Rate Slider */}
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Pay Rate</h3>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={payRate}
-              onChange={(e) => setPayRate(Number(e.target.value))}
-              className="w-full"
-            />
-            <div className="text-sm text-gray-600">${payRate}+/hr</div>
-          </div>
-
-          {/* Radius Slider
-          <div>
-            <h3 className="font-medium text-sm text-gray-700 mb-2">Radius</h3>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={radius}
-              onChange={(e) => setRadius(Number(e.target.value))}
-              className="w-full"
-            />
-            <div className="text-sm text-gray-600">{radius} km</div>
-          </div> */}
+        <div className="hidden md:block">
+          <CandidateFilters
+            jobTypes={jobTypes}
+            setJobTypes={setJobTypes}
+            shifts={shifts}
+            setShifts={setShifts}
+            roleCategories={roleCategories}
+            setRoleCategories={setRoleCategories}
+            experience={experience}
+            setExperience={setExperience}
+            visaStatus={visaStatus}
+            setVisaStatus={setVisaStatus}
+            payRate={payRate}
+            setPayRate={setPayRate}
+            clearFilters={clearFilters}
+          />
         </div>
 
         {/* Right Nurse List */}

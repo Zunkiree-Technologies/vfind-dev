@@ -189,7 +189,7 @@ export default function CandidateDetailPage() {
           // Fetch education and work experience in parallel
           const [eduRes, workRes] = await Promise.all([
             fetch(
-              `https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education`,
+              `https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education_by_id`,
               {
                 method: "POST",
                 headers: {
@@ -200,7 +200,7 @@ export default function CandidateDetailPage() {
               }
             ),
             fetch(
-              `https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/get_workExperience`,
+              `https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/get_workexperience_by_id`,
               {
                 method: "POST",
                 headers: {
