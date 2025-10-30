@@ -9,7 +9,7 @@ interface NavbarProps {
   companyName?: string;
 }
 
-export default function EmployerNavbar({}: NavbarProps) {
+export default function EmployerNavbar({ }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -59,50 +59,45 @@ export default function EmployerNavbar({}: NavbarProps) {
           <div className="hidden lg:flex items-center gap-6">
             <button
               onClick={() => router.push("/EmployerDashboard/Candidatelist")}
-              className={`font-medium text-sm transition-colors whitespace-nowrap ${
-                isActive("/EmployerDashboard/Candidatelist")
-                  ? "text-blue-400"
-                  : "text-gray-700 hover:text-blue-400"
-              }`}
+              className={`font-medium text-sm transition-colors whitespace-nowrap ${isActive("/EmployerDashboard/Candidatelist")
+                ? "text-blue-400"
+                : "text-gray-700 hover:text-blue-400"
+                }`}
             >
               Search Candidate
             </button>
             <button
               onClick={() => router.push("/EmployerDashboard/jobposting")}
-              className={`font-medium text-sm transition-colors whitespace-nowrap ${
-                isActive("/EmployerDashboard/jobposting")
-                  ? "text-blue-400"
-                  : "text-gray-700 hover:text-blue-400"
-              }`}
+              className={`font-medium text-sm transition-colors whitespace-nowrap ${isActive("/EmployerDashboard/jobposting")
+                ? "text-blue-400"
+                : "text-gray-700 hover:text-blue-400"
+                }`}
             >
               Post a Job
             </button>
             <button
               onClick={() => router.push("/EmployerDashboard/status")}
-              className={`font-medium text-sm transition-colors whitespace-nowrap ${
-                isActive("/EmployerDashboard/status")
-                  ? "text-blue-400"
-                  : "text-gray-700 hover:text-blue-400"
-              }`}
+              className={`font-medium text-sm transition-colors whitespace-nowrap ${isActive("/EmployerDashboard/status")
+                ? "text-blue-400"
+                : "text-gray-700 hover:text-blue-400"
+                }`}
             >
               Connection Requests
             </button>
             <button
               onClick={() => router.push("/EmployerDashboard/Wishlist")}
-              className={`font-medium text-sm transition-colors whitespace-nowrap ${
-                isActive("/EmployerDashboard/Wishlist")
-                  ? "text-blue-400"
-                  : "text-gray-700 hover:text-blue-400"
-              }`}
+              className={`font-medium text-sm transition-colors whitespace-nowrap ${isActive("/EmployerDashboard/Wishlist")
+                ? "text-blue-400"
+                : "text-gray-700 hover:text-blue-400"
+                }`}
             >
               Saved Candidates
             </button>
           </div>
 
           {/* Right Side - Profile, Notification & Mobile Menu */}
-          <div className="flex items-center gap-2">
-            {/* Notification - Visible on all screens */}
-            <NotificationSidebar />
+          <div className="flex items-center">
+
 
             {/* Profile Menu */}
             <div ref={profileMenuRef} className="relative flex items-center">
@@ -120,9 +115,8 @@ export default function EmployerNavbar({}: NavbarProps) {
                 </div>
 
                 <svg
-                  className={`w-4 h-4 text-gray-600 transition-transform hidden lg:block ${
-                    showProfileMenu ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 text-gray-600 transition-transform hidden lg:block ${showProfileMenu ? "rotate-180" : ""
+                    }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -160,7 +154,7 @@ export default function EmployerNavbar({}: NavbarProps) {
                 </div>
               )}
             </div>
-
+            <NotificationSidebar />
             {/* Mobile Menu Button - Only visible on mobile and tablet */}
             <button
               onClick={toggleMobileMenu}
@@ -189,11 +183,10 @@ export default function EmployerNavbar({}: NavbarProps) {
                 router.push("/EmployerDashboard/Candidatelist");
                 setShowMobileMenu(false);
               }}
-              className={`w-full text-left px-4 py-3 rounded-md font-medium ${
-                isActive("/EmployerDashboard/Candidatelist")
-                  ? "text-blue-400 bg-blue-50"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
+              className={`w-full text-left px-4 py-3 rounded-md font-medium ${isActive("/EmployerDashboard/Candidatelist")
+                ? "text-blue-400 bg-blue-50"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
             >
               Search Candidate
             </button>
@@ -202,11 +195,10 @@ export default function EmployerNavbar({}: NavbarProps) {
                 router.push("/EmployerDashboard/jobposting");
                 setShowMobileMenu(false);
               }}
-              className={`w-full text-left px-4 py-3 rounded-md font-medium ${
-                isActive("/EmployerDashboard/jobposting")
-                  ? "text-blue-400 bg-blue-50"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
+              className={`w-full text-left px-4 py-3 rounded-md font-medium ${isActive("/EmployerDashboard/jobposting")
+                ? "text-blue-400 bg-blue-50"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
             >
               Post a Job
             </button>
@@ -215,11 +207,10 @@ export default function EmployerNavbar({}: NavbarProps) {
                 router.push("/EmployerDashboard/status");
                 setShowMobileMenu(false);
               }}
-              className={`w-full text-left px-4 py-3 rounded-md font-medium ${
-                isActive("/EmployerDashboard/status")
-                  ? "text-blue-400 bg-blue-50"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
+              className={`w-full text-left px-4 py-3 rounded-md font-medium ${isActive("/EmployerDashboard/status")
+                ? "text-blue-400 bg-blue-50"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
             >
               Connection Requests
             </button>
@@ -228,11 +219,10 @@ export default function EmployerNavbar({}: NavbarProps) {
                 router.push("/EmployerDashboard/Wishlist");
                 setShowMobileMenu(false);
               }}
-              className={`w-full text-left px-4 py-3 rounded-md font-medium ${
-                isActive("/EmployerDashboard/Wishlist")
-                  ? "text-blue-400 bg-blue-50"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
+              className={`w-full text-left px-4 py-3 rounded-md font-medium ${isActive("/EmployerDashboard/Wishlist")
+                ? "text-blue-400 bg-blue-50"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
             >
               Saved Candidates
             </button>

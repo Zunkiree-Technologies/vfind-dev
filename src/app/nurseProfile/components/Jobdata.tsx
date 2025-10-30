@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import { MapPin, Briefcase, Clock, DollarSign, Calendar, ChevronLeft, ChevronRight, Clock1 } from "lucide-react";
+import { MapPin, Briefcase, Clock, DollarSign, Calendar, ChevronLeft, ChevronRight, Clock1, Ban } from "lucide-react";
 import Loader from "../../../../components/loading";
 import { useSearchParams } from "next/navigation";
 import MainButton from "@/components/ui/MainButton";
@@ -379,7 +379,7 @@ export default function JobData() {
                   >
                     {/* Expired badge */}
                     {isExpired && (
-                      <div className="absolute top-3 right-3 bg-red-100 text-red-600 text-xs font-semibold px-2 py-1 rounded">
+                      <div className="absolute top-3 right-3 bg-red-100 text-[#D9796C] text-xs font-semibold px-2 py-1 rounded">
                         Expired
                       </div>
                     )}
@@ -431,8 +431,8 @@ export default function JobData() {
                         <div className="flex items-center gap-1">
                           <Clock1 size={16} />
                           <span>
-                            {job.created_at
-                              ? new Date(job.created_at).toLocaleDateString('en-US', {
+                            {job.expiryDate
+                              ? new Date(job.expiryDate).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric'
@@ -441,20 +441,58 @@ export default function JobData() {
                           </span>
                         </div>
                       </div>
+                      {/* Apply Before Indicator */}
+
+                      <div
+                        className={`mt-4 text-sm font-extralight w-fit flex items-center gap-1 ${job.expiryDate && new Date(job.expiryDate) < new Date()
+                          ? "text-[#D9796C]"
+                          : "text-gray-600"
+                          }`}
+                      >
+                        {job.expiryDate
+                          ? (() => {
+                            const today = new Date();
+                            const expiry = new Date(job.expiryDate);
+                            const diffTime = expiry.getTime() - today.getTime();
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                            if (diffDays > 0) {
+                              return `Apply Before: ${diffDays} day${diffDays > 1 ? "s" : ""} from now`;
+                            } else {
+                              return (
+                                <>
+                                  <Ban size={16} />
+                                  Job Expired
+                                </>
+                              );
+                            }
+                          })()
+                          : "Date not available"}
+                      </div>
+
+
                     </div>
 
                     {/* CTA button */}
                     <div className="flex items-center gap-4 ml-6 flex-col">
                       <MainButton
-                        href={`/nurseProfile/jobapplicationpage/${job.id}?company=${encodeURIComponent(getCompanyName(job))}`}
+                        href={`/nurseProfile/jobapplicationpage/${job.id}?company=${encodeURIComponent(
+                          getCompanyName(job)
+                        )}&expired=${isExpired}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`px-4 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${isExpired
-                            ? "bg-gray-400 text-white cursor-not-allowed"
-                            : " "
+                        className={`px-4 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${isExpired ? "cursor-not-allowed" : ""
                           }`}
                       >
-                        View Details
+
+                        <span className="flex items-center gap-2">
+                          {" "}
+                          <span className="transition-all duration-300 group-hover:-translate-x-1">
+                            {" "}
+                            View Details{" "}
+
+                          </span>{" "}
+                        </span>
                       </MainButton>
                     </div>
                   </div>

@@ -1,12 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-
 import Loader from "../../../../../components/loading";
-import { ArrowRight, Building2 } from "lucide-react";
+import { ArrowRight, Building2, TriangleAlert } from "lucide-react";
 import { Navbar } from "../../components/Navbar";
 import Footer from '@/app/Admin/components/layout/Footer';
-
 
 interface Job {
   id: number;
@@ -27,6 +25,8 @@ interface Job {
   JobShift?: string;
   contact_email?: string;
   user_id?: number;
+  status?: string;
+  expiryDate?: string;
 }
 
 interface Company {
@@ -51,10 +51,7 @@ export default function JobApplicationPage() {
   const [checkingApplication, setCheckingApplication] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-
-  // console.log("Job ID from params:", id);
-  // const iddd = localStorage.getItem("nurse_profile_id");
-  // console.log("Nurse Profile ID from localStorage:", iddd);
+  const [isExpired, setIsExpired] = useState(false); // ✅ new
 
   // Load token, email, profileId from localStorage
   useEffect(() => {
@@ -62,22 +59,15 @@ export default function JobApplicationPage() {
     const email = localStorage.getItem("email");
     const profileId = localStorage.getItem("nurse_profile_id");
 
-    // console.log("LocalStorage values:", { token, email, profileId });
-    // console.log("Auth token state before setting:", token);
     if (token) {
       setAuthToken(token);
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
-    // console.log("Is user logged in?", authToken);
     if (email) setNurseEmail(email);
     if (profileId) setNurseProfileId(Number(profileId));
   }, []);
-  // console.log("Is user logged in?", authToken);
-  // Check if job is already bookmarked
-
-
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async () => {
@@ -88,7 +78,6 @@ export default function JobApplicationPage() {
 
     try {
       if (!isSaved) {
-        // Save job
         const res = await fetch(
           "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved",
           {
@@ -101,9 +90,8 @@ export default function JobApplicationPage() {
           }
         );
         if (!res.ok) throw new Error("Failed to save job");
-        setIsSaved(true); // ✅ Update button instantly
+        setIsSaved(true);
       } else {
-        // Unsave job
         const fetchRes = await fetch(
           "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
           {
@@ -129,14 +117,13 @@ export default function JobApplicationPage() {
         );
         if (!deleteRes.ok) throw new Error("Failed to remove saved job");
 
-        setIsSaved(false); // ✅ Update button instantly
+        setIsSaved(false);
       }
     } catch (err) {
       console.error(err);
       alert(err instanceof Error ? err.message : "Error updating saved job");
     }
   };
-
 
   const fetchSavedStatus = async (jobId: number) => {
     const token = localStorage.getItem("token");
@@ -167,18 +154,11 @@ export default function JobApplicationPage() {
     if (id) fetchSavedStatus(Number(id));
   }, [id]);
 
-
   // Check if user has already applied
   const checkIfAlreadyApplied = async (jobId: number, email: string) => {
     try {
       setCheckingApplication(true);
-
-      const payload = {
-        jobs_id: jobId.toString(),
-        email: email,
-      };
-
-      // console.log("Checking application status with payload:", payload);
+      const payload = { jobs_id: jobId.toString(), email };
 
       const res = await fetch(
         `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/is_applied`,
@@ -190,21 +170,17 @@ export default function JobApplicationPage() {
       );
 
       const result = await res.json();
-      // console.log("Raw application API response:", result);
 
       if (res.ok) {
         if (Array.isArray(result) && result.length > 0) {
           const hasAppliedStatus = result.some(
             (app) => app.status === "applied"
           );
-          // console.log("User has applied?", hasAppliedStatus);
           setHasApplied(hasAppliedStatus);
         } else {
-          console.log("No previous application found.");
           setHasApplied(false);
         }
       } else {
-        console.error("Failed to check application status:", res.status);
         setHasApplied(false);
       }
     } catch (err) {
@@ -225,18 +201,21 @@ export default function JobApplicationPage() {
     const fetchJobData = async () => {
       try {
         setLoading(true);
-
         const jobRes = await fetch(
           `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${id}`
         );
-
         if (!jobRes.ok) throw new Error("Job not found");
 
         const jobData: Job = await jobRes.json();
-        // console.log("Fetched job data:", jobData);
         setJob(jobData);
 
-        // Fetch company info
+        // ✅ check expiry
+        if (jobData.expiryDate) {
+          const expiry = new Date(jobData.expiryDate);
+          const now = new Date();
+          setIsExpired(expiry < now);
+        }
+
         if (jobData.user_id) {
           await fetchCompanyInfo(jobData.user_id);
         }
@@ -250,20 +229,12 @@ export default function JobApplicationPage() {
     fetchJobData();
   }, [id, router]);
 
-  // Run application check only after job and profileId are ready AND user is logged in
   useEffect(() => {
     if (job && nurseEmail && isLoggedIn) {
-      // console.log(
-      //   "Triggering application check for job:",
-      //   job.id,
-      //   "email:",
-      //   nurseEmail
-      // );
       checkIfAlreadyApplied(job.id, nurseEmail);
     }
   }, [job, nurseEmail, isLoggedIn]);
 
-  // Fetch company info
   const fetchCompanyInfo = async (id: number) => {
     try {
       const companyRes = await fetch(
@@ -277,7 +248,6 @@ export default function JobApplicationPage() {
 
       if (companyRes.ok) {
         const companyData = await companyRes.json();
-        console.log("Company info fetched:", companyData);
         setCompany({
           about_company:
             companyData.about_company || "No company information available.",
@@ -286,21 +256,12 @@ export default function JobApplicationPage() {
         setCompany({ about_company: "Failed to load company information." });
       }
     } catch {
-      // console.error("Error fetching company info:", err);
       setCompany({ about_company: "There is no about company information." });
     }
   };
 
-  // Submit job application
   const handleSubmitApplication = async () => {
     if (!job) return;
-
-    console.log(
-      "Submitting application for job:",
-      job.id,
-      "Nurse Email:",
-      nurseEmail
-    );
 
     if (!authToken) {
       alert("You must be logged in to apply.");
@@ -310,10 +271,7 @@ export default function JobApplicationPage() {
       alert("Could not find your email. Please log in again.");
       return;
     }
-    if (hasApplied) {
-      console.log("User has already applied, skipping submission.");
-      return;
-    }
+    if (hasApplied || isExpired) return; // ✅ block if expired
 
     try {
       setSubmitting(true);
@@ -324,8 +282,6 @@ export default function JobApplicationPage() {
         applied_date: new Date().toISOString(),
         email: nurseEmail,
       };
-
-      console.log("Application payload:", payload);
 
       const res = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/applications",
@@ -340,7 +296,6 @@ export default function JobApplicationPage() {
       );
 
       const result = await res.json();
-      console.log("Application response:", result);
 
       if (!res.ok)
         throw new Error(result.message || "Failed to submit application");
@@ -358,8 +313,8 @@ export default function JobApplicationPage() {
     }
   };
 
-  // Get button text based on authentication and application status
   const getButtonText = () => {
+    if (isExpired) return "Expired"; // ✅
     if (!isLoggedIn) return "Create an Account";
     if (checkingApplication) return "Checking...";
     if (hasApplied) return "Applied";
@@ -367,8 +322,8 @@ export default function JobApplicationPage() {
     return "Apply Now";
   };
 
-  // Get button action based on authentication status
   const handleButtonClick = () => {
+    if (isExpired) return; // ✅ prevent click
     if (!isLoggedIn) {
       router.push("/signup");
     } else {
@@ -376,7 +331,6 @@ export default function JobApplicationPage() {
     }
   };
 
-  // Get company name
   const getCompanyName = () => companyFromQuery || "Healthcare Facility";
 
   if (loading) return <Loader loading={true} message="Fetching job data..." />;
@@ -400,24 +354,29 @@ export default function JobApplicationPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Main Job Details */}
             <div className="lg:col-span-2 bg-white rounded-lg">
+
               <div className="shadow-sm relative">
-                {isLoggedIn && (
-                  <button
-                    onClick={handleBookmarkToggle}
-                    disabled={!id || checkingApplication}
-                    className={`absolute top-4 right-4 px-3 py-1 rounded-md transition-all text-sm font-medium
-      ${isSaved
-                        ? "bg-[#0073FF] text-white border-[#0073FF]"
-                        : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF]"
-                      }`}
-                    title={isSaved ? "Remove from saved jobs" : "Save job"}
-                  >
-                    {isSaved ? "Unsave Job" : "Save for later"}
-                  </button>
-                )}
+                {/* Header Section */}
+                <div className="flex justify-end items-center gap-3 mb-2 mr-4 mt-4">
+                  {isLoggedIn && (
+                    <button
+                      onClick={handleBookmarkToggle}
+                      disabled={!id || checkingApplication}
+                      className={`px-3 py-1 rounded-md text-sm font-medium transition-all
+        ${isSaved
+                          ? "bg-[#0073FF] text-white border-[#0073FF]"
+                          : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF]"
+                        }`}
+                      title={isSaved ? "Remove from saved jobs" : "Save job"}
+                    >
+                      {isSaved ? "Unsave Job" : "Save for later"}
+                    </button>
+                  )}
+
+                </div>
 
                 {/* Header Section */}
-                <div className="p-6 border-b border-gray-500">
+                <div className="p-6 border-b border-gray-500 ">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Building2 className="w-6 h-6 text-blue-600" />
@@ -426,12 +385,20 @@ export default function JobApplicationPage() {
                       <h1 className="text-xl font-semibold text-gray-900">
                         {getCompanyName()}
                       </h1>
+                      <h2 className="text-[20px] font-semibold text-gray-900">{job.title}</h2>
                     </div>
                   </div>
-                  <h2 className="text-[24px] font-semibold text-gray-900">
-                    {job.title}
-                  </h2>
+
+                  {isExpired && (
+                    <div className="flex items-center gap-2 text-[#B94A48] font-medium text-sm bg-[#F2D7D5] px-2 py-4 w-fit rounded-sm">
+                      <TriangleAlert className="w-5 h-5" />
+                      This job posting has expired and is no longer accepting applications.
+                    </div>
+                  )}
                 </div>
+
+
+
 
                 {/* Basic Info Section */}
                 <div className="p-4 border-b border-gray-500">
@@ -492,16 +459,29 @@ export default function JobApplicationPage() {
                       </div>
                     </div>
 
-                    {/* Job Posted */}
+                    {/* Job status */}
                     <div className="flex justify-between items-center w-2/3">
                       <span className="font-medium text-gray-600">
-                        Job Posted
+                        Job Status
                       </span>
                       <div className="flex justify-start gap-10 items-center w-1/2">
                         <span className="font-medium text-gray-600">:</span>
                         <p className="text-gray-900">
-                          {job.created_at
-                            ? new Date(job.created_at).toLocaleDateString(
+                          {job.status || "Not specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Job Expiry */}
+                    <div className="flex justify-between items-center w-2/3">
+                      <span className="font-medium text-gray-600">
+                        Job Expiry
+                      </span>
+                      <div className="flex justify-start gap-10 items-center w-1/2">
+                        <span className="font-medium text-gray-600">:</span>
+                        <p className="text-gray-900">
+                          {job.expiryDate
+                            ? new Date(job.expiryDate).toLocaleDateString(
                               "en-AU",
                               {
                                 day: "numeric",
@@ -574,26 +554,31 @@ export default function JobApplicationPage() {
               {/* Apply Button */}
               <button
                 onClick={handleButtonClick}
-                disabled={isLoggedIn && (submitting || hasApplied || checkingApplication)}
-                className={`group text-white px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm font-medium mt-3 flex items-center justify-center overflow-hidden ${!isLoggedIn
-                  ? "bg-blue-400"
-                  : hasApplied
-                    ? "bg-primary"
-                    : "bg-blue-400"
+                disabled={isExpired || (isLoggedIn && (submitting || hasApplied || checkingApplication))}
+                className={`group text-white px-3 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 text-sm font-medium mt-3 flex items-center justify-center overflow-hidden 
+    ${!isLoggedIn
+                    ? "bg-blue-400"
+                    : hasApplied
+                      ? "bg-primary"
+                      : isExpired
+                        ? "bg-gray-400"
+                        : "bg-blue-400"
                   }`}
               >
-                <span className="flex items-center gap-2">
+                <span className="flex items-center">
                   <span className="transition-all duration-300 group-hover:-translate-x-1">
-                    {getButtonText()}
+                    {isExpired ? "Expired" : getButtonText()}
                   </span>
-                  {!(isLoggedIn && (submitting || hasApplied || checkingApplication)) && (
-                    <ArrowRight
-                      className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                      strokeWidth={3}
-                    />
-                  )}
+                  {!isExpired &&
+                    !(isLoggedIn && (submitting || hasApplied || checkingApplication)) && (
+                      <ArrowRight
+                        className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                        strokeWidth={3}
+                      />
+                    )}
                 </span>
               </button>
+
             </div>
 
             {/* Right Column - About Company */}

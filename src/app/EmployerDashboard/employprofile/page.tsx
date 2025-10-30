@@ -178,93 +178,127 @@ export default function EmployerProfile() {
     setEditedEmployer((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+ const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+   const file = e.target.files?.[0];
+   if (!file) {
+     console.error("⚠️ No file selected");
+     return;
+   }
 
-    console.log("🖼️ Selected file:", file.name, file.type, file.size);
+   console.log("🖼️ Selected file details:", {
+     name: file.name,
+     type: file.type,
+     size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+   });
 
-    // Validate the file
-    const validationError = validateImageFile(file);
-    if (validationError) {
-      alert(validationError);
-      return;
-    }
+   // Validate file
+   const validationError = validateImageFile(file);
+   if (validationError) {
+     console.error("🚫 Validation failed:", validationError);
+     alert(validationError);
+     return;
+   }
 
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      alert("No authentication token found. Please log in again.");
-      return;
-    }
+   const token = localStorage.getItem("authToken");
+   if (!token) {
+     console.error("🚫 No auth token found in localStorage");
+     alert("Authentication token missing. Please log in again.");
+     return;
+   }
 
-    setUploadingLogo(true);
+   setUploadingLogo(true);
 
-    try {
-      console.log("📤 Uploading logo...");
+   try {
+     console.log("📤 Preparing FormData for upload...");
 
-      // Create FormData with the image and all employer data
-      const formData = new FormData();
-      formData.append("company_logo", file);
+     const formData = new FormData();
+     formData.append("company_logo", file);
 
-      // Add all other employer data to FormData (similar to nurse profile)
-      Object.entries(employer).forEach(([key, value]) => {
-        if (key !== "company_logo" && value !== null && value !== undefined) {
-          if (Array.isArray(value)) {
-            formData.append(key, JSON.stringify(value));
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
+     // Add all employer data (excluding the logo)
+     Object.entries(employer).forEach(([key, value]) => {
+       if (key !== "company_logo" && value !== null && value !== undefined) {
+         if (Array.isArray(value)) {
+           formData.append(key, JSON.stringify(value));
+         } else {
+           formData.append(key, value.toString());
+         }
+       }
+     });
 
-      console.log("📋 FormData prepared with file and profile data");
+     console.log(
+       "🧾 FormData content preview (keys only):",
+       Array.from(formData.keys())
+     );
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/edit_employer_profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+     const uploadUrl =
+       "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/edit_employer_profile";
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("❌ Upload failed:", errorText);
-        throw new Error(`Failed to upload logo: ${res.status}`);
-      }
+     console.log("🌍 Uploading to:", uploadUrl);
 
-      const updated = await res.json();
-      console.log("✅ Upload response:", updated);
+     const res = await fetch(uploadUrl, {
+       method: "POST",
+       headers: {
+         Authorization: `Bearer ${token}`,
+       },
+       body: formData,
+     });
 
-      const updatedData = updated?.data || updated;
+     console.log("📡 Response status:", res.status, res.statusText);
 
-      // Update both states
-      setEmployer(updatedData);
-      setEditedEmployer(updatedData);
+     // Try reading the raw text first in case JSON fails
+     const rawResponse = await res.text();
+     console.log("📥 Raw Response Text:", rawResponse);
 
-      // Force image re-render with delay
-      setTimeout(() => {
-        setLogoKey(Date.now());
-        console.log("🔄 Image cache refreshed");
-      }, 100);
+     let parsedResponse;
+     try {
+       parsedResponse = JSON.parse(rawResponse);
+       console.log("✅ Parsed JSON Response:", parsedResponse);
+     } catch (parseError) {
+       console.error("⚠️ Failed to parse JSON response:", parseError);
+     }
 
-      console.log("✅ Logo updated successfully:", updatedData.company_logo);
-      alert("Company logo updated successfully!");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      console.error("❌ Logo Upload Error:", err);
-      alert(err.message || "Failed to upload logo. Please try again.");
-    } finally {
-      setUploadingLogo(false);
-      // Reset the file input
-      if (e.target) {
-        e.target.value = "";
-      }
-    }
-  };
+     if (!res.ok) {
+       console.error("❌ Upload failed with status:", res.status);
+       console.error("❌ Response body (raw):", rawResponse);
+       throw new Error(`Failed to upload logo: HTTP ${res.status}`);
+     }
+
+     const updatedData = parsedResponse?.data || parsedResponse;
+
+     if (!updatedData) {
+       console.error("⚠️ No 'data' object in server response:", parsedResponse);
+       throw new Error("Server returned invalid data structure.");
+     }
+
+     console.log(
+       "✅ Logo uploaded successfully. Updated employer:",
+       updatedData
+     );
+
+     setEmployer(updatedData);
+     setEditedEmployer(updatedData);
+
+     setTimeout(() => {
+       setLogoKey(Date.now());
+       console.log("🔄 Image cache refreshed, forcing re-render");
+     }, 200);
+
+     alert("✅ Company logo updated successfully!");
+   } catch (err) {
+     console.error("🔥 Upload error caught in catch block:", err);
+     if (err instanceof Error) {
+       console.error("🧠 Error message:", err.message);
+       console.error("🧩 Error stack trace:", err.stack);
+     } else {
+       console.error("⚠️ Non-Error exception:", err);
+     }
+     alert("Logo upload failed — check console for detailed logs.");
+   } finally {
+     setUploadingLogo(false);
+     if (e.target) e.target.value = ""; // reset input
+   }
+ };
+
 
   const handleSaveAll = async () => {
     const token = localStorage.getItem("authToken");

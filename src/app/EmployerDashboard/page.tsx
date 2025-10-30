@@ -358,472 +358,409 @@ export default function EmployerDashboard() {
       <EmployerNavbar />
 
       {/* 🔹 Main container */}
-      <div className="p-4 mt-15 md:p-6   flex flex-col lg:flex-row gap-6 mx-auto container justify-center ">
-        {/* 👉 Left section */}
-        <div className="space-y-5 w-full px-4 md:px-4 md:min-w-[770px] md:max-w-[770px]">
-          {/* KYC Section */}
-          <div className="bg-white rounded-lg p-4 sm:p-6 md:p-8 shadow-sm min-h-[195px] w-full">
-            {/* Initial Step */}
-            {companyProfileStep === "initial" && (
-              <>
-                <h2 className="font-semibold text-gray-800 text-base md:text-lg">
-                  Complete Your Company Profile
-                </h2>
-                <p className="text-sm md:text-base text-gray-600 mt-1">
-                  Provide your company details to make your job postings stand out.
-                </p>
-
-                <button
-                  onClick={() => setCompanyProfileStep("editing")}
-                  className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-400 text-white rounded-md 
-          hover:bg-blue-500 text-sm md:text-base transition"
-                >
-                  Complete Profile
-                </button>
-              </>
-            )}
-
-            {/* Editing Step */}
-            {companyProfileStep === "editing" && (
-              <>
-                <h2 className="font-semibold text-gray-800 text-base md:text-lg">
-                  {isEditingExisting ? "Edit Company Profile" : "Complete Your Company Profile"}
-                </h2>
-                <p className="text-sm md:text-base text-gray-600 mt-1">
-                  Provide your company details to make your job postings stand out.
-                </p>
-
-                <textarea
-                  placeholder="Provide a brief description of your company"
-                  value={companyDescription}
-                  onChange={(e) => setCompanyDescription(e.target.value)}
-                  rows={4}
-                  className="mt-4 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm md:text-base text-gray-800 
-          focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
-                />
-
-                <button
-                  onClick={handleSaveCompanyProfile}
-                  disabled={saveLoading}
-                  className="mt-4 w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md 
-          hover:bg-blue-600 text-sm md:text-base transition disabled:opacity-50"
-                >
-                  {saveLoading ? "Saving..." : "Save & Continue"}
-                </button>
-
-                {isEditingExisting && (
-                  <button
-                    onClick={() => {
-                      setCompanyProfileStep("completed");
-                      setIsEditingExisting(false);
-                    }}
-                    className="mt-4 ml-0 sm:ml-2 w-full sm:w-auto px-4 py-2 bg-gray-500 text-white rounded-md 
-            hover:bg-gray-600 text-sm md:text-base transition"
-                  >
-                    Cancel
-                  </button>
-                )}
-
-                <p className="mt-2 text-xs md:text-sm text-gray-500">
-                  Your company description will appear on job postings.
-                </p>
-              </>
-            )}
-
-            {/* Completed Step */}
-            {companyProfileStep === "completed" && (
-              <>
-                {/* Company Description Display */}
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 w-full overflow-hidden">
-                  <h3 className="font-bold text-gray-800 text-sm mb-2">Company Description</h3>
-
-                  <div className="max-h-48 overflow-y-auto">
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
-                      {showFullDescription ? companyDescription : getTruncatedDescription(companyDescription)}
+      <div className="p-4 md:p-6   flex flex-col lg:flex-row gap-6 mx-auto container justify-center ">
+        <div className="container mx-auto px-4 py-6">
+          {/* Main Section */}
+          <div className="flex flex-col lg:flex-row gap-6 justify-center">
+            {/* 👉 Left Section */}
+            <div className="w-full lg:w-[770px] space-y-5">
+              {/* Company Profile / KYC Section */}
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                {companyProfileStep === "initial" && (
+                  <>
+                    <h2 className="font-semibold text-gray-800 text-lg">
+                      Complete Your Company Profile
+                    </h2>
+                    <p className="text-gray-600 mt-1 text-sm">
+                      Provide your company details to make your job postings stand out.
                     </p>
-                  </div>
-
-                  {companyDescription.length > 150 && (
                     <button
-                      onClick={() => setShowFullDescription(!showFullDescription)}
-                      className="mt-2 text-blue-400 hover:text-blue-500 text-sm font-medium"
+                      onClick={() => setCompanyProfileStep("editing")}
+                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm transition"
                     >
-                      {showFullDescription ? "Show Less" : "Show More"}
+                      Complete Profile
                     </button>
-                  )}
-                </div>
-
-                {/* Action buttons */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <MainButton
-                    onClick={handleEditCompanyProfile}
-
-                  >
-
-                    <span className="flex items-center gap-2">
-                      {" "}
-                      <span className="transition-all duration-300 group-hover:-translate-x-1">
-                        {" "}
-                        Edit Description{" "}
-                      </span>{" "}
-                    </span>
-                  </MainButton>
-                  <MainButton
-                    onClick={handleDeleteCompanyProfile}
-
-                  >
-                    <span className="flex items-center gap-2">
-                      {" "}
-                      <span className="transition-all duration-300 group-hover:-translate-x-1">
-                        {" "}
-                        Delete Description
-                        {" "}
-                      </span>{" "}
-                    </span>
-
-                  </MainButton>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Talent Pool + Free Job Posting */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Talent Pool */}
-            <div className="bg-white rounded-lg p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg flex-shrink-0">
-                <Search size={20} className="text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <h2 className="font-semibold text-gray-800">VFind Talent Pool</h2>
-                <p className="text-sm text-gray-600">Discover talent, start free.</p>
-                <MainButton
-                  onClick={() => window.open("/EmployerDashboard/Candidatelist", "_blank")}
-                  className="mt-3 "
-                >
-                  <span className="flex items-center gap-2">
-                    {" "}
-                    <span className="transition-all duration-300 group-hover:-translate-x-1">
-                      {" "}
-                      Search Candidate
-
-                      {" "}
-                    </span>{" "}
-                  </span>
-                </MainButton>
-              </div>
-            </div>
-
-            {/* Free Job Posting */}
-            <div className="bg-white rounded-lg p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg flex-shrink-0">
-                <Briefcase size={20} className="text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <h2 className="font-semibold text-gray-800">Post a Job</h2>
-                <p className="text-sm text-gray-600">Start posting jobs.</p>
-                <MainButton
-                  onClick={() => router.push("/EmployerDashboard/jobposting")}
-                  className="mt-3"
-
-                >
-                   <span className="flex items-center gap-2">
-                    {" "}
-                    <span className="transition-all duration-300 group-hover:-translate-x-1">
-                      {" "}
-                      Post a Job
-
-                      {" "}
-                    </span>{" "}
-                  </span>
-                </MainButton>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-        {/* 👉 Right section */}
-        <div className="hidden lg:block lg:w-80  ">
-          <div className="bg-white rounded-lg p-4 shadow-sm space-y-4 h-[343px]">
-            <h2 className="font-semibold text-gray-800">Need Help?</h2>
-
-            {/* Phone */}
-            <div className="flex items-start space-x-3">
-              <Phone size={20} className="text-blue-400 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-800">Phone</p>
-                <p className="mt-2 text-sm text-gray-700">
-                  {" "}
-                  {employer.mobile}{" "}
-                </p>
-              </div>
-            </div>
-
-            {/* Hours */}
-            <div className="flex items-start space-x-3">
-              <Clock size={20} className="text-blue-400 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-800">Hours</p>
-                <p className="text-sm text-gray-600">7:00 AM - 6:00 PM</p>
-              </div>
-            </div>
-
-            {/* Weekdays */}
-            <div className="flex items-start space-x-3">
-              <Calendar size={20} className="text-blue-400 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-800">Weekdays</p>
-                <p className="text-sm text-gray-600">Mon - Sat</p>
-              </div>
-            </div>
-
-            {/* Email */}
-            <div className="flex items-start space-x-3">
-              <Mail size={20} className="text-blue-400 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-800">Email</p>
-                <a
-                  href="mailto:support@vfind.com"
-                  className="text-sm text-gray-600 hover:underline"
-                >
-                  support@vfind.com
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 🔹 Job Postings Section */}
-      <div className=" flex item-center justify-center   container mx-auto ">
-        <div className="bg-white p-5 w-[1125px] rounded-lg  shadow-sm ">
-          <h2 className="font-semibold text-gray-800">Job Postings</h2>
-
-          {/* Desktop Table */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full mt-3 text-sm text-left border-collapse">
-              <thead>
-                <tr className="text-gray-600">
-                  <th className="py-2 px-3">Job Title</th>
-                  <th className="py-2 px-3">Created By</th>
-                  <th className="py-2 px-3">Status</th>
-                  <th className="py-2 px-3">Applicants</th>
-                  <th className="py-2 px-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {jobs.length > 0 ? (
-                  (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
-                    <tr key={job.id} className="hover:bg-gray-50">
-                      <td className="py-2 px-3">{job.title}</td>
-                      <td className="py-2 px-3">{employer.email}</td>
-                      <td className="py-2 px-3">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${job.status === "Active"
-                            ? "border border-green-500 text-green-600 bg-[#6FB7720D] px-3 py-1 w-28 text-center"
-                            : "border border-gray-400 bg-gray-100 text-gray-600 px-2 py-1 w-28 text-center"
-                            }`}
-                        >
-                          {job.status === "Active" ? "Active" : "Paused"}
-                        </span>
-                      </td>
-                      <td className="py-2 px-3">
-                        <a
-                          href={`/EmployerDashboard/Applicants/${job.id}`}
-                          className="text-blue-400 hover:underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View ({job.applicants_count || 0})
-                        </a>
-                      </td>
-                      <td className="py-2 px-3">
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => handleTogglePauseJob(job.id)}
-                            disabled={pausingJobId === job.id}
-                            className={`p-1 rounded cursor-pointer ${job.status === "Active"
-                              ? "text-gray-600 hover:text-[#61A6FA]"
-                              : "text-gray-600 hover:text-[#61A6FA]"
-                              } disabled:opacity-50`}
-                            title={
-                              job.status === "Active"
-                                ? "Pause Job"
-                                : "Resume Job"
-                            }
-                          >
-                            {pausingJobId === job.id ? (
-                              <Clock size={16} className="animate-spin" />
-                            ) : job.status === "Active" ? (
-                              <Pause size={16} />
-                            ) : (
-                              <Play size={16} />
-                            )}
-                          </button>
-
-                          <a
-                            href={`/EmployerDashboard/jobPreview/${job.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-600 hover:text-blue-600 p-1 rounded cursor-pointer"
-                            title="Preview"
-                          >
-                            <Eye size={16} />
-                          </a>
-
-                          <button
-                            onClick={() => handleEdit(job)}
-                            className="text-gray-600 hover:text-blue-600 p-1 rounded cursor-pointer"
-                            title="Edit"
-                          >
-                            <Edit size={16} />
-                          </button>
-
-                          <button
-                            onClick={() => handleDelete(job.id)}
-                            className="text-gray-600 hover:text-red-600 p-1 rounded cursor-pointer"
-                            title="Delete"
-                          >
-                            <Trash size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="text-center py-4 text-gray-500">
-                      No jobs posted yet.
-                    </td>
-                  </tr>
+                  </>
                 )}
-              </tbody>
-            </table>
-          </div>
 
-          {/* Mobile List */}
-          <div className="md:hidden mt-3 space-y-3">
-            {jobs.length > 0 ? (
-              (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
-                <div key={job.id} className="pb-3 border-b last:border-0">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-medium">{job.title}</h3>
-                      <p className="text-xs text-gray-500">{employer.email}</p>
-                      <div className="mt-1">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${job.is_active !== false
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-700"
-                            }`}
-                        >
-                          {job.is_active !== false ? "Active" : "Paused"}
-                        </span>
-                      </div>
-                      <a
-                        href={`/EmployerDashboard/Applicants/${job.id}`}
-                        className="text-xs text-blue-400 hover:underline inline-block mt-1"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        View Applicants ({job.applicants_count || 0})
-                      </a>
-                    </div>
-                    <div className="relative">
+                {companyProfileStep === "editing" && (
+                  <>
+                    <h2 className="font-semibold text-gray-800 text-lg">
+                      {isEditingExisting ? "Edit Company Profile" : "Complete Your Company Profile"}
+                    </h2>
+                    <textarea
+                      placeholder="Provide a brief description of your company"
+                      value={companyDescription}
+                      onChange={(e) => setCompanyDescription(e.target.value)}
+                      rows={4}
+                      className="mt-4 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 
+                focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
+                    />
+                    <div className="flex flex-wrap gap-2 mt-4">
                       <button
-                        onClick={() => toggleMobileActionMenu(job.id)}
-                        className="p-1 rounded-full hover:bg-gray-100"
+                        onClick={handleSaveCompanyProfile}
+                        disabled={saveLoading}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm transition disabled:opacity-50"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-gray-500"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                        </svg>
+                        {saveLoading ? "Saving..." : "Save & Continue"}
                       </button>
-                      {mobileActionMenu === job.id && (
-                        <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg z-10 border">
-                          <button
-                            onClick={() => handleTogglePauseJob(job.id)} // only pass job.id
-                            disabled={pausingJobId === job.id}
-                            className={`p-1 rounded cursor-pointer ${job.status === "Active"
-                              ? "text-gray-600 hover:text-orange-600"
-                              : "text-gray-600 hover:text-green-600"
-                              } disabled:opacity-50`}
-                            title={
-                              job.status === "Active"
-                                ? "Pause Job"
-                                : "Resume Job"
-                            }
-                          >
-                            {pausingJobId === job.id ? (
-                              <Clock size={16} className="animate-spin" />
-                            ) : job.status === "Active" ? (
-                              <Pause size={16} />
-                            ) : (
-                              <Play size={16} />
-                            )}
-                          </button>
-
-                          <a
-                            href={`/EmployerDashboard/jobPreview/${job.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Preview
-                          </a>
-                          <button
-                            onClick={() => {
-                              handleEdit(job);
-                              setMobileActionMenu(null);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleDelete(job.id);
-                              setMobileActionMenu(null);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                      {isEditingExisting && (
+                        <button
+                          onClick={() => {
+                            setCompanyProfileStep("completed");
+                            setIsEditingExisting(false);
+                          }}
+                          className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm transition"
+                        >
+                          Cancel
+                        </button>
                       )}
                     </div>
+                  </>
+                )}
+
+                {companyProfileStep === "completed" && (
+                  <>
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <h3 className="font-bold text-gray-800 text-sm mb-2">
+                        Company Description
+                      </h3>
+                      <div className="max-h-48 overflow-y-auto">
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                          {showFullDescription
+                            ? companyDescription
+                            : getTruncatedDescription(companyDescription)}
+                        </p>
+                      </div>
+                      {companyDescription.length > 150 && (
+                        <button
+                          onClick={() => setShowFullDescription(!showFullDescription)}
+                          className="mt-2 text-blue-500 hover:text-blue-600 text-sm font-medium"
+                        >
+                          {showFullDescription ? "Show Less" : "Show More"}
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <MainButton onClick={handleEditCompanyProfile}>Edit Description</MainButton>
+                      <MainButton onClick={handleDeleteCompanyProfile}>Delete Description</MainButton>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Talent Pool + Job Posting */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Talent Pool */}
+                <div className="bg-white rounded-lg p-4 shadow-sm flex gap-4 items-center">
+                  <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
+                    <Search size={20} className="text-blue-400" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold text-gray-800">VFind Talent Pool</h2>
+                    <p className="text-sm text-gray-600">Discover talent, start free.</p>
+                    <MainButton
+                      onClick={() => window.open("/EmployerDashboard/Candidatelist", "_blank")}
+                      className="mt-3"
+                    >
+                      Search Candidate
+                    </MainButton>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                No jobs posted yet.
+
+                {/* Free Job Posting */}
+                <div className="bg-white rounded-lg p-4 shadow-sm flex gap-4 items-center">
+                  <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
+                    <Briefcase size={20} className="text-blue-400" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold text-gray-800">Post a Job</h2>
+                    <p className="text-sm text-gray-600">Start posting jobs.</p>
+                    <MainButton
+                      onClick={() => router.push("/EmployerDashboard/jobposting")}
+                      className="mt-3"
+                    >
+                      Post a Job
+                    </MainButton>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* 👉 Right Section */}
+            <div className="hidden lg:block lg:w-[350px]">
+              <div className="bg-white rounded-lg p-5 shadow-sm space-y-4">
+                <h2 className="font-semibold text-gray-800">Need Help?</h2>
+
+                <div className="flex items-start space-x-3">
+                  <Phone size={20} className="text-blue-400 mt-1" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">Phone</p>
+                    <p className="mt-1 text-sm text-gray-700">{employer.mobile}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Clock size={20} className="text-blue-400 mt-1" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">Hours</p>
+                    <p className="text-sm text-gray-600">7:00 AM - 6:00 PM</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Calendar size={20} className="text-blue-400 mt-1" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">Weekdays</p>
+                    <p className="text-sm text-gray-600">Mon - Sat</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Mail size={20} className="text-blue-400 mt-1" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">Email</p>
+                    <a href="mailto:support@vfind.com" className="text-sm text-gray-600 hover:underline">
+                      support@vfind.com
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Show All Button */}
-          {jobs.length > 4 && (
-            <MainButton
-              onClick={() => setShowAllJobs(!showAllJobs)}
-              className="mt-4  gap-3 text-primary  text-sm md:text-base"
-            >
-              {showAllJobs ? "Show Less" : "View all Jobs"}
-            </MainButton>
-          )}
+          {/* 🔹 Job Postings Section */}
+          <div className="mt-8 flex justify-center">
+            <div className="bg-white rounded-lg p-6 shadow-sm w-full max-w-[1125px]">
+              <h2 className="font-semibold text-gray-800">Job Postings</h2>
+
+              {/* Desktop Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full mt-3 text-sm text-left border-collapse">
+                  <thead>
+                    <tr className="text-gray-600">
+                      <th className="py-2 px-3">Job Title</th>
+                      <th className="py-2 px-3">Created By</th>
+                      <th className="py-2 px-3">Status</th>
+                      <th className="py-2 px-3">Applicants</th>
+                      <th className="py-2 px-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {jobs.length > 0 ? (
+                      (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
+                        <tr key={job.id} className="hover:bg-gray-50">
+                          <td className="py-2 px-3">{job.title}</td>
+                          <td className="py-2 px-3">{employer.email}</td>
+                          <td className="py-2 px-3">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${job.status === "Active"
+                                ? "border border-green-500 text-green-600 bg-[#6FB7720D] px-3 py-1 w-28 text-center"
+                                : "border border-gray-400 bg-gray-100 text-gray-600 px-2 py-1 w-28 text-center"
+                                }`}
+                            >
+                              {job.status === "Active" ? "Active" : "Paused"}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3">
+                            <a
+                              href={`/EmployerDashboard/Applicants/${job.id}`}
+                              className="text-blue-400 hover:underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              View ({job.applicants_count || 0})
+                            </a>
+                          </td>
+                          <td className="py-2 px-3">
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => handleTogglePauseJob(job.id)}
+                                disabled={pausingJobId === job.id}
+                                className={`p-1 rounded cursor-pointer ${job.status === "Active"
+                                  ? "text-gray-600 hover:text-[#61A6FA]"
+                                  : "text-gray-600 hover:text-[#61A6FA]"
+                                  } disabled:opacity-50`}
+                                title={
+                                  job.status === "Active"
+                                    ? "Pause Job"
+                                    : "Resume Job"
+                                }
+                              >
+                                {pausingJobId === job.id ? (
+                                  <Clock size={16} className="animate-spin" />
+                                ) : job.status === "Active" ? (
+                                  <Pause size={16} />
+                                ) : (
+                                  <Play size={16} />
+                                )}
+                              </button>
+
+                              <a
+                                href={`/EmployerDashboard/jobPreview/${job.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-gray-600 hover:text-blue-600 p-1 rounded cursor-pointer"
+                                title="Preview"
+                              >
+                                <Eye size={16} />
+                              </a>
+
+                              <button
+                                onClick={() => handleEdit(job)}
+                                className="text-gray-600 hover:text-blue-600 p-1 rounded cursor-pointer"
+                                title="Edit"
+                              >
+                                <Edit size={16} />
+                              </button>
+
+                              <button
+                                onClick={() => handleDelete(job.id)}
+                                className="text-gray-600 hover:text-red-600 p-1 rounded cursor-pointer"
+                                title="Delete"
+                              >
+                                <Trash size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="text-center py-4 text-gray-500">
+                          No jobs posted yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile List */}
+              <div className="md:hidden mt-3 space-y-3">
+                {jobs.length > 0 ? (
+                  (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
+                    <div key={job.id} className="pb-3 border-b last:border-0">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-medium">{job.title}</h3>
+                          <p className="text-xs text-gray-500">{employer.email}</p>
+                          <div className="mt-1">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${job.is_active !== false
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-700"
+                                }`}
+                            >
+                              {job.is_active !== false ? "Active" : "Paused"}
+                            </span>
+                          </div>
+                          <a
+                            href={`/EmployerDashboard/Applicants/${job.id}`}
+                            className="text-xs text-blue-400 hover:underline inline-block mt-1"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View Applicants ({job.applicants_count || 0})
+                          </a>
+                        </div>
+                        <div className="relative">
+                          <button
+                            onClick={() => toggleMobileActionMenu(job.id)}
+                            className="p-1 rounded-full hover:bg-gray-100"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-gray-500"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
+                          </button>
+                          {mobileActionMenu === job.id && (
+                            <div className="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg z-10 border">
+                              <button
+                                onClick={() => handleTogglePauseJob(job.id)} // only pass job.id
+                                disabled={pausingJobId === job.id}
+                                className={`p-1 rounded cursor-pointer ${job.status === "Active"
+                                  ? "text-gray-600 hover:text-orange-600"
+                                  : "text-gray-600 hover:text-green-600"
+                                  } disabled:opacity-50`}
+                                title={
+                                  job.status === "Active"
+                                    ? "Pause Job"
+                                    : "Resume Job"
+                                }
+                              >
+                                {pausingJobId === job.id ? (
+                                  <Clock size={16} className="animate-spin" />
+                                ) : job.status === "Active" ? (
+                                  <Pause size={16} />
+                                ) : (
+                                  <Play size={16} />
+                                )}
+                              </button>
+
+                              <a
+                                href={`/EmployerDashboard/jobPreview/${job.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                Preview
+                              </a>
+                              <button
+                                onClick={() => {
+                                  handleEdit(job);
+                                  setMobileActionMenu(null);
+                                }}
+                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => {
+                                  handleDelete(job.id);
+                                  setMobileActionMenu(null);
+                                }}
+                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    No jobs posted yet.
+                  </div>
+                )}
+              </div>
+
+              {/* Show All Button */}
+              {jobs.length > 4 && (
+                <MainButton
+                  onClick={() => setShowAllJobs(!showAllJobs)}
+                  className="mt-4  gap-3 text-primary  text-sm md:text-base"
+                >
+                  {showAllJobs ? "Show Less" : "View all Jobs"}
+                </MainButton>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white">
+            <Footer />
+          </div>
         </div>
-      </div>
-
-      <div className="bg-white">
-        <Footer />
-      </div>
-    </div>
+        </div>
+        </div>
 
 
-  );
+        );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Bell, Trash2 } from "lucide-react";
+import { Bell, X, Link2 } from "lucide-react";
 
 interface ConnectionRequest {
   id: number;
@@ -116,7 +116,7 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
       if (newStatus === "accepted") {
         setMessageType("success");
         setSuccessMessage(
-          `You’ve successfully connected with ${employerName}. You will soon receive a confirmation email with further details from the employer.`
+          `You've successfully connected with ${employerName}. You will soon receive a confirmation email with further details from the employer.`
         );
       } else if (newStatus === "rejected") {
         setMessageType("error");
@@ -138,7 +138,6 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
     if (!hiddenIds.includes(requestId)) {
       localStorage.setItem("hiddenNotifications", JSON.stringify([...hiddenIds, requestId]));
     }
-    // Dispatch storage event to notify other tabs/components
     window.dispatchEvent(new Event("storage"));
   };
 
@@ -152,11 +151,11 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
       <div className="relative">
         <button
           onClick={handleToggleSidebar}
-          className="p-2 rounded-full hover:bg-gray-200 transition relative"
+          className="p-2 rounded-full hover:bg-gray-100 transition relative"
         >
           <Bell className="w-6 h-6 text-gray-700" />
           {requests.filter((r) => r.status === "pending").length > 0 && (
-            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white bg-red-600 rounded-full">
+            <span className="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold text-white bg-red-500 rounded-full">
               {requests.filter((r) => r.status === "pending").length}
             </span>
           )}
@@ -165,95 +164,109 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
 
       {/* Sidebar */}
       <div
-        className={`fixed top-5 right-1 h-[75%] w-[360px] bg-white rounded-xl shadow-2xl transform transition-transform duration-500 z-50 overflow-hidden ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-full max-w-[521px] h-full max-h-[572px] bg-white shadow-2xl transform transition-transform duration-300 z-50 rounded-b-lg ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
-        <div className="flex justify-between items-center p-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
-          <h2 className="font-bold text-xl text-gray-800">Notifications</h2>
+        {/* Header */}
+        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-100">
+          <h2 className="text-xl font-regular text-gray-900">Notifications</h2>
           <button
             onClick={() => setIsOpen(false)}
-            className="text-gray-500 hover:text-gray-700 text-2xl font-bold transition"
+            className="p-1 rounded-full hover:bg-gray-100 transition"
           >
-            ✕
+            <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
-        <div className="p-4 overflow-y-auto h-[calc(100%-72px)] space-y-4">
+        {/* Content */}
+        <div className="overflow-y-auto h-[calc(100%-64px)] ">
           {loading ? (
-            <div className="space-y-2">
-              <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+            <div className="p-6 space-y-4">
+              <div className="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
+              <div className="h-24 bg-gray-100 rounded-lg animate-pulse"></div>
             </div>
           ) : requests.length === 0 ? (
-            <p className="text-gray-400 text-center mt-10">No notifications</p>
+            <div className="flex flex-col items-center justify-center h-full text-center px-6">
+              <Bell className="w-16 h-16 text-gray-300 mb-4" />
+              <p className="text-gray-500 text-lg">No notifications</p>
+            </div>
           ) : (
-            requests.map((req) => (
-              <div
-                key={req.id}
-                className="flex gap-3 p-4 rounded-xl border border-gray-200 hover:shadow-lg transition bg-gray-50"
-              >
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center text-white font-bold text-lg">
-                    {req._employer_profiles?.companyName?.[0] ||
-                      req._employer_profiles?.fullName?.[0] ||
-                      "N"}
+            <div className="divide-y divide-gray-100">
+              {requests.map((req) => (
+                <div
+                  key={req.id}
+                  className="p-6 hover:bg-gray-50 transition relative group"
+                >
+                  {/* Delete button */}
+                  <button
+                    onClick={() => handleDelete(req.id)}
+                    className="absolute top-10 right-10 p-1 rounded-full opacity-0 group-hover:opacity-100 hover:bg-gray-200 transition"
+                    title="Dismiss notification"
+                  >
+                    <X className="w-5 h-5 text-gray-500" />
+                  </button>
+
+                  <div className="flex gap-4 px-2 py-2 border border-gray-200 rounded-lg">
+                    {/* Icon */}
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <Link2 className="w-5 h-5 text-blue-400" />
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base font-semibold text-gray-900 mb-1">
+                        New Connection Request Received
+                      </h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        You&apos;ve received a new connection request from{" "}
+                        <span className="font-medium text-gray-900">
+                          {req._employer_profiles?.companyName ||
+                            req._employer_profiles?.fullName ||
+                            "N/A"}
+                        </span>
+                        .
+                      </p>
+
+                      {/* Action Buttons */}
+                      {req.status === "pending" && (
+                        <div className="flex gap-2 mt-4">
+                          <button
+                            onClick={() => handleUpdateStatus(req.id, "accepted")}
+                            className="flex-1 px-4 py-2 bg-blue-400 text-white text-sm font-medium rounded-lg  transition"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => handleUpdateStatus(req.id, "rejected")}
+                            className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      )}
+
+                      {req.status === "accepted" && (
+                        <div className="mt-3">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            Connected
+                          </span>
+                        </div>
+                      )}
+
+                      {req.status === "rejected" && (
+                        <div className="mt-3">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                            Declined
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex-1 flex flex-col">
-                  <p className="text-gray-800">
-                    You have received a connection request from{" "}
-                    <span className="font-semibold text-blue-600">
-                      {req._employer_profiles?.companyName ||
-                        req._employer_profiles?.fullName ||
-                        "N/A"}
-                    </span>
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">Review and respond to continue.</p>
-                  <p className="text-sm text-gray-500 mt-1">Status: {req.status}</p>
-                  {req.created_at && (
-                    <p className="text-xs text-gray-400 mt-1">
-                      {new Date(req.created_at).toLocaleString()}
-                    </p>
-                  )}
-                  <div className="flex flex-wrap items-center gap-2 mt-3">
-                    {req.status === "pending" && (
-                      <>
-                        <button
-                          onClick={() => handleUpdateStatus(req.id, "accepted")}
-                          className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition flex-1"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleUpdateStatus(req.id, "rejected")}
-                          className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition flex-1"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
-                    {req.status === "accepted" && (
-                      <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full font-semibold text-sm">
-                        Connected
-                      </span>
-                    )}
-                    {req.status === "rejected" && (
-                      <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full font-semibold text-sm">
-                        Rejected
-                      </span>
-                    )}
-                    <button
-                      onClick={() => handleDelete(req.id)}
-                      className="ml-auto text-gray-500 hover:text-red-600 transition"
-                      title="Delete notification"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </div>
@@ -261,7 +274,7 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/10 z-40"
+          className="fixed inset-0 bg-black/20 z-40 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -269,11 +282,10 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
       {/* Toast Message */}
       {successMessage && (
         <div
-          className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-sm transition-all duration-300 transform ${
-            messageType === "success"
-              ? "bg-green-100 text-green-800 border border-green-300"
-              : "bg-red-100 text-red-800 border border-red-300"
-          }`}
+          className={`fixed top-6 right-6 z-[60] max-w-md px-4 py-3 rounded-lg shadow-xl text-sm transition-all duration-300 ${messageType === "success"
+              ? "bg-green-50 text-green-800 border border-green-200"
+              : "bg-red-50 text-red-800 border border-red-200"
+            }`}
         >
           {successMessage}
         </div>
