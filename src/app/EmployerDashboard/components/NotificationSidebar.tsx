@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Bell, Trash2 } from "lucide-react";
+import { Bell, Link2, X } from "lucide-react";
+import { useRouter } from 'next/navigation';
+
 
 interface Notification {
   id: number;
@@ -17,12 +19,14 @@ interface NotificationSidebarProps {
   employerId?: number;
 }
 
-export default function NotificationSidebar({ }: NotificationSidebarProps) {
+export default function EmployerNotificationSidebar({ }: NotificationSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
+    const router = useRouter();
+  
 
   // Get user-specific storage key
   const getStorageKey = () => {
@@ -130,9 +134,8 @@ export default function NotificationSidebar({ }: NotificationSidebarProps) {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-5 right-1 h-[75%] w-[360px] bg-white rounded-xl shadow-2xl transform transition-transform duration-500 z-50 overflow-hidden ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-full max-w-[521px] h-full max-h-[572px] bg-white shadow-2xl transform transition-transform duration-300 z-50 rounded-b-lg ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex justify-between items-center p-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
           <h2 className="font-bold text-xl text-gray-800">Notifications</h2>
@@ -140,7 +143,8 @@ export default function NotificationSidebar({ }: NotificationSidebarProps) {
             onClick={() => setIsOpen(false)}
             className="text-gray-500 hover:text-gray-700 text-2xl font-bold transition"
           >
-            ✕
+            <X className="w-5 h-5 text-gray-500" />
+
           </button>
         </div>
 
@@ -154,51 +158,60 @@ export default function NotificationSidebar({ }: NotificationSidebarProps) {
             <p className="text-gray-400 text-center mt-10">No notifications</p>
           ) : (
             notifications.map((note) => (
-              <div key={note.id} className="flex flex-col gap-2 p-4 rounded-xl border border-gray-200 hover:shadow-lg transition bg-gray-50">
-                <div>
-                  <p
-                    className={`text-sm ${
-                      note.status === "accepted"
-                        ? "text-green-700"
-                        : note.status === "rejected"
-                        ? "text-red-700"
-                        : "text-gray-800"
+              <div
+                      onClick={() => router.push(`/EmployerDashboard/status`)}
+
+                key={note.id}
+                className="flex items-center justify-between p-4 rounded-xl border border-gray-200 hover:shadow-lg transition bg-gray-50"
+              >
+                {/* Left Icon */}
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Link2 className="w-5 h-5 text-blue-400" />
+                  </div>
+                </div>
+
+                {/* Middle message */}
+                <p
+                  className={`flex-1 mx-4 text-sm ${note.status === "accepted"
+                    ? "text-green-700"
+                    : note.status === "rejected"
+                      ? "text-red-700"
+                      : "text-gray-800"
                     }`}
-                  >
-                    {note.message ||
-                      (note.status === "accepted"
-                        ? `${note.nurseName} accepted your request`
-                        : note.status === "rejected"
+                >
+                  {note.message ||
+                    (note.status === "accepted"
+                      ? `${note.nurseName} accepted your request`
+                      : note.status === "rejected"
                         ? `${note.nurseName} rejected your request`
                         : `Request ${note.status} with ${note.nurseName}`)}
-                  </p>
-                  <p className="text-gray-400 text-xs mt-1">{new Date(note.created_at).toLocaleString()}</p>
-                </div>
-                <div className="flex justify-end mt-2 gap-2">
-                  <button
-                    onClick={() => handleDelete(note.id)}
-                    className="text-red-500 hover:text-red-700 transition flex-shrink-0"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
+                </p>
+
+                {/* Right X button */}
+                <button
+                  onClick={() => handleDelete(note.id)}
+                  className="text-gray-400 hover:text-red-500 transition flex-shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
             ))
           )}
         </div>
+
       </div>
 
       {/* Overlay */}
-      {isOpen && <div className="fixed inset-0 bg-black/10 z-40" onClick={() => setIsOpen(false)} />}
+      {isOpen && <div className="fixed inset-0  z-40" onClick={() => setIsOpen(false)} />}
 
       {/* Toast */}
       {toastMessage && (
         <div
-          className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-sm transition-all duration-300 transform ${
-            toastType === "success"
-              ? "bg-green-100 text-green-800 border border-green-300"
-              : "bg-red-100 text-red-800 border border-red-300"
-          }`}
+          className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-sm transition-all duration-300 transform ${toastType === "success"
+            ? "bg-green-100 text-green-800 border border-green-300"
+            : "bg-red-100 text-red-800 border border-red-300"
+            }`}
         >
           {toastMessage}
         </div>

@@ -212,9 +212,11 @@ export default function JobApplicationPage() {
         // ✅ check expiry
         if (jobData.expiryDate) {
           const expiry = new Date(jobData.expiryDate);
+          expiry.setDate(expiry.getDate() + 1); 
           const now = new Date();
           setIsExpired(expiry < now);
         }
+
 
         if (jobData.user_id) {
           await fetchCompanyInfo(jobData.user_id);
@@ -474,25 +476,25 @@ export default function JobApplicationPage() {
 
                     {/* Job Expiry */}
                     <div className="flex justify-between items-center w-2/3">
-                      <span className="font-medium text-gray-600">
-                        Job Expiry
-                      </span>
+                      <span className="font-medium text-gray-600">Job Expiry</span>
                       <div className="flex justify-start gap-10 items-center w-1/2">
                         <span className="font-medium text-gray-600">:</span>
                         <p className="text-gray-900">
                           {job.expiryDate
-                            ? new Date(job.expiryDate).toLocaleDateString(
-                              "en-AU",
-                              {
+                            ? (() => {
+                              const expiry = new Date(job.expiryDate);
+                              expiry.setDate(expiry.getDate() + 1);
+                              return expiry.toLocaleDateString("en-AU", {
                                 day: "numeric",
                                 month: "short",
                                 year: "numeric",
-                              }
-                            )
+                              });
+                            })()
                             : "Not specified"}
                         </p>
                       </div>
                     </div>
+
                   </div>
                 </div>
 

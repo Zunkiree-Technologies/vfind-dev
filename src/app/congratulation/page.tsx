@@ -41,7 +41,7 @@ export default function CongratsScreen() {
             onClick={() => router.push("/employerloginpage")}
             className="w-full py-2 bg-blue-400 text-white font-bold rounded-lg hover:bg-[#007EE6] transition"
           >
-            Explore
+            Log In
           </button>
         </div>
       </div>

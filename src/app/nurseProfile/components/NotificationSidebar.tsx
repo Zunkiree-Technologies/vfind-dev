@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Bell, X, Link2 } from "lucide-react";
+import { useRouter } from 'next/navigation';
 
 interface ConnectionRequest {
   id: number;
@@ -24,8 +25,9 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
   const [isOpen, setIsOpen] = useState(false);
   const [requests, setRequests] = useState<ConnectionRequest[]>([]);
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string>("");
-  const [messageType, setMessageType] = useState<"success" | "error">("success");
+  const [successMessage] = useState<string>("");
+  const [messageType] = useState<"success" | "error">("success");
+  const router = useRouter();
 
   const fetchNotifications = useCallback(async () => {
     const token = localStorage.getItem("token");
@@ -72,65 +74,6 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  const handleUpdateStatus = async (requestId: number, newStatus: "accepted" | "rejected") => {
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Unauthorized");
-
-    try {
-      const affectedRequest = requests.find((r) => r.id === requestId);
-      if (!affectedRequest) throw new Error("Request not found");
-
-      const res = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/connections/${requestId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            connections_id: requestId,
-            employer_profiles_id: affectedRequest.employer_profiles_id,
-            nurse_profiles_id: affectedRequest.nurse_profiles_id,
-            status: newStatus,
-          }),
-        }
-      );
-
-      let updatedData: Partial<ConnectionRequest> = {};
-      if (res.status !== 204) {
-        updatedData = await res.json().catch(() => ({}));
-      }
-
-      setRequests((prev) =>
-        prev.map((req) =>
-          req.id === requestId ? { ...req, status: newStatus, ...updatedData } : req
-        )
-      );
-
-      const employerName =
-        affectedRequest._employer_profiles?.companyName ||
-        affectedRequest._employer_profiles?.fullName ||
-        "Employer";
-
-      if (newStatus === "accepted") {
-        setMessageType("success");
-        setSuccessMessage(
-          `You've successfully connected with ${employerName}. You will soon receive a confirmation email with further details from the employer.`
-        );
-      } else if (newStatus === "rejected") {
-        setMessageType("error");
-        setSuccessMessage(
-          `You have declined the connection request from ${employerName}. No further action is required.`
-        );
-      }
-
-      setTimeout(() => setSuccessMessage(""), 5000);
-    } catch (err) {
-      console.error("Update error:", err);
-      alert("Failed to update request");
-    }
-  };
 
   const handleDelete = (requestId: number) => {
     setRequests((prev) => prev.filter((req) => req.id !== requestId));
@@ -215,7 +158,10 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0">
+                    <div
+                      className="flex-1 min-w-0 cursor-pointer"
+                      onClick={() => router.push(`/nurseProfile/connectedstatus/`)}
+                    >
                       <h3 className="text-base font-semibold text-gray-900 mb-1">
                         New Connection Request Received
                       </h3>
@@ -228,40 +174,6 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
                         </span>
                         .
                       </p>
-
-                      {/* Action Buttons */}
-                      {req.status === "pending" && (
-                        <div className="flex gap-2 mt-4">
-                          <button
-                            onClick={() => handleUpdateStatus(req.id, "accepted")}
-                            className="flex-1 px-4 py-2 bg-blue-400 text-white text-sm font-medium rounded-lg  transition"
-                          >
-                            Accept
-                          </button>
-                          <button
-                            onClick={() => handleUpdateStatus(req.id, "rejected")}
-                            className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition"
-                          >
-                            Decline
-                          </button>
-                        </div>
-                      )}
-
-                      {req.status === "accepted" && (
-                        <div className="mt-3">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                            Connected
-                          </span>
-                        </div>
-                      )}
-
-                      {req.status === "rejected" && (
-                        <div className="mt-3">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                            Declined
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -274,7 +186,7 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-40 backdrop-blur-sm"
+          className="fixed inset-0  z-40 "
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -283,8 +195,8 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
       {successMessage && (
         <div
           className={`fixed top-6 right-6 z-[60] max-w-md px-4 py-3 rounded-lg shadow-xl text-sm transition-all duration-300 ${messageType === "success"
-              ? "bg-green-50 text-green-800 border border-green-200"
-              : "bg-red-50 text-red-800 border border-red-200"
+            ? "bg-green-50 text-green-800 border border-green-200"
+            : "bg-red-50 text-red-800 border border-red-200"
             }`}
         >
           {successMessage}

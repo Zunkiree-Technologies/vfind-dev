@@ -7,6 +7,7 @@ import NotificationSidebar from "./NotificationSidebar";
 import { MapPin, Search, UserRound, Menu, X } from "lucide-react";
 import Image from "next/image";
 
+
 export const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [locationTerm, setLocationTerm] = useState("");

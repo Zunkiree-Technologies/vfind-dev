@@ -12,6 +12,7 @@ export function CertificationsStep({ formData, handleCheckboxChange, handleChang
     "NDIS Worker Screening",
     "Certificate lll in Individual Support",
     "Certificate lV in Individual Support",
+    "None",
     // "Photo ID Card",
   ];
 

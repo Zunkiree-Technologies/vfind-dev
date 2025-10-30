@@ -313,7 +313,7 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
           </div>
 
           {/* Login Section (Right side) */}
-          <div className="border-1 border-gray-300 lg:order-1 w-full lg:w-[448px] h-auto lg:h-[477px] bg-white shadow-md rounded-2xl p-10">
+          <div className="border-1 border-gray-300 lg:order-1 w-full lg:w-[480px] h-auto lg:h-[477px] bg-white shadow-md rounded-2xl p-10">
             {step === 1 && (
               <>
                 <h2 className="text-xl sm:text-[22px] font-medium text-[#121224]">
@@ -324,7 +324,7 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
                   <p className="text-red-500 text-sm mb-3 mt-3">{emailError}</p>
                 )}
 
-                <div className="mt-3">
+                <div className="mt-10">
                   <label className="block text-gray-700 font-medium text-sm mt-3">
                     Email Address
                   </label>

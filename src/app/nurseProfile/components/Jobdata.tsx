@@ -377,12 +377,12 @@ export default function JobData() {
                     key={job.id}
                     className="relative flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2"
                   >
-                    {/* Expired badge */}
+                    {/* Expired badge
                     {isExpired && (
                       <div className="absolute top-3 right-3 bg-red-100 text-[#D9796C] text-xs font-semibold px-2 py-1 rounded">
                         Expired
                       </div>
-                    )}
+                    )} */}
 
                     {/* Job info */}
                     <div className="flex-1">
@@ -444,15 +444,19 @@ export default function JobData() {
                       {/* Apply Before Indicator */}
 
                       <div
-                        className={`mt-4 text-sm font-extralight w-fit flex items-center gap-1 ${job.expiryDate && new Date(job.expiryDate) < new Date()
-                          ? "text-[#D9796C]"
-                          : "text-gray-600"
+                        className={`mt-4 text-sm font-extralight w-fit flex items-center gap-1 ${job.expiryDate && new Date(job.expiryDate).setHours(23, 59, 59, 999) < new Date().getTime()
+                            ? "text-[#D9796C]"
+                            : "text-gray-600"
                           }`}
                       >
                         {job.expiryDate
                           ? (() => {
                             const today = new Date();
                             const expiry = new Date(job.expiryDate);
+
+                            // Set expiry to end of the day
+                            expiry.setHours(23, 59, 59, 999);
+
                             const diffTime = expiry.getTime() - today.getTime();
                             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -469,6 +473,7 @@ export default function JobData() {
                           })()
                           : "Date not available"}
                       </div>
+
 
 
                     </div>

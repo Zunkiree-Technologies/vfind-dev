@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Navbar from "../../../components/navbar";
 import Footer from "../../../components/footer-section";
-import { Building2, Globe, Mail, MapPinned, User } from "lucide-react";
+import { Building2, Globe, Mail, MapPinned, User, Share } from "lucide-react";
 import Image from "next/image";
 
 type FormData = {
@@ -39,10 +39,10 @@ function RegistrationComponent() {
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [emailOtp, setEmailOtp] = useState<string[]>(new Array(6).fill(""));
   const [, setOtpSent] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [logo, setLogo] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-
 
   const [formData, setFormData] = useState<FormData>({
     mobile: "",
@@ -68,7 +68,6 @@ function RegistrationComponent() {
     if (file) setPreview(URL.createObjectURL(file));
     else setPreview(null);
   };
-
 
   // Pre-fill mobile from query params
   useEffect(() => {
@@ -115,27 +114,115 @@ function RegistrationComponent() {
 
   // Send OTP to email
   const sendEmailOtp = async () => {
+    console.log("🚀 Starting sendEmailOtp...");
+
     if (!formData.email) {
+      console.warn("❌ Missing email");
       alert("Please enter a valid email address");
       return;
     }
 
-    setOtpSent(true);
-    // TODO: Replace with actual API call to send OTP
-    alert(`OTP sent to ${formData.email}`);
+    if (!formData.companyName) {
+      console.warn("❌ Missing companyName");
+      alert("Please enter company name");
+      return;
+    }
+
+    setOtpLoading(true);
+
+    const payload = {
+      email: formData.email,
+      company_name: formData.companyName,
+    };
+
+    console.log("📦 Payload being sent:", payload);
+
+    try {
+      const response = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/otp_employer_signUp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      console.log("🔍 Raw response object:", response);
+      console.log("📡 Response status:", response.status, response.statusText);
+
+      const data = await response.json().catch((err) => {
+        console.error("❌ Failed to parse JSON:", err);
+        return null;
+      });
+
+      console.log("🧾 Parsed response data:", data);
+
+      if (!response.ok) {
+        console.error("❌ Server responded with error:", data);
+        throw new Error(data?.message || "Failed to send OTP");
+      }
+
+      if (data?.success || response.ok) {
+        console.log("✅ OTP sent successfully!", data);
+        setOtpSent(true);
+        alert(`OTP sent successfully to ${formData.email}`);
+      } else {
+        console.warn("⚠️ Unexpected success format:", data);
+        alert("Unexpected response, check console.");
+      }
+
+    } catch (err) {
+      console.error("🔥 Error while sending OTP:", err);
+      alert(err instanceof Error ? err.message : "Failed to send OTP");
+    } finally {
+      setOtpLoading(false);
+      console.log("🏁 Finished sendEmailOtp()");
+    }
   };
 
-  // Verify OTP and submit form
-  const verifyOtpAndSubmit = async () => {
+
+  // Verify OTP
+  const verifyOtp = async () => {
     const enteredOtp = emailOtp.join("");
+
     if (enteredOtp.length !== 6) {
       alert("Please enter the complete 6-digit OTP");
       return;
     }
 
-    // TODO: Replace with actual OTP verification API call
-    // For now, proceeding to submit
-    await handleSubmit();
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/verify_otp_for_employerSignUp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            otp_code: enteredOtp,
+            email: formData.email,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Invalid OTP");
+      }
+
+      // OTP verified successfully, now submit the registration form
+      await handleSubmit();
+
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "OTP verification failed");
+      setLoading(false);
+    }
   };
 
   // Validate form and show OTP modal
@@ -205,9 +292,6 @@ function RegistrationComponent() {
 
   // Submit form to backend
   const handleSubmit = async () => {
-    setLoading(true);
-    setMessage("");
-
     try {
       const form = new FormData();
 
@@ -218,32 +302,38 @@ function RegistrationComponent() {
 
       // Add logo only if exists
       if (logo) {
-        form.append("image", logo); // make sure "image" matches backend input name
+        form.append("image", logo);
       }
 
       const response = await fetch(
         "https://x76o-gnx4-xrav.a2.xano.io/api:5OnHwV4U/employerOnboarding",
         {
           method: "POST",
-          body: form, // Note: no JSON headers for multipart
+          body: form,
         }
       );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to submit form");
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit form");
+      }
 
       setMessage("Registration successful!");
-      setTimeout(() => router.push("/congratulation"), 1500);
+      setShowOtpModal(false);
+
+      setTimeout(() => {
+        router.push("/congratulation");
+      }, 1500);
 
     } catch (err) {
       console.error(err);
       alert(err instanceof Error ? err.message : "Something went wrong");
+      throw err;
     } finally {
       setLoading(false);
     }
   };
-
-
 
   return (
     <>
@@ -342,12 +432,13 @@ function RegistrationComponent() {
                       onChange={(e) => handleChange("numberOfEmployees", e.target.value)}
                       className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
                     >
-                      <option value="0-5">Less than 5 employees</option>
-                      <option value="5-20">Less than 20 employees</option>
-                      <option value="20-50">Less than 50 employees</option>
-                      <option value="50-100">Less than 100 employees</option>
-                      <option value="100-200">Less than 200 employees</option>
-                      <option value="200+">More than 200 employees</option>
+                      <option value="selection"> Number of employee</option>
+                      <option value="Less than 5 employees">Less than 5 employees</option>
+                      <option value="Less than 20 employees">Less than 20 employees</option>
+                      <option value="Less than 50 employees">Less than 50 employees</option>
+                      <option value="Less than 100 employees">Less than 100 employees</option>
+                      <option value="Less than 200 employees">Less than 200 employees</option>
+                      <option value="More than 200 employees">More than 200 employees</option>
 
                     </select>
                   </div>
@@ -481,6 +572,7 @@ function RegistrationComponent() {
                       onChange={(e) => handleChange("state", e.target.value)}
                       className="w-full px-3 py-2 border border-gray-400 rounded-md text-sm "
                     >
+                      <option value="State">Select your state</option>
                       <option value="NSW">New South Wales</option>
                       <option value="VIC">Victoria</option>
                       <option value="QLD">Queensland</option>
@@ -541,28 +633,34 @@ function RegistrationComponent() {
               <div className="flex items-center justify-between p-4 ">
                 <div className="flex items-center gap-2">
                   <Globe className="w-5 h-5 text-blue-400" />
-
-                  <h2 className="text-lg font-semibold">Organization Photo / Logo (Optional) </h2>
+                  <h2 className="text-lg font-semibold">Organization Photo / Logo (Optional)</h2>
                 </div>
               </div>
 
               <div className="p-4 flex flex-col items-center gap-4">
-                {/* Preview */}
-                <div className="w-32 h-32 rounded-full border border-gray-300 overflow-hidden bg-gray-100 flex items-center justify-center">
+                {/* Preview & Clickable Area */}
+                <label className="w-32 h-32 rounded-full border border-gray-300 overflow-hidden bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition">
                   {preview ? (
-                    <Image width={50} height={50} src={preview} alt="Logo Preview" className="w-full h-full object-cover" />
+                    <Image
+                      width={128}
+                      height={128}
+                      src={preview}
+                      alt="Logo Preview"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <span className="text-gray-400 text-sm">Choose Photo</span>
+                    <div className="flex flex-col items-center justify-center text-gray-400">
+                      <Share className="w-8 h-8 mb-1" />
+                      <span className="text-sm">Choose Photo</span>
+                    </div>
                   )}
-                </div>
-
-                {/* File Input */}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="text-sm text-gray-600"
-                />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
               </div>
             </div>
 
@@ -617,14 +715,11 @@ function RegistrationComponent() {
 
       {/* OTP Verification Modal */}
       {showOtpModal && (
-
-
-        <div className="fixed inset-0   bg-white  flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-white flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail className="w-5 h-5 text-blue-400" />
-
+                <Mail className="w-8 h-8 text-blue-400" />
               </div>
               <h2 className="text-xl font-bold mb-2">Verify Your Email</h2>
               <p className="text-gray-600 text-sm">
@@ -640,7 +735,7 @@ function RegistrationComponent() {
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
-                  className="w-12 h-12 text-center border border-gray-500 rounded-lg text-lg font-semibold outline-none"
+                  className="w-12 h-12 text-center border border-gray-500 rounded-lg text-lg font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   value={digit}
                   onChange={(e) => handleEmailOtpChange(e.target, index)}
                   onKeyDown={(e) => handleEmailOtpKeyDown(e, index)}
@@ -652,9 +747,9 @@ function RegistrationComponent() {
             </div>
 
             <button
-              onClick={verifyOtpAndSubmit}
+              onClick={verifyOtp}
               disabled={loading || emailOtp.join("").length !== 6}
-              className={`w-full py-3 rounded-md font-semibold text-white mb-3 ${loading || emailOtp.join("").length !== 6
+              className={`w-full py-3 rounded-md font-semibold text-white mb-3 transition-colors ${loading || emailOtp.join("").length !== 6
                 ? "bg-gray-300 cursor-not-allowed"
                 : "bg-blue-400 hover:bg-blue-500"
                 }`}
@@ -665,7 +760,7 @@ function RegistrationComponent() {
             <button
               onClick={() => setShowOtpModal(false)}
               disabled={loading}
-              className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm"
+              className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm disabled:opacity-50"
             >
               Cancel
             </button>
@@ -673,17 +768,14 @@ function RegistrationComponent() {
             <div className="text-center mt-4">
               <button
                 onClick={sendEmailOtp}
-                className="text-blue-400 text-sm hover:underline"
+                disabled={otpLoading}
+                className="text-blue-400 text-sm hover:underline disabled:opacity-50"
               >
-                Resend OTP
+                {otpLoading ? "Sending..." : "Resend OTP"}
               </button>
             </div>
           </div>
-
         </div>
-
-
-
       )}
     </>
   );
