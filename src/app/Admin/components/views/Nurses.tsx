@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { MoreVertical, Search, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
+import DeleteModal from "./deleteModal";
 
 interface Nurse {
   id: number;
@@ -21,6 +22,9 @@ export default function NursesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedNurse, setSelectedNurse] = useState<Nurse | null>(null);
+
   const router = useRouter();
 
   // Close dropdown when clicking outside
@@ -166,7 +170,6 @@ export default function NursesPage() {
               <h2 className="text-[18px] font-bold text-gray-800 mb-1">
                 Registered Nurses
               </h2>
-              
             </div>
 
             <div className="flex item-center justify-around gap-4">
@@ -293,21 +296,10 @@ export default function NursesPage() {
                           {/* Delete */}
                           <div
                             className="px-3 py-2 text-red-600 hover:bg-red-50 cursor-pointer"
-                            onClick={async () => {
-                              if (confirm(`Delete nurse: ${nurse.fullName}?`)) {
-                                try {
-                                  await fetch(
-                                    `https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/delete_nurse_Admin/${nurse.id}`,
-                                    { method: "DELETE" }
-                                  );
-                                  setNurses((prev) =>
-                                    prev.filter((n) => n.id !== nurse.id)
-                                  );
-                                  setActionOpen(null);
-                                } catch (err) {
-                                  console.error("Error deleting nurse:", err);
-                                }
-                              }
+                            onClick={() => {
+                              setSelectedNurse(nurse);
+                              setDeleteModalOpen(true);
+                              setActionOpen(null); // close dropdown
                             }}
                           >
                             Delete
@@ -332,6 +324,26 @@ export default function NursesPage() {
           )}
         </div>
       </div>
+      <DeleteModal
+        open={deleteModalOpen}
+        nurseName={selectedNurse?.fullName}
+        onCancel={() => setDeleteModalOpen(false)}
+        onConfirm={async () => {
+          if (!selectedNurse) return;
+          try {
+            await fetch(
+              `https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/delete_nurse_Admin/${selectedNurse.id}`,
+              { method: "DELETE" }
+            );
+            setNurses((prev) => prev.filter((n) => n.id !== selectedNurse.id));
+          } catch (err) {
+            console.error("Error deleting nurse:", err);
+          } finally {
+            setDeleteModalOpen(false);
+            setSelectedNurse(null);
+          }
+        }}
+      />
     </div>
   );
 }

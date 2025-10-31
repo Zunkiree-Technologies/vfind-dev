@@ -3,6 +3,8 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Phone, Clock, Calendar, Mail } from "lucide-react";
+
 
 // Public components
 import NavbarPublic from "../../../components/navbar";
@@ -11,12 +13,10 @@ import FooterPublic from "../../../components/footer-section";
 // Logged-in components
 import { Navbar as NavbarPrivate } from "../nurseProfile/components/Navbar";
 import FooterPrivate from "../Admin/components/layout/Footer";
-import { ArrowRight } from "lucide-react";
 
 export default function ContactUs() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // ✅ Detect login state from token
   useEffect(() => {
     const token =
       localStorage.getItem("token") ||
@@ -32,7 +32,9 @@ export default function ContactUs() {
     message: "",
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -54,147 +56,187 @@ export default function ContactUs() {
       } else {
         alert("Failed to send message. Please try again.");
       }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        alert("Error occurred: " + error.message);
-      } else {
-        alert("An unknown error occurred.");
-      }
+    } catch (error) {
+      alert("An error occurred. Please try again later.");
     }
   };
 
   return (
     <div>
-      {/* ✅ Conditional Navbar */}
+      {/* Navbar */}
       {isLoggedIn ? <NavbarPrivate /> : <NavbarPublic />}
 
-      {/* -------------------- Contact Section -------------------- */}
-      <div className="flex justify-center items-center py-16 px-6 bg-gray-50 ">
-        <div className="flex flex-col md:flex-row gap-10 w-full max-w-6xl items-start">
-          {/* Left Side: Map + Info */}
-          <div className="flex-1 h-[600px]">
-            <h1 className="text-4xl font-bold mb-4 text-gray-800">Contact Us</h1>
-            <p className="mb-2 text-gray-600">Need to get in touch with us?</p>
-            <p className="mb-6 text-gray-600">
+      {/* Contact Section */}
+      <div className="bg-[#f9fafb] flex justify-center items-center py-20 px-6">
+        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-16">
+          {/* Left Section - Contact Form */}
+          <div className="flex-1">
+            <h1 className="text-[34px] font-semibold text-gray-900 mb-4">
+              Contact Us
+            </h1>
+            <p className="text-black text-[16px] text-sm mb-2">
+              Need to get in touch with us?
+            </p>
+            <p className="text-black text-[16px] text-sm mb-8">
               Either fill out the form or contact us at{" "}
               <a
                 href="mailto:info@vfind.com"
-                className="text-primary underline font-medium"
+                className="text-[#2563eb] hover:underline font-medium"
               >
                 info@vfind.com
               </a>
             </p>
 
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d271.7302561497269!2d85.30364919359299!3d27.675390939707295!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb1b0cf2ce96c5%3A0x4f3ed477e4f68c22!2sSimplifycodes%20(%20Simplify%20Tech%20Pvt.%20Ltd.%20)!5e1!3m2!1sen!2snp!4v1758707183808!5m2!1sen!2snp"
-              width="100%"
-              height="400"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-2xl shadow-md"
-            ></iframe>
-          </div>
-
-          {/* Right Side: Form */}
-          <Card className="flex-1 shadow-lg border-0 rounded-2xl h-[550px]">
-            <CardContent className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="firstName"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      id="firstName"
-                      name="firstName"
-                      placeholder="First Name"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required
-                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="lastName"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      name="lastName"
-                      placeholder="Last Name"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400"
-                    />
-                  </div>
-                </div>
-
+            <form onSubmit={handleSubmit} className="space-y-5 max-w-md">
+              {/* First Name */}
+              <div>
                 <label
-                  htmlFor="Email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                />
+              </div>
+
+              {/* Last Name */}
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-black mb-1"
                 >
                   Email
                 </label>
                 <input
                   type="email"
+                  id="email"
                   name="email"
-                  placeholder="Email Address"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 />
+              </div>
 
+              {/* Feedback */}
+              <div>
                 <label
-                  htmlFor="Feedback"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  htmlFor="message"
+                  className="block text-sm font-medium text-black mb-1"
                 >
                   Feedback
                 </label>
                 <textarea
+                  id="message"
                   name="message"
-                  placeholder="What can we help you with?"
                   value={formData.message}
                   onChange={handleChange}
                   required
-                  rows={5}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400"
+                  rows={4}
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"
                 ></textarea>
+              </div>
 
-                <Button
-                  type="submit"
-                  className="group relative w-full bg-primary text-white py-3 rounded-lg text-lg transition-all duration-300 overflow-hidden flex items-center justify-center"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="transition-all duration-300 group-hover:-translate-x-1">
-                      SEND MESSAGE
-                    </span>
-                    <ArrowRight
-                      className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                      strokeWidth={3}
-                    />
-                  </span>
-                </Button>
-              </form>
+              {/* Send Button */}
+              <Button
+                type="submit"
+                className="w-[90px] bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm rounded-md font-medium py-2 transition"
+              >
+                Send
+              </Button>
+            </form>
+          </div>
+
+          {/* Right Section - Contact Info */}
+          {/* -------------------- Right: Contact Info -------------------- */}
+          <Card className="bg-gray-50 border-0 shadow-none rounded-2xl w-full md:w-1/3 text-gray-800">
+            <CardContent className="">
+              <h3 className="text-lg text-[18px] font-semibold mb-6">
+                Contact Information
+              </h3>
+
+              <div className="space-y-6 text-sm">
+                {/* Phone */}
+                <div className="flex items-center space-x-3">
+                  <Phone className="w-5 h-5 text-blue-500 mt-[2px]" />
+                  <div>
+                    <p className="font-medium">Phone</p>
+                    <p className="text-[#717376] mt-[3px]">
+                      04 23457855 / 61 0425145245
+                    </p>
+                  </div>
+                </div>
+
+                {/* Hours */}
+                <div className="flex items-center space-x-3">
+                  <Clock className="w-5 h-5 text-blue-500 mt-[2px]" />
+                  <div>
+                    <p className="font-medium">Hours</p>
+                    <p className="text-[#717376]  mt-[3px]">
+                      7:00 AM – 6:00 PM, Mon – Sat
+                    </p>
+                  </div>
+                </div>
+
+                {/* Weekdays */}
+                <div className="flex items-center space-x-3">
+                  <Calendar className="w-5 h-5 text-blue-500 mt-[2px]" />
+                  <div>
+                    <p className="font-medium">Weekdays</p>
+                    <p className="text-[#717376]  mt-[3px]">
+                      7:00 AM – 6:00 PM, Mon – Sat
+                    </p>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="flex items-center space-x-3">
+                  <Mail className="w-5 h-5 text-blue-500 mt-[2px]" />
+                  <div>
+                    <p className="font-medium">Email</p>
+                    <a
+                      href="mailto:support@vfind.com"
+                      className="text-[#717376]  mt-[3px]"
+                    >
+                      support@vfind.com
+                    </a>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* ✅ Conditional Footer */}
-      <div >
-        {isLoggedIn ? <FooterPrivate /> : <FooterPublic />}
-      </div>
+      {/* Footer */}
+      {isLoggedIn ? <FooterPrivate /> : <FooterPublic />}
     </div>
   );
 }
