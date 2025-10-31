@@ -17,6 +17,9 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowRight,
+  EyeOff,
+  Check,
+  Eye,
 } from "lucide-react";
 import Footer from "@/app/Admin/components/layout/Footer";
 import { Navbar } from "../components/Navbar";
@@ -78,6 +81,7 @@ interface NurseProfile {
   workExperiences?: WorkExperience[];
   isCustomResidency?: boolean;
   isCustomDate?: boolean;
+  visibilityStatus?: string;
 }
 
 interface CollapsibleSectionProps {
@@ -121,6 +125,7 @@ export default function NurseProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [visibilityStatus, setVisibilityStatus] = useState<string>("visibleToNone");
   const [educationList, setEducationList] = useState<Education[]>([]);
 
   const [workExperienceList, setWorkExperienceList] = useState<
@@ -230,6 +235,13 @@ export default function NurseProfilePage() {
         console.log("✅ Nurse Profile fetched:", data);
 
         setProfile(data);
+        // Set initial visibility status from profile data
+        if (data.visibilityStatus) {
+          setVisibilityStatus(data.visibilityStatus);
+          console.log("✅ Visibility status loaded:", data.visibilityStatus);
+        } else {
+          console.log("⚠️ No visibility status in profile, defaulting to visibleToNone");
+        }
 
         // Fetch education and work experience in parallel
         const [eduRes, workRes] = await Promise.all([
@@ -329,6 +341,50 @@ export default function NurseProfilePage() {
     } catch (err: any) {
       console.error("❌ Image Upload Error:", err);
       alert(err.message || "Error uploading image");
+    }
+  };
+
+  // Toggle Visibility Status Handler
+  const handleToggleVisibility = async (newStatus: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No authentication token found");
+        return;
+      }
+
+      console.log("🔄 Toggling visibility to:", newStatus);
+
+      const res = await fetch(
+        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/toggle_visibility_status",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to update visibility status");
+
+      const responseData = await res.json();
+      console.log("✅ API Response:", responseData);
+
+      // Update local state
+      setVisibilityStatus(newStatus);
+
+      // Update profile object to persist the change
+      if (profile) {
+        setProfile({ ...profile, visibilityStatus: newStatus });
+      }
+
+      console.log("✅ Visibility status updated to:", newStatus);
+      alert(`Profile visibility updated to: ${newStatus === "visibleToAll" ? "Visible to All" : "Private"}`);
+    } catch (err: any) {
+      console.error("❌ Toggle Visibility Error:", err);
+      alert(err.message || "Error updating visibility status");
     }
   };
 
@@ -945,40 +1001,47 @@ export default function NurseProfilePage() {
               </h2>
             </div>
 
-            {!isEditingBasicInfo ? (
-              <MainButton
-                onClick={() => setIsEditingBasicInfo(true)}
-                className="group flex items-center gap-2 px-4  text-black rounded-lg transition-all duration-300"
-              >
-                <span>Edit</span>
-              </MainButton>
-            ) : (
-              <div className="flex gap-2">
-                <MainButton
-                  onClick={handleCancelBasicInfo}
-                  disabled={saving}
-                  className="group px-4 py-2 flex items-center justify-center border border-blue-400 rounded-lg text-blue-400 font-medium text-sm transition-all duration-300 overflow-hidden disabled:opacity-50"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="transition-all duration-300 group-hover:-translate-x-1">
-                      Cancel
-                    </span>
-                  </span>
-                </MainButton>
+            <div className="flex items-center gap-4">
 
+
+
+
+              {/* Edit Buttons */}
+              {!isEditingBasicInfo ? (
                 <MainButton
-                  onClick={handleSaveBasicInfo}
-                  disabled={saving}
-                  className="group px-4 py-2 min-w-[80px] flex items-center justify-center border border-blue-400 rounded-lg text-blue-400 font-medium text-sm transition-all duration-300 overflow-hidden disabled:opacity-50"
+                  onClick={() => setIsEditingBasicInfo(true)}
+                  className="group flex items-center gap-2 px-4  text-black rounded-lg transition-all duration-300"
                 >
-                  <span className="flex items-center gap-2">
-                    <span className="transition-all duration-300 group-hover:-translate-x-1">
-                      {saving ? "Saving..." : "Save"}
-                    </span>
-                  </span>
+                  <span>Edit</span>
                 </MainButton>
-              </div>
-            )}
+              ) : (
+                <div className="flex gap-2">
+                  <MainButton
+                    onClick={handleCancelBasicInfo}
+                    disabled={saving}
+                    className="group px-4 py-2 flex items-center justify-center border border-blue-400 rounded-lg text-blue-400 font-medium text-sm transition-all duration-300 overflow-hidden disabled:opacity-50"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        Cancel
+                      </span>
+                    </span>
+                  </MainButton>
+
+                  <MainButton
+                    onClick={handleSaveBasicInfo}
+                    disabled={saving}
+                    className="group px-4 py-2 min-w-[80px] flex items-center justify-center border border-blue-400 rounded-lg text-blue-400 font-medium text-sm transition-all duration-300 overflow-hidden disabled:opacity-50"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="transition-all duration-300 group-hover:-translate-x-1">
+                        {saving ? "Saving..." : "Save"}
+                      </span>
+                    </span>
+                  </MainButton>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Profile Content */}
@@ -1018,6 +1081,9 @@ export default function NurseProfilePage() {
                 </label>
               )}
             </div>
+            <span className="text-xs text-gray-600 font-medium">
+              Visibility Status: <span className="text-blue-400 font-semibold">{visibilityStatus === "visibleToAll" ? "Public" : "Private"}</span>
+            </span>
 
             {/* Basic Info Grid */}
             <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
@@ -2461,6 +2527,63 @@ export default function NurseProfilePage() {
 
 
             </div>
+          </div>
+        </CollapsibleSection>
+
+
+        {/* Profile Visibility"*/}
+        <CollapsibleSection
+          title="Profile Visibility"
+          icon={<Eye className="w-6 h-6 text-blue-400" />}
+        >
+          <div className="flex flex-col ">
+            {/* Current Status */}
+            <span className="text-sm text-gray-600 font-medium">
+              Visibility Status:{" "}
+              <span className="text-blue-400 font-semibold">
+                {visibilityStatus === "visibleToAll" ? "Public" : "Private"}
+              </span>
+            </span>
+            <div className="flex flex-col  p-2 ">
+              {/* Option 1: Public */}
+              <div
+                className="flex items-start gap-3 cursor-pointer hover:bg-blue-50 p-2 rounded-md transition-all duration-200"
+                onClick={() => handleToggleVisibility("visibleToAll")}
+              >
+                <button
+                  type="button"
+                  className={`w-6 h-6 rounded-full border flex items-center justify-center mt-0.5 ${visibilityStatus === "visibleToAll"
+                    ? "bg-blue-500 border-blue-500 text-white"
+                    : "bg-white border-gray-300"
+                    }`}
+                >
+                  {visibilityStatus === "visibleToAll" && <Check size={16} />}
+                </button>
+                <label className="text-sm text-gray-700">
+                  I want my profile to be visible to all employers and recruiters.
+                </label>
+              </div>
+
+              {/* Option 2: Private */}
+              <div
+                className="flex items-start gap-3 cursor-pointer hover:bg-blue-50 p-2 rounded-md transition-all duration-200"
+                onClick={() => handleToggleVisibility("visibleToNone")}
+              >
+                <button
+                  type="button"
+                  className={`w-6 h-6 rounded-full border flex items-center justify-center mt-0.5 ${visibilityStatus === "visibleToNone"
+                    ? "bg-blue-500 border-blue-500 text-white"
+                    : "bg-white border-gray-300"
+                    }`}
+                >
+                  {visibilityStatus === "visibleToNone" && <Check size={16} />}
+                </button>
+                <label className="text-sm text-gray-700">
+                  I only want my profile to be visible to employers whose jobs I have applied for.
+                </label>
+              </div>
+            </div>
+
           </div>
         </CollapsibleSection>
       </div>

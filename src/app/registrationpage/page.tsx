@@ -113,19 +113,15 @@ function RegistrationComponent() {
   };
 
   // Send OTP to email
-  const sendEmailOtp = async () => {
-    console.log("🚀 Starting sendEmailOtp...");
-
+  const sendEmailOtp = async (): Promise<boolean> => {
     if (!formData.email) {
-      console.warn("❌ Missing email");
       alert("Please enter a valid email address");
-      return;
+      return false;
     }
 
     if (!formData.companyName) {
-      console.warn("❌ Missing companyName");
       alert("Please enter company name");
-      return;
+      return false;
     }
 
     setOtpLoading(true);
@@ -135,11 +131,9 @@ function RegistrationComponent() {
       company_name: formData.companyName,
     };
 
-    console.log("📦 Payload being sent:", payload);
-
     try {
       const response = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/otp_employer_signUp",
+        process.env.NEXT_PUBLIC_SEND_OTP_ENDPOINT || "",
         {
           method: "POST",
           headers: {
@@ -149,36 +143,24 @@ function RegistrationComponent() {
         }
       );
 
-      console.log("🔍 Raw response object:", response);
-      console.log("📡 Response status:", response.status, response.statusText);
-
-      const data = await response.json().catch((err) => {
-        console.error("❌ Failed to parse JSON:", err);
-        return null;
-      });
-
-      console.log("🧾 Parsed response data:", data);
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        console.error("❌ Server responded with error:", data);
-        throw new Error(data?.message || "Failed to send OTP");
+        const errorMessage = data?.message || `Server error: ${response.status}`;
+        throw new Error(errorMessage);
       }
 
-      if (data?.success || response.ok) {
-        console.log("✅ OTP sent successfully!", data);
-        setOtpSent(true);
-        alert(`OTP sent successfully to ${formData.email}`);
-      } else {
-        console.warn("⚠️ Unexpected success format:", data);
-        alert("Unexpected response, check console.");
-      }
+      setOtpSent(true);
+      setMessage(`OTP has been sent successfully to ${formData.email}`);
+      return true;
 
     } catch (err) {
-      console.error("🔥 Error while sending OTP:", err);
-      alert(err instanceof Error ? err.message : "Failed to send OTP");
+      console.error("Error sending OTP:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to send OTP. Please check your connection and try again.";
+      alert(errorMessage);
+      return false;
     } finally {
       setOtpLoading(false);
-      console.log("🏁 Finished sendEmailOtp()");
     }
   };
 
@@ -196,7 +178,7 @@ function RegistrationComponent() {
 
     try {
       const response = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/verify_otp_for_employerSignUp",
+        process.env.NEXT_PUBLIC_VERIFY_OTP_ENDPOINT || "",
         {
           method: "POST",
           headers: {
@@ -209,18 +191,20 @@ function RegistrationComponent() {
         }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data.message || "Invalid OTP");
+        const errorMessage = data?.message || "Invalid OTP. Please try again.";
+        throw new Error(errorMessage);
       }
 
       // OTP verified successfully, now submit the registration form
       await handleSubmit();
 
     } catch (err) {
-      console.error(err);
-      alert(err instanceof Error ? err.message : "OTP verification failed");
+      console.error("OTP verification error:", err);
+      const errorMessage = err instanceof Error ? err.message : "OTP verification failed. Please try again.";
+      alert(errorMessage);
       setLoading(false);
     }
   };
@@ -286,8 +270,19 @@ function RegistrationComponent() {
     }
 
     // All validations passed, send OTP
-    await sendEmailOtp();
-    setShowOtpModal(true);
+    const otpSent = await sendEmailOtp();
+
+    // Only open modal if OTP was sent successfully
+    if (otpSent) {
+      // Clear any previous OTP entries
+      setEmailOtp(new Array(6).fill(""));
+      setShowOtpModal(true);
+
+      // Clear success message after modal opens
+      setTimeout(() => {
+        setMessage("");
+      }, 3000);
+    }
   };
 
   // Submit form to backend
@@ -306,17 +301,18 @@ function RegistrationComponent() {
       }
 
       const response = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:5OnHwV4U/employerOnboarding",
+        process.env.NEXT_PUBLIC_XANO_REGISTRATION_ENDPOINT || "",
         {
           method: "POST",
           body: form,
         }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to submit form");
+        const errorMessage = data?.message || "Failed to complete registration. Please try again.";
+        throw new Error(errorMessage);
       }
 
       setMessage("Registration successful!");
@@ -327,8 +323,9 @@ function RegistrationComponent() {
       }, 1500);
 
     } catch (err) {
-      console.error(err);
-      alert(err instanceof Error ? err.message : "Something went wrong");
+      console.error("Registration error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Registration failed. Please contact support if the problem persists.";
+      alert(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -691,17 +688,17 @@ function RegistrationComponent() {
             <button
               type="button"
               onClick={handleRegisterClick}
-              disabled={!agreedToTerms || loading}
-              className={`w-fit py-3 px-5 rounded-md font-semibold text-white transition-colors ${agreedToTerms && !loading
-                ? "bg-blue-400 hover:bg-blue-400"
+              disabled={!agreedToTerms || loading || otpLoading}
+              className={`w-fit py-3 px-5 rounded-md font-semibold text-white transition-colors ${agreedToTerms && !loading && !otpLoading
+                ? "bg-blue-400 hover:bg-blue-500"
                 : "bg-gray-300 cursor-not-allowed"
                 }`}
             >
-              {loading ? "Processing..." : "Register"}
+              {otpLoading ? "Sending OTP..." : loading ? "Processing..." : "Register"}
             </button>
 
             {message && (
-              <p className="text-center text-sm text-green-600 font-medium">
+              <p className="text-center text-sm text-green-600 font-medium mt-2">
                 {message}
               </p>
             )}
@@ -758,7 +755,10 @@ function RegistrationComponent() {
             </button>
 
             <button
-              onClick={() => setShowOtpModal(false)}
+              onClick={() => {
+                setShowOtpModal(false);
+                setEmailOtp(new Array(6).fill(""));
+              }}
               disabled={loading}
               className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm disabled:opacity-50"
             >

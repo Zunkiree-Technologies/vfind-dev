@@ -1,4 +1,4 @@
-import { useState,  } from "react";
+import { useState, } from "react";
 import { FormDataType } from "../types/FormTypes";
 import rawPostcodeSuburbs from "./json/postcodeSuburbs.json";
 import { Check } from "lucide-react";
@@ -92,14 +92,14 @@ export function ContactPasswordStep({ formData, handleChange }: ContactPasswordS
   };
 
   return (
-    
+
     <>
-    <h2 className="text-xl font-semibold text-[#121224] mb-6">
+      <h2 className="text-xl font-semibold text-[#121224] mb-6">
         Personal & Contact Information
       </h2>
 
       <div className="grid grid-cols-2 gap-4">
-      {/* Name */}
+        {/* Name */}
         <div>
           <label htmlFor="fullName" className="block text-sm font-medium text-[#121224] mb-2">Name</label>
           <input
@@ -112,12 +112,17 @@ export function ContactPasswordStep({ formData, handleChange }: ContactPasswordS
               const value = e.target.value.trim();
               if (value.length === 0) {
                 setFullNameError("Full name is required");
-              } else if (!/^[a-zA-Z\s]+$/.test(value)) {
-                setFullNameError("Please enter letters only");
+              } else if (!/^[a-zA-Z\s\-']+$/.test(value)) {
+                setFullNameError("Please enter letters only (hyphens and apostrophes allowed)");
               } else if (value.length < 2) {
                 setFullNameError("Name must be at least 2 characters");
               } else {
-                setFullNameError("");
+                const nameParts = value.split(' ').filter(part => part.length > 0);
+                if (nameParts.length < 2) {
+                  setFullNameError("Please enter both first and last name");
+                } else {
+                  setFullNameError("");
+                }
               }
             }}
             className="w-full border border-gray-300 rounded-lg p-3 text-sm placeholder-gray-400"
@@ -203,9 +208,9 @@ export function ContactPasswordStep({ formData, handleChange }: ContactPasswordS
               {showPassword ? "Hide" : "Show"}
             </button>
           </div>
-          {formData.password && 
-          <p className={`text-sm mt-1 ${passwordStrength === "Weak" ? "text-red-600" : passwordStrength === "Medium" ? "text-yellow-600" : "text-green-600"}`}>
-           </p>}
+          {formData.password &&
+            <p className={`text-sm mt-1 ${passwordStrength === "Weak" ? "text-red-600" : passwordStrength === "Medium" ? "text-yellow-600" : "text-green-600"}`}>
+            </p>}
         </div>
 
         {/* Confirm Password */}
@@ -250,8 +255,65 @@ export function ContactPasswordStep({ formData, handleChange }: ContactPasswordS
 
       {selectedSuburb && <p className="mt-2 text-blue-400 font-semibold">Selected Location: {selectedSuburb}</p>}
 
-       {/* Terms */}
-     <div className="mt-6 flex items-center">
+      {/* Profile Visibility Checkbox */}
+      <div className="   p-5 mt-6 ">
+        <h2 className="text-xl font-semibold text-[#121224] mb-6">
+          Profile Visibility
+        </h2>
+        {/* Option 1 */}
+        <div className="flex items-start mb-4">
+          <button
+            type="button"
+            onClick={() =>
+              handleChange(
+                "visibilityStatus",
+                "visibleToAll"
+              )
+            }
+            className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 mt-0.5 ${formData.visibilityStatus === "visibleToAll"
+              ? "bg-blue-500 border-blue-500 text-white"
+              : "bg-white border-gray-400"
+              }`}
+          >
+            {formData.visibilityStatus === "visibleToAll" && <Check size={14} />}
+          </button>
+          <label
+            className="text-sm text-gray-700 cursor-pointer"
+            onClick={() => handleChange("visibilityStatus", "visibleToAll")}
+          >
+            I want my profile to be visible to all employers and recruiters.
+          </label>
+        </div>
+
+        {/* Option 2 */}
+        <div className="flex items-start">
+          <button
+            type="button"
+            onClick={() =>
+              handleChange(
+                "visibilityStatus",
+                "visibleToNone"
+              )
+            }
+            className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 mt-0.5 ${formData.visibilityStatus === "visibleToNone"
+              ? "bg-blue-500 border-blue-500 text-white"
+              : "bg-white border-gray-400"
+              }`}
+          >
+            {formData.visibilityStatus === "visibleToNone" && <Check size={14} />}
+          </button>
+          <label
+            className="text-sm text-gray-700 cursor-pointer"
+            onClick={() => handleChange("visibilityStatus", "visibleToNone")}
+          >
+            I only want my profile to be visible to employers whose jobs I have applied for.
+          </label>
+        </div>
+      </div>
+
+
+      {/* Terms */}
+      <div className="mt-6 flex items-center">
         <button
           type="button"
           onClick={() => handleChange("termsAccepted", !formData.termsAccepted)}

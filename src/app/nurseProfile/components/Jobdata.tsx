@@ -445,8 +445,8 @@ export default function JobData() {
 
                       <div
                         className={`mt-4 text-sm font-extralight w-fit flex items-center gap-1 ${job.expiryDate && new Date(job.expiryDate).setHours(23, 59, 59, 999) < new Date().getTime()
-                            ? "text-[#D9796C]"
-                            : "text-gray-600"
+                          ? "text-[#D9796C]"
+                          : "text-gray-600"
                           }`}
                       >
                         {job.expiryDate
@@ -473,9 +473,6 @@ export default function JobData() {
                           })()
                           : "Date not available"}
                       </div>
-
-
-
                     </div>
 
                     {/* CTA button */}

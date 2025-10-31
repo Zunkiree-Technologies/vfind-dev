@@ -26,6 +26,7 @@ export type FormDataType = {
     postcode: string;
     currentResidentialLocation?: string;
     termsAccepted: boolean;
+    visibilityStatus: string;
     photoIdFile: File | null;
 };
 

@@ -212,7 +212,7 @@ export default function JobApplicationPage() {
         // ✅ check expiry
         if (jobData.expiryDate) {
           const expiry = new Date(jobData.expiryDate);
-          expiry.setDate(expiry.getDate() + 1); 
+          expiry.setDate(expiry.getDate() + 1);
           const now = new Date();
           setIsExpired(expiry < now);
         }
@@ -457,19 +457,6 @@ export default function JobApplicationPage() {
                         <span className="font-medium text-gray-600">:</span>
                         <p className="text-gray-900">
                           {job.JobShift || "Not specified"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Job status */}
-                    <div className="flex justify-between items-center w-2/3">
-                      <span className="font-medium text-gray-600">
-                        Job Status
-                      </span>
-                      <div className="flex justify-start gap-10 items-center w-1/2">
-                        <span className="font-medium text-gray-600">:</span>
-                        <p className="text-gray-900">
-                          {job.status || "Not specified"}
                         </p>
                       </div>
                     </div>

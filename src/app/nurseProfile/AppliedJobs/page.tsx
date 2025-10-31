@@ -10,10 +10,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock1,
+  Ban,
 } from "lucide-react";
 import { Navbar } from "../components/Navbar";
 import Footer from "@/app/Admin/components/layout/Footer";
-import { JobFilters } from "@/app/nurseProfile/components/JobFilters"; 
+import { JobFilters } from "@/app/nurseProfile/components/JobFilters";
+import MainButton from "@/components/ui/MainButton";
 
 interface JobDetails {
   id: number;
@@ -33,6 +35,8 @@ interface JobDetails {
   keyResponsibilities?: string;
   workEnvironment?: string;
   status?: string;
+  expiryDate?: string;
+
 }
 
 interface AppliedJob {
@@ -93,11 +97,10 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          currentPage === 1
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
-        }`}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
+          }`}
       >
         <ChevronLeft size={16} />
         Previous
@@ -111,11 +114,10 @@ const Pagination: React.FC<PaginationProps> = ({
             ) : (
               <button
                 onClick={() => onPageChange(page as number)}
-                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${
-                  currentPage === page
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
+                  ? "bg-gray-900 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
               >
                 {page}
               </button>
@@ -127,11 +129,10 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          currentPage === totalPages
-            ? "text-gray-400 cursor-not-allowed"
-            : "text-gray-600 hover:bg-gray-100"
-        }`}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
+          }`}
       >
         Next
         <ChevronRight size={16} />
@@ -211,20 +212,20 @@ const AppliedJobs = () => {
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
     if (
-      statusLower.includes("pending") ||
-      statusLower.includes("review") ||
-      statusLower === "applied"
+      statusLower.includes("Pending") ||
+      statusLower.includes("Review") ||
+      statusLower === "Applied"
     ) {
-      return "bg-blue-400 text-white ";
+      return " border border-blue-400 ";
     }
     if (
       statusLower.includes("accepted") ||
       statusLower.includes("approved")
     ) {
-      return "bg-green-100 text-green-800 border-green-200";
+      return "bg-green-100 text-blue-400 border-blue-200";
     }
     if (statusLower.includes("rejected") || statusLower.includes("declined")) {
-      return "bg-red-100 text-red-800 border-red-200";
+      return "bg-red-100 text-blue-400 border-blue-200";
     }
     return "bg-gray-100 text-gray-800 border-gray-200";
   };
@@ -377,28 +378,26 @@ const AppliedJobs = () => {
 
                               {(jobDetails?.experienceMin ||
                                 jobDetails?.experienceMax) && (
-                                <div className="flex items-center gap-1">
-                                  <Calendar size={16} />
-                                  <span>
-                                    {jobDetails.experienceMin
-                                      ? `${jobDetails.experienceMin}${
-                                          jobDetails.experienceMax
-                                            ? ` - ${jobDetails.experienceMax}`
-                                            : ""
+                                  <div className="flex items-center gap-1">
+                                    <Calendar size={16} />
+                                    <span>
+                                      {jobDetails.experienceMin
+                                        ? `${jobDetails.experienceMin}${jobDetails.experienceMax
+                                          ? ` - ${jobDetails.experienceMax}`
+                                          : ""
                                         } years`
-                                      : "Not specified"}
-                                  </span>
-                                </div>
-                              )}
+                                        : "Not specified"}
+                                    </span>
+                                  </div>
+                                )}
 
                               {(jobDetails?.minPay || jobDetails?.maxPay) && (
                                 <div className="flex items-center gap-1">
                                   <DollarSign size={16} />
                                   <span>
                                     {jobDetails.minPay || jobDetails.maxPay
-                                      ? `${jobDetails.minPay || "0"} - ${
-                                          jobDetails.maxPay || "0"
-                                        }/hr`
+                                      ? `${jobDetails.minPay || "0"} - ${jobDetails.maxPay || "0"
+                                      }/hr`
                                       : "Not specified"}
                                   </span>
                                 </div>
@@ -414,21 +413,52 @@ const AppliedJobs = () => {
                               <div className="flex items-center gap-1">
                                 <Clock1 size={16} />
                                 <span>
-                                  Applied {formatDate(job.applied_date)}
+                                  Applied at {formatDate(job.applied_date)}
                                 </span>
                               </div>
+                              <div
+                                className={`mt-4 text-sm font-extralight w-fit flex items-center gap-1 ${jobDetails?.expiryDate && new Date(jobDetails.expiryDate).setHours(23, 59, 59, 999) < new Date().getTime()
+                                  ? "text-[#D9796C]"
+                                  : "text-gray-600"
+                                  }`}
+                              >
+                                {jobDetails?.expiryDate
+                                  ? (() => {
+                                    const today = new Date();
+                                    const expiry = new Date(jobDetails.expiryDate);
+                                    expiry.setHours(23, 59, 59, 999);
+                                    const diffTime = expiry.getTime() - today.getTime();
+                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                    if (diffDays > 0) {
+                                      return `Apply Before: ${diffDays} day${diffDays > 1 ? "s" : ""} from now`;
+                                    } else {
+                                      return (
+                                        <>
+                                          <Ban size={16} />
+                                          Job Expired
+                                        </>
+                                      );
+                                    }
+                                  })()
+                                  : "Date not available"}
+                              </div>
+
+
                             </div>
+
                           </div>
 
                           <div className="flex items-center gap-4 ml-6">
-                            <span
-                              className={`px-4 py-2 rounded-md text-sm font-medium border ${getStatusColor(
+                            <MainButton
+                              className={`px-4 py-2 rounded-md text-sm font-medium  ${getStatusColor(
                                 job.status
                               )}`}
                             >
-                              {job.status}
-                            </span>
+                              {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                            </MainButton>
                           </div>
+
                         </a>
                       );
                     })}

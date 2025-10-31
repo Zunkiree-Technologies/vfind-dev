@@ -50,6 +50,7 @@ export default function NurseSignup() {
         postcode: "",
         currentResidentialLocation: "",
         termsAccepted: false,
+        visibilityStatus: "visibleToAll",
         photoIdFile: null,
     });
 

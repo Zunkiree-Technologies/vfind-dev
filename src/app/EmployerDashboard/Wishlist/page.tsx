@@ -486,7 +486,7 @@ export default function WishlistNurses() {
             {currentNurses.length === 0 ? (
               <p className="text-gray-500 text-center py-10">No nurses found matching your filters.</p>
             ) : (
-              currentNurses.map((nurse) => (
+              currentNurses.map ((nurse) => (
                 <div
                   key={nurse.id}
                   className="flex justify-between items-center bg-white max-w-[983px] rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2"

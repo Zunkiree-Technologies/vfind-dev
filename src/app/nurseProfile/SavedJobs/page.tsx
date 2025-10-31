@@ -9,12 +9,14 @@ import {
   Clock1,
   ChevronLeft,
   ChevronRight,
+  Ban,
 } from "lucide-react";
 import Loader from "../../../../components/loading";
 import Link from "next/link";
 import { Navbar } from "../components/Navbar";
 import Footer from "@/app/Admin/components/layout/Footer";
 import { JobFilters } from "../components/JobFilters";
+import MainButton from "@/components/ui/MainButton";
 
 const EXPERIENCE_RANGES: Record<string, [number, number]> = {
   "Fresher": [0, 0.5],
@@ -57,6 +59,8 @@ interface Job {
   roleCategory?: string;
   shift?: string;
   created_at?: string;
+  expiryDate?: string;
+
 }
 
 interface PaginationProps {
@@ -158,6 +162,7 @@ export default function SavedJobs() {
   const endIndex = startIndex + itemsPerPage;
   const currentJobs = filteredJobs.slice(startIndex, endIndex);
 
+
   const fetchSavedJobs = useCallback(async () => {
     try {
       setLoading(true);
@@ -173,6 +178,7 @@ export default function SavedJobs() {
       if (!res.ok) throw new Error("Failed to fetch saved jobs");
 
       const data = await res.json();
+      console.log(data)
       console.log("Saved Jobs API Response:", data);
 
       // Correctly extract the array from the response
@@ -376,84 +382,128 @@ export default function SavedJobs() {
             {/* Job Cards */}
             <div className="flex-1 max-w-[983px]">
               <div className="grid grid-cols-1 gap-4">
-                {currentJobs.map((job) => (
-                  <div
-                    key={job.id}
-                    className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-lg p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2 gap-4"
-                  >
-                    <div className="flex-1 w-full">
-                      <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
-                        {job.title}
-                      </h2>
-                      <p className="text-gray-600 text-sm mb-3 font-medium">
-                        {getCompanyName(job)}
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 text-gray-600 text-sm">
-                        <div className="flex items-center gap-1">
-                          <MapPin size={16} className="flex-shrink-0" />
-                          <span className="truncate">
-                            {job.location || "Location not specified"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock size={16} className="flex-shrink-0" />
-                          <span>{job.type || "Not specified"}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar size={16} className="flex-shrink-0" />
-                          <span>
-                            {job.experienceMin
-                              ? `${job.experienceMin}${job.experienceMax
-                                ? ` - ${job.experienceMax}`
-                                : ""
-                              } years`
-                              : "Not specified"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <DollarSign size={16} className="flex-shrink-0" />
-                          <span>
-                            {job.minPay || job.maxPay
-                              ? `${job.minPay || "0"} - ${job.maxPay || "0"}/hr`
-                              : "Not specified"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Briefcase size={16} className="flex-shrink-0" />
-                          <span>{job.roleCategory || "General"}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock1 size={16} className="flex-shrink-0" />
-                          <span>
-                            {job.created_at
-                              ? new Date(job.created_at).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
+
+
+                {currentJobs.map((job) => {
+                  const isExpired = job.expiryDate && new Date(job.expiryDate) < new Date();
+
+                  return (
+                    <div
+                      key={job.id}
+                      className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-lg p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2 gap-4"
+                    >
+                      <div className="flex-1 w-full">
+                        <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
+                          {job.title}
+                        </h2>
+                        <p className="text-gray-600 text-sm mb-3 font-medium">
+                          {getCompanyName(job)}
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 text-gray-600 text-sm">
+                          <div className="flex items-center gap-1">
+                            <MapPin size={16} className="flex-shrink-0" />
+                            <span className="truncate">
+                              {job.location || "Location not specified"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={16} className="flex-shrink-0" />
+                            <span>{job.type || "Not specified"}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar size={16} className="flex-shrink-0" />
+                            <span>
+                              {job.experienceMin
+                                ? `${job.experienceMin}${job.experienceMax
+                                  ? ` - ${job.experienceMax}`
+                                  : ""
+                                } years`
+                                : "Not specified"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <DollarSign size={16} className="flex-shrink-0" />
+                            <span>
+                              {job.minPay || job.maxPay
+                                ? `${job.minPay || "0"} - ${job.maxPay || "0"}/hr`
+                                : "Not specified"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Briefcase size={16} className="flex-shrink-0" />
+                            <span>{job.roleCategory || "General"}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock1 size={16} className="flex-shrink-0" />
+                            <span>
+                              {job.expiryDate
+                                ? new Date(job.expiryDate).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  }
+                                )
+                                : "Date not available"}
+                            </span>
+                          </div>
+                          <div
+                            className={` text-sm font-extralight w-fit flex items-center gap-1 ${job.expiryDate && new Date(job.expiryDate).setHours(23, 59, 59, 999) < new Date().getTime()
+                              ? "text-[#D9796C]"
+                              : "text-gray-600"
+                              }`}
+                          >
+                            {job.expiryDate
+                              ? (() => {
+                                const today = new Date();
+                                const expiry = new Date(job.expiryDate);
+
+                                // Set expiry to end of the day
+                                expiry.setHours(23, 59, 59, 999);
+
+                                const diffTime = expiry.getTime() - today.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                if (diffDays > 0) {
+                                  return `Apply Before: ${diffDays} day${diffDays > 1 ? "s" : ""} from now`;
+                                } else {
+                                  return (
+                                    <>
+                                      <Ban size={16} />
+                                      Job Expired
+                                    </>
+                                  );
                                 }
-                              )
+                              })()
                               : "Date not available"}
-                          </span>
+                          </div>
                         </div>
                       </div>
+                      <div className="flex items-center w-full md:w-auto md:ml-6">
+                        <MainButton
+                          href={`/nurseProfile/jobapplicationpage/${job.id}?company=${encodeURIComponent(
+                            getCompanyName(job)
+                          )}&expired=${isExpired}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`px-4 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${isExpired ? "cursor-not-allowed" : ""
+                            }`}
+                        >
+
+                          <span className="flex items-center gap-2">
+                            {" "}
+                            <span className="transition-all duration-300 group-hover:-translate-x-1">
+                              {" "}
+                              View Details{" "}
+
+                            </span>{" "}
+                          </span>
+                        </MainButton>
+                      </div>
                     </div>
-                    <div className="flex items-center w-full md:w-auto md:ml-6">
-                      <Link
-                        href={{
-                          pathname: `/nurseProfile/jobapplicationpage/${job.id}`,
-                          query: { company: getCompanyName(job) },
-                        }}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full md:w-auto text-center px-4 py-2 bg-[#61A6FA] text-white text-sm font-medium rounded-[10px] hover:bg-blue-500 transition-all duration-200"
-                      >
-                        View Details
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {totalPages > 1 && (

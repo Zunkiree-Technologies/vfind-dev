@@ -374,12 +374,12 @@ export default function EmployerDashboard() {
                     <p className="text-gray-600 mt-1 text-sm">
                       Provide your company details to make your job postings stand out.
                     </p>
-                    <button
+                    <MainButton
                       onClick={() => setCompanyProfileStep("editing")}
-                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm transition"
+                      className="mt-4 "
                     >
                       Complete Profile
-                    </button>
+                    </MainButton>
                   </>
                 )}
 
@@ -397,23 +397,21 @@ export default function EmployerDashboard() {
                 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
                     />
                     <div className="flex flex-wrap gap-2 mt-4">
-                      <button
+                      <MainButton
                         onClick={handleSaveCompanyProfile}
                         disabled={saveLoading}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm transition disabled:opacity-50"
                       >
                         {saveLoading ? "Saving..." : "Save & Continue"}
-                      </button>
+                      </MainButton>
                       {isEditingExisting && (
-                        <button
+                        <MainButton
                           onClick={() => {
                             setCompanyProfileStep("completed");
                             setIsEditingExisting(false);
                           }}
-                          className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm transition"
                         >
                           Cancel
-                        </button>
+                        </MainButton>
                       )}
                     </div>
                   </>
@@ -435,7 +433,7 @@ export default function EmployerDashboard() {
                       {companyDescription.length > 150 && (
                         <button
                           onClick={() => setShowFullDescription(!showFullDescription)}
-                          className="mt-2 text-blue-500 hover:text-blue-600 text-sm font-medium"
+                          className="mt-2 text-blue-400  text-sm font-medium"
                         >
                           {showFullDescription ? "Show Less" : "Show More"}
                         </button>
