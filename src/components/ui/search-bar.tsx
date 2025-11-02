@@ -22,7 +22,7 @@ export const SearchBar = () => {
   };
 
   return (
-    <div className="bg-white rounded-full px-4 py-3 flex items-center gap-3 max-w-4xl mx-auto shadow-md">
+    <div className="bg-white rounded-2xl md:rounded-full px-4 py-4 md:py-3 flex flex-col md:flex-row items-stretch md:items-center gap-3 max-w-4xl mx-auto shadow-md">
       {/* Job Title */}
       <div className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md flex-1 bg-white">
         <Briefcase className="text-gray-400 h-4 w-4" />
@@ -31,7 +31,7 @@ export const SearchBar = () => {
           placeholder="Job Title"
           value={jobTitle}
           onChange={(e) => setJobTitle(e.target.value)}
-          className="w-full text-sm bg-transparent outline-none placeholder-gray-400"
+          className="w-full text-sm bg-transparent outline-none text-black"
         />
       </div>
 
@@ -73,9 +73,10 @@ export const SearchBar = () => {
       {/* Search Button */}
       <button
         onClick={handleSearch}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-[#61A6FA] text-white hover:bg-[#477fff] transition"
+        className="flex items-center justify-center w-full md:w-10 h-10 rounded-md md:rounded-full bg-[#61A6FA] text-white hover:bg-[#477fff] transition font-medium"
       >
-        <Search className="h-4 w-4" />
+        <span className="md:hidden">Search Jobs</span>
+        <Search className="h-4 w-4 hidden md:block" />
       </button>
     </div>
   );

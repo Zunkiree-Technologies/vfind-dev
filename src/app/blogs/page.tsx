@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, Calendar, ArrowRight, Home, ChevronRight } from 'lucide-react';
+import { Search, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../../../components/navbar';
+import Footer from '../../../components/footer-section';
 import Image from 'next/image';
+import React from 'react';
 
 interface DevToArticle {
     id: number;
@@ -28,12 +30,112 @@ interface DevToArticle {
     public_reactions_count: number;
 }
 
+interface PaginationProps {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+}
+
+// Pagination Component
+const Pagination: React.FC<PaginationProps> = ({
+    currentPage,
+    totalPages,
+    onPageChange,
+}) => {
+    const getVisiblePages = () => {
+        const delta = 2;
+        const range: (number | string)[] = [];
+        const rangeWithDots: (number | string)[] = [];
+
+        for (
+            let i = Math.max(2, currentPage - delta);
+            i <= Math.min(totalPages - 1, currentPage + delta);
+            i++
+        ) {
+            range.push(i);
+        }
+
+        if (currentPage - delta > 2) {
+            rangeWithDots.push(1, "...");
+        } else {
+            rangeWithDots.push(1);
+        }
+
+        rangeWithDots.push(...range);
+
+        if (currentPage + delta < totalPages - 1) {
+            rangeWithDots.push("...", totalPages);
+        } else if (totalPages > 1) {
+            rangeWithDots.push(totalPages);
+        }
+
+        return rangeWithDots;
+    };
+
+    if (totalPages <= 1) return null;
+
+    return (
+        <div className="flex items-center justify-center gap-2 mt-8 mb-6">
+            {/* Previous Button */}
+            <button
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    currentPage === 1
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "text-gray-600 hover:bg-gray-100"
+                }`}
+            >
+                <ChevronLeft size={16} />
+                Previous
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex items-center gap-1">
+                {getVisiblePages().map((page, index) => (
+                    <React.Fragment key={index}>
+                        {page === "..." ? (
+                            <span className="px-3 py-2 text-gray-400">...</span>
+                        ) : (
+                            <button
+                                onClick={() => onPageChange(page as number)}
+                                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${
+                                    currentPage === page
+                                        ? "bg-gray-900 text-white"
+                                        : "text-gray-600 hover:bg-gray-100"
+                                }`}
+                            >
+                                {page}
+                            </button>
+                        )}
+                    </React.Fragment>
+                ))}
+            </div>
+
+            {/* Next Button */}
+            <button
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    currentPage === totalPages
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "text-gray-600 hover:bg-gray-100"
+                }`}
+            >
+                Next
+                <ChevronRight size={16} />
+            </button>
+        </div>
+    );
+};
+
 export default function Blogs() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('all');
     const [articles, setArticles] = useState<DevToArticle[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const articlesPerPage = 6;
     const router = useRouter();
 
     // Fetch articles from Dev.to API
@@ -42,11 +144,11 @@ export default function Blogs() {
             try {
                 setLoading(true);
                 const response = await fetch('https://dev.to/api/articles?per_page=20&top=7');
-                
+
                 if (!response.ok) {
                     throw new Error('Failed to fetch articles');
                 }
-                
+
                 const data: DevToArticle[] = await response.json();
                 setArticles(data);
                 setError(null);
@@ -61,15 +163,21 @@ export default function Blogs() {
         fetchArticles();
     }, []);
 
-    // Get unique categories from articles
-    const categories = ['all', ...Array.from(new Set(articles.flatMap(article => article.tag_list.slice(0, 1))))];
-
+    // Filter articles based on search
     const filteredArticles = articles.filter(article => {
         const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             article.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategory === 'all' || article.tag_list.includes(selectedCategory);
-        return matchesSearch && matchesCategory;
+        return matchesSearch;
     });
+
+    // Get unique authors count
+    const uniqueAuthors = new Set(articles.map(article => article.user.username));
+
+    // Pagination logic
+    const indexOfLastArticle = currentPage * articlesPerPage;
+    const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
+    const currentArticles = filteredArticles.slice(indexOfFirstArticle, indexOfLastArticle);
+    const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
 
     const handleBlogClick = (id: number) => {
         // Navigate to your [id] page
@@ -78,15 +186,16 @@ export default function Blogs() {
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
         });
     };
 
-    const getMainCategory = (tagList: string[]) => {
-        return tagList[0] || 'General';
+    const handlePageChange = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     if (loading) {
@@ -127,62 +236,31 @@ export default function Blogs() {
             {/* Navbar */}
             <Navbar />
 
-            {/* Hero Section */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-100 py-16">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">EXPLORE OUR BLOGS</h1>
-                </div>
-            </div>
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Breadcrumb */}
-                <div className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
-                    <Home className="w-4 h-4" />
-                    <span>Home</span>
-                    <ChevronRight className="w-4 h-4" />
-                    <span className="text-blue-600 font-medium">Blog</span>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                {/* Header */}
+                <div className="mb-12">
+                    <h1 className="text-3xl font-bold text-blue-400">VFind Insights: Career, Hiring & Growth</h1>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Main Content */}
                     <div className="lg:col-span-3">
-                        {/* Blog Header */}
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">Blog</h2>
-
-                            {/* Category Filter */}
-                            <div className="flex flex-wrap gap-2 mb-6">
-                                {categories.slice(0, 10).map(category => (
-                                    <button
-                                        key={category}
-                                        onClick={() => setSelectedCategory(category)}
-                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === category
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                                        }`}
-                                    >
-                                        {category === 'all' ? 'All Categories' : category}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Blog Cards Grid */}
-                        <div className="grid grid-cols-1 gap-6">
-                            {filteredArticles.map(article => (
+                        {/* Blog Cards */}
+                        <div className="space-y-6 mb-8">
+                            {currentArticles.map(article => (
                                 <div
                                     key={article.id}
                                     onClick={() => handleBlogClick(article.id)}
-                                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
+                                    className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                                 >
                                     <div className="flex">
-                                        <div className="relative flex-shrink-0 w-48 h-32">
+                                        {/* Thumbnail */}
+                                        <div className="relative flex-shrink-0 w-48 h-40">
                                             <Image
-                                            height={50}
-                                            width={50}
                                                 src={article.cover_image || '/api/placeholder/300/200'}
                                                 alt={article.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                fill
+                                                className="object-cover"
                                                 onError={(e) => {
                                                     const target = e.target as HTMLImageElement;
                                                     target.src = '/api/placeholder/300/200';
@@ -190,65 +268,49 @@ export default function Blogs() {
                                             />
                                         </div>
 
-                                        <div className="flex-1 p-4 flex flex-col justify-between">
-                                            <div>
-                                                <div className="flex gap-2 items-center text-sm text-gray-500 mb-2">
-                                                    <Calendar className="w-4 h-4 mr-1" />
-                                                    {formatDate(article.published_at)}
-                                                    <div className="">
-                                                        <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                                                            {getMainCategory(article.tag_list)}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1 ml-auto">
-                                                        <span className="text-xs text-gray-400">
-                                                            {article.reading_time_minutes} min read
-                                                        </span>
-                                                        <span className="text-xs text-gray-400">
-                                                            • {article.public_reactions_count} reactions
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                        {/* Content */}
+                                        <div className="flex-1 p-6">
+                                            <h2 className="text-xl font-semibold text-gray-900 mb-3 hover:text-blue-600 transition-colors">
+                                                {article.title}
+                                            </h2>
 
-                                                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
-                                                    {article.title}
-                                                </h3>
-
-                                                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                                                    {article.description}
-                                                </p>
-
-                                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                    <Image
-                                                     height={50}
-                                            width={50}
-                                                        src={article.user.profile_image}
-                                                        alt={article.user.name}
-                                                        className="w-5 h-5 rounded-full"
-                                                    />
-                                                    <span>by {article.user.name}</span>
-                                                    {article.organization && (
-                                                        <>
-                                                            <span>•</span>
-                                                            <span>{article.organization.name}</span>
-                                                        </>
-                                                    )}
-                                                </div>
+                                            <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
+                                                <span>{formatDate(article.published_at)}</span>
+                                                <span className="flex items-center gap-1">
+                                                    <User className="w-4 h-4" />
+                                                    {article.user.name}
+                                                </span>
+                                                <span>|</span>
+                                                <span>{article.reading_time_minutes} min read</span>
+                                                <span>|</span>
+                                                <span>{article.public_reactions_count} reactions</span>
                                             </div>
 
-                                            <div className="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700 mt-2">
-                                                Learn More
-                                                <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                                            </div>
+                                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                                                {article.description}
+                                            </p>
+
+                                            <button className="text-blue-400 text-sm font-medium ">
+                                                Read more...
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                            />
+                        )}
+
                         {filteredArticles.length === 0 && !loading && (
                             <div className="text-center py-12">
-                                <p className="text-gray-500 text-lg">No blog posts found matching your criteria.</p>
+                                <p className="text-gray-500 text-lg">No blog posts found matching your search.</p>
                             </div>
                         )}
                     </div>
@@ -257,58 +319,33 @@ export default function Blogs() {
                     <div className="lg:col-span-1">
                         <div className="space-y-6">
                             {/* Search */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Search</h3>
+                            <div className="bg-white rounded-lg border border-gray-200 p-6">
                                 <div className="relative">
                                     <input
                                         type="text"
-                                        placeholder="Search for blog..."
+                                        placeholder="Search blogs here"
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        onChange={(e) => {
+                                            setSearchTerm(e.target.value);
+                                            setCurrentPage(1); // Reset to first page on search
+                                        }}
+                                        className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                     />
-                                    <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                                    <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
                                 </div>
                             </div>
 
-                            {/* Career Tips */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Career Tips</h3>
-                                <p className="text-gray-600 text-sm mb-4">
-                                    Your career is a significant part of your life, and were here to provide guidance and support every step of the way.
-                                </p>
-                                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium border border-blue-600 hover:border-blue-700 px-4 py-2 rounded-lg transition-colors">
-                                    Read Career Tips
-                                </button>
-                            </div>
-
-                            {/* Browse by Categories */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Browse by Categories</h3>
-                                <div className="space-y-2">
-                                    {categories.slice(1, 11).map(category => (
-                                        <button
-                                            key={category}
-                                            onClick={() => setSelectedCategory(category)}
-                                            className="block w-full text-left text-sm text-gray-600 hover:text-blue-600 transition-colors py-1"
-                                        >
-                                            {category}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Stats */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
+                            {/* Blog Stats */}
+                            <div className="bg-white rounded-lg border border-gray-200 p-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Blog Stats</h3>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Total Articles:</span>
-                                        <span className="font-medium">{articles.length}</span>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600 text-sm">Total Articles:</span>
+                                        <span className="font-semibold text-gray-900">{articles.length}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-600">Categories:</span>
-                                        <span className="font-medium">{categories.length - 1}</span>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600 text-sm">Authors:</span>
+                                        <span className="font-semibold text-gray-900">{uniqueAuthors.size}</span>
                                     </div>
                                 </div>
                             </div>
@@ -316,6 +353,9 @@ export default function Blogs() {
                     </div>
                 </div>
             </div>
+
+            {/* Footer */}
+            <Footer />
         </div>
     );
 }

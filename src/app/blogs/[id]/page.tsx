@@ -224,10 +224,7 @@ export default function BlogDetail() {
                         {article.title}
                     </h1>
 
-                    {/* Description */}
-                    <p className="text-xl text-gray-600 mb-6">
-                        {article.description}
-                    </p>
+                 
 
                     {/* Meta Information */}
                     <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 mb-6">
@@ -270,7 +267,7 @@ export default function BlogDetail() {
                     <div className="flex items-center gap-4 mb-8">
                         <button
                             onClick={handleShare}
-                            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            className="flex items-center px-4 py-2 bg-blue-400 text-white rounded-lg  transition-colors"
                         >
                             <Share2 className="w-4 h-4 mr-2" />
                             Share
@@ -300,23 +297,6 @@ export default function BlogDetail() {
                     />
                 </article>
 
-                {/* Author Info */}
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                    <div className="flex items-start space-x-4">
-                        <Image
-                            width={90}
-                            height={90}
-                            src={article.user.profile_image}
-                            alt={article.user.name}
-                            className="w-16 h-16 rounded-full"
-                        />
-                        <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900">{article.user.name}</h3>
-                            <p className="text-gray-600 mb-2">@{article.user.username}</p>
-                            
-                        </div>
-                    </div>
-                </div>
 
                 {/* Related Articles */}
                 {relatedArticles.length > 0 && (

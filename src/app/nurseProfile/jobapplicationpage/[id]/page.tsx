@@ -371,7 +371,7 @@ export default function JobApplicationPage() {
                         }`}
                       title={isSaved ? "Remove from saved jobs" : "Save job"}
                     >
-                      {isSaved ? "Unsave Job" : "Save for later"}
+                      {isSaved ? "Unsave Job" : "Save Job"}
                     </button>
                   )}
 

@@ -63,6 +63,9 @@ export default function EmployerNotificationSidebar({ }: NotificationSidebarProp
       const hiddenIds: number[] = JSON.parse(localStorage.getItem(getStorageKey()) || "[]");
       data = data.filter((n) => !hiddenIds.includes(n.id));
 
+      // Filter out pending notifications - only show accepted and rejected
+      data = data.filter((n) => n.status === "accepted" || n.status === "rejected");
+
       // Sort newest first
       data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
@@ -159,10 +162,9 @@ export default function EmployerNotificationSidebar({ }: NotificationSidebarProp
           ) : (
             notifications.map((note) => (
               <div
-                      onClick={() => router.push(`/EmployerDashboard/status`)}
-
+                onClick={() => router.push(`/EmployerDashboard/Candidatelist/${note.nurse_profiles_id}`)}
                 key={note.id}
-                className="flex items-center justify-between p-4 rounded-xl border border-gray-200 hover:shadow-lg transition bg-gray-50"
+                className="flex items-center justify-between p-4 rounded-xl border border-gray-200 hover:shadow-lg transition bg-gray-50 cursor-pointer"
               >
                 {/* Left Icon */}
                 <div className="flex-shrink-0">
@@ -173,7 +175,7 @@ export default function EmployerNotificationSidebar({ }: NotificationSidebarProp
 
                 {/* Middle message */}
                 <p
-                  className={`flex-1 mx-4 text-sm ${note.status === "accepted"
+                  className={`flex-1 mx-4 text-sm hover:underline ${note.status === "accepted"
                     ? "text-green-700"
                     : note.status === "rejected"
                       ? "text-red-700"
@@ -190,7 +192,10 @@ export default function EmployerNotificationSidebar({ }: NotificationSidebarProp
 
                 {/* Right X button */}
                 <button
-                  onClick={() => handleDelete(note.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(note.id);
+                  }}
                   className="text-gray-400 hover:text-red-500 transition flex-shrink-0"
                 >
                   <X className="w-5 h-5" />

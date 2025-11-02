@@ -381,7 +381,7 @@ export default function NurseProfilePage() {
       }
 
       console.log("✅ Visibility status updated to:", newStatus);
-      alert(`Profile visibility updated to: ${newStatus === "visibleToAll" ? "Visible to All" : "Private"}`);
+      // alert(`Profile visibility updated to: ${newStatus === "visibleToAll" ? "Visible to All" : "Private"}`);
     } catch (err: any) {
       console.error("❌ Toggle Visibility Error:", err);
       alert(err.message || "Error updating visibility status");
@@ -440,7 +440,7 @@ export default function NurseProfilePage() {
       setProfile(updatedData);
       setEditedBasicInfo({});
       setIsEditingBasicInfo(false);
-      alert("Basic information updated successfully!");
+      // alert("Basic information updated successfully!");
     } catch (err: any) {
       console.error("❌ Save Error:", err);
       alert(err.message || "Failed to update profile");
@@ -506,7 +506,7 @@ export default function NurseProfilePage() {
       setProfile(updatedData);
       setEditedVisaInfo({});
       setIsEditingVisaResidency(false);
-      alert("Visa & Residency information updated successfully!");
+      // alert("Visa & Residency information updated successfully!");
     } catch (err: any) {
       console.error("❌ Save Error:", err);
       alert(err.message || "Failed to update profile");
@@ -572,7 +572,7 @@ export default function NurseProfilePage() {
       setProfile(updatedData);
       setEditedAhpraInfo({});
       setIsEditingAhpraReg(false);
-      alert("AHPRA registration updated successfully!");
+      // alert("AHPRA registration updated successfully!");
     } catch (err: any) {
       console.error("❌ Save Error:", err);
       alert(err.message || "Failed to update AHPRA registration");
@@ -638,7 +638,7 @@ export default function NurseProfilePage() {
       setProfile(updatedData);
       setEditedCertInfo({});
       setIsEditingCertifications(false);
-      alert("Certifications updated successfully!");
+      // alert("Certifications updated successfully!");
     } catch (err: any) {
       console.error("❌ Save Error:", err);
       alert(err.message || "Failed to update certifications");
@@ -704,7 +704,7 @@ export default function NurseProfilePage() {
       setProfile(updatedData);
       setEditedWorkPrefInfo({});
       setIsEditingWorkPreferences(false);
-      alert("Work preferences updated successfully!");
+      // alert("Work preferences updated successfully!");
     } catch (err: any) {
       console.error("❌ Save Error:", err);
       alert(err.message || "Failed to update work preferences");
@@ -829,7 +829,7 @@ export default function NurseProfilePage() {
       setEducationList((prev) =>
         prev.filter((edu) => edu.degree_name !== degree_name)
       );
-      alert(`Education "${degree_name}" deleted successfully!`);
+      // alert(`Education "${degree_name}" deleted successfully!`);
     } catch (err: any) {
       console.error("❌ Delete Education Error:", err);
       alert(err.message || "Failed to delete education");
@@ -949,7 +949,7 @@ export default function NurseProfilePage() {
       // Refresh data from server instead of manual filtering
       await fetchWorkExperiences();
 
-      alert(`Work Experience "${experience.role_title}" deleted successfully!`);
+      // alert(`Work Experience "${experience.role_title}" deleted successfully!`);
     } catch (err: any) {
       console.error("❌ Delete Work Experience Error:", err);
       alert(err.message || "Failed to delete work experience");
@@ -1196,6 +1196,26 @@ export default function NurseProfilePage() {
                   </select>
                 ) : (
                   <p className="text-gray-900">{profile.willingToRelocate}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Experience
+                </label>
+                {isEditingBasicInfo ? (
+                  <input
+                    type="text"
+                    value={editedBasicInfo.experience ?? profile.experience}
+                    onChange={(e) =>
+                      handleBasicInfoChange("experience", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                ) : (
+                  <p className="text-gray-900">
+                    {profile.experience || "Not specified"}
+                  </p>
                 )}
               </div>
             </div>
@@ -1589,7 +1609,7 @@ export default function NurseProfilePage() {
                                     await handleAddEducation(edu);
                                   }
                                   setIsEditingEducation(null);
-                                  alert("Education saved successfully!");
+                                  // alert("Education saved successfully!");
                                 } catch (err) {
                                   console.error("Save failed:", err);
                                 }
@@ -1808,7 +1828,7 @@ export default function NurseProfilePage() {
                                   }
                                   await fetchWorkExperiences(); // Refresh list
                                   setIsEditingWorkExperience(null);
-                                  alert("Work experience saved successfully!");
+                                  // alert("Work experience saved successfully!");
                                 } catch (err) {
                                   console.error("Save failed:", err);
                                 }

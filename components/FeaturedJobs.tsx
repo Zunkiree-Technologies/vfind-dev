@@ -48,10 +48,10 @@ export default function FeaturedJobs() {
 
   return (
     <section
-      className="min-h-fit flex items-center justify-center px-6 py-12 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
+      className="py-16 md:py-20 flex items-center justify-center bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
       id="Featurejobs"
     >
-      <div className="max-w-7xl w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Header */}
         <div className="text-center mb-12 flex justify-center items-center flex-col">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold  font-bold text-gray-900 mb-4">

@@ -1,9 +1,9 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { User, Clock, CheckCircle, XCircle } from "lucide-react";
+import { User, Clock, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "../components/Navbar";
 import Footer from "@/app/Admin/components/layout/Footer";
 
@@ -22,6 +22,103 @@ interface ConnectionRequest {
   };
 }
 
+// Pagination props typing
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+// Pagination Component
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range: (number | string)[] = [];
+    const rangeWithDots: (number | string)[] = [];
+
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, "...");
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push("...", totalPages);
+    } else if (totalPages > 1) {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="flex items-center justify-center gap-2 mt-8 mb-6">
+      {/* Previous Button */}
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === 1
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
+          }`}
+      >
+        <ChevronLeft size={16} />
+        Previous
+      </button>
+
+      {/* Page Numbers */}
+      <div className="flex items-center gap-1">
+        {getVisiblePages().map((page, index) => (
+          <React.Fragment key={index}>
+            {page === "..." ? (
+              <span className="px-3 py-2 text-gray-400">...</span>
+            ) : (
+              <button
+                onClick={() => onPageChange(page as number)}
+                className={`w-10 h-10 rounded-full text-sm font-medium transition-all duration-200 ${currentPage === page
+                  ? "bg-gray-900 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
+              >
+                {page}
+              </button>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Next Button */}
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${currentPage === totalPages
+          ? "text-gray-400 cursor-not-allowed"
+          : "text-gray-600 hover:bg-gray-100"
+          }`}
+      >
+        Next
+        <ChevronRight size={16} />
+      </button>
+    </div>
+  );
+};
+
 function NurseStatusContent() {
   const router = useRouter();
   const [requests, setRequests] = useState<ConnectionRequest[]>([]);
@@ -32,6 +129,10 @@ function NurseStatusContent() {
   >("all");
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [messageType, setMessageType] = useState<"success" | "error">("success");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const fetchRequests = useCallback(async () => {
     const token = localStorage.getItem("token");
@@ -58,6 +159,11 @@ function NurseStatusContent() {
   useEffect(() => {
     fetchRequests();
   }, [fetchRequests]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const handleUpdateStatus = async (
     requestId: number,
@@ -122,6 +228,18 @@ function NurseStatusContent() {
         .includes(searchTerm.toLowerCase()) &&
       (statusFilter === "all" || req.status === statusFilter)
   );
+
+  // Calculate pagination values
+  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentRequests = filteredRequests.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -205,7 +323,7 @@ function NurseStatusContent() {
                 <p className="mt-2 text-sm text-gray-500">Try adjusting your filters or search terms.</p>
               </div>
             ) : (
-              filteredRequests.map((req) => (
+              currentRequests.map((req) => (
                 <div
                   key={req.id}
                   onClick={() => handleCardClick(req._employer_profiles?.id)}
@@ -254,6 +372,15 @@ function NurseStatusContent() {
                   </div>
                 </div>
               ))
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
             )}
           </div>
         </div>

@@ -254,50 +254,49 @@ const EmployerLoginPage = () => {
   return (
     <div className="h-fit">
       <Navbar />
-      <div className="flex items-center justify-center min-h-fit py-10 px-4 mt-10">
+      <div className="flex items-center justify-center py-16 md:py-20 px-4 sm:px-6 lg:px-8">
         {/* Flex container with responsive behavior */}
-        <div className="flex flex-col md:flex-col lg:flex-row gap-6 max-w-5xl w-full">
+        <div className="flex flex-col md:flex-col lg:flex-row gap-8 lg:gap-12 max-w-7xl w-full mx-auto">
           {/* "New to VFind" Section (Left side) */}
           <div
-            className="hidden md:flex flex-col justify-between w-full lg:w-[627px] lg:h-[480px] p-10 rounded-2xl shadow-md 
+            className="hidden md:flex flex-col justify-between w-full lg:w-[627px] p-8 md:p-10 rounded-2xl shadow-md
         order-2 lg:order-1
 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
-
           >
-            <div className="mt-10 ml-10">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-6">
                 Find & hire the right talent with us
               </h2>
-              <ul className="space-y-3 text-[#474D6A] font-weight-medium text-sm">
-                <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
-                  <span className="font-regular text-[14px] text-black">
+              <ul className="space-y-4 md:space-y-5 text-[#474D6A]">
+                <li className="flex items-start gap-3 md:gap-4">
+                  <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-blue-400 flex-shrink-0 rounded-full" />
+                  <span className="text-sm md:text-base text-black">
                     Post jobs and reach verified healthcare professionals.
                   </span>
                 </li>
 
-                <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
-                  <span className="font-regular text-[14px] text-black">
+                <li className="flex items-start gap-3 md:gap-4">
+                  <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-blue-400 flex-shrink-0 rounded-full" />
+                  <span className="text-sm md:text-base text-black">
                     View detailed nurse profiles and credentials.
                   </span>
                 </li>
-                <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
-                  <span className="font-regular text-[14px] text-black">
+                <li className="flex items-start gap-3 md:gap-4">
+                  <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-blue-400 flex-shrink-0 rounded-full" />
+                  <span className="text-sm md:text-base text-black">
                     Connect directly with top nursing talent.
                   </span>
                 </li>
-                <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
-                  <span className="font-regular text-[14px] text-black">
+                <li className="flex items-start gap-3 md:gap-4">
+                  <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-blue-400 flex-shrink-0 rounded-full" />
+                  <span className="text-sm md:text-base text-black">
                     Build your trusted employer brand.
                   </span>
                 </li>
               </ul>
               <button
                 onClick={() => router.push("/foremployer")}
-                className="group mt-6 h-[38px] w-[225px] text-white bg-[#4A90E2] rounded-[8px] shadow transition-all duration-300 overflow-hidden flex items-center justify-center font-medium"
+                className="group mt-8 h-10 md:h-[42px] w-full sm:w-[225px] text-white bg-[#4A90E2] rounded-lg shadow transition-all duration-300 overflow-hidden flex items-center justify-center font-medium hover:bg-blue-500"
               >
                 <span className="flex items-center gap-2">
                   <span className="transition-all duration-300 group-hover:-translate-x-1">
@@ -313,72 +312,74 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
           </div>
 
           {/* Login Section (Right side) */}
-          <div className="border-1 border-gray-300 lg:order-1 w-full lg:w-[480px] h-auto lg:h-[477px] bg-white shadow-md rounded-2xl p-10">
+          <div className="border-1 border-gray-300 lg:order-1 w-full lg:w-[480px] h-auto bg-white shadow-md rounded-2xl p-6 sm:p-8 md:p-10">
             {step === 1 && (
               <>
-                <h2 className="text-xl sm:text-[22px] font-medium text-[#121224]">
+                <h2 className="text-xl sm:text-2xl font-medium text-[#121224] mb-6">
                   Sign In to Your Employer Account
                 </h2>
 
                 {emailError && (
-                  <p className="text-red-500 text-sm mb-3 mt-3">{emailError}</p>
+                  <p className="text-red-500 text-sm mb-4">{emailError}</p>
                 )}
 
-                <div className="mt-10">
-                  <label className="block text-gray-700 font-medium text-sm mt-3">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full p-3 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#717B9E] h-[40] w-[328]"
-                    value={email}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setEmail(value);
-                      setEmailError(
-                        validateEmail(value)
-                          ? ""
-                          : "Please enter a valid email address"
-                      );
-                    }}
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-
-                <div className="mt-5">
-                  <label className="block text-gray-700 font-medium text-sm">
-                    Password
-                  </label>
-                  <div className="relative">
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-gray-700 font-medium text-sm md:text-base mb-2">
+                      Email Address
+                    </label>
                     <input
-                      type={showPassword ? "text" : "password"}
-                      className="w-full p-3  mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#717B9E] h-[40] w-[328]"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password"
+                      type="email"
+                      className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 text-sm md:text-base"
+                      value={email}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setEmail(value);
+                        setEmailError(
+                          validateEmail(value)
+                            ? ""
+                            : "Please enter a valid email address"
+                        );
+                      }}
+                      placeholder="Enter your email"
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 px-3 flex items-center text-[#4A90E2]"
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
                   </div>
-                  <a
-                    href="/forgot-password-employer"
-                    className="text-sm text-[#4A90E2] hover:underline float-right mt-2 font-medium"
-                  >
-                    Forgot password?
-                  </a>
+
+                  <div>
+                    <label className="block text-gray-700 font-medium text-sm md:text-base mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 text-sm md:text-base"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 px-3 flex items-center text-[#4A90E2] font-medium text-sm"
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <a
+                      href="/forgot-password-employer"
+                      className="text-sm text-[#4A90E2] hover:underline float-right mt-2 font-medium"
+                    >
+                      Forgot password?
+                    </a>
+                  </div>
                 </div>
 
                 <button
                   onClick={handleLogin}
                   disabled={isLoading || !!emailError || !email || !password}
-                  className="group w-full sm:w-[328px] h-[40px] bg-[#4A90E2] text-white rounded-lg font-medium transition-all duration-300 mt-12 mx-auto block overflow-hidden disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="group w-full h-10 md:h-11 bg-[#4A90E2] text-white rounded-lg font-medium transition-all duration-300 mt-8 overflow-hidden disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center hover:bg-blue-500"
                 >
                   <span className="flex items-center gap-2">
                     <span className="transition-all duration-300 group-hover:-translate-x-1">
@@ -393,11 +394,11 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
                   </span>
                 </button>
 
-                <div className="block text-center mt-4 text-sm text-gray-600">
+                <div className="block text-center mt-6 text-sm md:text-base text-gray-600">
                   Don&apos;t have an account?
                   <button
                     onClick={() => router.push("/foremployer")}
-                    className="text-[#4A90E2] font-medium ml-1"
+                    className="text-[#4A90E2] font-medium ml-1 hover:underline"
                   >
                     Sign up
                   </button>
@@ -407,15 +408,15 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
 
             {step === 2 && (
               <>
-                <h2 className="text-xl sm:text-[22px] font-medium text-[#121224]">
+                <h2 className="text-xl sm:text-2xl font-medium text-[#121224] mb-4">
                   Enter the OTP sent to your email
                 </h2>
-                <p className="text-sm text-gray-600 mt-2 break-all">
+                <p className="text-sm md:text-base text-gray-600 mt-2 break-all">
                   <strong>{email}</strong>
                 </p>
 
-                <div className="mt-5">
-                  <label className="block text-gray-700 font-medium text-sm mb-3">
+                <div className="mt-6">
+                  <label className="block text-gray-700 font-medium text-sm md:text-base mb-3">
                     OTP Code
                   </label>
                   <div className="flex gap-2 justify-center">
@@ -443,12 +444,12 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
                     <button
                       onClick={handleResendOtp}
                       disabled={isResending}
-                      className="text-sm text-[#4A90E2] hover:underline font-medium disabled:opacity-50"
+                      className="text-sm md:text-base text-[#4A90E2] hover:underline font-medium disabled:opacity-50 transition"
                     >
                       {isResending ? "Resending..." : "Resend OTP"}
                     </button>
                   ) : (
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm md:text-base text-gray-500">
                       Resend OTP in {resendCooldown}s
                     </p>
                   )}
@@ -457,13 +458,13 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
                 <button
                   onClick={handleVerifyOtp}
                   disabled={isLoading || timeLeft === 0}
-                  className="w-full sm:w-[328px] h-[40px] bg-[#4A90E2] text-white rounded-lg font-medium hover:bg-blue-500 transition mt-6 mx-auto block disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="w-full sm:w-[328px] h-10 md:h-11 bg-[#4A90E2] text-white rounded-lg font-medium hover:bg-blue-500 transition mt-8 mx-auto block disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {isLoading ? "Verifying..." : "Verify OTP"}
                 </button>
 
                 {timeLeft === 0 && (
-                  <p className="mt-2 text-center text-red-600 text-sm">
+                  <p className="mt-4 text-center text-red-600 text-sm md:text-base">
                     OTP expired. Please login again to request a new OTP.
                   </p>
                 )}

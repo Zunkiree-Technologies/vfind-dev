@@ -17,27 +17,29 @@ const companies = [
 
 export const FeaturedCompanies = () => {
     return (
-        <section className="min-h-fit p-4 bg-white flex items-center justify-center mt-5">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <section className="py-16 md:py-20 bg-white flex items-center justify-center">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Heading */}
-                <div className="text-center mb-16">
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                <div className="text-center mb-12">
+
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                         Featured Companies Actively Hiring
                     </h2>
-                    <p className="text-gray-600 mt-2">
+                    <p className="text-sm sm:text-base md:text-lg text-gray-600 mt-2">
                         Top healthcare employers looking for talented nurses
                     </p>
                 </div>
 
                 {/* Slider Wrapper */}
-                <div className="relative mt-5">
+                <div className="relative w-full max-w-[320px] sm:max-w-[400px] md:max-w-[700px] lg:max-w-none overflow-hidden mx-auto">
                     <Swiper
                         modules={[Autoplay, Pagination]}
                         spaceBetween={30}
                         slidesPerView={1}
                         breakpoints={{
-                            640: { slidesPerView: 2 },
-                            1024: { slidesPerView: 4 },
+                            640: { slidesPerView: 2, spaceBetween: 20 },
+                            768: { slidesPerView: 3, spaceBetween: 24 },
+                            1024: { slidesPerView: 4, spaceBetween: 30 },
                         }}
                         autoplay={{ delay: 2500, disableOnInteraction: false }}
                         loop={true}

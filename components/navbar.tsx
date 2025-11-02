@@ -53,8 +53,8 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="shadow-md px-4 py-2 bg-white dark:bg-gray-900 transition-colors duration-300 ">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
+    <nav className="shadow-md bg-white dark:bg-gray-900 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         {/* Left: Logo */}
 
         <Link href="/" className="flex items-center space-x-2 cursor-pointer">
@@ -240,6 +240,15 @@ export default function Navbar() {
               </ul>
             )}
           </div>
+
+          {/* Mobile Find Jobs Button */}
+          <button
+            onClick={() => router.push("/joblist")}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 mt-4 bg-blue-400 text-white font-medium rounded-lg transition-all duration-300 hover:bg-blue-500"
+          >
+            <span className="text-sm">Find Jobs</span>
+            <ArrowRight className="w-4 h-4" strokeWidth={3} />
+          </button>
         </div>
       )}
     </nav>

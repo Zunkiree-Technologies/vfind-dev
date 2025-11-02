@@ -67,21 +67,21 @@ export default function ContactUs() {
       {isLoggedIn ? <NavbarPrivate /> : <NavbarPublic />}
 
       {/* Contact Section */}
-      <div className="bg-[#f9fafb] flex justify-center items-center py-20 px-6">
-        <div className="w-full max-w-6xl flex flex-col md:flex-row gap-16">
+      <div className="bg-[#f9fafb] flex justify-center items-center py-16 md:py-20">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-8 lg:gap-12">
           {/* Left Section - Contact Form */}
           <div className="flex-1">
-            <h1 className="text-[34px] font-semibold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-blue-400 mb-4">
               Contact Us
             </h1>
-            <p className="text-black text-[16px] text-sm mb-2">
+            <p className="text-black text-base md:text-lg mb-2">
               Need to get in touch with us?
             </p>
-            <p className="text-black text-[16px] text-sm mb-8">
+            <p className="text-black text-base md:text-lg mb-8">
               Either fill out the form or contact us at{" "}
               <a
                 href="mailto:info@vfind.com"
-                className="text-[#2563eb] hover:underline font-medium"
+                className="text-primary hover:underline font-medium"
               >
                 info@vfind.com
               </a>
@@ -92,7 +92,7 @@ export default function ContactUs() {
               <div>
                 <label
                   htmlFor="firstName"
-                  className="block text-sm font-medium text-black mb-1"
+                  className="block text-sm md:text-base font-medium text-black mb-2"
                 >
                   First Name
                 </label>
@@ -103,7 +103,7 @@ export default function ContactUs() {
                   value={formData.firstName}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm md:text-base focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 />
               </div>
 
@@ -111,7 +111,7 @@ export default function ContactUs() {
               <div>
                 <label
                   htmlFor="lastName"
-                  className="block text-sm font-medium text-black mb-1"
+                  className="block text-sm md:text-base font-medium text-black mb-2"
                 >
                   Last Name
                 </label>
@@ -122,7 +122,7 @@ export default function ContactUs() {
                   value={formData.lastName}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm md:text-base focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 />
               </div>
 
@@ -130,7 +130,7 @@ export default function ContactUs() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-black mb-1"
+                  className="block text-sm md:text-base font-medium text-black mb-2"
                 >
                   Email
                 </label>
@@ -141,7 +141,7 @@ export default function ContactUs() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm md:text-base focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 />
               </div>
 
@@ -149,7 +149,7 @@ export default function ContactUs() {
               <div>
                 <label
                   htmlFor="message"
-                  className="block text-sm font-medium text-black mb-1"
+                  className="block text-sm md:text-base font-medium text-black mb-2"
                 >
                   Feedback
                 </label>
@@ -160,14 +160,14 @@ export default function ContactUs() {
                   onChange={handleChange}
                   required
                   rows={4}
-                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"
+                  className="w-full border border-gray-300 rounded-md p-2.5 text-sm md:text-base focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"
                 ></textarea>
               </div>
 
               {/* Send Button */}
               <Button
                 type="submit"
-                className="w-[90px] bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm rounded-md font-medium py-2 transition"
+                className="w-full sm:w-[120px] bg-blue-400 text-white text-sm md:text-base rounded-md font-medium py-2.5 transition hover:bg-blue-500"
               >
                 Send
               </Button>
@@ -177,18 +177,18 @@ export default function ContactUs() {
           {/* Right Section - Contact Info */}
           {/* -------------------- Right: Contact Info -------------------- */}
           <Card className="bg-gray-50 border-0 shadow-none rounded-2xl w-full md:w-1/3 text-gray-800">
-            <CardContent className="">
-              <h3 className="text-lg text-[18px] font-semibold mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-6">
                 Contact Information
               </h3>
 
-              <div className="space-y-6 text-sm">
+              <div className="space-y-6 text-sm md:text-base">
                 {/* Phone */}
                 <div className="flex items-center space-x-3">
-                  <Phone className="w-5 h-5 text-blue-500 mt-[2px]" />
+                  <Phone className="w-5 h-5 text-blue-400 flex-shrink-0" />
                   <div>
                     <p className="font-medium">Phone</p>
-                    <p className="text-[#717376] mt-[3px]">
+                    <p className="text-[#717376] mt-1">
                       04 23457855 / 61 0425145245
                     </p>
                   </div>
@@ -196,10 +196,10 @@ export default function ContactUs() {
 
                 {/* Hours */}
                 <div className="flex items-center space-x-3">
-                  <Clock className="w-5 h-5 text-blue-500 mt-[2px]" />
+                  <Clock className="w-5 h-5 text-blue-400 flex-shrink-0" />
                   <div>
                     <p className="font-medium">Hours</p>
-                    <p className="text-[#717376]  mt-[3px]">
+                    <p className="text-[#717376] mt-1">
                       7:00 AM – 6:00 PM, Mon – Sat
                     </p>
                   </div>
@@ -207,10 +207,10 @@ export default function ContactUs() {
 
                 {/* Weekdays */}
                 <div className="flex items-center space-x-3">
-                  <Calendar className="w-5 h-5 text-blue-500 mt-[2px]" />
+                  <Calendar className="w-5 h-5 text-blue-400 flex-shrink-0" />
                   <div>
                     <p className="font-medium">Weekdays</p>
-                    <p className="text-[#717376]  mt-[3px]">
+                    <p className="text-[#717376] mt-1">
                       7:00 AM – 6:00 PM, Mon – Sat
                     </p>
                   </div>
@@ -218,12 +218,12 @@ export default function ContactUs() {
 
                 {/* Email */}
                 <div className="flex items-center space-x-3">
-                  <Mail className="w-5 h-5 text-blue-500 mt-[2px]" />
+                  <Mail className="w-5 h-5 text-blue-400 flex-shrink-0" />
                   <div>
                     <p className="font-medium">Email</p>
                     <a
                       href="mailto:support@vfind.com"
-                      className="text-[#717376]  mt-[3px]"
+                      className="text-[#717376] mt-1 block hover:underline"
                     >
                       support@vfind.com
                     </a>

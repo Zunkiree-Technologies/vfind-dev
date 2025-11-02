@@ -25,10 +25,10 @@ const steps = [
 
 export const HowItWorksSection = () => {
   return (
-    <section className="min-h-fit p-5 mt-5  flex items-center justify-center bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]">
-      <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 md:py-20 flex items-center justify-center bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div className="text-center mb-16 fade-in">
+        <div className="text-center mb-12 fade-in">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             How It Works?
           </h2>

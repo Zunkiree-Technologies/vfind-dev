@@ -11,6 +11,8 @@ import {
   Shield,
   ChevronDown,
   ChevronUp,
+  CheckCircle,
+  X,
 } from "lucide-react";
 import Loader from "../../../../../components/loading";
 import EmployerNavbar from "../../components/EmployerNavbar";
@@ -131,6 +133,7 @@ export default function CandidateDetailPage() {
 
   const [educationList, setEducationList] = useState<Education[]>([]);
   const [workExperienceList, setWorkExperienceList] = useState<WorkExperience[]>([]);
+  const [showToast, setShowToast] = useState(false);
 
   // Load employerId from localStorage
   useEffect(() => {
@@ -394,11 +397,6 @@ export default function CandidateDetailPage() {
   const handleSendConnection = async () => {
     if (connectionStatus !== "none" || !nurseId || !employerId) return;
 
-    const confirmSend = window.confirm(
-      "Are you sure you want to connect with this candidate? They will be notified of your request..."
-    );
-    if (!confirmSend) return;
-
     try {
       const token = localStorage.getItem("authToken");
       if (!token) return alert("Unauthorized: Please log in");
@@ -428,6 +426,8 @@ export default function CandidateDetailPage() {
       }
 
       setConnectionStatus("pending");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 5000);
     } catch (err) {
       console.error("Error sending connection request:", err);
       alert("Error sending connection request.");
@@ -485,7 +485,7 @@ export default function CandidateDetailPage() {
       <div className="sticky top-0 z-50">
         <EmployerNavbar />
       </div>
-      <div className="container mx-auto mt-23">
+      <div className="container mx-auto mt-10">
         {/* Basic Information Section */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-5">
           {/* Section Header with Buttons */}
@@ -572,6 +572,7 @@ export default function CandidateDetailPage() {
                 { label: "Current Location", value: candidate.currentResidentialLocation || "Not specified" },
                 { label: "Postcode", value: candidate.postcode || "Not specified" },
                 { label: "Willing to Relocate", value: candidate.willingToRelocate || "Not specified" },
+                { label: "Experience", value: candidate.experience || "Not specified" },
               ].map((item, index) => (
                 <div key={index}>
                   <label className="text-sm font-medium text-gray-700 mb-1 block">
@@ -948,6 +949,38 @@ export default function CandidateDetailPage() {
       <div className="bg-white">
         <Footer />
       </div>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-5 right-5 z-50 animate-slide-in">
+          <div className="bg-white rounded-lg shadow-2xl border border-gray-200 p-4 max-w-md flex items-start gap-3">
+            {/* Blue Checkmark Icon */}
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-white" />
+              </div>
+            </div>
+
+            {/* Message Content */}
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900 text-base mb-1">
+                Connection Request Sent!
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Your connection request has been sent successfully. You&apos;ll be notified when the nurse accepts or rejects your request.
+              </p>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowToast(false)}
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

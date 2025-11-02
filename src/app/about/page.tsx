@@ -32,21 +32,17 @@ export default function AboutPage() {
 
       {/* --------------------------other section about vfind---------------------- */}
       <section
-        className="relative min-h-[450px] flex items-center justify-center overflow-hidden bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]
-
-
-
-"
+        className="relative py-16 md:py-20 flex items-center justify-center overflow-hidden bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between">
 
           {/* Left Content */}
-          <div className="flex-1 text-center lg:text-left space-y-5 max-w-4xl h-[415px] flex flex-col justify-center">
-            <h1 className="text-[34px] md:text-4xl font-bold leading-tight">
+          <div className="flex-1 text-center lg:text-left space-y-6 md:space-y-8 max-w-4xl flex flex-col justify-center">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight">
               About <span className="text-[#61A6FA]">VFind</span> <br />
             </h1>
 
-            <p className=" text-[16px] md:text-xl text-medium text-[#646465]">
+            <p className="text-base md:text-xl font-medium text-[#646465]">
               VFind is a trusted healthcare recruitment platform built to connect nurses and healthcare professionals with the right career opportunities in Australia. We simplify the hiring process for aged care providers and hospitals, making recruitment faster, secure, and reliable.
             </p>
           </div>
@@ -70,8 +66,8 @@ export default function AboutPage() {
 
       {/* --------------------------other section- who we are--------------------- */}
 
-      <section className="relative flex items-center justify-center overflow-hidden min-h-[422px] py-10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-39">
+      <section className="relative py-16 md:py-20 flex items-center justify-center overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
 
           {/* Left Image */}
           <div className="flex-1 flex justify-center lg:justify-start">
@@ -88,12 +84,12 @@ export default function AboutPage() {
           </div>
 
           {/* Right Content */}
-          <div className="flex-1 flex items-center justify-center bg-[#F5F6FA] rounded-lg p-5 min-w-[320px] lg:min-w-[746px] h-auto">
-            <div className="space-y-3">
-              <h1 className="text-[32px] md:text-4xl font-semibold leading-tight">
+          <div className="flex-1 flex items-center justify-center bg-[#F5F6FA] rounded-lg p-6 sm:p-8 md:p-10 min-w-[320px] lg:min-w-[746px] h-auto">
+            <div className="space-y-4 md:space-y-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight">
                 Who We <span className="text-[#61A6FA]">Are</span>?
               </h1>
-              <p className="text-[#646465] text-[16px] text-medium md:text-xl leading-relaxed max-w-[629px]">
+              <p className="text-[#646465] text-base md:text-xl font-medium leading-relaxed max-w-[629px]">
                 We are a team of healthcare and technology professionals passionate about building a platform that empowers nurses while supporting employers in delivering quality care. At VFind, people come first — we are driven by empathy, trust, and innovation.
               </p>
             </div>
@@ -109,18 +105,16 @@ export default function AboutPage() {
         <BenefitsSection />
       </section>
       {/* --------------------------other section our mission ---------------------- */}
-      <section className="relative flex items-center justify-center overflow-hidden min-h-[422px] py-10 ">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-39">
+      <section className="relative py-16 md:py-20 flex items-center justify-center overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
 
           {/* Left Content */}
-          <div className="flex-1 flex items-center justify-center bg-[#F5F6FA] rounded-lg p-8 min-w-[320px] lg:min-w-[746px] h-auto">
-            <div className="space-y-5">
-              <h1 className="text-[32px] md:text-4xl font-semibold leading-tight">
-
+          <div className="flex-1 flex items-center justify-center bg-[#F5F6FA] rounded-lg p-6 sm:p-8 md:p-10 min-w-[320px] lg:min-w-[746px] h-auto">
+            <div className="space-y-4 md:space-y-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight">
                 Our <span className="text-[#61A6FA]">Mission</span>
               </h1>
-              <p className="text-[#646465] text-[16px] text-medium md:text-xl leading-relaxed max-w-[629px]">
-
+              <p className="text-[#646465] text-base md:text-xl font-medium leading-relaxed max-w-[629px]">
                 To empower nurses and healthcare professionals by providing equal access to opportunities while supporting employers with trusted hiring solutions.
               </p>
             </div>
@@ -144,8 +138,8 @@ export default function AboutPage() {
       </section>
 
       {/* --------------------------other section over vision---------------------- */}
-      <section className="relative flex items-center justify-center overflow-hidden max-h-[422px] ">
-        <div className="max-w-7xl mx-auto  flex flex-col lg:flex-row items-center  gap-39">
+      <section className="relative py-16 md:py-20 flex items-center justify-center overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
 
           {/* Left Image */}
           <div className="flex-1 flex justify-center lg:justify-end relative">
@@ -162,15 +156,13 @@ export default function AboutPage() {
           </div>
 
           {/* Right Content */}
-          <div className="flex-1 flex items-center justify-center bg-[#F5F6FA] rounded-lg p-8 min-w-[320px] lg:min-w-[746px] max-h-[422px] ">
-            <div className="space-y-5">
-              <h1 className="text-[32px] md:text-4xl font-semibold leading-tight">
-
+          <div className="flex-1 flex items-center justify-center bg-[#F5F6FA] rounded-lg p-6 sm:p-8 md:p-10 min-w-[320px] lg:min-w-[746px] h-auto">
+            <div className="space-y-4 md:space-y-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight">
                 Our <span className="text-[#61A6FA]">Vision</span>
               </h1>
-              <p className="text-[#646465] text-[16px] text-medium md:text-xl leading-relaxed max-w-[629px]">
-
-                To become Australia’s most trusted healthcare hiring platform — where nurses thrive, employers succeed, and quality care reaches every community.
+              <p className="text-[#646465] text-base md:text-xl font-medium leading-relaxed max-w-[629px]">
+                To become Australia most trusted healthcare hiring platform — where nurses thrive, employers succeed, and quality care reaches every community.
               </p>
             </div>
           </div>
@@ -180,25 +172,23 @@ export default function AboutPage() {
 
       {/* --------------------------other section Contact---------------------- */}
       <section
-        className="relative max-h-[460px] flex items-center justify-center overflow-hidden bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]
-"
+        className="relative py-16 md:py-20 flex items-center justify-center overflow-hidden bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-39">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
 
           {/* Left Content */}
-          <div className="flex-1 text-center lg:text-left space-y-7 min-w-4xl h-[415px] flex flex-col justify-center">
-            <h1 className="text-[32px] md:text-4xl font-semibold leading-tight">
-
+          <div className="flex-1 text-center lg:text-left space-y-6 md:space-y-8 flex flex-col justify-center">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight">
               Have questions or want to partner with <span className="text-[#61A6FA]">us</span>?<br />
             </h1>
-            <div className="gap-5">
-              <h1 className="text-[24px] md:text-2xl font-semibold leading-tight text-[#58A6F9]">
+            <div className="space-y-4 md:space-y-6">
+              <h1 className="text-xl sm:text-2xl md:text-2xl font-semibold leading-tight text-[#58A6F9]">
                 Let&apos;s connect!
               </h1>
 
               <a
                 href="/contact"
-                className="group relative inline-flex items-center px-6 py-3 mt-2 bg-[#58A6F9] text-white font-semibold rounded-lg transition-all duration-300 hover:bg-blue-500 overflow-hidden w-fit"
+                className="group relative inline-flex items-center px-6 py-3 bg-[#58A6F9] text-white font-semibold rounded-lg transition-all duration-300 hover:bg-blue-500 overflow-hidden w-fit"
               >
                 <span className="flex items-center gap-2">
                   <span className="text-sm transition-all duration-300 group-hover:-translate-x-1">

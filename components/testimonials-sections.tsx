@@ -70,12 +70,12 @@ export const TestimonialsSection = () => {
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
-    <section className="max-h-screen p-4 bg-healthcare-gray-light overflow-hidden">
-      <div className="container mx-auto px-4 mb-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-700">
+    <section className="py-16 md:py-20 bg-healthcare-gray-light overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-700">
           Success Stories from Our Nurses
         </h2>
-        <p className="text-xl text-gray-500 max-w-2xl mt-5 mx-auto text-center">
+        <p className="text-base sm:text-lg md:text-xl text-gray-500 max-w-2xl mt-4 md:mt-5 mx-auto text-center">
           Join thousands of nurses who have successfully built their careers in Australia through our platform.
         </p>
       </div>
@@ -122,11 +122,11 @@ export const TestimonialsSection = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 mb-16 text-center mt-5">
-        <h2 className="text-3xl font-bold text-gray-700">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center mt-12">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-700">
           Success Stories from Employers
         </h2>
-        <p className="text-xl text-gray-500 max-w-2xl mt-5 mx-auto text-center">
+        <p className="text-base sm:text-lg md:text-xl text-gray-500 max-w-2xl mt-4 md:mt-5 mx-auto text-center">
           Connect with top nursing talent and build a skilled, reliable healthcare team across Australia with ease.
         </p>
       </div>

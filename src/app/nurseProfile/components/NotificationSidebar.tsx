@@ -142,14 +142,20 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
                 >
                   {/* Delete button */}
                   <button
-                    onClick={() => handleDelete(req.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(req.id);
+                    }}
                     className="absolute top-10 right-10 p-1 rounded-full opacity-0 group-hover:opacity-100 hover:bg-gray-200 transition"
                     title="Dismiss notification"
                   >
                     <X className="w-5 h-5 text-gray-500" />
                   </button>
 
-                  <div className="flex gap-4 px-2 py-2 border border-gray-200 rounded-lg">
+                  <div
+                    className="flex gap-4 px-2 py-2 border border-gray-200 rounded-lg cursor-pointer"
+                    onClick={() => router.push(`/nurseProfile/connectedstatus/${req._employer_profiles?.id}`)}
+                  >
                     {/* Icon */}
                     <div className="flex-shrink-0">
                       <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -158,16 +164,13 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
                     </div>
 
                     {/* Content */}
-                    <div
-                      className="flex-1 min-w-0 cursor-pointer"
-                      onClick={() => router.push(`/nurseProfile/connectedstatus/`)}
-                    >
+                    <div className="flex-1 min-w-0">
                       <h3 className="text-base font-semibold text-gray-900 mb-1">
                         New Connection Request Received
                       </h3>
                       <p className="text-sm text-gray-600 leading-relaxed">
                         You&apos;ve received a new connection request from{" "}
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-gray-900 hover:underline">
                           {req._employer_profiles?.companyName ||
                             req._employer_profiles?.fullName ||
                             "N/A"}
