@@ -25,6 +25,7 @@ interface Job {
   applicants_count?: number;
   is_active?: boolean;
   status: "Active" | "Paused";
+  expiryDate?: string;
 }
 
 interface Employer {
@@ -34,6 +35,41 @@ interface Employer {
   mobile?: string;
   companyName?: string;
 }
+
+// Utility function to calculate timeframe
+const getJobTimeframe = (expiryDate?: string): { text: string; isExpired: boolean } => {
+  if (!expiryDate) {
+    return { text: "No expiry date", isExpired: false };
+  }
+
+  const now = new Date();
+  const expiry = new Date(expiryDate);
+  const diffTime = expiry.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return { text: "Expired", isExpired: true };
+  }
+
+  if (diffDays === 0) {
+    return { text: "Expires today", isExpired: false };
+  }
+
+  if (diffDays === 1) {
+    return { text: "1 day left", isExpired: false };
+  }
+
+  if (diffDays < 30) {
+    return { text: `${diffDays} days left`, isExpired: false };
+  }
+
+  if (diffDays < 60) {
+    return { text: "1 month left", isExpired: false };
+  }
+
+  const months = Math.floor(diffDays / 30);
+  return { text: `${months} months left`, isExpired: false };
+};
 
 export default function EmployerDashboard() {
   const router = useRouter();
@@ -541,13 +577,16 @@ export default function EmployerDashboard() {
                       <th className="py-2 px-3">Job Title</th>
                       <th className="py-2 px-3">Created By</th>
                       <th className="py-2 px-3">Status</th>
+                      <th className="py-2 px-3">Timeframe</th>
                       <th className="py-2 px-3">Applicants</th>
                       <th className="py-2 px-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {jobs.length > 0 ? (
-                      (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
+                      (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => {
+                        const timeframe = getJobTimeframe(job.expiryDate);
+                        return (
                         <tr key={job.id} className="hover:bg-gray-50">
                           <td className="py-2 px-3">{job.title}</td>
                           <td className="py-2 px-3">{employer.email}</td>
@@ -559,6 +598,15 @@ export default function EmployerDashboard() {
                                 }`}
                             >
                               {job.status === "Active" ? "Active" : "Paused"}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3">
+                            <span
+                              className={`text-sm font-medium ${
+                                timeframe.isExpired ? "text-red-300" : "text-gray-700"
+                              }`}
+                            >
+                              {timeframe.text}
                             </span>
                           </td>
                           <td className="py-2 px-3">
@@ -623,10 +671,11 @@ export default function EmployerDashboard() {
                             </div>
                           </td>
                         </tr>
-                      ))
+                        );
+                      })
                     ) : (
                       <tr>
-                        <td colSpan={5} className="text-center py-4 text-gray-500">
+                        <td colSpan={6} className="text-center py-4 text-gray-500">
                           No jobs posted yet.
                         </td>
                       </tr>
@@ -638,13 +687,15 @@ export default function EmployerDashboard() {
               {/* Mobile List */}
               <div className="md:hidden mt-3 space-y-3">
                 {jobs.length > 0 ? (
-                  (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => (
+                  (showAllJobs ? jobs : jobs.slice(0, 4)).map((job) => {
+                    const timeframe = getJobTimeframe(job.expiryDate);
+                    return (
                     <div key={job.id} className="pb-3 border-b last:border-0">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <h3 className="font-medium">{job.title}</h3>
                           <p className="text-xs text-gray-500">{employer.email}</p>
-                          <div className="mt-1">
+                          <div className="mt-1 flex items-center gap-2 flex-wrap">
                             <span
                               className={`px-2 py-1 rounded-full text-xs font-medium ${job.is_active !== false
                                 ? "bg-green-100 text-green-700"
@@ -652,6 +703,13 @@ export default function EmployerDashboard() {
                                 }`}
                             >
                               {job.is_active !== false ? "Active" : "Paused"}
+                            </span>
+                            <span
+                              className={`text-xs font-medium ${
+                                timeframe.isExpired ? "text-red-300" : "text-gray-700"
+                              }`}
+                            >
+                              {timeframe.text}
                             </span>
                           </div>
                           <a
@@ -732,7 +790,8 @@ export default function EmployerDashboard() {
                         </div>
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="text-center py-4 text-gray-500">
                     No jobs posted yet.
