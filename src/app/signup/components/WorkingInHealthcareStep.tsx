@@ -28,9 +28,8 @@ export function WorkingInHealthcareStep({ formData, handleChange }: StepProps) {
     handleChange("organisation", "");
   };
 
-  const yesNoOptions = ["Yes", "No"];
+  const yesNoOptions = ["Yes", "Fresher"];
   const experienceOptions = [
-    "Fresher",
     "Less than 1 year",
     "1 – 2 years",
     "2 - 5 years",
