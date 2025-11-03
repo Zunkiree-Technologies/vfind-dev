@@ -304,10 +304,18 @@ const AppliedJobs = () => {
     <div>
       <Navbar />
       <div className="p-4 min-h-screen bg-[#F5F6FA]">
-        <div className="flex gap-6 mt-6 items-start">
-          <div className="mx-auto container flex justify-center items-start gap-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-[1600px] mx-auto">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl lg:ml-125 font-bold text-blue-400">
+              Applied Jobs
+            </h1>
+          </div>
+        </div>
 
-            {/* ✅ Filters Sidebar */}
+        <div className="flex gap-6 mt-6 items-start">
+          <div className="mx-auto container flex justify-center item-center gap-8">
+
+            {/* Filters Sidebar */}
             <JobFilters
               typeFilter={typeFilter}
               setTypeFilter={setTypeFilter}
@@ -321,164 +329,154 @@ const AppliedJobs = () => {
               handleCheckboxChange={handleCheckboxChange}
             />
 
-            {/* ✅ Job Cards */}
+            {/* Job Cards */}
             <div className="flex-1 max-w-[983px]">
-              <h1 className="text-3xl font-bold ml-2 text-primary mb-6">
-                Applied Jobs
-              </h1>
 
-              {filteredJobs.length === 0 ? (
-                <div className="text-center bg-white rounded-lg p-12 shadow-sm">
-                  <Building2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    No Applied Jobs Yet
-                  </h3>
-                  <p className="text-gray-600">
-                    Start applying to jobs to see them here
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 gap-4">
-                    {currentJobs.map((job) => {
-                      const jobDetails = job._jobs;
-                      return (
-                        <a
-                          key={job.id}
+              <div className="grid grid-cols-1 gap-4">
+
+
+                {currentJobs.map((job) => {
+                  const jobDetails = job._jobs;
+                  const isExpired = jobDetails?.expiryDate && new Date(jobDetails.expiryDate) < new Date();
+
+                  return (
+                    <div
+                      key={job.id}
+                      className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-lg p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2 gap-4"
+                    >
+                      <div className="flex-1 w-full">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h2 className="font-semibold text-bold text-lg text-[#61A6FA]">
+                            {jobDetails?.title || "Job Title"}
+                          </h2>
+                          <span
+                            className={`px-3 py-1 rounded-md text-xs font-medium ${getStatusColor(
+                              job.status
+                            )}`}
+                          >
+                            {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-3 font-medium">
+                          {getCompanyName(job)}
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 text-gray-600 text-sm">
+                          <div className="flex items-center gap-1">
+                            <MapPin size={16} className="flex-shrink-0" />
+                            <span className="truncate">
+                              {jobDetails?.location || "Location not specified"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock size={16} className="flex-shrink-0" />
+                            <span>{jobDetails?.type || "Not specified"}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar size={16} className="flex-shrink-0" />
+                            <span>
+                              {jobDetails?.experienceMin
+                                ? `${jobDetails.experienceMin}${jobDetails?.experienceMax
+                                  ? ` - ${jobDetails.experienceMax}`
+                                  : ""
+                                } years`
+                                : "Not specified"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <DollarSign size={16} className="flex-shrink-0" />
+                            <span>
+                              {jobDetails?.minPay || jobDetails?.maxPay
+                                ? `${jobDetails?.minPay || "0"} - ${jobDetails?.maxPay || "0"}/hr`
+                                : "Not specified"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Briefcase size={16} className="flex-shrink-0" />
+                            <span>{jobDetails?.roleCategory || "General"}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock1 size={16} className="flex-shrink-0" />
+                            <span>
+                              Applied: {formatDate(job.applied_date)}
+                            </span>
+                          </div>
+                          <div
+                            className={` text-sm font-extralight w-fit flex items-center gap-1 ${jobDetails?.expiryDate && new Date(jobDetails.expiryDate).setHours(23, 59, 59, 999) < new Date().getTime()
+                              ? "text-[#D9796C]"
+                              : "text-gray-600"
+                              }`}
+                          >
+                            {jobDetails?.expiryDate
+                              ? (() => {
+                                const today = new Date();
+                                const expiry = new Date(jobDetails.expiryDate);
+
+                                // Set expiry to end of the day
+                                expiry.setHours(23, 59, 59, 999);
+
+                                const diffTime = expiry.getTime() - today.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                if (diffDays > 0) {
+                                  return `Apply Before: ${diffDays} day${diffDays > 1 ? "s" : ""} from now`;
+                                } else {
+                                  return (
+                                    <>
+                                      <Ban size={16} />
+                                      Job Expired
+                                    </>
+                                  );
+                                }
+                              })()
+                              : "Date not available"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center w-full md:w-auto md:ml-6">
+                        <MainButton
                           href={`/nurseProfile/jobapplicationpage/${job.jobs_id}?company=${encodeURIComponent(
                             getCompanyName(job)
-                          )}`}
+                          )}&expired=${isExpired}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex justify-between items-center bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 mx-2 cursor-pointer"
+                          className={`px-4 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${isExpired ? "cursor-not-allowed" : ""
+                            }`}
                         >
-                          <div className="flex-1">
-                            <h2 className="font-semibold text-bold text-lg text-[#61A6FA] mb-1">
-                              {jobDetails?.title || "Job Title"}
-                            </h2>
 
-                            <p className="text-gray-600 text-sm mb-3 font-medium">
-                              {getCompanyName(job)}
-                            </p>
+                          <span className="flex items-center gap-2">
+                            {" "}
+                            <span className="transition-all duration-300 group-hover:-translate-x-1">
+                              {" "}
+                              View Details{" "}
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-gray-600 text-sm">
-                              {jobDetails?.location && (
-                                <div className="flex items-center gap-1">
-                                  <MapPin size={16} />
-                                  <span>{jobDetails.location}</span>
-                                </div>
-                              )}
+                            </span>{" "}
+                          </span>
+                        </MainButton>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
 
-                              {jobDetails?.type && (
-                                <div className="flex items-center gap-1">
-                                  <Clock size={16} />
-                                  <span>{jobDetails.type}</span>
-                                </div>
-                              )}
-
-                              {(jobDetails?.experienceMin ||
-                                jobDetails?.experienceMax) && (
-                                  <div className="flex items-center gap-1">
-                                    <Calendar size={16} />
-                                    <span>
-                                      {jobDetails.experienceMin
-                                        ? `${jobDetails.experienceMin}${jobDetails.experienceMax
-                                          ? ` - ${jobDetails.experienceMax}`
-                                          : ""
-                                        } years`
-                                        : "Not specified"}
-                                    </span>
-                                  </div>
-                                )}
-
-                              {(jobDetails?.minPay || jobDetails?.maxPay) && (
-                                <div className="flex items-center gap-1">
-                                  <DollarSign size={16} />
-                                  <span>
-                                    {jobDetails.minPay || jobDetails.maxPay
-                                      ? `${jobDetails.minPay || "0"} - ${jobDetails.maxPay || "0"
-                                      }/hr`
-                                      : "Not specified"}
-                                  </span>
-                                </div>
-                              )}
-
-                              {jobDetails?.roleCategory && (
-                                <div className="flex items-center gap-1">
-                                  <Briefcase size={16} />
-                                  <span>{jobDetails.roleCategory}</span>
-                                </div>
-                              )}
-
-                              <div className="flex items-center gap-1">
-                                <Clock1 size={16} />
-                                <span>
-                                  Applied at {formatDate(job.applied_date)}
-                                </span>
-                              </div>
-                              <div
-                                className={`mt-4 text-sm font-extralight w-fit flex items-center gap-1 ${jobDetails?.expiryDate && new Date(jobDetails.expiryDate).setHours(23, 59, 59, 999) < new Date().getTime()
-                                  ? "text-[#D9796C]"
-                                  : "text-gray-600"
-                                  }`}
-                              >
-                                {jobDetails?.expiryDate
-                                  ? (() => {
-                                    const today = new Date();
-                                    const expiry = new Date(jobDetails.expiryDate);
-                                    expiry.setHours(23, 59, 59, 999);
-                                    const diffTime = expiry.getTime() - today.getTime();
-                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                                    if (diffDays > 0) {
-                                      return `Apply Before: ${diffDays} day${diffDays > 1 ? "s" : ""} from now`;
-                                    } else {
-                                      return (
-                                        <>
-                                          <Ban size={16} />
-                                          Job Expired
-                                        </>
-                                      );
-                                    }
-                                  })()
-                                  : "Date not available"}
-                              </div>
-
-
-                            </div>
-
-                          </div>
-
-                          <div className="flex items-center gap-4 ml-6">
-                            <MainButton
-                              className={`px-4 py-2 rounded-md text-sm font-medium  ${getStatusColor(
-                                job.status
-                              )}`}
-                            >
-                              {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                            </MainButton>
-                          </div>
-
-                        </a>
-                      );
-                    })}
-                  </div>
-
-                  {totalPages > 1 && (
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={handlePageChange}
-                    />
-                  )}
-                </>
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              )}
+              {filteredJobs.length === 0 && (
+                <div className="text-center text-gray-500 mt-8">
+                  No applied jobs found matching your criteria.
+                </div>
               )}
             </div>
           </div>
         </div>
       </div>
-
-      <Footer />
+      <div>
+        <Footer />
+      </div>
     </div>
   );
 };

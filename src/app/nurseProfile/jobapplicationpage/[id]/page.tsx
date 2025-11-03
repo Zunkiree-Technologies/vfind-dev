@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Loader from "../../../../../components/loading";
-import { ArrowRight, Building2, TriangleAlert } from "lucide-react";
+import { ArrowRight, Building2, TriangleAlert, X, CheckCircle2 } from "lucide-react";
 import { Navbar } from "../../components/Navbar";
 import Footer from '@/app/Admin/components/layout/Footer';
 
@@ -52,6 +52,7 @@ export default function JobApplicationPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isExpired, setIsExpired] = useState(false); // ✅ new
+  const [showToast, setShowToast] = useState(false);
 
   // Load token, email, profileId from localStorage
   useEffect(() => {
@@ -303,8 +304,17 @@ export default function JobApplicationPage() {
         throw new Error(result.message || "Failed to submit application");
 
       setHasApplied(true);
-      alert("Job application sent successfully!");
-      router.push("/nurseProfile");
+      setShowToast(true);
+
+      // Auto-hide toast after 5 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push("/nurseProfile");
+      }, 2000);
     } catch (err: unknown) {
       console.error("Failed to submit application:", err);
       alert(
@@ -351,6 +361,31 @@ export default function JobApplicationPage() {
     <div>
       <Navbar />
 
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+          <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 flex items-start gap-3 min-w-[400px] max-w-lg">
+            <div className="flex-shrink-0">
+              <CheckCircle2 className="w-6 h-6 bg-blue-400 text-white rounded-lg " />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                Job Application Submitted!
+              </h3>
+              <p className="text-sm text-gray-600">
+                You&apos;ve successfully applied for this job post. If the employer is interested, they&apos;ll contact you or send you a connection request. Explore more job opportunities below.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowToast(false)}
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -367,7 +402,7 @@ export default function JobApplicationPage() {
                       className={`px-3 py-1 rounded-md text-sm font-medium transition-all
         ${isSaved
                           ? "bg-[#0073FF] text-white border-[#0073FF]"
-                          : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-[#0073FF]"
+                          : "bg-[#FFFDFD] border border-blue-400 hover:bg-[#0073FF] hover:text-white text-blue-400"
                         }`}
                       title={isSaved ? "Remove from saved jobs" : "Save job"}
                     >
