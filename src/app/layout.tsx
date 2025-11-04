@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ThemeWrapper from "./ThemeWrapper";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,7 +26,9 @@ export default function RootLayout({
         className={`${inter.variable} antialiased`}
         style={{ fontFamily: "var(--font-inter)" }}
       >
-        <ThemeWrapper>{children}</ThemeWrapper>
+        <AuthProvider>
+          <ThemeWrapper>{children}</ThemeWrapper>
+        </AuthProvider>
       </body>
     </html>
   );

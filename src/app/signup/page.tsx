@@ -338,24 +338,26 @@ export default function NurseSignup() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Navbar />
+            <div className="sticky top-0 z-50 bg-white shadow-sm">
+                <Navbar />
+            </div>
 
             {/* Mobile Login Link - Only visible on mobile */}
-            <div className="block lg:hidden px-4 py-2 text-center text-sm text-gray-600">
+            <div className="block lg:hidden px-4 py-3 text-center text-sm text-gray-600">
                 Already have an account?
                 <button onClick={() => router.push("/signin")} className="text-[#4A90E2] font-medium ml-1">
                     Login
                 </button>
             </div>
 
-            <div className="container mx-auto px-4 lg:px-0 flex items-center justify-center gap-10 min-h-[calc(100vh-80px)] py-4 lg:py-0">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-start justify-center gap-10 py-6 lg:py-10">
                 {/* Left Side - Static Card - Hidden on mobile */}
 
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center sticky top-24">
                     {/* Main Box */}
-                    <div className="hidden lg:flex w-[435px] h-[410px] rounded-lg shadow-md flex-col justify-center items-center text-center text-gray-800 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]">
+                    <div className="hidden lg:flex w-[435px] rounded-lg shadow-md flex-col justify-center items-center text-center text-gray-800 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)] p-8">
 
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6">
                             On registering, you can
                         </h2>
 
@@ -379,7 +381,7 @@ export default function NurseSignup() {
                     </div>
 
                     {/* Login Below the Box */}
-                    <div className="block text-center mt-4 text-sm text-gray-600">
+                    <div className="hidden lg:block text-center mt-6 text-sm text-gray-600">
                         Already have an account?
                         <button
                             onClick={() => router.push("/signin")}
@@ -411,10 +413,10 @@ export default function NurseSignup() {
                     </div>
 
                     <div
-                        className="w-full min-h-[400px] lg:min-h-[576px] max-h-[calc(100vh-200px)] lg:max-h-[80vh] rounded-lg shadow-md flex flex-col overflow-y-auto bg-white"
+                        className="w-full rounded-lg shadow-md flex flex-col bg-white"
                         ref={formRef}
                     >
-                        <div className="p-3 lg:p-6 mt-1 lg:mt-3 space-y-4 lg:space-y-8 flex-grow">
+                        <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 flex-grow">
                             {[...Array(currentStep)].map((_, i) => {
                                 const stepNumber = i + 1;
                                 return (
@@ -425,7 +427,7 @@ export default function NurseSignup() {
                             })}
 
                             {/* Navigation Buttons */}
-                            <div className="flex justify-end p-3 lg:p-6 -t -gray-200 sticky bottom-0 bg-white">
+                            <div className="flex justify-end pt-4 pb-2 lg:pt-6 lg:pb-4 border-t border-gray-200 sticky bottom-0 bg-white">
                                 {currentStep < totalSteps && (
                                     <button
                                         onClick={() => setCurrentStep((prev) => prev + 1)}
@@ -465,9 +467,7 @@ export default function NurseSignup() {
                     </div>
                 </div>
             </div>
-            <div className="bg-[#1F3C88] ">
-                <Footer />
-            </div>
+            <Footer />
         </div>
     );
 }

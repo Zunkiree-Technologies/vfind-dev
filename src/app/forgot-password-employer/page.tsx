@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "../../../components/navbar";
 import { useRouter } from "next/navigation";
+import Footer from "../../../components/footer-section";
 
 
 
@@ -233,74 +234,97 @@ const ForgotPassword: React.FC = () => {
  return (
   <div>
      <Navbar />
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-blue-50 px-4 sm:px-6">
-      <div className="flex flex-col xl:flex-row gap-6 lg:gap-8 max-w-7xl w-full">
-        
+    <div className="min-h-fit lg:py-10 flex items-center justify-center bg-gradient-to-b from-white to-blue-50 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col xl:flex-row gap-6 lg:gap-8 max-w-7xl w-full mx-auto">
+
         {/* Left section - Hidden on mobile and small tablets */}
         <div
-          style={{
-            background:
-              "linear-gradient(160deg, rgba(255, 255, 255, 0.22) 0%, rgba(238, 174, 202, 0.14) 72%, rgba(39, 93, 245, 0.11) 100%)",
-          }}
-          className="hidden lg:flex flex-col justify-center w-full xl:w-[699px] h-auto lg:h-[420px] xl:h-[481px] rounded-2xl shadow-lg p-6 lg:p-8 xl:p-10"
+          className="hidden lg:flex flex-col justify-between w-full xl:w-[699px] h-auto lg:h-[420px] xl:h-[481px] rounded-2xl shadow-lg p-6 lg:p-8 xl:p-12 bg-gradient-to-br from-blue-50 to-blue-100"
         >
-          <h1 className="text-3xl lg:text-4xl xl:text-[48px] font-bold text-[#121224] leading-tight">
-            Reset your password <br className="hidden xl:block" /> 
-            <span className="xl:hidden">securely</span>
-            <span className="hidden xl:inline">securely</span>
-          </h1>
-          <div className="mt-4 flex items-center gap-2 text-sm text-[#474D6A]">
-                       <div className="flex items-center gap-2">
-                         <Image
-                           src="/icons/check.png"
-                           alt="Check Icon"
-                           width={14}
-                           height={14}
-                           className="text-white flex-shrink-0"
-                         />
-                         <span className="text-xs lg:text-sm">Trusted by 10 Cr+ candidates | 4 Lakh+ employers</span>
-                       </div>
-                     </div>
-                     <div className="mt-4 flex -space-x-2">
-                       {[...Array(5)].map((_, i) => (
-                         <Image
-                           key={i}
-                           width={32}
-                           height={32}
-                           src="/assets/profile.png"
-                           className="w-7 h-7 lg:w-8 lg:h-8 rounded-full shadow-sm"
-                           alt="Employer Avatar"
-                         />
-                       ))}
-                     </div>
-                     <div className="mt-auto flex justify-end">
-                       <div className="w-32 lg:w-40 xl:w-48 h-32 lg:h-40 xl:h-48 rounded-full overflow-hidden">
-                         <Image
-                           src="/assets/profile.png"
-                           alt="Login Illustration"
-                           width={194}
-                           height={194}
-                           className="object-cover w-full h-full"
-                         />
-                       </div>
-                     </div>
-                   </div>
+          <div>
+            <h1 className="text-3xl lg:text-4xl xl:text-[40px] font-bold text-[#121224] leading-tight mb-8">
+              Reset your password easily
+            </h1>
+
+            {/* Instructions with checkmarks */}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-1 flex-shrink-0">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="10" fill="#60A5FA" fillOpacity="0.2"/>
+                    <path d="M6 10L8.5 12.5L14 7" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <p className="text-[#474D6A] text-sm lg:text-base">
+                  Enter your registered email address.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="mt-1 flex-shrink-0">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="10" fill="#60A5FA" fillOpacity="0.2"/>
+                    <path d="M6 10L8.5 12.5L14 7" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <p className="text-[#474D6A] text-sm lg:text-base">
+                  Check your inbox for a one-time OTP.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="mt-1 flex-shrink-0">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="10" fill="#60A5FA" fillOpacity="0.2"/>
+                    <path d="M6 10L8.5 12.5L14 7" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <p className="text-[#474D6A] text-sm lg:text-base">
+                  Use the OTP to create a new password.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="mt-1 flex-shrink-0">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="10" fill="#60A5FA" fillOpacity="0.2"/>
+                    <path d="M6 10L8.5 12.5L14 7" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <p className="text-[#474D6A] text-sm lg:text-base">
+                  Regain secure access to your account.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Back to Login Link */}
+          <button
+            onClick={() => router.push("/employerloginpage")}
+            className="flex items-center gap-2 text-blue-400 border border-blue-400 w-fit px-4 py-4  font-medium transition-colors mt-6"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Back to Login
+          </button>
+        </div>
 
         {/* Right section - Form */}
         <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-md h-fit mx-auto xl:mx-0">
-          
+
           {/* Step 1: Email Input */}
           {step === 1 && (
             <>
-              <h2 className="text-xl sm:text-[22px] font-medium text-[#121224] mt-2">
+              <h2 className="text-xl sm:text-[22px] font-semibold text-[#121224] mt-2">
                 Forgot Password
               </h2>
               <p className="text-sm text-gray-500 mt-2">
                 Enter your email address and we will send you an OTP to reset your password.
               </p>
-              
+
               <div className="mt-5">
-                <label className="block text-sm text-[#091E42] mb-1">Email</label>
+                <label className="block text-sm font-medium text-[#091E42] mb-2">Email Address</label>
                 <input
                   type="email"
                   value={email}
@@ -314,40 +338,51 @@ const ForgotPassword: React.FC = () => {
                     );
                   }}
                   placeholder="Enter your email"
-                  className="w-full rounded-md px-3 py-2.5 outline-none ring-1 ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="w-full rounded-lg px-4 py-3 outline-none ring-1 ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all"
                 />
                 {emailError && (
                   <p className="text-red-500 text-xs mt-1">{emailError}</p>
                 )}
               </div>
-              
+
               <button
                 onClick={sendOTP}
                 disabled={isLoading || !!emailError || !email}
-                className={`mt-6 w-full py-2.5 rounded-lg font-medium transition-all ${!emailError && email
-                  ? "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800"
+                className={`mt-6 w-full py-3 rounded-lg font-medium transition-all ${!emailError && email
+                  ? "bg-blue-400 text-white hover:bg-blue-400 active:bg-blue-400"
                   : "bg-gray-200 text-gray-500 cursor-not-allowed"
                   }`}
               >
                 {isLoading ? "Sending OTP..." : "Send OTP"}
               </button>
-              
-              
+
+              {/* Back to Login - Mobile */}
+              <button
+                onClick={() => router.push("/employerloginpage")}
+                className="lg:hidden flex items-center justify-center gap-2 text-blue-400 hover:text-blue-400 font-medium transition-colors mt-4 w-full"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Back to Login
+              </button>
+
+
             </>
           )}
 
           {/* Step 2: OTP Verification */}
           {step === 2 && (
             <>
-              <h2 className="text-xl sm:text-[22px] font-medium text-[#121224] mt-2">
+              <h2 className="text-xl sm:text-[22px] font-semibold text-[#121224] mt-2">
                 Enter OTP
               </h2>
               <p className="text-sm text-gray-500 mt-2 break-all">
                 We have sent a 6-digit OTP to <strong>{email}</strong>
               </p>
-              
+
               <div className="mt-5">
-                <label className="block text-sm text-[#091E42] mb-1">OTP</label>
+                <label className="block text-sm font-medium text-[#091E42] mb-2">OTP</label>
                 <div className="flex gap-2 justify-between max-w-xs mx-auto sm:mx-0">
                   {otp.map((data, index) => (
                     <input
@@ -355,7 +390,7 @@ const ForgotPassword: React.FC = () => {
                       type="text"
                       inputMode="numeric"
                       maxLength={1}
-                      className="w-10 h-10 sm:w-12 sm:h-12 text-center rounded-md text-lg sm:text-xl outline-none ring-1 ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all"
+                      className="w-10 h-10 sm:w-12 sm:h-12 text-center rounded-lg text-lg sm:text-xl outline-none ring-1 ring-gray-300 focus:ring-2 focus:ring-blue-500 transition-all"
                       value={data}
                       onChange={(e) => handleOtpChange(e.target, index)}
                       onKeyDown={(e) => handleOtpKeyDown(e, index)}
@@ -387,43 +422,54 @@ const ForgotPassword: React.FC = () => {
               <button
                 onClick={verifyOTP}
                 disabled={isLoading || timeLeft === 0}
-                className={`mt-6 w-full py-2.5 rounded-lg font-medium transition-all ${!isLoading && timeLeft > 0
-                  ? "bg-green-600 text-white hover:bg-green-700 active:bg-green-800"
+                className={`mt-6 w-full py-3 rounded-lg font-medium transition-all ${!isLoading && timeLeft > 0
+                  ? "bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700"
                   : "bg-gray-300 text-gray-600 cursor-not-allowed"
                   }`}
               >
                 {isLoading ? "Verifying..." : "Verify OTP"}
               </button>
-              
+
               {timeLeft === 0 && (
                 <p className="mt-2 text-center text-red-600 text-sm">
                   OTP expired. Please request a new OTP.
                 </p>
               )}
+
+              {/* Back to Login - Mobile */}
+              <button
+                onClick={() => router.push("/employerloginpage")}
+                className="lg:hidden flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors mt-4 w-full"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Back to Login
+              </button>
             </>
           )}
 
           {/* Step 3: Reset Password */}
           {step === 3 && (
             <>
-              <h2 className="text-xl sm:text-[22px] font-medium text-[#121224] mt-2">
+              <h2 className="text-xl sm:text-[22px] font-semibold text-[#121224] mt-2">
                 Set New Password
               </h2>
               <p className="text-sm text-gray-500 mt-2">
                 Create a strong password for your account.
               </p>
-              
+
               <div className="mt-5">
-                <label className="block text-sm text-[#091E42] mb-1">
+                <label className="block text-sm font-medium text-[#091E42] mb-2">
                   New Password
                 </label>
-                <div className="flex items-center rounded-md px-3 ring-1 ring-gray-300 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+                <div className="flex items-center rounded-lg px-4 ring-1 ring-gray-300 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
                   <input
                     type={showNewPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter new password"
-                    className="w-full py-2.5 outline-none"
+                    className="w-full py-3 outline-none"
                   />
                   <button
                     type="button"
@@ -434,18 +480,18 @@ const ForgotPassword: React.FC = () => {
                   </button>
                 </div>
               </div>
-              
+
               <div className="mt-5">
-                <label className="block text-sm text-[#091E42] mb-1">
+                <label className="block text-sm font-medium text-[#091E42] mb-2">
                   Confirm New Password
                 </label>
-                <div className="flex items-center rounded-md px-3 ring-1 ring-gray-300 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+                <div className="flex items-center rounded-lg px-4 ring-1 ring-gray-300 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm new password"
-                    className="w-full py-2.5 outline-none"
+                    className="w-full py-3 outline-none"
                   />
                   <button
                     type="button"
@@ -459,22 +505,34 @@ const ForgotPassword: React.FC = () => {
                   <p className="text-red-500 text-xs mt-1">Passwords do not match</p>
                 )}
               </div>
-              
+
               <button
                 onClick={updatePassword}
                 disabled={isLoading || !newPassword || !confirmPassword || newPassword !== confirmPassword}
-                className={`mt-6 w-full py-2.5 rounded-lg font-medium transition-all ${newPassword && confirmPassword && newPassword === confirmPassword
-                  ? "bg-yellow-500 text-black hover:bg-yellow-600 active:bg-yellow-700"
+                className={`mt-6 w-full py-3 rounded-lg font-medium transition-all ${newPassword && confirmPassword && newPassword === confirmPassword
+                  ? "bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700"
                   : "bg-gray-200 text-gray-500 cursor-not-allowed"
                   }`}
               >
                 {isLoading ? "Updating Password..." : "Update Password"}
+              </button>
+
+              {/* Back to Login - Mobile */}
+              <button
+                onClick={() => router.push("/employerloginpage")}
+                className="lg:hidden flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors mt-4 w-full"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Back to Login
               </button>
             </>
           )}
         </div>
       </div>
     </div>
+     <Footer />
   </div>
 
   );

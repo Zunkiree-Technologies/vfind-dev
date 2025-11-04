@@ -5,6 +5,7 @@ import Image from "next/image";
 import Navbar from "../../../components/navbar";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import Footer from "../../../components/footer-section";
+import { setAuthCookies } from "@/utils/cookies";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -65,14 +66,15 @@ export default function LoginPage() {
       );
 
       const data = await response.json();
-      // console.log("Xano authToken:", data.authToken);
       if (!response.ok) throw new Error(data.message || "Login failed");
 
       if (data.authToken) {
+        // Store authentication data in secure cookies
+        setAuthCookies(data.authToken, "Nurse", email);
+
+        // Keep localStorage for backward compatibility (optional)
         localStorage.setItem("token", data.authToken);
         localStorage.setItem("email", email);
-
-        // console.log("Token saved:", localStorage.getItem("token"));
       }
 
       setSuccess("Login successful!");

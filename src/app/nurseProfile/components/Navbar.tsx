@@ -6,6 +6,8 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import NotificationSidebar from "./NotificationSidebar";
 import { MapPin, Search, UserRound, Menu, X } from "lucide-react";
 import Image from "next/image";
+import { useAuth } from "@/contexts/AuthContext";
+import { getCookie } from "@/utils/cookies";
 
 
 export const Navbar = () => {
@@ -14,7 +16,6 @@ export const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const [authToken, setAuthToken] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -22,12 +23,12 @@ export const Navbar = () => {
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
+  // Use auth context
+  const { isAuthenticated, user, logout } = useAuth();
+
   useEffect(() => {
     setSearchTerm(searchParams.get("search") || "");
     setLocationTerm(searchParams.get("location") || "");
-
-    const token = localStorage.getItem("token");
-    setAuthToken(token);
   }, [searchParams]);
 
   useEffect(() => {
@@ -65,15 +66,12 @@ export const Navbar = () => {
   }, 250);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setAuthToken(null);
+    logout(); // Uses auth context logout
     setMobileMenuOpen(false);
-    router.push("/signin");
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setAuthToken(token);
+    const token = getCookie("authToken") || localStorage.getItem("token");
 
     if (token) {
       fetch("https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_profile", {
@@ -97,8 +95,7 @@ export const Navbar = () => {
           <div
             className="flex items-center space-x-2 cursor-pointer flex-shrink-0"
             onClick={() => {
-              const token = localStorage.getItem("token");
-              if (token) {
+              if (isAuthenticated) {
                 router.push("/nurseProfile");
               } else {
                 router.push("/");
@@ -112,7 +109,7 @@ export const Navbar = () => {
 
           {/* Desktop Navigation Links - Hidden on mobile and tablet */}
           <div className="hidden lg:flex items-center gap-6">
-            {authToken ? (
+            {isAuthenticated ? (
               <>
                 <Link
                   href="/nurseProfile/connectedstatus"
@@ -209,7 +206,7 @@ export const Navbar = () => {
 
           {/* Right Side - User Menu & Notification */}
           <div className="flex items-center gap-2">
-            {authToken && (
+            {isAuthenticated && (
               <>
                 
 
@@ -333,7 +330,7 @@ export const Navbar = () => {
           ref={mobileMenuRef}
           className="lg:hidden bg-white border-t border-gray-200 shadow-lg"
         >
-          {authToken ? (
+          {isAuthenticated ? (
             <div className="px-4 py-3 space-y-2">
               <Link
                 href="/nurseProfile/connectedstatus"

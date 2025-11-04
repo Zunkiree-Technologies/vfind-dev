@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../../../components/navbar";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import Footer from "../../../components/footer-section";
+import { setAuthCookies, getCookie } from "@/utils/cookies";
 
 const EmployerLoginPage = () => {
   const router = useRouter();
@@ -153,7 +154,8 @@ const EmployerLoginPage = () => {
         return;
       }
 
-      // Store the token
+      // Store the token in cookies and localStorage
+      setAuthCookies(authToken, "Employer", userEmail);
       localStorage.setItem("authToken", authToken);
 
       // Step 2: Send OTP
@@ -174,7 +176,7 @@ const EmployerLoginPage = () => {
 
   // Resend OTP function
   const handleResendOtp = async () => {
-    const authToken = localStorage.getItem("authToken");
+    const authToken = getCookie("authToken") || localStorage.getItem("authToken");
     const userEmail = email.trim().toLowerCase();
 
     if (!authToken) {
@@ -212,7 +214,7 @@ const EmployerLoginPage = () => {
       return;
     }
 
-    const authToken = localStorage.getItem("authToken");
+    const authToken = getCookie("authToken") || localStorage.getItem("authToken");
     if (!authToken) {
       alert("Authentication token missing. Please login again.");
       return;

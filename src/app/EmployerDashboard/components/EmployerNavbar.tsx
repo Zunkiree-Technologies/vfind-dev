@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import NotificationSidebar from "./NotificationSidebar";
 import { UserRound, Menu, X } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NavbarProps {
   companyName?: string;
@@ -17,6 +18,9 @@ export default function EmployerNavbar({ }: NavbarProps) {
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Use auth context
+  const { logout } = useAuth();
 
   const toggleMobileMenu = () => setShowMobileMenu(!showMobileMenu);
 
@@ -143,9 +147,8 @@ export default function EmployerNavbar({ }: NavbarProps) {
                   </button>
                   <button
                     onClick={() => {
-                      localStorage.removeItem("authToken");
+                      logout(); // Uses auth context logout
                       sessionStorage.clear();
-                      router.push("/employerloginpage");
                     }}
                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >

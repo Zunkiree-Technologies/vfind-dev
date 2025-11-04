@@ -1,34 +1,33 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { BenefitsSection } from "../../../components/benefits-section2";
 import Image from "next/image";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Public components
 import NavbarPublic from "../../../components/navbar";
 import FooterPublic from "../../../components/footer-section";
 
 // Logged-in components
-import { Navbar as NavbarPrivate } from "../nurseProfile/components/Navbar";
+import { Navbar as NurseNavbar } from "../nurseProfile/components/Navbar";
+import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
 import FooterPrivate from "../Admin/components/layout/Footer";
 import { ArrowRight } from "lucide-react";
 
 export default function AboutPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    // Check login token from localStorage, sessionStorage, or cookie
-    const token =
-      localStorage.getItem("token") ||
-      sessionStorage.getItem("token") ||
-      document.cookie.includes("token=");
-    setIsLoggedIn(!!token);
-  }, []);
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <main>
-      {/* ✅ Conditional Navbar */}
-      {isLoggedIn ? <NavbarPrivate /> : <NavbarPublic />}
+      {/* Conditional Navbar based on user role */}
+      {!isAuthenticated ? (
+        <NavbarPublic />
+      ) : user.role === "Employer" ? (
+        <EmployerNavbar />
+      ) : (
+        <NurseNavbar />
+      )}
 
       {/* --------------------------other section about vfind---------------------- */}
       <section
@@ -220,8 +219,8 @@ export default function AboutPage() {
         </div>
       </section>
       {/* -------------------------- Footer Section -------------------------- */}
-      <div >
-        {isLoggedIn ? <FooterPrivate /> : <FooterPublic />}
+      <div>
+        {isAuthenticated ? <FooterPrivate /> : <FooterPublic />}
       </div>
 
 

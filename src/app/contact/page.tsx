@@ -4,26 +4,19 @@ import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Phone, Clock, Calendar, Mail } from "lucide-react";
-
+import { useAuth } from "@/contexts/AuthContext";
 
 // Public components
 import NavbarPublic from "../../../components/navbar";
 import FooterPublic from "../../../components/footer-section";
 
 // Logged-in components
-import { Navbar as NavbarPrivate } from "../nurseProfile/components/Navbar";
+import { Navbar as NurseNavbar } from "../nurseProfile/components/Navbar";
+import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
 import FooterPrivate from "../Admin/components/layout/Footer";
 
 export default function ContactUs() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const token =
-      localStorage.getItem("token") ||
-      sessionStorage.getItem("token") ||
-      document.cookie.includes("token=");
-    setIsLoggedIn(!!token);
-  }, []);
+  const { isAuthenticated, user } = useAuth();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -64,7 +57,14 @@ export default function ContactUs() {
   return (
     <div>
       {/* Navbar */}
-      {isLoggedIn ? <NavbarPrivate /> : <NavbarPublic />}
+      {/* Conditional Navbar based on user role */}
+      {!isAuthenticated ? (
+        <NavbarPublic />
+      ) : user.role === "Employer" ? (
+        <EmployerNavbar />
+      ) : (
+        <NurseNavbar />
+      )}
 
       {/* Contact Section */}
       <div className="bg-[#f9fafb] flex justify-center items-center py-16 md:py-20">
@@ -236,7 +236,7 @@ export default function ContactUs() {
       </div>
 
       {/* Footer */}
-      {isLoggedIn ? <FooterPrivate /> : <FooterPublic />}
+      {isAuthenticated ? <FooterPrivate /> : <FooterPublic />}
     </div>
   );
 }

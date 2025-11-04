@@ -1,7 +1,8 @@
-"use client"; 
+"use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
+import { setAuthCookies } from "@/utils/cookies"; 
 
 export default function OAuthCallback() {
   const [status, setStatus] = useState("Processing...");
@@ -89,8 +90,11 @@ export default function OAuthCallback() {
           console.log("User info:", { name: data.name, email: data.email });
           setStatus("Login successful! Redirecting...");
 
-          // Store the token and user info (consistent with regular signin)
-          localStorage.setItem("token", data.token); // Changed from 'authToken'
+          // Store authentication data in secure cookies
+          setAuthCookies(data.token, "Nurse", data.email);
+
+          // Store in localStorage for backward compatibility
+          localStorage.setItem("token", data.token);
           localStorage.setItem("email", data.email);
           localStorage.setItem("userName", data.name);
 
