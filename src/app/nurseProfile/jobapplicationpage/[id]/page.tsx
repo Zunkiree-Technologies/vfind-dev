@@ -31,6 +31,12 @@ interface Job {
 
 interface Company {
   about_company: string;
+  companyName?: string;
+  user_id?: number;
+  businessType?: string;
+  company_logo?: {
+    url: string;
+  };
 }
 
 export default function JobApplicationPage() {
@@ -219,9 +225,8 @@ export default function JobApplicationPage() {
         }
 
 
-        if (jobData.user_id) {
-          await fetchCompanyInfo(jobData.user_id);
-        }
+        // Fetch company info using job ID
+        await fetchCompanyInfo(jobData.id);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to fetch job");
       } finally {
@@ -238,14 +243,14 @@ export default function JobApplicationPage() {
     }
   }, [job, nurseEmail, isLoggedIn]);
 
-  const fetchCompanyInfo = async (id: number) => {
+  const fetchCompanyInfo = async (jobsId: number) => {
     try {
       const companyRes = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company_for_saved_jobs_page`,
+        `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company_for_nurse`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: id }),
+          body: JSON.stringify({ jobs_id: jobsId.toString() }),
         }
       );
 
@@ -254,6 +259,10 @@ export default function JobApplicationPage() {
         setCompany({
           about_company:
             companyData.about_company || "No company information available.",
+          companyName: companyData.companyName || "Healthcare Facility",
+          user_id: companyData.user_id,
+          businessType: companyData.businessType || "No description available.",
+          company_logo: companyData.company_logo,
         });
       } else {
         setCompany({ about_company: "Failed to load company information." });
@@ -419,12 +428,21 @@ export default function JobApplicationPage() {
                       <Building2 className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
-                      <h1 className="text-xl font-semibold text-gray-900">
+                      <h1
+                        className="text-xl font-semibold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                        onClick={() => {
+                          if (job.user_id) {
+                            router.push(`/nurseProfile/connectedstatus/${job.user_id}`);
+                          }
+                        }}
+                      >
                         {getCompanyName()}
                       </h1>
-                      <h2 className="text-[20px] font-semibold text-gray-900">{job.title}</h2>
                     </div>
+                    
                   </div>
+                      <h2 className="text-[20px] font-semibold text-gray-900">{job.title}</h2>
+
 
                   {isExpired && (
                     <div className="flex items-center gap-2 text-[#B94A48] font-medium text-sm bg-[#F2D7D5] px-2 py-4 w-fit rounded-sm">
@@ -608,16 +626,39 @@ export default function JobApplicationPage() {
             {/* Right Column - About Company */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  About Company
-                </h3>
-                <div className="text-sm text-gray-700 leading-relaxed">
-                  {company?.about_company ? (
-                    <p>{company.about_company}</p>
-                  ) : (
-                    <p>Loading company information...</p>
-                  )}
-                </div>
+                {company ? (
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => {
+                      if (company.user_id) {
+                        router.push(`/nurseProfile/connectedstatus/${company.user_id}`);
+                      }
+                    }}
+                  >
+                    {/* Company Logo */}
+                    {company.company_logo?.url && (
+                      <div className="flex justify-center mb-4">
+                        <img
+                          src={company.company_logo.url}
+                          alt={company.companyName || "Company Logo"}
+                          className="w-16 h-16 object-contain rounded-lg"
+                        />
+                      </div>
+                    )}
+
+                    {/* Company Name */}
+                    <h3 className="text-lg font-semibold text-black mb-4 text-center hover:text-blue-400 transition-colors">
+                      {company.companyName || "Healthcare Facility"}
+                    </h3>
+
+                    {/* Company Description */}
+                    <div className="text-sm text-gray-700 leading-relaxed">
+                      <p>{company.businessType || "No description available."}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-700">Loading company information...</p>
+                )}
               </div>
             </div>
           </div>

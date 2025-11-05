@@ -65,27 +65,43 @@ export default function EmployerDetailPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token || !id) {
+    if (!id) {
       setLoading(false);
       return;
     }
 
     const fetchEmployer = async () => {
       try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
-          { headers: { Authorization: `Bearer ${token}` } }
+        // First, try to fetch from notifications (for connected employers)
+        if (token) {
+          const res = await fetch(
+            "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const connection = data.find((item: any) => item._employer_profiles?.id === Number(id));
+            if (connection?._employer_profiles) {
+              setEmployer(connection._employer_profiles);
+              setLogoKey(Date.now());
+              setLoading(false);
+              return;
+            }
+          }
+        }
+
+        // If not found in notifications, fetch directly by ID
+        const directRes = await fetch(
+          `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/employer_profiles/${id}`
         );
 
-        if (!res.ok) throw new Error("Failed to fetch employer data");
-        const data = await res.json();
+        if (!directRes.ok) throw new Error("Employer not found");
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const connection = data.find((item: any) => item._employer_profiles?.id === Number(id));
-        if (connection?._employer_profiles) {
-          setEmployer(connection._employer_profiles);
-          setLogoKey(Date.now());
-        }
+        const employerData = await directRes.json();
+        setEmployer(employerData);
+        setLogoKey(Date.now());
       } catch (err) {
         console.error(err);
       } finally {

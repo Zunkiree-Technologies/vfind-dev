@@ -122,7 +122,7 @@ export default function NurseSignup() {
             case 6:
                 return (
                     formData.workingInHealthcare &&
-                    (formData.workingInHealthcare === "No" ||
+                    (formData.workingInHealthcare === "No (Fresher)" ||
                         (formData.experience && formData.organisation))
                 );
             case 7:
@@ -413,7 +413,7 @@ export default function NurseSignup() {
                     </div>
 
                     <div
-                        className="w-full rounded-lg shadow-md flex flex-col bg-white"
+                        className="w-full rounded-lg shadow-md flex flex-col bg-white max-h-[calc(100vh-200px)] overflow-y-auto"
                         ref={formRef}
                     >
                         <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 flex-grow">
@@ -430,7 +430,26 @@ export default function NurseSignup() {
                             <div className="flex justify-end pt-4 pb-2 lg:pt-6 lg:pb-4 border-t border-gray-200 sticky bottom-0 bg-white">
                                 {currentStep < totalSteps && (
                                     <button
-                                        onClick={() => setCurrentStep((prev) => prev + 1)}
+                                        onClick={() => {
+                                            setCurrentStep((prev) => prev + 1);
+                                            // Scroll within the form container only
+                                            setTimeout(() => {
+                                                const nextStep = currentStep + 1;
+                                                const nextStepElement = document.getElementById(`step-${nextStep}`);
+                                                if (nextStepElement && formRef.current) {
+                                                    // Calculate the position relative to the form container
+                                                    const containerTop = formRef.current.offsetTop;
+                                                    const elementTop = nextStepElement.offsetTop;
+                                                    const scrollPosition = elementTop - containerTop;
+
+                                                    // Scroll within the form container
+                                                    formRef.current.scrollTo({
+                                                        top: scrollPosition,
+                                                        behavior: "smooth"
+                                                    });
+                                                }
+                                            }, 100);
+                                        }}
                                         disabled={!isStepComplete(currentStep)}
                                         className={`group px-4 lg:px-4 py-2 lg:py-2 rounded text-white text-sm lg:text-base transition-all duration-300 flex items-center justify-center overflow-hidden ${isStepComplete(currentStep)
                                                 ? "bg-[#61A6FA]"

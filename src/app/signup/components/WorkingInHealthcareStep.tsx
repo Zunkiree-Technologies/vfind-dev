@@ -51,7 +51,15 @@ export function WorkingInHealthcareStep({ formData, handleChange }: StepProps) {
                 className={`w-5 h-5 flex items-center justify-center border-2 ${
                   isSelected ? "border-blue-500 bg-blue-500" : "border-gray-400"
                 }`}
-                onClick={() => handleChange("workingInHealthcare", opt)}
+                onClick={() => {
+                  handleChange("workingInHealthcare", opt);
+                  // Clear experience and organisation fields when switching to "No (Fresher)"
+                  if (opt === "No (Fresher)") {
+                    handleChange("experience", "");
+                    handleChange("organisation", "");
+                    setQuery("");
+                  }
+                }}
               >
                 {isSelected && <Check className="h-3 w-3 text-white" />}
               </div>

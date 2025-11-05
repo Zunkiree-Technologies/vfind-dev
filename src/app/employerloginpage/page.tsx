@@ -5,6 +5,7 @@ import Navbar from "../../../components/navbar";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import Footer from "../../../components/footer-section";
 import { setAuthCookies, getCookie } from "@/utils/cookies";
+import MainButton from "@/components/ui/MainButton";
 
 const EmployerLoginPage = () => {
   const router = useRouter();
@@ -377,23 +378,21 @@ bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
                     </a>
                   </div>
                 </div>
-
                 <button
                   onClick={handleLogin}
                   disabled={isLoading || !!emailError || !email || !password}
-                  className="group w-full h-10 md:h-11 bg-[#4A90E2] text-white rounded-lg font-medium transition-all duration-300 mt-8 overflow-hidden disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center hover:bg-blue-500"
+
+                  className="group w-full  h-[40px] bg-[#61A6FA] text-white rounded-lg font-medium transition-all duration-300 mt-8 block overflow-hidden flex items-center justify-center"
                 >
-                  <span className="flex items-center gap-2">
                     <span className="transition-all duration-300 group-hover:-translate-x-1">
                       {isLoading ? "Processing..." : "Login"}
                     </span>
-                    {!isLoading && !(!!emailError || !email || !password) && (
+                    {!isLoading && (
                       <ArrowRight
                         className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                         strokeWidth={3}
                       />
                     )}
-                  </span>
                 </button>
 
                 <div className="block text-center mt-6 text-sm md:text-base text-gray-600">

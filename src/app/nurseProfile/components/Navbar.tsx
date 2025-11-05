@@ -73,7 +73,7 @@ export const Navbar = () => {
   useEffect(() => {
     const token = getCookie("authToken") || localStorage.getItem("token");
 
-    if (token) {
+    if (token && isAuthenticated) {
       fetch("https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -82,8 +82,10 @@ export const Navbar = () => {
           setProfileImage(data.profileImage?.url || null);
         })
         .catch((err) => console.error("Error fetching profile:", err));
+    } else {
+      setProfileImage(null);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const isActive = (path: string) => pathname === path;
 

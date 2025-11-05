@@ -1394,7 +1394,7 @@ export default function NurseProfilePage() {
               </div>
 
               {((isEditingVisaResidency &&
-                editedVisaInfo.workHoursRestricted === "Yes") ||
+                (editedVisaInfo.workHoursRestricted ?? profile.workHoursRestricted) === "Yes") ||
                 (!isEditingVisaResidency &&
                   profile.workHoursRestricted === "Yes")) && (
                   <div>
@@ -1415,7 +1415,7 @@ export default function NurseProfilePage() {
                       />
                     ) : (
                       <p className="text-gray-900">
-                        {profile.maxWorkHours || "Not specified"}
+                        {profile.maxWorkHours || "Not specified"} HR/Week
                       </p>
                     )}
                   </div>
