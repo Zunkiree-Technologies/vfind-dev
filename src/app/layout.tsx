@@ -6,7 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-inter",
 });
 
@@ -35,8 +35,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${montserrat.variable} ${openSans.variable} antialiased`}
-        style={{ fontFamily: "var(--font-open-sans), var(--font-inter), sans-serif" }}
+        className={`${inter.variable} ${montserrat.variable} ${openSans.variable} antialiased font-sans`}
+        style={{ fontFamily: "var(--font-inter), var(--font-open-sans), system-ui, sans-serif" }}
       >
         <AuthProvider>
           <ThemeWrapper>{children}</ThemeWrapper>
