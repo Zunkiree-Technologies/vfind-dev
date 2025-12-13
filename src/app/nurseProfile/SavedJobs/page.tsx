@@ -12,11 +12,11 @@ import {
   Ban,
 } from "lucide-react";
 import Loader from "../../../../components/loading";
-import Link from "next/link";
 import { Navbar } from "../components/Navbar";
 import Footer from "@/app/Admin/components/layout/Footer";
 import { JobFilters } from "../components/JobFilters";
 import MainButton from "@/components/ui/MainButton";
+import { getSavedJobs } from "@/lib/supabase-api";
 
 const EXPERIENCE_RANGES: Record<string, [number, number]> = {
   "Fresher": [0, 0.5],
@@ -168,29 +168,30 @@ export default function SavedJobs() {
       setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) throw new Error("You must be logged in");
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/getJobsForSpecificNurse",
-        {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (!res.ok) throw new Error("Failed to fetch saved jobs");
 
-      const data = await res.json();
-      console.log(data)
-      console.log("Saved Jobs API Response:", data);
+      const savedJobsData = await getSavedJobs(token);
 
-      // Correctly extract the array from the response
-      const list = Array.isArray(data.result1)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ? data.result1.map((item: any) => ({
-          ...item._jobs, // spread the actual job details
-          savedId: item.id, // optional: keep the saved job record id
-
-
-        }))
-        : [];
+      // Map saved jobs to Job interface
+      const list: Job[] = savedJobsData.map((item) => {
+        const job = item.job;
+        return {
+          id: Number(job?.id) || 0,
+          title: job?.title || "",
+          location: job?.location || "",
+          locality: job?.locality,
+          companyName: job?.locality,
+          type: job?.type,
+          minPay: job?.min_pay,
+          maxPay: job?.max_pay,
+          description: job?.description,
+          experienceMin: job?.experience_min,
+          experienceMax: job?.experience_max,
+          roleCategory: job?.role_category,
+          shift: job?.job_shift,
+          created_at: job?.created_at,
+          expiryDate: job?.expiry_date,
+        };
+      });
 
       console.log("Jobs list:", list);
 

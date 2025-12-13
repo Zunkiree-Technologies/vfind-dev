@@ -5,6 +5,7 @@ import Loader from "../../../../components/loading";
 import { useSearchParams } from "next/navigation";
 import MainButton from "@/components/ui/MainButton";
 import { JobFilters } from "./JobFilters";
+import { getActiveJobs } from "@/lib/supabase-api";
 
 const EXPERIENCE_RANGES: Record<string, [number, number]> = {
   "Fresher": [0, 0.5],
@@ -191,11 +192,28 @@ export default function JobData() {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const res = await fetch("https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs");
-        if (!res.ok) throw new Error("Failed to fetch jobs");
-        const data = await res.json();
-        console.log(data)
-        const list = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        const data = await getActiveJobs();
+
+        // Map Supabase data to Job interface
+        const list: Job[] = data.map((job) => ({
+          id: Number(job.id),
+          title: job.title || "",
+          location: job.location || "",
+          locality: job.locality,
+          companyName: job.locality,
+          type: job.type,
+          minPay: job.min_pay,
+          maxPay: job.max_pay,
+          description: job.description,
+          experienceMin: job.experience_min,
+          experienceMax: job.experience_max,
+          shift: job.job_shift,
+          roleCategory: job.role_category,
+          visaRequirement: job.visa_requirement,
+          created_at: job.created_at,
+          expiryDate: job.expiry_date,
+        }));
+
         setJobs(list);
         setFilteredJobs(list);
       } catch (err) {

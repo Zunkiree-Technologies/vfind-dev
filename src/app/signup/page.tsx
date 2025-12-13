@@ -16,6 +16,7 @@ import { ShiftPreferenceStep } from "./components/ShiftPreferanceStep";
 import Navbar from "../../../components/navbar";
 import Footer from "../../../components/footer-section";
 import { ArrowRight, CheckCircle } from "lucide-react";
+import { registerNurse } from "@/lib/supabase-auth";
 
 export default function NurseSignup() {
     const router = useRouter();
@@ -251,62 +252,54 @@ export default function NurseSignup() {
                 }
             }
 
-            const form = new FormData();
-            for (const key in formData) {
-                const value = formData[key as keyof FormDataType];
-                if (Array.isArray(value)) {
-                    form.append(key, JSON.stringify(value));
-                } else if (value instanceof File) {
-                    form.append(key, value);
-                } else {
-                    form.append(key, value as string);
-                }
-            }
+            console.log('Submitting form data to Supabase...');
 
-            console.log('Submitting form data...', Object.fromEntries(form.entries()));
+            // Use Supabase registration
+            const result = await registerNurse({
+                email: formData.email,
+                password: formData.password,
+                fullName: formData.fullName,
+                phone: formData.phone,
+                postcode: formData.postcode,
+                currentResidentialLocation: formData.currentResidentialLocation,
+                jobTypes: formData.jobTypes,
+                openToOtherTypes: formData.openToOtherTypes,
+                shiftPreferences: formData.shiftPreferences,
+                startTime: formData.startTime,
+                startDate: formData.startDate,
+                jobSearchStatus: formData.jobSearchStatus,
+                qualification: formData.qualification,
+                otherQualification: formData.otherQualification,
+                workingInHealthcare: formData.workingInHealthcare,
+                experience: formData.experience,
+                organisation: formData.organisation,
+                locationPreference: formData.locationPreference,
+                preferredLocations: formData.preferredLocations,
+                certifications: formData.certifications,
+                residencyStatus: formData.residencyStatus,
+                visaType: formData.visaType,
+                visaDuration: formData.visaDuration,
+                workHoursRestricted: formData.workHoursRestricted,
+                maxWorkHours: formData.maxWorkHours,
+                termsAccepted: formData.termsAccepted,
+                visibilityStatus: formData.visibilityStatus,
+            });
 
-            const response = await fetch(
-                process.env.NEXT_PUBLIC_SIGNUP_ENDPOINT ||
-                "https://x76o-gnx4-xrav.a2.xano.io/api:YhrHeNAH/nurse_onboarding",
-                {
-                    method: "POST",
-                    body: form,
-                    headers: {
-                        // Don't set Content-Type when sending FormData, let the browser set it
-                    }
-                }
-            );
+            console.log('Registration result:', result);
 
-            console.log('Response status:', response.status);
-            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-            let responseData;
-            const contentType = response.headers.get("content-type");
-
-            if (contentType && contentType.includes("application/json")) {
-                responseData = await response.json();
-            } else {
-                // Handle non-JSON responses
-                const textResponse = await response.text();
-                console.log('Non-JSON response:', textResponse);
-                responseData = { message: textResponse };
-            }
-
-            console.log('Response data:', responseData);
-
-            if (response.ok) {
+            if (result.success) {
                 console.log('Signup successful!');
                 // Save token and profile, then redirect
                 if (typeof window !== "undefined") {
-                    if (responseData.authToken) {
-                        localStorage.setItem("authToken", responseData.authToken);
+                    if (result.authToken) {
+                        localStorage.setItem("authToken", result.authToken);
                     }
-                    if (responseData.user) {
-                        localStorage.setItem("userProfile", JSON.stringify(responseData.user));
+                    if (result.data) {
+                        localStorage.setItem("userProfile", JSON.stringify(result.data));
                     }
 
                     // Show congratulations message
-                    alert("🎉 Congratulations! Your account has been created successfully!");
+                    alert("Congratulations! Your account has been created successfully!");
 
                     // Small delay to let user read the message before redirect
                     setTimeout(() => {
@@ -315,7 +308,7 @@ export default function NurseSignup() {
                 }
             } else {
                 // Handle error responses
-                const errorMessage = getErrorMessage(responseData, response.status);
+                const errorMessage = getErrorMessage({ message: result.error }, 400);
                 console.error('Signup failed:', errorMessage);
                 alert(`Registration failed: ${errorMessage}`);
             }

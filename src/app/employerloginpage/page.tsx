@@ -6,6 +6,7 @@ import { ArrowRight, CheckCircle } from "lucide-react";
 import Footer from "../../../components/footer-section";
 import { setAuthCookies, getCookie } from "@/utils/cookies";
 import MainButton from "@/components/ui/MainButton";
+import { loginEmployer, sendOTP, verifyOTP } from "@/lib/supabase-auth";
 
 const EmployerLoginPage = () => {
   const router = useRouter();
@@ -66,9 +67,6 @@ const EmployerLoginPage = () => {
     return regex.test(value);
   };
 
-  // API Base
-  const LOGIN_ENDPOINT = process.env.NEXT_PUBLIC_LOGIN_ENDPOINT || "";
-
   // Handle OTP Input
   const handleOtpChange = (
     target: EventTarget & HTMLInputElement,
@@ -92,24 +90,15 @@ const EmployerLoginPage = () => {
   };
 
   // Function to send OTP (used for both initial send and resend)
-  const sendOtp = async (authToken: string, userEmail: string) => {
-    const otpRes = await fetch(
-      "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/email_otp",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({ email: userEmail }),
-      }
-    );
-
-    if (!otpRes.ok) {
-      throw new Error("Failed to send OTP email");
+  const sendOtpEmail = async (userEmail: string) => {
+    const result = await sendOTP(userEmail, "employer_login");
+    if (!result.success) {
+      throw new Error(result.error || "Failed to send OTP email");
     }
-
-    return otpRes;
+    // In production, the OTP would be sent via email
+    // For development, the OTP is logged to console
+    console.log("OTP sent for:", userEmail);
+    return result;
   };
 
   // Step 1: Login with email & password (and request OTP)
@@ -128,26 +117,16 @@ const EmployerLoginPage = () => {
     try {
       setIsLoading(true);
 
-      // Step 1: Call login API
-      const loginRes = await fetch(LOGIN_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: userEmail,
-          password,
-          role: "Employer",
-        }),
-      });
+      // Step 1: Call login API with Supabase
+      const loginResult = await loginEmployer(userEmail, password);
 
-      if (!loginRes.ok) {
-        alert("Invalid Credentials");
+      if (!loginResult.success) {
+        alert(loginResult.error || "Invalid Credentials");
         setIsLoading(false);
         return;
       }
 
-      const loginData = await loginRes.json();
-
-      const authToken = loginData.authToken;
+      const authToken = loginResult.authToken;
 
       if (!authToken) {
         alert("Login failed: no auth token returned");
@@ -160,7 +139,7 @@ const EmployerLoginPage = () => {
       localStorage.setItem("authToken", authToken);
 
       // Step 2: Send OTP
-      await sendOtp(authToken, userEmail);
+      await sendOtpEmail(userEmail);
 
       // Move to step 2: show OTP input UI and reset timer
       setStep(2);
@@ -177,18 +156,12 @@ const EmployerLoginPage = () => {
 
   // Resend OTP function
   const handleResendOtp = async () => {
-    const authToken = getCookie("authToken") || localStorage.getItem("authToken");
     const userEmail = email.trim().toLowerCase();
-
-    if (!authToken) {
-      alert("Authentication token missing. Please login again.");
-      return;
-    }
 
     try {
       setIsResending(true);
 
-      await sendOtp(authToken, userEmail);
+      await sendOtpEmail(userEmail);
 
       // Reset OTP input
       setOtp(new Array(6).fill(""));
@@ -215,36 +188,18 @@ const EmployerLoginPage = () => {
       return;
     }
 
-    const authToken = getCookie("authToken") || localStorage.getItem("authToken");
-    if (!authToken) {
-      alert("Authentication token missing. Please login again.");
-      return;
-    }
+    const userEmail = email.trim().toLowerCase();
 
     try {
       setIsLoading(true);
 
-      const response = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/verify_otp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: JSON.stringify({
-            otp_code: enteredOtp,
-          }),
-        }
-      );
+      const result = await verifyOTP(userEmail, enteredOtp, "employer_login");
 
-      const result = await response.json();
-
-      if (response.ok) {
+      if (result.success) {
         // OTP verified successfully
         router.push("/EmployerDashboard");
       } else {
-        alert(result.message || "Invalid or expired OTP. Please try again.");
+        alert(result.error || "Invalid or expired OTP. Please try again.");
       }
     } catch (error) {
       console.error("OTP verification error:", error);

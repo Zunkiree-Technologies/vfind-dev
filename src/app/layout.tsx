@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Montserrat, Open_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeWrapper from "./ThemeWrapper";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -8,6 +8,18 @@ const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-inter",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-montserrat",
+});
+
+const openSans = Open_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-open-sans",
 });
 
 export const metadata: Metadata = {
@@ -23,8 +35,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} antialiased`}
-        style={{ fontFamily: "var(--font-inter)" }}
+        className={`${inter.variable} ${montserrat.variable} ${openSans.variable} antialiased`}
+        style={{ fontFamily: "var(--font-open-sans), var(--font-inter), sans-serif" }}
       >
         <AuthProvider>
           <ThemeWrapper>{children}</ThemeWrapper>

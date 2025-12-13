@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Loader from "../../../../../../components/loading";
 import { Badge } from "@/components/ui/Badge";
+import { supabase } from "@/lib/supabase";
 
 interface Employer {
   id?: number;
@@ -40,13 +41,37 @@ export default function EmployerPage({ params }: { params: Promise<{ id: string 
   useEffect(() => {
     const fetchEmployer = async () => {
       try {
-        const res = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/employer_profiles/${id}`,
-          { cache: "no-store" }
-        );
-        if (!res.ok) return notFound();
-        const data = await res.json();
-        setEmployer(data);
+        const { data, error } = await supabase
+          .from('employers')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error("Failed to load employer:", error);
+          return;
+        }
+
+        if (!data) return notFound();
+
+        // Map Supabase data to Employer interface
+        const employerData: Employer = {
+          id: Number(data.id),
+          mobile: data.mobile,
+          creatingAccountAs: data.account_type,
+          fullName: data.full_name,
+          email: data.email,
+          companyName: data.company_name,
+          numberOfEmployees: data.number_of_employees,
+          yourDesignation: data.designation,
+          country: data.country,
+          city: data.city,
+          pinCode: data.pin_code,
+          companyAddress: data.company_address,
+          created_at: data.created_at,
+        };
+
+        setEmployer(employerData);
       } catch (err) {
         console.error("Failed to load employer:", err);
       } finally {

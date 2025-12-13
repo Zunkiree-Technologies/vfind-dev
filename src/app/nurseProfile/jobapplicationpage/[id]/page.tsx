@@ -5,6 +5,7 @@ import Loader from "../../../../../components/loading";
 import { ArrowRight, Building2, TriangleAlert, X, CheckCircle2 } from "lucide-react";
 import { Navbar } from "../../components/Navbar";
 import Footer from '@/app/Admin/components/layout/Footer';
+import { getJobById, getEmployerById, saveJob, unsaveJob, isJobSaved, applyToJob, hasAppliedToJob } from "@/lib/supabase-api";
 
 interface Job {
   id: number;
@@ -85,45 +86,12 @@ export default function JobApplicationPage() {
 
     try {
       if (!isSaved) {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ jobs_id: Number(id) }),
-          }
-        );
-        if (!res.ok) throw new Error("Failed to save job");
+        const result = await saveJob(token, String(id));
+        if (!result.success) throw new Error(result.error || "Failed to save job");
         setIsSaved(true);
       } else {
-        const fetchRes = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ jobs_id: id.toString() }),
-          }
-        );
-
-        const data = await fetchRes.json();
-        const savedJobId = data[0]?.id;
-        if (!savedJobId) throw new Error("Saved job ID not found");
-
-        const deleteRes = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/jobssaved/${savedJobId}`,
-          {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        if (!deleteRes.ok) throw new Error("Failed to remove saved job");
-
+        const result = await unsaveJob(token, String(id));
+        if (!result.success) throw new Error(result.error || "Failed to remove saved job");
         setIsSaved(false);
       }
     } catch (err) {
@@ -137,20 +105,8 @@ export default function JobApplicationPage() {
     if (!token) return setIsSaved(false);
 
     try {
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:vUfT8k87/fetch_jobSaved_status",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ jobs_id: jobId.toString() }),
-        }
-      );
-
-      const data = await res.json();
-      setIsSaved(Array.isArray(data) && data.length > 0);
+      const saved = await isJobSaved(token, String(jobId));
+      setIsSaved(saved);
     } catch (err) {
       console.error("Error fetching saved status:", err);
       setIsSaved(false);
@@ -165,31 +121,14 @@ export default function JobApplicationPage() {
   const checkIfAlreadyApplied = async (jobId: number, email: string) => {
     try {
       setCheckingApplication(true);
-      const payload = { jobs_id: jobId.toString(), email };
-
-      const res = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/is_applied`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const result = await res.json();
-
-      if (res.ok) {
-        if (Array.isArray(result) && result.length > 0) {
-          const hasAppliedStatus = result.some(
-            (app) => app.status === "applied"
-          );
-          setHasApplied(hasAppliedStatus);
-        } else {
-          setHasApplied(false);
-        }
-      } else {
+      const token = localStorage.getItem("token");
+      if (!token) {
         setHasApplied(false);
+        return;
       }
+
+      const applied = await hasAppliedToJob(token, String(jobId));
+      setHasApplied(applied);
     } catch (err) {
       console.error("Error checking application status:", err);
       setHasApplied(false);
@@ -208,25 +147,41 @@ export default function JobApplicationPage() {
     const fetchJobData = async () => {
       try {
         setLoading(true);
-        const jobRes = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${id}`
-        );
-        if (!jobRes.ok) throw new Error("Job not found");
+        const jobData = await getJobById(String(id));
+        if (!jobData) throw new Error("Job not found");
 
-        const jobData: Job = await jobRes.json();
-        setJob(jobData);
+        // Map Supabase data to Job interface
+        const mappedJob: Job = {
+          id: Number(jobData.id),
+          title: jobData.title || "",
+          location: jobData.location || "",
+          type: jobData.type || "",
+          minPay: jobData.min_pay || "",
+          maxPay: jobData.max_pay || "",
+          description: jobData.description || "",
+          roleCategory: jobData.role_category || "",
+          experienceMin: jobData.experience_min || "",
+          experienceMax: jobData.experience_max || "",
+          created_at: jobData.created_at || "",
+          certifications: jobData.certifications || [],
+          JobShift: jobData.job_shift,
+          user_id: jobData.employer_id ? Number(jobData.employer_id) : undefined,
+          expiryDate: jobData.expiry_date,
+        };
+        setJob(mappedJob);
 
-        // ✅ check expiry
-        if (jobData.expiryDate) {
-          const expiry = new Date(jobData.expiryDate);
+        // Check expiry
+        if (mappedJob.expiryDate) {
+          const expiry = new Date(mappedJob.expiryDate);
           expiry.setDate(expiry.getDate() + 1);
           const now = new Date();
           setIsExpired(expiry < now);
         }
 
-
-        // Fetch company info using job ID
-        await fetchCompanyInfo(jobData.id);
+        // Fetch company info using employer_id
+        if (jobData.employer_id) {
+          await fetchCompanyInfo(jobData.employer_id);
+        }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to fetch job");
       } finally {
@@ -243,26 +198,17 @@ export default function JobApplicationPage() {
     }
   }, [job, nurseEmail, isLoggedIn]);
 
-  const fetchCompanyInfo = async (jobsId: number) => {
+  const fetchCompanyInfo = async (employerId: string) => {
     try {
-      const companyRes = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company_for_nurse`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ jobs_id: jobsId.toString() }),
-        }
-      );
+      const employer = await getEmployerById(employerId);
 
-      if (companyRes.ok) {
-        const companyData = await companyRes.json();
+      if (employer) {
         setCompany({
-          about_company:
-            companyData.about_company || "No company information available.",
-          companyName: companyData.companyName || "Healthcare Facility",
-          user_id: companyData.user_id,
-          businessType: companyData.businessType || "No description available.",
-          company_logo: companyData.company_logo,
+          about_company: employer.about_company || "No company information available.",
+          companyName: employer.company_name || "Healthcare Facility",
+          user_id: Number(employer.id),
+          businessType: employer.business_type || "No description available.",
+          company_logo: employer.company_logo_url ? { url: employer.company_logo_url } : undefined,
         });
       } else {
         setCompany({ about_company: "Failed to load company information." });
@@ -283,34 +229,16 @@ export default function JobApplicationPage() {
       alert("Could not find your email. Please log in again.");
       return;
     }
-    if (hasApplied || isExpired) return; // ✅ block if expired
+    if (hasApplied || isExpired) return; // Block if expired
 
     try {
       setSubmitting(true);
 
-      const payload = {
-        jobs_id: job.id,
-        status: "applied",
-        applied_date: new Date().toISOString(),
-        email: nurseEmail,
-      };
+      const result = await applyToJob(authToken, String(job.id));
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/applications",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const result = await res.json();
-
-      if (!res.ok)
-        throw new Error(result.message || "Failed to submit application");
+      if (!result.success) {
+        throw new Error(result.error || "Failed to submit application");
+      }
 
       setHasApplied(true);
       setShowToast(true);

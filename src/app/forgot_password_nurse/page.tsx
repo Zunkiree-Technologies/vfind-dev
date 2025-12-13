@@ -4,6 +4,7 @@ import Image from "next/image";
 import Navbar from "../../../components/navbar";
 import { useRouter } from "next/navigation";
 import Footer from "../../../components/footer-section";
+import { sendOTP as sendOTPToEmail, verifyOTP as verifyOTPCode, resetPassword } from "@/lib/supabase-auth";
 
 
 
@@ -21,7 +22,7 @@ const ForgotPassword: React.FC = () => {
   const [isResending, setIsResending] = useState<boolean>(false);
 
   // Timer states
-  const [timeLeft, setTimeLeft] = useState<number>(600); 
+  const [timeLeft, setTimeLeft] = useState<number>(600);
   const [canResend, setCanResend] = useState<boolean>(false);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
 
@@ -100,16 +101,11 @@ const ForgotPassword: React.FC = () => {
 
     try {
       setIsLoading(true);
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/reset_password_otp",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email.trim().toLowerCase() }),
-        }
-      );
+      const result = await sendOTPToEmail(email.trim().toLowerCase(), "password_reset");
 
-      if (!res.ok) throw new Error("Failed to send OTP");
+      if (!result.success) {
+        throw new Error(result.error || "Failed to send OTP");
+      }
 
       setStep(2);
       setTimeLeft(600);
@@ -150,24 +146,13 @@ const ForgotPassword: React.FC = () => {
 
     try {
       setIsLoading(true);
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/verify_resetPassword_otp",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            otp_code: enteredOtp,
-            email: email.trim().toLowerCase(),
-          }),
-        }
-      );
+      const result = await verifyOTPCode(email.trim().toLowerCase(), enteredOtp, "password_reset");
 
-      const data = await res.json();
-      if (res.ok) {
+      if (result.success) {
         setStep(3);
         alert("OTP verified! Please set your new password.");
       } else {
-        alert(data?.message || "Invalid OTP or email");
+        alert(result.error || "Invalid OTP or email");
       }
     } catch (error) {
       console.error(error);
@@ -194,21 +179,9 @@ const ForgotPassword: React.FC = () => {
 
     try {
       setIsLoading(true);
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/update_password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: email.trim().toLowerCase(),
-            newPassword,
-            confirmPassword,
-          }),
-        }
-      );
+      const result = await resetPassword(email.trim().toLowerCase(), newPassword);
 
-      const data = await res.json();
-      if (res.ok) {
+      if (result.success) {
         alert("Password updated successfully!");
         // Reset everything
         setStep(1);
@@ -221,7 +194,7 @@ const ForgotPassword: React.FC = () => {
 
         router.push("/signin");
       } else {
-        alert(data?.message || "Failed to update password");
+        alert(result.error || "Failed to update password");
       }
     } catch (error) {
       console.error(error);

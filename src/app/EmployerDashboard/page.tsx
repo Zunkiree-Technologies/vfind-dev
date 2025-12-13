@@ -6,6 +6,17 @@ import EmployerNavbar from "../EmployerDashboard/components/EmployerNavbar";
 import { Briefcase, Calendar, Clock, Edit, Eye, Mail, Phone, Search, Trash, Pause, Play } from "lucide-react";
 import Footer from "../Admin/components/layout/Footer";
 import MainButton from "@/components/ui/MainButton";
+import {
+  getEmployerProfile,
+  getEmployerJobs,
+  getCompanyProfile,
+  createCompanyProfile as createCompanyProfileApi,
+  updateCompanyProfile as updateCompanyProfileApi,
+  deleteCompanyProfile as deleteCompanyProfileApi,
+  deleteJob,
+  toggleJobStatus,
+  getApplicantCount,
+} from "@/lib/supabase-api";
 
 interface Job {
   created_at: string;
@@ -93,18 +104,11 @@ export default function EmployerDashboard() {
 
   // 🔹 Function to fetch applicant counts for each job
   const fetchApplicantCounts = async (jobsList: Job[]) => {
-    const token = localStorage.getItem("authToken");
-    if (!token) return jobsList;
-
     const jobsWithCounts = await Promise.all(
       jobsList.map(async (job) => {
         try {
-          const res = await fetch(
-            `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/getAllNursesAppliedForJob?job_id=${job.id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          const applications = await res.json();
-          return { ...job, applicants_count: applications.length };
+          const count = await getApplicantCount(String(job.id));
+          return { ...job, applicants_count: count };
         } catch (err) {
           console.error(`Error fetching applicants for job ${job.id}:`, err);
           return { ...job, applicants_count: 0 };
@@ -122,21 +126,21 @@ export default function EmployerDashboard() {
 
     const fetchEmployer = async () => {
       try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/get_employer_profile",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        console.log(token)
+        const data = await getEmployerProfile(token);
 
-        if (!res.ok) throw new Error("Failed to fetch employer profile");
-        const data = await res.json();
+        if (data) {
+          setEmployer({
+            fullName: data.full_name,
+            email: data.email,
+            company: data.company_name,
+            mobile: data.mobile,
+            companyName: data.company_name,
+          });
 
-        setEmployer(data?.data || data);
-
-        // ✅ Store employerId in localStorage
-        const employerId = data?.data?.id || data?.id;
-        if (employerId) {
-          localStorage.setItem("employerId", String(employerId));
+          // Store employerId in localStorage
+          if (data.id) {
+            localStorage.setItem("employerId", String(data.id));
+          }
         }
       } catch (err) {
         console.error("Error fetching employer profile:", err);
@@ -145,36 +149,44 @@ export default function EmployerDashboard() {
 
     const fetchJobs = async () => {
       try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/get_job_details",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const data = await getEmployerJobs(token);
 
-        if (!res.ok) throw new Error("Failed to fetch jobs");
-        const data = await res.json();
+        // Map data to match the Job interface
+        const mappedJobs: Job[] = data.map((job) => ({
+          id: Number(job.id),
+          title: job.title || "",
+          location: job.location || "",
+          locality: job.locality,
+          type: job.type || "",
+          minPay: job.min_pay || "",
+          maxPay: job.max_pay || "",
+          description: job.description || "",
+          roleCategory: job.role_category || "",
+          experienceMin: job.experience_min || "",
+          experienceMax: job.experience_max || "",
+          certifications: job.certifications || [],
+          created_at: job.created_at || "",
+          updated_at: job.updated_at || "",
+          status: (job.status as "Active" | "Paused") || "Active",
+          expiryDate: job.expiry_date,
+        }));
 
         // Fetch applicant counts for all jobs
-        const jobsWithCounts = await fetchApplicantCounts(data);
+        const jobsWithCounts = await fetchApplicantCounts(mappedJobs);
         setJobs(jobsWithCounts);
       } catch (err) {
         console.error("Error fetching jobs:", err);
       }
     };
 
-    const fetchCompanyProfile = async () => {
+    const fetchCompanyProfileData = async () => {
       try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const data = await getCompanyProfile(token);
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.about_company) {
-            setExistingCompanyData(data);
-            setCompanyDescription(data.about_company);
-            setCompanyProfileStep("completed");
-          }
+        if (data && data.about_company) {
+          setExistingCompanyData(data);
+          setCompanyDescription(data.about_company);
+          setCompanyProfileStep("completed");
         }
         // If no company profile exists, we keep the initial state
       } catch (err) {
@@ -183,7 +195,7 @@ export default function EmployerDashboard() {
       }
     };
 
-    Promise.all([fetchEmployer(), fetchJobs(), fetchCompanyProfile()]).finally(() =>
+    Promise.all([fetchEmployer(), fetchJobs(), fetchCompanyProfileData()]).finally(() =>
       setLoading(false)
     );
   }, []);
@@ -193,56 +205,27 @@ export default function EmployerDashboard() {
     const token = localStorage.getItem("authToken");
     if (!token) throw new Error("No auth token");
 
-    const res = await fetch(
-      "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ about_company: aboutCompany })
-      }
-    );
-
-    if (!res.ok) throw new Error("Failed to create company profile");
-    return res.json();
+    const result = await createCompanyProfileApi(token, aboutCompany);
+    if (!result.success) throw new Error(result.error || "Failed to create company profile");
+    return result.data;
   };
 
   const updateCompanyProfile = async (aboutCompany: string) => {
     const token = localStorage.getItem("authToken");
     if (!token) throw new Error("No auth token");
 
-    const res = await fetch(
-      "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company",
-      {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ about_company: aboutCompany })
-      }
-    );
-
-    if (!res.ok) throw new Error("Failed to update company profile");
-    return res.json();
+    const result = await updateCompanyProfileApi(token, aboutCompany);
+    if (!result.success) throw new Error(result.error || "Failed to update company profile");
+    return result.data;
   };
 
-  const deleteCompanyProfile = async () => {
+  const deleteCompanyProfileHandler = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) throw new Error("No auth token");
 
-    const res = await fetch(
-      "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/about_company",
-      {
-        method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` }
-      }
-    );
-
-    if (!res.ok) throw new Error("Failed to delete company profile");
-    return res.json();
+    const result = await deleteCompanyProfileApi(token);
+    if (!result.success) throw new Error(result.error || "Failed to delete company profile");
+    return result;
   };
 
   // 🔹 Job actions
@@ -260,15 +243,9 @@ export default function EmployerDashboard() {
         return;
       }
 
-      const res = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs/${jobId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const result = await deleteJob(token, String(jobId));
 
-      if (!res.ok) throw new Error("Failed to delete job");
+      if (!result.success) throw new Error(result.error || "Failed to delete job");
 
       setJobs((prevJobs) => prevJobs.filter((job) => job.id !== jobId));
       alert("Job deleted successfully.");
@@ -288,35 +265,17 @@ export default function EmployerDashboard() {
     setJobs((prev) =>
       prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j))
     );
-    // console.log(jobId)
+
     try {
       const token = localStorage.getItem("authToken");
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/pause_active_job",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ jobs_id: jobId }),
-        }
-      );
+      if (!token) return;
 
-      // Prevent throwing error to console
-      if (!res.ok) {
-        console.warn(
-          "API returned an error, but frontend already updated optimistically",
-          res.status
-        );
-        return; // do not throw
-      }
+      const result = await toggleJobStatus(token, String(jobId));
 
-      const data = await res.json();
-      if (data.result1?.status) {
+      if (result.success && result.data?.status) {
         setJobs((prev) =>
           prev.map((j) =>
-            j.id === jobId ? { ...j, status: data.result1.status } : j
+            j.id === jobId ? { ...j, status: result.data!.status as "Active" | "Paused" } : j
           )
         );
       }
@@ -363,7 +322,7 @@ export default function EmployerDashboard() {
     if (!confirm("Are you sure you want to delete your company profile?")) return;
 
     try {
-      await deleteCompanyProfile();
+      await deleteCompanyProfileHandler();
       setExistingCompanyData(null);
       setCompanyDescription("");
       setCompanyProfileStep("initial");

@@ -6,6 +6,7 @@ import Navbar from "../../../components/navbar";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import Footer from "../../../components/footer-section";
 import { useAuth } from "@/contexts/AuthContext";
+import { loginNurse } from "@/lib/supabase-auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,33 +18,16 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
-  // Google Sign-In
+  // Google Sign-In (TODO: Implement with Supabase OAuth)
   const loginWithGoogle = async () => {
     try {
       setLoading(true);
       setError("");
 
-      // Use localhost for dev, Vercel for production
-      const redirectUri = encodeURIComponent(
-        process.env.NEXT_PUBLIC_APP_URL + "/oauth/callback"
-      );
-
-      // Call Xano init endpoint
-      const response = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:U0aE1wpF/oauth/google/init?redirect_uri=${redirectUri}`
-      );
-      const data = await response.json();
-
-      if (data.authUrl) {
-        // Redirect browser to Google login
-        window.location.href = data.authUrl;
-      } else {
-        console.error("No authUrl returned from Xano:", data);
-        setError("Unable to start Google login.");
-      }
+      // Google OAuth will be implemented with Supabase OAuth
+      setError("Google Sign-In coming soon. Please use email/password.");
     } catch (err) {
       console.error("Google login error:", err);
-      setError("Google login failed. Please try again or use email/password.");
       setError("Google login failed. Try again.");
     } finally {
       setLoading(false);
@@ -57,24 +41,18 @@ export default function LoginPage() {
     setSuccess("");
 
     try {
-      const response = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, role: "Nurse" }),
-        }
-      );
+      const result = await loginNurse(email, password);
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Login failed");
+      if (!result.success) {
+        throw new Error(result.error || "Login failed");
+      }
 
-      if (data.authToken) {
+      if (result.authToken) {
         // Use AuthContext login to update state and store cookies
-        login(data.authToken, "Nurse", email);
+        login(result.authToken, "Nurse", email);
 
         // Keep localStorage for backward compatibility (optional)
-        localStorage.setItem("token", data.authToken);
+        localStorage.setItem("token", result.authToken);
         localStorage.setItem("email", email);
       }
 

@@ -1,18 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  
+
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "x8ki-letl-twmt.n7.xano.io", 
-      },
-       {
-        protocol: "https",
         hostname: "images.unsplash.com",
       },
-       {
+      {
         protocol: 'https',
         hostname: 'media2.dev.to',
         port: '',
@@ -30,12 +26,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Supabase Storage
       {
         protocol: "https",
-        hostname: "x76o-gnx4-xrav.a2.xano.io",
-        pathname: "/**", 
+        hostname: "*.supabase.co",
+        pathname: "/**",
       },
-      
     ],
   },
 };

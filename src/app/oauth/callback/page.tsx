@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { setAuthCookies } from "@/utils/cookies"; 
+import { setAuthCookies } from "@/utils/cookies";
+import { supabase } from "@/lib/supabase";
 
 export default function OAuthCallback() {
   const [status, setStatus] = useState("Processing...");
@@ -11,105 +12,83 @@ export default function OAuthCallback() {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
-        // Get the authorization code from URL
+        // Check for OAuth errors from URL
         const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get("code");
         const error = urlParams.get("error");
+        const errorDescription = urlParams.get("error_description");
 
-        // Check for OAuth errors from Google
         if (error) {
-          console.error("OAuth error from Google:", error);
-          setStatus("Login cancelled or failed");
+          console.error("OAuth error:", error, errorDescription);
+          setStatus(errorDescription || "Login cancelled or failed");
           setTimeout(() => router.push("/signin"), 2000);
           return;
         }
 
-        if (!code) {
-          console.error("No authorization code received");
-          setStatus("No authorization code received");
-          setTimeout(() => router.push("/signin"), 2000);
+        setStatus("Completing sign-in...");
+
+        // For Supabase OAuth, the session is automatically handled via the hash fragment
+        // We need to check if there's a session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          setStatus("Failed to complete sign-in");
+          setTimeout(() => router.push("/signin?error=session-error"), 3000);
           return;
         }
 
-        console.log("Authorization code received:", code);
-        setStatus("Exchanging code for token...");
+        if (session) {
+          const user = session.user;
+          console.log("OAuth user:", user);
 
-        // Same redirect_uri as used in signinWithGoogle
-        const redirectUri = process.env.NEXT_PUBLIC_APP_URL + "/oauth/callback";
+          // Check if this user exists in our nurses table
+          const { data: nurseData } = await supabase
+            .from('nurses')
+            .select('id, full_name, email')
+            .eq('email', user.email)
+            .single();
 
-        // Call Xano's continue endpoint (GET request with query params)
-        const params = new URLSearchParams({
-          code: code,
-          redirect_uri: redirectUri, // Must match exactly what was sent to /init
-        });
-
-        const response = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:U0aE1wpF/oauth/google/continue?${params.toString()}`
-        );
-
-        console.log("Response status:", response.status);
-        console.log("Response ok:", response.ok);
-
-        const data = await response.json();
-        console.log("OAuth continue response:", data);
-
-        if (!response.ok) {
-          console.error("OAuth continue failed:", data);
-
-          // Handle specific error for users who haven't signed up yet
-          if (
-            data.error === "account_not_found" ||
-            data.code === "ERROR_CODE_ACCESS_DENIED"
-          ) {
-            setStatus(
-              "No account found with this email. Please sign up first."
-            );
-            setTimeout(
-              () => router.push("/signup?message=create-account-first"),
-              3000
-            );
+          if (!nurseData) {
+            // User doesn't have an account yet
+            setStatus("No account found with this email. Please sign up first.");
+            await supabase.auth.signOut();
+            setTimeout(() => router.push("/signup?message=create-account-first"), 3000);
             return;
           }
 
-          // Handle other OAuth errors
-          setStatus(
-            `Google sign-in failed: ${
-              data.message || data.payload || "Please try again"
-            }`
-          );
-          setTimeout(
-            () => router.push("/signin?error=google-signin-failed"),
-            3000
-          );
-          return;
-        }
+          // Create our custom token format
+          const customToken = `nurse_${nurseData.id}_${Date.now()}`;
 
-        // Check if we got a token (Xano returns 'token' not 'authToken')
-        if (data.token) {
-          console.log("Auth token received, logging in...");
-          console.log("User info:", { name: data.name, email: data.email });
+          // Store authentication data
+          setAuthCookies(customToken, "Nurse", user.email || "");
+          localStorage.setItem("token", customToken);
+          localStorage.setItem("email", user.email || "");
+          localStorage.setItem("userName", nurseData.full_name || user.user_metadata?.full_name || "");
+
           setStatus("Login successful! Redirecting...");
-
-          // Store authentication data in secure cookies
-          setAuthCookies(data.token, "Nurse", data.email);
-
-          // Store in localStorage for backward compatibility
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("email", data.email);
-          localStorage.setItem("userName", data.name);
-
-          // Redirect to same place as regular signin
           setTimeout(() => router.push("/nurseProfile"), 1000);
         } else {
-          // This should rarely happen now, but keep as fallback
-          console.error("Unexpected response format:", data);
-          setStatus(
-            data.payload
-          );
-          setTimeout(
-            () => router.push("/signin?error=unexpected-response"),
-            3000
-          );
+          // No session found, try to exchange the code
+          const code = urlParams.get("code");
+
+          if (code) {
+            // Exchange code for session
+            const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+            if (exchangeError || !data.session) {
+              console.error("Code exchange failed:", exchangeError);
+              setStatus("Failed to complete sign-in");
+              setTimeout(() => router.push("/signin?error=code-exchange-failed"), 3000);
+              return;
+            }
+
+            // Recursively handle the session
+            handleOAuthCallback();
+            return;
+          }
+
+          setStatus("No authorization found. Please try again.");
+          setTimeout(() => router.push("/signin"), 3000);
         }
       } catch (error) {
         console.error("OAuth callback error:", error);

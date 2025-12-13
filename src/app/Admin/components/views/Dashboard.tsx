@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Users, Building2, TrendingUp, CheckCircle, Clock, XCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface Stats {
   nurses: number;
@@ -18,29 +19,23 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [
-          nurses,
-          employers,
-          jobs,
-          accepted,
-          pending,
-          rejected,
-        ] = await Promise.all([
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/total_number_of_nurses").then((res) => res.json()),
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/total_number_of_employers").then((res) => res.json()),
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/total_number_of_jobs").then((res) => res.json()),
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/accepted_connections").then((res) => res.json()),
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/pending_connections").then((res) => res.json()),
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/rejected_connection").then((res) => res.json()),
+        // Fetch counts from Supabase
+        const [nursesResult, employersResult, jobsResult, acceptedResult, pendingResult, rejectedResult] = await Promise.all([
+          supabase.from('nurses').select('id', { count: 'exact', head: true }),
+          supabase.from('employers').select('id', { count: 'exact', head: true }),
+          supabase.from('jobs').select('id', { count: 'exact', head: true }),
+          supabase.from('connections').select('id', { count: 'exact', head: true }).eq('status', 'accepted'),
+          supabase.from('connections').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+          supabase.from('connections').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
         ]);
 
         setStats({
-          nurses,
-          employers,
-          jobs,
-          accepted,
-          pending,
-          rejected,
+          nurses: nursesResult.count || 0,
+          employers: employersResult.count || 0,
+          jobs: jobsResult.count || 0,
+          accepted: acceptedResult.count || 0,
+          pending: pendingResult.count || 0,
+          rejected: rejectedResult.count || 0,
         });
       } catch (err) {
         console.error("Error fetching stats:", err);

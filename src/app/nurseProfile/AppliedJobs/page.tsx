@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import {
-  Building2,
   MapPin,
   DollarSign,
   Calendar,
@@ -16,6 +15,7 @@ import { Navbar } from "../components/Navbar";
 import Footer from "@/app/Admin/components/layout/Footer";
 import { JobFilters } from "@/app/nurseProfile/components/JobFilters";
 import MainButton from "@/components/ui/MainButton";
+import { getAppliedJobs } from "@/lib/supabase-api";
 
 interface JobDetails {
   id: number;
@@ -185,23 +185,36 @@ const AppliedJobs = () => {
         throw new Error("Authentication token not found. Please login.");
       }
 
-      const response = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/get_applied_jobs_for_nurse",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const appliedJobsData = await getAppliedJobs(authToken);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch applied jobs: ${response.statusText}`);
-      }
+      // Map to the AppliedJob interface
+      const mappedJobs: AppliedJob[] = appliedJobsData.map((app) => ({
+        id: Number(app.id),
+        jobs_id: Number(app.job_id),
+        status: app.status || "applied",
+        applied_date: app.applied_at || "",
+        email: app.nurse?.email || "",
+        nurse_profiles_id: app.nurse_id ? Number(app.nurse_id) : undefined,
+        _jobs: app.job ? {
+          id: Number(app.job.id),
+          title: app.job.title || "",
+          locality: app.job.locality,
+          location: app.job.location,
+          minPay: app.job.min_pay,
+          maxPay: app.job.max_pay,
+          type: app.job.type,
+          JobShift: app.job.job_shift,
+          description: app.job.description,
+          roleCategory: app.job.role_category,
+          experienceMin: app.job.experience_min,
+          experienceMax: app.job.experience_max,
+          created_at: app.job.created_at ? new Date(app.job.created_at).getTime() : undefined,
+          certifications: app.job.certifications,
+          expiryDate: app.job.expiry_date,
+        } : undefined,
+      }));
 
-      const data = await response.json();
-      setJobs(Array.isArray(data) ? data : []);
+      setJobs(mappedJobs);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {

@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, DollarSign, Clock, Briefcase, ArrowRight } from "lucide-react";
+import { getActiveJobs } from "@/lib/supabase-api";
+import type { Job as DbJob } from "@/lib/supabase";
 
 interface Job {
-  id: number;
+  id: string;
   title: string;
   location: string;
   type?: string;
@@ -30,13 +32,26 @@ export default function FeaturedJobs() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs"
-        );
-        const data: Job[] = await res.json();
+        const data = await getActiveJobs();
+
+        // Map to component format and shuffle
+        const mappedJobs: Job[] = data.map((job: DbJob) => ({
+          id: job.id,
+          title: job.title,
+          location: job.location,
+          type: job.type,
+          minPay: job.min_pay,
+          maxPay: job.max_pay,
+          description: job.description,
+          experienceMin: job.experience_min,
+          experienceMax: job.experience_max,
+          updated_at: job.updated_at,
+          shift: job.job_shift,
+          roleCategory: job.role_category,
+        }));
 
         // Shuffle and take 4 random jobs
-        const shuffled = [...data].sort(() => 0.5 - Math.random());
+        const shuffled = [...mappedJobs].sort(() => 0.5 - Math.random());
         setJobs(shuffled.slice(0, 4));
       } catch (error) {
         console.error("Error fetching jobs:", error);

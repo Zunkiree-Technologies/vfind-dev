@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { User, Clock, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Navbar } from "../components/Navbar";
 import Footer from "@/app/Admin/components/layout/Footer";
+import { supabase } from "@/lib/supabase";
+import { parseAuthToken } from "@/lib/supabase-auth";
 
 interface ConnectionRequest {
   id: number;
@@ -138,17 +140,36 @@ function NurseStatusContent() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
+    const parsed = parseAuthToken(token);
+    if (!parsed || parsed.role !== 'nurse') return;
+
     setLoading(true);
     try {
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error("Failed to fetch requests");
-      const data: ConnectionRequest[] = await res.json();
+      const { data, error } = await supabase
+        .from('connections')
+        .select('*, employer:employers(id, full_name, company_name, email, mobile)')
+        .eq('nurse_id', parsed.userId)
+        .order('created_at', { ascending: false });
 
-      data.sort((a, b) => b.id - a.id);
-      setRequests(data);
+      if (error) throw new Error(error.message);
+
+      // Map to ConnectionRequest interface
+      const mappedData: ConnectionRequest[] = (data || []).map((conn) => ({
+        id: Number(conn.id),
+        nurse_profiles_id: Number(conn.nurse_id),
+        employer_profiles_id: Number(conn.employer_id),
+        status: conn.status as "pending" | "accepted" | "rejected" | "",
+        created_at: conn.created_at,
+        _employer_profiles: conn.employer ? {
+          id: Number(conn.employer.id),
+          fullName: conn.employer.full_name,
+          companyName: conn.employer.company_name,
+          email: conn.employer.email,
+          mobile: conn.employer.mobile,
+        } : undefined,
+      }));
+
+      setRequests(mappedData);
     } catch (err) {
       console.error(err);
     } finally {
@@ -169,22 +190,13 @@ function NurseStatusContent() {
     requestId: number,
     newStatus: "accepted" | "rejected"
   ) => {
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Unauthorized");
-
     try {
-      const res = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/connections/${requestId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
-      if (!res.ok) throw new Error("Failed to update request");
+      const { error } = await supabase
+        .from('connections')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', requestId);
+
+      if (error) throw new Error(error.message);
 
       setRequests((prev) =>
         prev.map((req) =>

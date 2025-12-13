@@ -14,6 +14,7 @@ import {
   UserRoundSearch,
 } from "lucide-react";
 import Loader from "../../../../../../components/loading";
+import { supabase } from "@/lib/supabase";
 
 interface ProfileImage {
   url?: string;
@@ -69,14 +70,49 @@ export default function NurseDetailPage() {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/nurse_profiles_admin/${id}`
-        );
+        const { data, error } = await supabase
+          .from('nurses')
+          .select('*')
+          .eq('id', id)
+          .single();
 
-        if (!res.ok) throw new Error("Failed to fetch nurse details");
+        if (error) throw new Error(error.message);
+        if (!data) throw new Error("Nurse not found");
 
-        const data: NurseDetail = await res.json();
-        setNurse(data);
+        // Map Supabase data to NurseDetail interface
+        const nurseData: NurseDetail = {
+          id: Number(data.id),
+          fullName: data.full_name || "",
+          email: data.email,
+          phoneNumber: data.phone_number,
+          currentResidentialLocation: data.current_residential_location,
+          postcode: data.postcode,
+          jobSearchStatus: data.job_search_status,
+          qualification: data.qualification,
+          otherQualification: data.other_qualification,
+          residencyStatus: data.residency_status,
+          jobTypes: data.job_types,
+          openToOtherTypes: data.open_to_other_types,
+          certifications: data.certifications,
+          specializations: data.specializations,
+          experience: data.experience,
+          workingInHealthcare: data.working_in_healthcare,
+          locationPreference: data.location_preference,
+          preferredLocations: data.preferred_locations,
+          shiftPreferences: data.shift_preferences,
+          maxWorkHours: data.max_work_hours,
+          workHoursRestricted: data.work_hours_restricted,
+          startTime: data.start_time,
+          startDate: data.start_date,
+          visaType: data.visa_type,
+          visaDuration: data.visa_duration,
+          profileImage: data.profile_image_url ? { url: data.profile_image_url } : null,
+          organisation: data.organisation,
+          organizationStartYear: data.organization_start_year,
+          created_at: data.created_at ? new Date(data.created_at).getTime() : undefined,
+        };
+
+        setNurse(nurseData);
       } catch (err) {
         console.error("Error fetching nurse:", err);
         setError("Could not load nurse details");
@@ -119,11 +155,7 @@ export default function NurseDetailPage() {
       : [nurse.jobTypes]
     : [];
 
-  const profileImageUrl = nurse.profileImage?.url
-    ? nurse.profileImage.url
-    : nurse.profileImage?.path
-      ? `https://x76o-gnx4-xrav.a2.xano.io${nurse.profileImage.path}`
-      : null;
+  const profileImageUrl = nurse.profileImage?.url || null;
 
   return (
     <div className="min-h-screen bg-[#F5F6FA] p-4">

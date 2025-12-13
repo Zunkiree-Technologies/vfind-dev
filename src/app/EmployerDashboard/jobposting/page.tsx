@@ -6,6 +6,9 @@ import RichTextEditor from "../components/RichTextEditor";
 import EmployerNavbar from "../components/EmployerNavbar";
 import Footer from "@/app/Admin/components/layout/Footer";
 import MainButton from "@/components/ui/MainButton";
+import { parseAuthToken } from "@/lib/supabase-auth";
+import { getEmployerProfile, getEmployerJobs, createJob, updateJob } from "@/lib/supabase-api";
+import type { Job as DbJob } from "@/lib/supabase";
 
 interface Job {
   id: number;
@@ -56,30 +59,30 @@ function JobPostingContent() {
     expiryDate: "",
   });
 
-  const JOB_POST_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/jobs";
-  const JOB_EDIT_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/edit_job_details";
-  const JOB_LIST_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/get_job_details";
-  const EMPLOYER_PROFILE_ENDPOINT = "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/get_employer_profile";
   const [isTypingOther, setIsTypingOther] = useState(false);
+
+  // Helper function to get employer ID from token
+  const getEmployerIdFromToken = () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return null;
+    const parsed = parseAuthToken(token);
+    return parsed?.userId || null;
+  };
 
   // Fetch employer profile to get company name
   useEffect(() => {
     const fetchEmployerProfile = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-        if (!token) return;
+        const employerId = getEmployerIdFromToken();
+        if (!employerId) return;
 
-        const res = await fetch(EMPLOYER_PROFILE_ENDPOINT, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Failed to fetch employer profile");
-        const data = await res.json();
+        const data = await getEmployerProfile(employerId);
+        if (!data) throw new Error("Failed to fetch employer profile");
 
-        setEmployer(data?.data || data);
+        setEmployer({ companyName: data.company_name });
 
         // Set the company name in formData
-        const companyName = data?.data?.companyName || data?.companyName || "";
-        setFormData(prev => ({ ...prev, locality: companyName }));
+        setFormData(prev => ({ ...prev, locality: data.company_name || "" }));
 
       } catch (err) {
         console.error("Error fetching employer profile:", err);
@@ -94,14 +97,12 @@ function JobPostingContent() {
     const fetchJobDetails = async () => {
       if (jobId) {
         try {
-          const token = localStorage.getItem("authToken");
-          const res = await fetch(JOB_LIST_ENDPOINT, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!res.ok) throw new Error("Failed to fetch job details");
-          const jobs: Job[] = await res.json();
+          const employerId = getEmployerIdFromToken();
+          if (!employerId) return;
 
-          const job = jobs.find((j: Job) => j.id === parseInt(jobId));
+          const jobs = await getEmployerJobs(employerId);
+
+          const job = jobs.find((j: DbJob) => j.id === jobId);
 
           if (job) {
             setFormData({
@@ -109,15 +110,15 @@ function JobPostingContent() {
               location: job.location || "",
               locality: job.locality || employer.companyName || "",
               type: job.type || "",
-              minPay: job.minPay || "",
-              maxPay: job.maxPay || "",
+              minPay: job.min_pay || "",
+              maxPay: job.max_pay || "",
               description: job.description || "",
-              roleCategory: job.roleCategory || "",
-              experienceMin: job.experienceMin || "",
-              JobShift: job.JobShift || "",
+              roleCategory: job.role_category || "",
+              experienceMin: job.experience_min || "",
+              JobShift: job.job_shift || "",
               certifications: job.certifications || [],
-              keyResponsibilities: job.keyResponsibilities || "",
-              workEnvironment: job.workEnvironment || "",
+              keyResponsibilities: job.key_responsibilities || "",
+              workEnvironment: job.work_environment || "",
             });
           }
         } catch (err) {
@@ -216,24 +217,40 @@ function JobPostingContent() {
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      if (!token) {
+      const employerId = getEmployerIdFromToken();
+      if (!employerId || !token) {
         alert("Unauthorized. Please login.");
         return;
       }
 
       const isEdit = !!jobId;
-      const endpoint = isEdit ? JOB_EDIT_ENDPOINT : JOB_POST_ENDPOINT;
-      const payload = isEdit
-        ? { ...formData, id: parseInt(jobId!) }
-        : formData;
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(payload),
-      });
+      // Map to Supabase format
+      const jobPayload = {
+        title: formData.title,
+        location: formData.location,
+        locality: formData.locality,
+        type: formData.type,
+        min_pay: formData.minPay,
+        max_pay: formData.maxPay,
+        description: formData.description,
+        role_category: formData.roleCategory,
+        experience_min: formData.experienceMin,
+        job_shift: formData.JobShift,
+        certifications: formData.certifications,
+        key_responsibilities: formData.keyResponsibilities,
+        work_environment: formData.workEnvironment,
+        expiry_date: formData.expiryDate || undefined,
+      };
 
-      if (!res.ok) throw new Error("Failed to save job");
+      let result;
+      if (isEdit) {
+        result = await updateJob(token, jobId!, jobPayload);
+      } else {
+        result = await createJob(token, jobPayload);
+      }
+
+      if (!result) throw new Error("Failed to save job");
 
       alert(isEdit ? "Job updated successfully!" : "Job posted successfully!");
       router.push("/EmployerDashboard");

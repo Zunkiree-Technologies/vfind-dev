@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { MoreVertical, Search, Filter, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 interface Employer {
   id: number;
@@ -38,19 +39,23 @@ export default function EmployersPage() {
   useEffect(() => {
     async function fetchEmployers() {
       try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/employer_profiles"
-        );
-        const data = await res.json();
+        const { data, error } = await supabase
+          .from('employers')
+          .select('id, company_name, email, company_address, created_at')
+          .order('created_at', { ascending: false });
 
-        if (Array.isArray(data)) {
-          setEmployers(data);
-        } else if (Array.isArray(data.employers)) {
-          setEmployers(data.employers);
-        } else {
-          console.error("Unexpected API response format", data);
-          setEmployers([]);
-        }
+        if (error) throw new Error(error.message);
+
+        // Map to Employer interface
+        const mappedEmployers: Employer[] = (data || []).map((e) => ({
+          id: Number(e.id),
+          companyName: e.company_name,
+          email: e.email,
+          companyAddress: e.company_address,
+          created_at: e.created_at,
+        }));
+
+        setEmployers(mappedEmployers);
       } catch (err) {
         console.error("Error fetching employers:", err);
         setEmployers([]);
@@ -230,10 +235,13 @@ export default function EmployersPage() {
                               )
                             ) {
                               try {
-                                await fetch(
-                                  `https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/delete_employer_id/${employer.id}`,
-                                  { method: "DELETE" }
-                                );
+                                const { error } = await supabase
+                                  .from('employers')
+                                  .delete()
+                                  .eq('id', employer.id);
+
+                                if (error) throw new Error(error.message);
+
                                 setEmployers((prev) =>
                                   prev.filter((e) => e.id !== employer.id)
                                 );

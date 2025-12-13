@@ -6,6 +6,7 @@ import Loading from "../../../../../components/loading";
 import { Building2 } from "lucide-react";
 import EmployerNavbar from "../../components/EmployerNavbar";
 import Footer from "@/app/Admin/components/layout/Footer";
+import { getJobById, getEmployerById } from "@/lib/supabase-api";
 
 interface Job {
   id: number;
@@ -55,17 +56,31 @@ export default function JobPreviewPage() {
     const fetchJob = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("authToken");
-        const res = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:W58sMfI8/get_job_details`,
-          { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
-        );
-        if (!res.ok) throw new Error("Failed to fetch jobs");
-        const jobs: Job[] = await res.json();
-        const selected = jobs.find((j) => j.id === Number(id));
-        setJob(selected || null);
+        const jobData = await getJobById(id);
 
-        if (selected?.user_id) fetchCompanyInfo(selected.user_id);
+        if (jobData) {
+          const selected: Job = {
+            id: Number(jobData.id),
+            title: jobData.title || "",
+            location: jobData.location || "",
+            locality: jobData.locality,
+            type: jobData.type || "",
+            minPay: jobData.min_pay || "",
+            maxPay: jobData.max_pay || "",
+            description: jobData.description || "",
+            roleCategory: jobData.role_category || "",
+            experienceMin: jobData.experience_min || "",
+            experienceMax: jobData.experience_max || "",
+            languageRequirements: jobData.language_requirements?.join(", "),
+            certifications: jobData.certifications,
+            created_at: new Date(jobData.created_at || "").getTime(),
+            JobShift: jobData.job_shift,
+            user_id: jobData.employer_id ? Number(jobData.employer_id) : undefined,
+          };
+          setJob(selected);
+
+          if (jobData.employer_id) fetchCompanyInfo(jobData.employer_id);
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -76,24 +91,16 @@ export default function JobPreviewPage() {
     fetchJob();
   }, [id]);
 
-  const fetchCompanyInfo = async (userId: number) => {
+  const fetchCompanyInfo = async (employerId: string) => {
     try {
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/get_about_company_for_saved_jobs_page",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userId }),
-        }
-      );
+      const employer = await getEmployerById(employerId);
 
-      const data = await res.json();
-
-      // ✅ Store both name and about_company
-      setCompany({
-        name: data.company_name || "Unknown Company",
-        about_company: data.about_company || "No company info available.",
-      });
+      if (employer) {
+        setCompany({
+          name: employer.company_name || "Unknown Company",
+          about_company: employer.about_company || "No company info available.",
+        });
+      }
     } catch (error) {
       console.error("Error fetching company info:", error);
       setCompany({

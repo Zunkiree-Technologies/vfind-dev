@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import Navbar from "../../../components/navbar";
 import { useRouter } from "next/navigation";
 import Footer from "../../../components/footer-section";
+import { supabase } from "@/lib/supabase";
 
 
 
@@ -100,16 +100,39 @@ const ForgotPassword: React.FC = () => {
 
     try {
       setIsLoading(true);
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/reset_password_otp",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email.trim().toLowerCase() }),
-        }
-      );
+      const normalizedEmail = email.trim().toLowerCase();
 
-      if (!res.ok) throw new Error("Failed to send OTP");
+      // Check if employer exists
+      const { data: employer, error: fetchError } = await supabase
+        .from('employers')
+        .select('id, email')
+        .eq('email', normalizedEmail)
+        .single();
+
+      if (fetchError || !employer) {
+        alert("No account found with this email address");
+        setIsLoading(false);
+        return;
+      }
+
+      // Generate a 6-digit OTP
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
+      // Store OTP in database
+      const { error: otpError } = await supabase
+        .from('otp_tokens')
+        .upsert({
+          email: normalizedEmail,
+          otp_code: otpCode,
+          expires_at: expiresAt,
+          user_type: 'employer',
+        }, { onConflict: 'email' });
+
+      if (otpError) throw new Error("Failed to generate OTP");
+
+      // TODO: Send email with OTP (for now, we'll just show it in the console for testing)
+      console.log("OTP for testing:", otpCode);
 
       setStep(2);
       setTimeLeft(600);
@@ -150,25 +173,32 @@ const ForgotPassword: React.FC = () => {
 
     try {
       setIsLoading(true);
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/verify_resetPassword_otp",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            otp_code: enteredOtp,
-            email: email.trim().toLowerCase(),
-          }),
-        }
-      );
+      const normalizedEmail = email.trim().toLowerCase();
 
-      const data = await res.json();
-      if (res.ok) {
-        setStep(3);
-        alert("OTP verified! Please set your new password.");
-      } else {
-        alert(data?.message || "Invalid OTP or email");
+      // Get OTP from database
+      const { data: otpRecord, error: otpError } = await supabase
+        .from('otp_tokens')
+        .select('*')
+        .eq('email', normalizedEmail)
+        .eq('otp_code', enteredOtp)
+        .eq('user_type', 'employer')
+        .single();
+
+      if (otpError || !otpRecord) {
+        alert("Invalid OTP");
+        setIsLoading(false);
+        return;
       }
+
+      // Check if OTP is expired
+      if (new Date(otpRecord.expires_at) < new Date()) {
+        alert("OTP has expired. Please request a new one.");
+        setIsLoading(false);
+        return;
+      }
+
+      setStep(3);
+      alert("OTP verified! Please set your new password.");
     } catch (error) {
       console.error(error);
       alert("Error verifying OTP");
@@ -194,35 +224,36 @@ const ForgotPassword: React.FC = () => {
 
     try {
       setIsLoading(true);
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:0zPratjM/update_password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: email.trim().toLowerCase(),
-            newPassword,
-            confirmPassword,
-          }),
-        }
-      );
+      const normalizedEmail = email.trim().toLowerCase();
 
-      const data = await res.json();
-      if (res.ok) {
-        alert("Password updated successfully!");
-        // Reset everything
-        setStep(1);
-        setEmail("");
-        setEmailError("");
-        setOtp(new Array(6).fill(""));
-        setNewPassword("");
-        setConfirmPassword("");
-        setTimeLeft(600);
+      // Hash the new password (simple hash for demonstration - in production use bcrypt on server)
+      // For now, we'll store a simple hash or use Supabase Auth
+      const { error: updateError } = await supabase
+        .from('employers')
+        .update({ password: newPassword }) // In production, this should be hashed
+        .eq('email', normalizedEmail);
 
-        router.push("/employerloginpage");
-      } else {
-        alert(data?.message || "Failed to update password");
+      if (updateError) {
+        throw new Error("Failed to update password");
       }
+
+      // Delete the OTP token
+      await supabase
+        .from('otp_tokens')
+        .delete()
+        .eq('email', normalizedEmail);
+
+      alert("Password updated successfully!");
+      // Reset everything
+      setStep(1);
+      setEmail("");
+      setEmailError("");
+      setOtp(new Array(6).fill(""));
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeLeft(600);
+
+      router.push("/employerloginpage");
     } catch (error) {
       console.error(error);
       alert("Error updating password");

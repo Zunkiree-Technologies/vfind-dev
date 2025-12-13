@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { MoreVertical, Search, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
 import DeleteModal from "./deleteModal";
+import { supabase } from "@/lib/supabase";
 
 interface Nurse {
   id: number;
@@ -47,35 +48,23 @@ export default function NursesPage() {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/nurse_profiles_admin"
-        );
+        const { data, error } = await supabase
+          .from('nurses')
+          .select('id, full_name, email, qualification, created_at')
+          .order('created_at', { ascending: false });
 
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        if (error) throw new Error(error.message);
 
-        const data = await res.json();
+        // Map to Nurse interface
+        const mappedNurses: Nurse[] = (data || []).map((n) => ({
+          id: Number(n.id),
+          fullName: n.full_name,
+          email: n.email,
+          qualification: n.qualification,
+          startDate: n.created_at,
+        }));
 
-        if (Array.isArray(data)) {
-          setNurses(data);
-        } else if (data && Array.isArray(data.nurses)) {
-          setNurses(data.nurses);
-        } else if (data && typeof data === "object") {
-          const possibleArrayKeys = Object.keys(data).filter(
-            (key) => Array.isArray(data[key])
-          );
-
-          if (possibleArrayKeys.length > 0) {
-            const arrayData = data[possibleArrayKeys[0]];
-            setNurses(arrayData);
-          } else {
-            setNurses([]);
-          }
-        } else {
-          setNurses([]);
-          setError("Invalid API response format");
-        }
+        setNurses(mappedNurses);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to fetch nurses"
@@ -331,10 +320,13 @@ export default function NursesPage() {
         onConfirm={async () => {
           if (!selectedNurse) return;
           try {
-            await fetch(
-              `https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/delete_nurse_Admin/${selectedNurse.id}`,
-              { method: "DELETE" }
-            );
+            const { error } = await supabase
+              .from('nurses')
+              .delete()
+              .eq('id', selectedNurse.id);
+
+            if (error) throw new Error(error.message);
+
             setNurses((prev) => prev.filter((n) => n.id !== selectedNurse.id));
           } catch (err) {
             console.error("Error deleting nurse:", err);

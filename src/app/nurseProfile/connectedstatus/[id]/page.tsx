@@ -21,6 +21,7 @@ import { Navbar } from "../../components/Navbar";
 import Footer from "@/app/Admin/components/layout/Footer";
 import Image from "next/image";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getEmployerById } from "@/lib/supabase-api";
 
 interface CompanyLogo {
   url: string;
@@ -64,7 +65,6 @@ export default function EmployerDetailPage() {
   const [logoKey, setLogoKey] = useState(Date.now());
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     if (!id) {
       setLoading(false);
       return;
@@ -72,35 +72,40 @@ export default function EmployerDetailPage() {
 
     const fetchEmployer = async () => {
       try {
-        // First, try to fetch from notifications (for connected employers)
-        if (token) {
-          const res = await fetch(
-            "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+        const employerData = await getEmployerById(String(id));
 
-          if (res.ok) {
-            const data = await res.json();
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const connection = data.find((item: any) => item._employer_profiles?.id === Number(id));
-            if (connection?._employer_profiles) {
-              setEmployer(connection._employer_profiles);
-              setLogoKey(Date.now());
-              setLoading(false);
-              return;
-            }
-          }
-        }
+        if (!employerData) throw new Error("Employer not found");
 
-        // If not found in notifications, fetch directly by ID
-        const directRes = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:dttXPFU4/employer_profiles/${id}`
-        );
+        // Map Supabase data to Employer interface
+        const mapped: Employer = {
+          mobile: employerData.mobile || "",
+          companyName: employerData.company_name || "",
+          email: employerData.email || "",
+          Australian_Business_Number: employerData.australian_business_number || "",
+          businessType: employerData.business_type || "",
+          numberOfEmployees: employerData.number_of_employees || "",
+          fullName: employerData.full_name || "",
+          yourDesignation: employerData.designation || "",
+          state: employerData.state || "",
+          city: employerData.city || "",
+          pinCode: employerData.pin_code || "",
+          companyAddress: employerData.company_address || "",
+          password: "",
+          Organization_websiteSocial_Media_Link: employerData.website_link || "",
+          creatingAccountAs: employerData.account_type || "",
+          country: employerData.country,
+          company_logo: employerData.company_logo_url ? {
+            url: employerData.company_logo_url,
+            path: "",
+            name: "",
+            type: "",
+            mime: "",
+            size: 0,
+            access: "",
+          } : undefined,
+        };
 
-        if (!directRes.ok) throw new Error("Employer not found");
-
-        const employerData = await directRes.json();
-        setEmployer(employerData);
+        setEmployer(mapped);
         setLogoKey(Date.now());
       } catch (err) {
         console.error(err);

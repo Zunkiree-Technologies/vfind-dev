@@ -9,6 +9,7 @@ import {
   Building2,
   Filter,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface Stats {
   nurses: number;
@@ -39,32 +40,50 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // ✅ Fetch stats
-        const [accepted, pending, rejected, connectionsCount] = await Promise.all([
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/accepted_connections").then((res) => res.json()),
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/pending_connections").then((res) => res.json()),
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/rejected_connection").then((res) => res.json()),
-          fetch("https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/total_number_of_connections").then((res) => res.json()),
+        // Fetch stats counts
+        const [acceptedResult, pendingResult, rejectedResult, totalResult] = await Promise.all([
+          supabase.from('connections').select('id', { count: 'exact', head: true }).eq('status', 'accepted'),
+          supabase.from('connections').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+          supabase.from('connections').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
+          supabase.from('connections').select('id', { count: 'exact', head: true }),
         ]);
 
         setStats({
-          nurses: 0, 
+          nurses: 0,
           employers: 0,
           jobs: 0,
-          accepted,
-          pending,
-          rejected,
-          connections: connectionsCount,
+          accepted: acceptedResult.count || 0,
+          pending: pendingResult.count || 0,
+          rejected: rejectedResult.count || 0,
+          connections: totalResult.count || 0,
         });
 
-        // ✅ Fetch connections for table
-        const conns = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/connections"
-        ).then((res) => res.json());
+        // Fetch connections for table with nurse and employer info
+        const { data: conns, error } = await supabase
+          .from('connections')
+          .select('id, nurse_id, employer_id, status, nurse:nurses(full_name), employer:employers(company_name)')
+          .order('created_at', { ascending: false });
 
-        setConnections(Array.isArray(conns) ? conns : []);
+        if (error) throw new Error(error.message);
+
+        // Map to Connection interface
+        const mappedConnections: Connection[] = (conns || []).map((c) => {
+          // Supabase returns relations as single objects when joining by foreign key
+          const nurse = c.nurse as unknown as { full_name: string } | null;
+          const employer = c.employer as unknown as { company_name: string } | null;
+          return {
+            id: Number(c.id),
+            employer_profiles_id: Number(c.employer_id),
+            nurse_profiles_id: Number(c.nurse_id),
+            nurseName: nurse?.full_name || `Nurse #${c.nurse_id}`,
+            companyName: employer?.company_name,
+            status: c.status as "accepted" | "pending" | "rejected",
+          };
+        });
+
+        setConnections(mappedConnections);
       } catch (err) {
-        console.error("❌ Error fetching data:", err);
+        console.error("Error fetching data:", err);
       }
     }
 

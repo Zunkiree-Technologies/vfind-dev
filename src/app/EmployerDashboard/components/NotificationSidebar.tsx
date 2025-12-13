@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Bell, Link2, X } from "lucide-react";
 import { useRouter } from 'next/navigation';
+import { supabase } from "@/lib/supabase";
+import { parseAuthToken } from "@/lib/supabase-auth";
 
 
 interface Notification {
@@ -30,50 +32,55 @@ export default function EmployerNotificationSidebar({ }: NotificationSidebarProp
 
   // Get user-specific storage key
   const getStorageKey = () => {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("authToken") || localStorage.getItem("token");
     if (!token) return "hiddenNotifications_employer";
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      const userId = payload.id || payload.user_id || payload.sub;
-      return userId ? `hiddenNotifications_employer_${userId}` : "hiddenNotifications_employer";
-    } catch {
-      return "hiddenNotifications_employer";
-    }
+    const parsed = parseAuthToken(token);
+    return parsed?.userId ? `hiddenNotifications_employer_${parsed.userId}` : "hiddenNotifications_employer";
   };
 
   const fetchNotifications = useCallback(async () => {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("authToken") || localStorage.getItem("token");
     if (!token) return;
+
+    const parsed = parseAuthToken(token);
+    if (!parsed || parsed.role !== 'employer') return;
 
     try {
       setLoading(true);
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getEmployerNotifications",
-        {
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          cache: "no-store",
-        }
-      );
 
-      if (!res.ok) throw new Error("Failed to fetch notifications");
+      // Fetch connection requests for this employer that have been responded to
+      const { data, error } = await supabase
+        .from('connections')
+        .select('*, nurse:nurses(id, full_name, email)')
+        .eq('employer_id', parsed.userId)
+        .in('status', ['accepted', 'rejected'])
+        .order('updated_at', { ascending: false });
 
-      let data: Notification[] = await res.json();
+      if (error) throw new Error(error.message);
+
+      // Map to Notification interface
+      let mappedData: Notification[] = (data || []).map((conn) => ({
+        id: Number(conn.id),
+        status: conn.status as "pending" | "accepted" | "rejected" | "",
+        created_at: conn.updated_at || conn.created_at,
+        nurseName: conn.nurse?.full_name || "Nurse",
+        nurse_profiles_id: Number(conn.nurse_id),
+        employerName: "",
+        message: undefined,
+      }));
 
       // Filter hidden notifications
       const hiddenIds: number[] = JSON.parse(localStorage.getItem(getStorageKey()) || "[]");
-      data = data.filter((n) => !hiddenIds.includes(n.id));
-
-      // Filter out pending notifications - only show accepted and rejected
-      data = data.filter((n) => n.status === "accepted" || n.status === "rejected");
+      mappedData = mappedData.filter((n) => !hiddenIds.includes(n.id));
 
       // Sort newest first
-      data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      mappedData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       setNotifications((prev) => {
-        if (JSON.stringify(prev) !== JSON.stringify(data)) {
+        if (JSON.stringify(prev) !== JSON.stringify(mappedData)) {
           // Show toast for new notifications
-          if (data.length > prev.length) {
-            const latest = data[0];
+          if (mappedData.length > prev.length) {
+            const latest = mappedData[0];
             if (latest.status === "accepted") {
               setToastType("success");
               setToastMessage(
@@ -87,7 +94,7 @@ export default function EmployerNotificationSidebar({ }: NotificationSidebarProp
             }
             setTimeout(() => setToastMessage(""), 5000);
           }
-          return data;
+          return mappedData;
         }
         return prev;
       });

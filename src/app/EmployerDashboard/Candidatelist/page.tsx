@@ -16,6 +16,8 @@ import Footer from "@/app/Admin/components/layout/Footer";
 import EmployerNavbar from "../../EmployerDashboard/components/EmployerNavbar";
 import MainButton from "../../../components/ui/MainButton";
 import CandidateFilters from "../components/CandidateFilters";
+import { getNursesForEmployers } from "@/lib/supabase-api";
+import { supabase } from "@/lib/supabase";
 
 interface ProfileImage {
   access: string;
@@ -134,7 +136,15 @@ const Pagination: React.FC<PaginationProps> = ({
   );
 };
 
-const BASE_IMAGE_URL = "https://x76o-gnx4-xrav.a2.xano.io";
+// Get the Supabase storage URL for profile images
+const getImageUrl = (path: string | undefined) => {
+  if (!path) return null;
+  // If it's already a full URL, return it
+  if (path.startsWith('http')) return path;
+  // Otherwise construct from Supabase storage
+  const { data } = supabase.storage.from('profile-images').getPublicUrl(path);
+  return data.publicUrl;
+};
 
 // Updated experience ranges to match the form
 const experienceRanges: Record<string, [number, number]> = {
@@ -216,18 +226,24 @@ export default function CandidateList() {
           return;
         }
 
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_for_employers",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const data = await getNursesForEmployers();
 
-        if (!res.ok) throw new Error("Failed to fetch candidates");
-        const data = await res.json();
-        const list = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.data)
-            ? data.data
-            : [];
+        // Map Supabase data to Candidate interface
+        const list: Candidate[] = data.map((nurse) => ({
+          id: Number(nurse.id),
+          fullName: nurse.full_name || "",
+          email: nurse.email,
+          currentResidentialLocation: nurse.current_residential_location,
+          jobTypes: nurse.job_types ? JSON.stringify(nurse.job_types) : undefined,
+          maxWorkHours: nurse.max_work_hours,
+          phoneNumber: nurse.phone_number,
+          qualification: nurse.qualification,
+          profileImage: nurse.profile_image_url ? { access: "", path: nurse.profile_image_url, name: "", type: "", size: 0 } : null,
+          residencyStatus: nurse.residency_status || "",
+          shiftPreferences: nurse.shift_preferences || [],
+          experience: nurse.experience || "",
+          visaStatus: nurse.visa_status || "",
+        }));
 
         setCandidates(list);
         setFilteredCandidates(list);
@@ -575,9 +591,9 @@ export default function CandidateList() {
                     <div className="flex items-center gap-4 ml-6 flex-col">
                       {/* Circular Profile Image */}
                       <div className="h-16 w-16 rounded-full overflow-hidden border flex-shrink-0">
-                        {candidate.profileImage ? (
+                        {candidate.profileImage?.path ? (
                           <Image
-                            src={BASE_IMAGE_URL + candidate.profileImage.path}
+                            src={getImageUrl(candidate.profileImage.path) || ""}
                             alt={candidate.fullName}
                             className="h-full w-full object-cover"
                             width={64}

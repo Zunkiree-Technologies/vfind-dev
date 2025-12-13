@@ -7,6 +7,7 @@ import Navbar from "../../../components/navbar";
 import Footer from "../../../components/footer-section";
 import { Building2, Globe, Mail, MapPinned, User, Share } from "lucide-react";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
 
 type FormData = {
   mobile: string;
@@ -125,30 +126,40 @@ function RegistrationComponent() {
     }
 
     setOtpLoading(true);
-
-    const payload = {
-      email: formData.email,
-      company_name: formData.companyName,
-    };
+    const normalizedEmail = formData.email.trim().toLowerCase();
 
     try {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_SEND_OTP_ENDPOINT || "",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      // Check if email already exists
+      const { data: existingEmployer } = await supabase
+        .from('employers')
+        .select('id')
+        .eq('email', normalizedEmail)
+        .single();
 
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        const errorMessage = data?.message || `Server error: ${response.status}`;
-        throw new Error(errorMessage);
+      if (existingEmployer) {
+        alert("An account with this email already exists. Please login instead.");
+        setOtpLoading(false);
+        return false;
       }
+
+      // Generate a 6-digit OTP
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
+      // Store OTP in database
+      const { error: otpError } = await supabase
+        .from('otp_tokens')
+        .upsert({
+          email: normalizedEmail,
+          otp_code: otpCode,
+          expires_at: expiresAt,
+          user_type: 'employer_registration',
+        }, { onConflict: 'email' });
+
+      if (otpError) throw new Error("Failed to generate OTP");
+
+      // TODO: Send email with OTP (for now, we'll just show it in the console for testing)
+      console.log("OTP for testing:", otpCode);
 
       setOtpSent(true);
       setMessage(`OTP has been sent successfully to ${formData.email}`);
@@ -175,27 +186,25 @@ function RegistrationComponent() {
     }
 
     setLoading(true);
+    const normalizedEmail = formData.email.trim().toLowerCase();
 
     try {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_VERIFY_OTP_ENDPOINT || "",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            otp_code: enteredOtp,
-            email: formData.email,
-          }),
-        }
-      );
+      // Get OTP from database
+      const { data: otpRecord, error: otpError } = await supabase
+        .from('otp_tokens')
+        .select('*')
+        .eq('email', normalizedEmail)
+        .eq('otp_code', enteredOtp)
+        .eq('user_type', 'employer_registration')
+        .single();
 
-      const data = await response.json().catch(() => null);
+      if (otpError || !otpRecord) {
+        throw new Error("Invalid OTP. Please try again.");
+      }
 
-      if (!response.ok) {
-        const errorMessage = data?.message || "Invalid OTP. Please try again.";
-        throw new Error(errorMessage);
+      // Check if OTP is expired
+      if (new Date(otpRecord.expires_at) < new Date()) {
+        throw new Error("OTP has expired. Please request a new one.");
       }
 
       // OTP verified successfully, now submit the registration form
@@ -288,32 +297,59 @@ function RegistrationComponent() {
   // Submit form to backend
   const handleSubmit = async () => {
     try {
-      const form = new FormData();
+      const normalizedEmail = formData.email.trim().toLowerCase();
 
-      // Add normal fields
-      Object.entries(formData).forEach(([key, value]) => {
-        form.append(key, value as string);
-      });
-
-      // Add logo only if exists
+      // Upload logo to Supabase storage if exists
+      let companyLogoUrl: string | null = null;
       if (logo) {
-        form.append("image", logo);
-      }
+        const fileExt = logo.name.split('.').pop();
+        const fileName = `${normalizedEmail.replace(/[^a-z0-9]/g, '_')}_${Date.now()}.${fileExt}`;
 
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_XANO_REGISTRATION_ENDPOINT || "",
-        {
-          method: "POST",
-          body: form,
+        const { error: uploadError } = await supabase.storage
+          .from('company-logos')
+          .upload(fileName, logo);
+
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage
+            .from('company-logos')
+            .getPublicUrl(fileName);
+          companyLogoUrl = urlData.publicUrl;
         }
-      );
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        const errorMessage = data?.message || "Failed to complete registration. Please try again.";
-        throw new Error(errorMessage);
       }
+
+      // Create employer in Supabase
+      const { data: newEmployer, error: insertError } = await supabase
+        .from('employers')
+        .insert({
+          mobile: formData.mobile,
+          company_name: formData.companyName,
+          email: normalizedEmail,
+          australian_business_number: formData.AustralianBusinessNumber,
+          business_type: formData.businessType,
+          number_of_employees: formData.numberOfEmployees,
+          full_name: formData.fullName,
+          designation: formData.yourDesignation,
+          state: formData.state,
+          city: formData.city,
+          pin_code: formData.pinCode,
+          company_address: formData.companyAddress,
+          password: formData.password, // In production, this should be hashed
+          website_link: formData.organizationWebsite,
+          account_type: formData.creatingAccountAs,
+          company_logo_url: companyLogoUrl,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        throw new Error(insertError.message || "Failed to complete registration. Please try again.");
+      }
+
+      // Delete the OTP token
+      await supabase
+        .from('otp_tokens')
+        .delete()
+        .eq('email', normalizedEmail);
 
       setMessage("Registration successful!");
       setShowOtpModal(false);

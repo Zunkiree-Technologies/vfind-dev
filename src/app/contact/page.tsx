@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Phone, Clock, Calendar, Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { submitContactForm } from "@/lib/supabase-api";
 
 // Public components
 import NavbarPublic from "../../../components/navbar";
@@ -34,16 +35,13 @@ export default function ContactUs() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:gbZ4MFHH/contact_us",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      const result = await submitContactForm({
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        message: formData.message,
+      });
 
-      if (response.ok) {
+      if (result) {
         alert("Message sent successfully!");
         setFormData({ firstName: "", lastName: "", email: "", message: "" });
       } else {

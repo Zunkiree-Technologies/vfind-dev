@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Bell, X, Link2 } from "lucide-react";
 import { useRouter } from 'next/navigation';
+import { supabase } from "@/lib/supabase";
+import { parseAuthToken } from "@/lib/supabase-auth";
 
 interface ConnectionRequest {
   id: number;
@@ -33,23 +35,42 @@ export default function NotificationSidebar({ employerId }: NotificationSidebarP
     const token = localStorage.getItem("token");
     if (!token) return;
 
+    const parsed = parseAuthToken(token);
+    if (!parsed || parsed.role !== 'nurse') return;
+
     try {
       setLoading(true);
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getNurseNotifications",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
 
-      if (!res.ok) throw new Error("Failed to fetch notifications");
+      // Fetch pending connection requests for this nurse
+      const { data, error } = await supabase
+        .from('connections')
+        .select('*, employer:employers(id, full_name, company_name)')
+        .eq('nurse_id', parsed.userId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
 
-      let data: ConnectionRequest[] = await res.json();
+      if (error) throw new Error(error.message);
+
+      // Map to ConnectionRequest interface
+      let mappedData: ConnectionRequest[] = (data || []).map((conn) => ({
+        id: Number(conn.id),
+        nurse_profiles_id: Number(conn.nurse_id),
+        employer_profiles_id: Number(conn.employer_id),
+        status: conn.status as "pending" | "accepted" | "rejected" | "",
+        created_at: conn.created_at,
+        _employer_profiles: conn.employer ? {
+          id: Number(conn.employer.id),
+          fullName: conn.employer.full_name,
+          companyName: conn.employer.company_name,
+        } : undefined,
+      }));
 
       const hiddenIds: number[] = JSON.parse(localStorage.getItem("hiddenNotifications") || "[]");
-      data = data.filter((item) => !hiddenIds.includes(item.id));
+      mappedData = mappedData.filter((item) => !hiddenIds.includes(item.id));
 
       const filtered = employerId
-        ? data.filter((item) => item.employer_profiles_id === employerId)
-        : data;
+        ? mappedData.filter((item) => item.employer_profiles_id === employerId)
+        : mappedData;
 
       filtered.sort((a, b) => b.id - a.id);
 

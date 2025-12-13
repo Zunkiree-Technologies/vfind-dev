@@ -18,6 +18,8 @@ import Loader from "../../../../../components/loading";
 import EmployerNavbar from "../../components/EmployerNavbar";
 import MainButton from "@/components/ui/MainButton";
 import Footer from "@/app/Admin/components/layout/Footer";
+import { supabase } from "@/lib/supabase";
+import { getNurseById, getEducation, getWorkExperience } from "@/lib/supabase-api";
 
 interface ProfileImage {
   url?: string;
@@ -163,80 +165,80 @@ export default function CandidateDetailPage() {
           return;
         }
 
-        // Fetch nurse profile
-        const res = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/nurse_profiles/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        // Fetch nurse profile using Supabase
+        const nurseData = await getNurseById(id);
 
-        if (!res.ok) {
-          const errorText = await res.text();
-          setError(`Failed to fetch candidate details: ${res.status} ${res.statusText}. ${errorText}`);
+        if (!nurseData) {
+          setError("Candidate not found.");
+          setCandidate(null);
           setLoading(false);
           return;
         }
 
-        const data: CandidateDetail = await res.json();
-        if (!data || Object.keys(data).length === 0) {
-          setError("Candidate not found.");
-          setCandidate(null);
-        } else {
-          setCandidate(data);
-          setNurseId(data.id);
+        // Map Supabase data to CandidateDetail interface
+        const data: CandidateDetail = {
+          id: Number(nurseData.id),
+          fullName: nurseData.full_name || "",
+          email: nurseData.email,
+          phoneNumber: nurseData.phone_number,
+          currentResidentialLocation: nurseData.current_residential_location,
+          postcode: nurseData.postcode,
+          willingToRelocate: nurseData.willing_to_relocate,
+          jobSearchStatus: nurseData.job_search_status,
+          qualification: nurseData.qualification,
+          otherQualification: nurseData.other_qualification,
+          experience: nurseData.experience,
+          workingInHealthcare: nurseData.working_in_healthcare,
+          residencyStatus: nurseData.residency_status,
+          visaType: nurseData.visa_type,
+          visaDuration: nurseData.visa_duration,
+          visaExpiry: nurseData.visa_expiry,
+          maxWorkHours: nurseData.max_work_hours,
+          workHoursRestricted: nurseData.work_hours_restricted,
+          ahpraRegistration: nurseData.ahpra_registration,
+          registrationNumber: nurseData.registration_number,
+          ahprRegistrationExpiry: nurseData.ahpra_registration_expiry,
+          jobTypes: nurseData.job_types ? JSON.stringify(nurseData.job_types) : undefined,
+          openToOtherTypes: nurseData.open_to_other_types,
+          shiftPreferences: nurseData.shift_preferences,
+          preferredLocations: nurseData.preferred_locations,
+          startTime: nurseData.start_time,
+          startDate: nurseData.start_date,
+          certifications: nurseData.certifications,
+          licenses: nurseData.licenses,
+          profileImage: nurseData.profile_image_url ? { url: nurseData.profile_image_url } : null,
+        };
 
-          // Fetch education and work experience in parallel
-          const [eduRes, workRes] = await Promise.all([
-            fetch(
-              `https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education_by_id`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ nurse_profiles_id: id }),
-              }
-            ),
-            fetch(
-              `https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/get_workexperience_by_id`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ nurse_profiles_id: id }),
-              }
-            ),
-          ]);
+        setCandidate(data);
+        setNurseId(data.id);
 
-          // Handle education data
-          if (eduRes.ok) {
-            const eduData = await eduRes.json();
-            setEducationList(eduData || []);
-          }
+        // Fetch education and work experience in parallel
+        const [eduData, workData] = await Promise.all([
+          getEducation(id),
+          getWorkExperience(id),
+        ]);
 
-          // Handle work experience data
-          if (workRes.ok) {
-            const workData = await workRes.json();
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const mapped = workData.map((exp: any) => ({
-              id: exp.id,
-              organization_name: exp.organizationName || exp.organization_name || "",
-              role_title: exp.roleTitle || exp.role_title || "",
-              total_years_of_experience:
-                exp.totalYearsOfExperience || exp.total_years_of_experience || "",
-              start_date: exp.startDate || exp.start_date || "",
-              end_date: exp.endDate || exp.end_date || "",
-            }));
-            setWorkExperienceList(mapped);
-          }
-        }
+        // Handle education data
+        const mappedEdu: Education[] = eduData.map((edu) => ({
+          id: Number(edu.id),
+          institution_name: edu.institution_name || "",
+          degree_name: edu.degree_name || "",
+          from_year: edu.from_year || "",
+          to_year: edu.to_year || "",
+        }));
+        setEducationList(mappedEdu);
+
+        // Handle work experience data
+        const mappedWork: WorkExperience[] = workData.map((exp) => ({
+          id: Number(exp.id),
+          organization_name: exp.organization_name || "",
+          role_title: exp.role_title || "",
+          total_years_of_experience: exp.total_years || "",
+          start_date: exp.start_date || "",
+          end_date: exp.end_date || "",
+        }));
+        setWorkExperienceList(mappedWork);
+
       } catch (err: unknown) {
         console.error("Error fetching candidate details:", err);
         if (err instanceof Error) setError(err.message);
@@ -254,32 +256,18 @@ export default function CandidateDetailPage() {
     const fetchWishlistStatus = async () => {
       if (!id || !employerId) return;
 
-      const token = localStorage.getItem("authToken");
-      if (!token) return;
-
       try {
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/fetch_wishlist_status",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              nurse_profiles_id: id,
-            }),
-          }
-        );
+        const { data } = await supabase
+          .from('employer_wishlist')
+          .select('id')
+          .eq('employer_id', employerId)
+          .eq('nurse_id', id)
+          .single();
 
-        const data = await res.json();
-        if (data[0] && typeof data[0].status === "string" && data[0].status === "saved") {
-          setWishlisted(true);
-        } else {
-          setWishlisted(false);
-        }
+        setWishlisted(!!data);
       } catch (err) {
         console.error("Error fetching wishlist status:", err);
+        setWishlisted(false);
       }
     };
 
@@ -291,24 +279,21 @@ export default function CandidateDetailPage() {
     if (!id || !employerId) return;
 
     try {
-      const token = localStorage.getItem("authToken");
-      if (!token) return;
+      const { data } = await supabase
+        .from('connections')
+        .select('status')
+        .eq('employer_id', employerId)
+        .eq('nurse_id', id)
+        .single();
 
-      const connRes = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/sendStatus?employer_profiles_id=${employerId}&nurse_profiles_id=${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (connRes.ok) {
-        const connData = await connRes.json();
-        if (connData.length > 0) {
-          setConnectionStatus(connData[0].status);
-        } else {
-          setConnectionStatus("none");
-        }
+      if (data) {
+        setConnectionStatus(data.status as "none" | "pending" | "accepted" | "rejected");
+      } else {
+        setConnectionStatus("none");
       }
     } catch (err) {
       console.error("Error checking connection:", err);
+      setConnectionStatus("none");
     }
   }, [id, employerId]);
 
@@ -320,68 +305,32 @@ export default function CandidateDetailPage() {
   const handleWishlistToggle = async () => {
     if (!nurseId || !employerId) return;
 
-    const token = localStorage.getItem("authToken");
-    if (!token) return alert("Unauthorized: Please log in");
-
     try {
       if (!wishlisted) {
         // Add to wishlist
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/wishlist",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              nurse_profiles_id: nurseId,
-              employer_profiles_id: employerId,
-            }),
-          }
-        );
+        const { error } = await supabase
+          .from('employer_wishlist')
+          .insert({
+            nurse_id: String(nurseId),
+            employer_id: String(employerId),
+          });
 
-        if (!res.ok) {
-          const text = await res.text();
-          console.error("Failed to add wishlist:", text);
+        if (error) {
+          console.error("Failed to add wishlist:", error.message);
           return alert("Failed to add to wishlist");
         }
 
         setWishlisted(true);
       } else {
         // Remove from wishlist
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/fetch_wishlist_id",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              nurse_profiles_id: id,
-            }),
-          }
-        );
+        const { error } = await supabase
+          .from('employer_wishlist')
+          .delete()
+          .eq('employer_id', employerId)
+          .eq('nurse_id', id);
 
-        if (!res.ok) throw new Error("Failed to get wishlist ID");
-        const data = await res.json();
-        const wishlistId = data[0].id;
-        if (!wishlistId) throw new Error("Wishlist ID not found");
-
-        const deleteRes = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:P9j60cGD/wishlist/${wishlistId}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!deleteRes.ok) {
-          const text = await deleteRes.text();
-          console.error("Failed to remove wishlist:", text);
+        if (error) {
+          console.error("Failed to remove wishlist:", error.message);
           return alert("Failed to remove from wishlist");
         }
 
@@ -398,31 +347,19 @@ export default function CandidateDetailPage() {
     if (connectionStatus !== "none" || !nurseId || !employerId) return;
 
     try {
-      const token = localStorage.getItem("authToken");
-      if (!token) return alert("Unauthorized: Please log in");
-
       setSendingConnection(true);
 
-      const res = await fetch(
-        `https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/sendConnection`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            nurse_profiles_id: nurseId,
-            employer_profiles_id: employerId,
-            status: "pending",
-          }),
-        }
-      );
+      const { error } = await supabase
+        .from('connections')
+        .insert({
+          nurse_id: String(nurseId),
+          employer_id: String(employerId),
+          status: "pending",
+        });
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Failed to send connection:", text);
-        return alert(`Failed to send connection: ${text}`);
+      if (error) {
+        console.error("Failed to send connection:", error.message);
+        return alert(`Failed to send connection: ${error.message}`);
       }
 
       setConnectionStatus("pending");
@@ -474,8 +411,22 @@ export default function CandidateDetailPage() {
   const certificationsArray = parseValues(candidate.certifications);
 
   // Profile image URL
-  const profileImageUrl = candidate.profileImage?.url ||
-    (candidate.profileImage?.path ? `https://x76o-gnx4-xrav.a2.xano.io${candidate.profileImage.path}` : null);
+  const getProfileImageUrl = () => {
+    if (candidate.profileImage?.url) {
+      // If already a full URL, use it directly
+      if (candidate.profileImage.url.startsWith('http')) return candidate.profileImage.url;
+      // Otherwise get from Supabase storage
+      const { data } = supabase.storage.from('profile-images').getPublicUrl(candidate.profileImage.url);
+      return data.publicUrl;
+    }
+    if (candidate.profileImage?.path) {
+      if (candidate.profileImage.path.startsWith('http')) return candidate.profileImage.path;
+      const { data } = supabase.storage.from('profile-images').getPublicUrl(candidate.profileImage.path);
+      return data.publicUrl;
+    }
+    return null;
+  };
+  const profileImageUrl = getProfileImageUrl();
 
   // ==================== RETURN STATEMENT STARTS HERE ====================
 

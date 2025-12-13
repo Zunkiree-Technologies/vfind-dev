@@ -5,6 +5,7 @@ import { Calendar, Filter, Search, Mail, User, Clock, CheckCircle, XCircle, Aler
 import Loader from "../../../../../components/loading";
 import EmployerNavbar from "../../components/EmployerNavbar";
 import Footer from "@/app/Admin/components/layout/Footer";
+import { getJobApplicants } from "@/lib/supabase-api";
 
 interface JobApplication {
   id: number;
@@ -37,15 +38,22 @@ const JobApplicationsPage = () => {
 
     const fetchApplications = async () => {
       try {
-        const res = await fetch(
-          `https://x76o-gnx4-xrav.a2.xano.io/api:PX2mK6Kr/getAllNursesAppliedForJob?job_id=${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const data = await res.json();
-        setApplications(data);
-        console.log(data)
+        const data = await getJobApplicants(token, String(id));
+
+        // Map Supabase data to JobApplication interface
+        const mappedApplications: JobApplication[] = data.map((app) => ({
+          id: Number(app.id),
+          created_at: new Date(app.applied_at || "").getTime(),
+          jobs_id: Number(app.job_id),
+          nurse_profiles_id: Number(app.nurse_id),
+          status: (app.status as "applied" | "invited" | "rejected" | "hired") || "applied",
+          applied_date: app.applied_at || "",
+          email: app.nurse?.email || "",
+          fullName: app.nurse?.full_name,
+        }));
+
+        setApplications(mappedApplications);
+        console.log(mappedApplications);
       } catch (err) {
         console.error("Error fetching applications:", err);
       } finally {

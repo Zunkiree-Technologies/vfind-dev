@@ -14,6 +14,7 @@ import Footer from "@/app/Admin/components/layout/Footer";
 import EmployerNavbar from "../components/EmployerNavbar";
 import Image from "next/image";
 import MainButton from "@/components/ui/MainButton";
+import { getEmployerProfile, updateEmployerProfile, uploadProfileImage } from "@/lib/supabase-api";
 
 interface CompanyLogo {
   url: string;
@@ -101,17 +102,34 @@ export default function EmployerProfile() {
     const fetchEmployer = async () => {
       try {
         console.log("🔐 Fetching employer profile...");
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/get_employer_profile",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!res.ok) throw new Error("Failed to fetch employer profile");
-        const data = await res.json();
-        const employerData = data?.data || data;
-        console.log("✅ Employer Data fetched:", employerData);
-        setEmployer(employerData);
-        setEditedEmployer(employerData);
-        setLogoKey(Date.now());
+        const data = await getEmployerProfile(token);
+
+        if (data) {
+          // Map Supabase snake_case to frontend camelCase
+          const employerData: Employer = {
+            mobile: data.mobile || "",
+            companyName: data.company_name || "",
+            email: data.email || "",
+            Australian_Business_Number: data.australian_business_number || "",
+            businessType: data.business_type || "",
+            numberOfEmployees: data.number_of_employees || "",
+            fullName: data.full_name || "",
+            yourDesignation: data.designation || "",
+            state: data.state || "",
+            city: data.city || "",
+            pinCode: data.pin_code || "",
+            companyAddress: data.company_address || "",
+            password: "",
+            Organization_websiteSocial_Media_Link: data.website_link || "",
+            creatingAccountAs: data.account_type || "company",
+            company_logo: data.company_logo_url ? { url: data.company_logo_url, path: "", name: "", type: "", mime: "", size: 0, access: "" } : undefined,
+            country: data.country || "Australia",
+          };
+          console.log("✅ Employer Data fetched:", employerData);
+          setEmployer(employerData);
+          setEditedEmployer(employerData);
+          setLogoKey(Date.now());
+        }
       } catch (err) {
         console.error("❌ Fetch Error:", err);
       } finally {
@@ -165,45 +183,50 @@ export default function EmployerProfile() {
     setUploadingLogo(true);
 
     try {
-      // Prepare FormData for all fields
-      const formData = new FormData();
-
-      Object.entries(editedEmployer).forEach(([key, value]) => {
-        if (key === "company_logo") return; // handle separately
-        if (Array.isArray(value)) {
-          formData.append(key, JSON.stringify(value));
-        } else if (value !== undefined && value !== null) {
-          formData.append(key, value.toString());
-        }
-      });
-
-      // Add logo file if selected
+      // Upload logo if selected
+      let logoUrl = editedEmployer.company_logo?.url;
       if (pendingLogoFile) {
-        formData.append("company_logo", pendingLogoFile);
-      }
-
-      // Send request
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:t5TlTxto/edit_employer_profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`, // NO Content-Type for FormData
-          },
-          body: formData,
+        const uploadResult = await uploadProfileImage(token, pendingLogoFile);
+        if (uploadResult.success && uploadResult.url) {
+          logoUrl = uploadResult.url;
+        } else {
+          console.error("Failed to upload logo:", uploadResult.error);
         }
-      );
-
-      const data = await res.json();
-      if (!res.ok) {
-        console.error("API Error:", data);
-        throw new Error(data.message || "Failed to update profile");
       }
 
-      // Update local state
-      const updatedData = data?.data || data;
-      setEmployer(updatedData);
-      setEditedEmployer(updatedData);
+      // Prepare updates object (map camelCase to snake_case)
+      const updates = {
+        mobile: editedEmployer.mobile,
+        company_name: editedEmployer.companyName,
+        australian_business_number: editedEmployer.Australian_Business_Number,
+        business_type: editedEmployer.businessType,
+        number_of_employees: editedEmployer.numberOfEmployees,
+        full_name: editedEmployer.fullName,
+        designation: editedEmployer.yourDesignation,
+        state: editedEmployer.state,
+        city: editedEmployer.city,
+        pin_code: editedEmployer.pinCode,
+        company_address: editedEmployer.companyAddress,
+        website_link: editedEmployer.Organization_websiteSocial_Media_Link,
+        account_type: editedEmployer.creatingAccountAs,
+        country: editedEmployer.country,
+        company_logo_url: logoUrl,
+      };
+
+      const result = await updateEmployerProfile(token, updates);
+
+      if (!result.success) {
+        console.error("API Error:", result.error);
+        throw new Error(result.error || "Failed to update profile");
+      }
+
+      // Update local state with the new logo URL
+      const updatedEmployer = {
+        ...editedEmployer,
+        company_logo: logoUrl ? { url: logoUrl, path: "", name: "", type: "", mime: "", size: 0, access: "" } : undefined,
+      };
+      setEmployer(updatedEmployer);
+      setEditedEmployer(updatedEmployer);
 
       // Clear pending logo and preview
       setPendingLogoFile(null);

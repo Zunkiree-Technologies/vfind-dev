@@ -6,6 +6,8 @@ import { User, Clock, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lu
 import Loader from "../../../../components/loading";
 import EmployerNavbar from "../components/EmployerNavbar";
 import Footer from "@/app/Admin/components/layout/Footer";
+import { supabase } from "@/lib/supabase";
+import { parseAuthToken } from "@/lib/supabase-auth";
 
 interface StatusItem {
   id: number;
@@ -132,20 +134,28 @@ export default function StatusPage() {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("Unauthorized: No token found");
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:LP_rdOtV/getEmployerNotifications",
-        {
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        }
-      );
+      const parsed = parseAuthToken(token);
+      if (!parsed || parsed.role !== 'employer') {
+        throw new Error("Unauthorized");
+      }
 
-      if (!res.ok) throw new Error(`Failed to fetch data: ${await res.text()}`);
+      // Fetch connections for this employer with nurse data
+      const { data: connections, error } = await supabase
+        .from('connections')
+        .select('*, nurse:nurses(full_name)')
+        .eq('employer_id', parsed.userId)
+        .order('created_at', { ascending: false });
 
-      const apiData: StatusItem[] = await res.json();
-      apiData.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      if (error) throw new Error(error.message);
+
+      const apiData: StatusItem[] = (connections || []).map((conn) => ({
+        id: Number(conn.id),
+        status: conn.status || 'pending',
+        created_at: conn.created_at || '',
+        nurseName: conn.nurse?.full_name || 'Unknown Nurse',
+        nurse_profiles_id: Number(conn.nurse_id),
+      }));
+
       setData(apiData);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);

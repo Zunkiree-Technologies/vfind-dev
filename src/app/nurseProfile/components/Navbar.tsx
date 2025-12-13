@@ -8,6 +8,7 @@ import { MapPin, Search, UserRound, Menu, X } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCookie } from "@/utils/cookies";
+import { getNurseProfile } from "@/lib/supabase-api";
 
 
 export const Navbar = () => {
@@ -74,12 +75,9 @@ export const Navbar = () => {
     const token = getCookie("authToken") || localStorage.getItem("token");
 
     if (token && isAuthenticated) {
-      fetch("https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
+      getNurseProfile(token)
         .then((data) => {
-          setProfileImage(data.profileImage?.url || null);
+          setProfileImage(data?.profile_image_url || null);
         })
         .catch((err) => console.error("Error fetching profile:", err));
     } else {

@@ -24,6 +24,21 @@ import {
 import Footer from "@/app/Admin/components/layout/Footer";
 import { Navbar } from "../components/Navbar";
 import MainButton from "@/components/ui/MainButton";
+import { parseAuthToken } from "@/lib/supabase-auth";
+import {
+  getNurseProfile,
+  updateNurseProfile,
+  toggleNurseVisibility,
+  getEducation,
+  addEducation,
+  updateEducation,
+  deleteEducation,
+  getWorkExperience,
+  addWorkExperience,
+  updateWorkExperience,
+  deleteWorkExperience,
+  uploadProfileImage,
+} from "@/lib/supabase-api";
 
 interface ProfileImage {
   url: string;
@@ -164,43 +179,37 @@ export default function NurseProfilePage() {
     Partial<NurseProfile>
   >({});
 
+  // Helper function to get nurse ID from token
+  const getNurseIdFromToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    const parsed = parseAuthToken(token);
+    return parsed?.userId || null;
+  };
+
   // Fetch work experiences helper function
   const fetchWorkExperiences = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) throw new Error("No nurse ID found");
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/get_workExperience",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const data = await getWorkExperience(nurseId);
+      console.log("Work Experience Data fetched:", data);
 
-      if (!res.ok) throw new Error("Failed to fetch work experience");
-
-      const data = await res.json();
-      console.log("📥 Work Experience Data fetched:", data);
-
-      // Consistent mapping with proper fallbacks for both naming conventions
+      // Map to consistent format
       const mapped = data.map((exp: any) => ({
         id: exp.id,
-        organization_name: exp.organizationName || exp.organization_name || "",
-        role_title: exp.roleTitle || exp.role_title || "",
-        total_years_of_experience:
-          exp.totalYearsOfExperience || exp.total_years_of_experience || "",
-        start_date: exp.startDate || exp.start_date || "",
-        end_date: exp.endDate || exp.end_date || "",
+        organization_name: exp.organization_name || "",
+        role_title: exp.role_title || "",
+        total_years_of_experience: exp.total_years_of_experience || "",
+        start_date: exp.start_date || "",
+        end_date: exp.end_date || "",
       }));
 
       setWorkExperienceList(mapped);
-      console.log("✅ Work Experience loaded successfully:", mapped);
+      console.log("Work Experience loaded successfully:", mapped);
     } catch (err: any) {
-      console.error("❌ Fetch Work Experience Error:", err);
+      console.error("Fetch Work Experience Error:", err);
       setWorkExperienceList([]); // Set empty array on error
     }
   };
@@ -209,89 +218,98 @@ export default function NurseProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        const nurseId = getNurseIdFromToken();
+        if (!nurseId) {
           setError("No authentication token found");
           setLoading(false);
           return;
         }
 
-        console.log("🔐 Using token:", token);
+        console.log("Using nurse ID:", nurseId);
 
-        // Fetch nurse profile
-        const res = await fetch(
-          "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/get_nurse_profile",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        // Fetch nurse profile using Supabase
+        const profileData = await getNurseProfile(nurseId);
 
-        if (!res.ok) throw new Error("Failed to fetch profile");
-        const data = await res.json();
-        console.log("✅ Nurse Profile fetched:", data);
-
-        setProfile(data);
-        // Set initial visibility status from profile data
-        if (data.visibilityStatus) {
-          setVisibilityStatus(data.visibilityStatus);
-          console.log("✅ Visibility status loaded:", data.visibilityStatus);
-        } else {
-          console.log("⚠️ No visibility status in profile, defaulting to visibleToNone");
+        if (!profileData) {
+          throw new Error("Failed to fetch profile");
         }
 
-        // Fetch education and work experience in parallel
-        const [eduRes, workRes] = await Promise.all([
-          fetch(
-            "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          ),
-          fetch(
-            "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/get_workExperience",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          ),
+        // Map Supabase data to profile format
+        const mappedProfile: NurseProfile = {
+          fullName: profileData.full_name || "",
+          email: profileData.email || "",
+          phoneNumber: profileData.phone || "",
+          qualification: profileData.qualification || "",
+          otherQualification: profileData.other_qualification,
+          experience: profileData.experience || "",
+          workingInHealthcare: profileData.working_in_healthcare || "",
+          jobTypes: profileData.job_types || [],
+          openToOtherTypes: profileData.open_to_other_types,
+          startDate: profileData.start_date || "",
+          startTime: profileData.start_time || "",
+          jobSearchStatus: profileData.job_search_status || "",
+          preferredLocations: profileData.preferred_locations || [],
+          shiftPreferences: profileData.shift_preferences || [],
+          licenses: profileData.licenses || [],
+          certifications: profileData.certifications || [],
+          residencyStatus: profileData.residency_status,
+          visaType: profileData.visa_type,
+          visaDuration: profileData.visa_duration,
+          maxWorkHours: profileData.max_work_hours,
+          workHoursRestricted: profileData.work_hours_restricted,
+          postcode: profileData.postcode,
+          organisation: profileData.organisation,
+          currentResidentialLocation: profileData.current_residential_location,
+          profileImage: profileData.profile_image_url ? { url: profileData.profile_image_url } : null,
+          willingToRelocate: profileData.location_preference || "",
+          ahpraRegistration: "",
+          registrationNumber: "",
+          ahprRegistrationExpiry: "",
+          visibilityStatus: profileData.visibility_status,
+        };
+
+        console.log("Nurse Profile fetched:", mappedProfile);
+        setProfile(mappedProfile);
+
+        // Set initial visibility status from profile data
+        if (mappedProfile.visibilityStatus) {
+          setVisibilityStatus(mappedProfile.visibilityStatus);
+          console.log("Visibility status loaded:", mappedProfile.visibilityStatus);
+        } else {
+          console.log("No visibility status in profile, defaulting to visibleToNone");
+        }
+
+        // Fetch education and work experience in parallel using Supabase
+        const [eduData, workData] = await Promise.all([
+          getEducation(nurseId),
+          getWorkExperience(nurseId),
         ]);
 
         // Handle education data
-        if (eduRes.ok) {
-          const eduData = await eduRes.json();
-          setEducationList(eduData || []);
-          console.log("✅ Education loaded:", eduData);
-        }
+        const mappedEdu = (eduData || []).map((edu) => ({
+          id: edu.id ? Number(edu.id) : undefined,
+          institution_name: edu.institution_name || "",
+          degree_name: edu.degree_name || "",
+          from_year: edu.from_year || "",
+          to_year: edu.to_year || "",
+        }));
+        setEducationList(mappedEdu);
+        console.log("Education loaded:", mappedEdu);
 
         // Handle work experience data
-        if (workRes.ok) {
-          const workData = await workRes.json();
-          const mapped = workData.map((exp: any) => ({
-            id: exp.id,
-            organization_name:
-              exp.organizationName || exp.organization_name || "",
-            role_title: exp.roleTitle || exp.role_title || "",
-            total_years_of_experience:
-              exp.totalYearsOfExperience || exp.total_years_of_experience || "",
-            start_date: exp.startDate || exp.start_date || "",
-            end_date: exp.endDate || exp.end_date || "",
-          }));
-          setWorkExperienceList(mapped);
-          console.log("✅ Work Experience loaded:", mapped);
-        }
+        const mappedWork = workData.map((exp: any) => ({
+          id: exp.id,
+          organization_name: exp.organization_name || "",
+          role_title: exp.role_title || "",
+          total_years_of_experience: exp.total_years_of_experience || "",
+          start_date: exp.start_date || "",
+          end_date: exp.end_date || "",
+        }));
+        setWorkExperienceList(mappedWork);
+        console.log("Work Experience loaded:", mappedWork);
+
       } catch (err: any) {
-        console.error("❌ Fetch Error:", err);
+        console.error("Fetch Error:", err);
         setError(err.message || "Failed to fetch profile");
       } finally {
         setLoading(false);
@@ -305,41 +323,23 @@ export default function NurseProfilePage() {
     if (!profile) return;
 
     try {
-      console.log("🖼️ Uploading new image file:", file);
-      const token = localStorage.getItem("token");
-      if (!token) {
+      console.log("Uploading new image file:", file);
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) {
         alert("No authentication token found");
         return;
       }
 
-      const formData = new FormData();
-      formData.append("profileImage", file);
+      // Upload image using Supabase
+      const result = await uploadProfileImage(nurseId, file);
+      if (!result.success || !result.url) {
+        throw new Error(result.error || "Failed to upload image");
+      }
 
-      Object.entries(profile).forEach(([key, value]) => {
-        if (key !== "profileImage" && value !== null && value !== undefined) {
-          if (Array.isArray(value)) {
-            formData.append(key, JSON.stringify(value));
-          } else {
-            formData.append(key, value.toString());
-          }
-        }
-      });
-
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/image_edit",
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to update profile image");
-      const updatedData = await res.json();
-      console.log("✅ Image updated:", updatedData);
-      setProfile(updatedData);
+      console.log("Image uploaded:", result.url);
+      setProfile({ ...profile, profileImage: { url: result.url } });
     } catch (err: any) {
-      console.error("❌ Image Upload Error:", err);
+      console.error("Image Upload Error:", err);
       alert(err.message || "Error uploading image");
     }
   };
@@ -347,30 +347,21 @@ export default function NurseProfilePage() {
   // Toggle Visibility Status Handler
   const handleToggleVisibility = async (newStatus: string) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) {
         alert("No authentication token found");
         return;
       }
 
-      console.log("🔄 Toggling visibility to:", newStatus);
+      console.log("Toggling visibility to:", newStatus);
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/toggle_visibility_status",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
+      const result = await toggleNurseVisibility(nurseId, newStatus);
 
-      if (!res.ok) throw new Error("Failed to update visibility status");
+      if (!result) {
+        throw new Error("Failed to update visibility status");
+      }
 
-      const responseData = await res.json();
-      console.log("✅ API Response:", responseData);
+      console.log("API Response:", result);
 
       // Update local state
       setVisibilityStatus(newStatus);
@@ -380,10 +371,9 @@ export default function NurseProfilePage() {
         setProfile({ ...profile, visibilityStatus: newStatus });
       }
 
-      console.log("✅ Visibility status updated to:", newStatus);
-      // alert(`Profile visibility updated to: ${newStatus === "visibleToAll" ? "Visible to All" : "Private"}`);
+      console.log("Visibility status updated to:", newStatus);
     } catch (err: any) {
-      console.error("❌ Toggle Visibility Error:", err);
+      console.error("Toggle Visibility Error:", err);
       alert(err.message || "Error updating visibility status");
     }
   };
@@ -400,49 +390,33 @@ export default function NurseProfilePage() {
     if (!profile) return;
     setSaving(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) throw new Error("No authentication token found");
 
       const updatedProfile = { ...profile, ...editedBasicInfo };
-      const apiPayload = {
-        ...updatedProfile,
-        jobTypes: Array.isArray(updatedProfile.jobTypes)
-          ? JSON.stringify(updatedProfile.jobTypes)
-          : updatedProfile.jobTypes,
-        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
-          ? JSON.stringify(updatedProfile.preferredLocations)
-          : updatedProfile.preferredLocations,
-        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
-          ? JSON.stringify(updatedProfile.shiftPreferences)
-          : updatedProfile.shiftPreferences,
-        licenses: Array.isArray(updatedProfile.licenses)
-          ? JSON.stringify(updatedProfile.licenses)
-          : updatedProfile.licenses,
-        certifications: Array.isArray(updatedProfile.certifications)
-          ? JSON.stringify(updatedProfile.certifications)
-          : updatedProfile.certifications,
+
+      // Map to Supabase format
+      const supabasePayload = {
+        full_name: updatedProfile.fullName,
+        phone: updatedProfile.phoneNumber,
+        qualification: updatedProfile.qualification,
+        other_qualification: updatedProfile.otherQualification,
+        experience: updatedProfile.experience,
+        organisation: updatedProfile.organisation,
+        postcode: updatedProfile.postcode,
+        current_residential_location: updatedProfile.currentResidentialLocation,
       };
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiPayload),
-        }
-      );
+      const result = await updateNurseProfile(nurseId, supabasePayload);
 
-      if (!res.ok) throw new Error("Failed to update profile");
-      const updatedData = await res.json();
-      setProfile(updatedData);
+      if (!result) throw new Error("Failed to update profile");
+
+      // Update local profile state
+      setProfile(updatedProfile);
       setEditedBasicInfo({});
       setIsEditingBasicInfo(false);
-      // alert("Basic information updated successfully!");
     } catch (err: any) {
-      console.error("❌ Save Error:", err);
+      console.error("Save Error:", err);
       alert(err.message || "Failed to update profile");
     } finally {
       setSaving(false);
@@ -466,49 +440,29 @@ export default function NurseProfilePage() {
     if (!profile) return;
     setSaving(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) throw new Error("No authentication token found");
 
       const updatedProfile = { ...profile, ...editedVisaInfo };
-      const apiPayload = {
-        ...updatedProfile,
-        jobTypes: Array.isArray(updatedProfile.jobTypes)
-          ? JSON.stringify(updatedProfile.jobTypes)
-          : updatedProfile.jobTypes,
-        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
-          ? JSON.stringify(updatedProfile.preferredLocations)
-          : updatedProfile.preferredLocations,
-        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
-          ? JSON.stringify(updatedProfile.shiftPreferences)
-          : updatedProfile.shiftPreferences,
-        licenses: Array.isArray(updatedProfile.licenses)
-          ? JSON.stringify(updatedProfile.licenses)
-          : updatedProfile.licenses,
-        certifications: Array.isArray(updatedProfile.certifications)
-          ? JSON.stringify(updatedProfile.certifications)
-          : updatedProfile.certifications,
+
+      // Map to Supabase format
+      const supabasePayload = {
+        residency_status: updatedProfile.residencyStatus,
+        visa_type: updatedProfile.visaType,
+        visa_duration: updatedProfile.visaDuration,
+        work_hours_restricted: updatedProfile.workHoursRestricted,
+        max_work_hours: updatedProfile.maxWorkHours,
       };
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiPayload),
-        }
-      );
+      const result = await updateNurseProfile(nurseId, supabasePayload);
 
-      if (!res.ok) throw new Error("Failed to update profile");
-      const updatedData = await res.json();
-      setProfile(updatedData);
+      if (!result) throw new Error("Failed to update profile");
+
+      setProfile(updatedProfile);
       setEditedVisaInfo({});
       setIsEditingVisaResidency(false);
-      // alert("Visa & Residency information updated successfully!");
     } catch (err: any) {
-      console.error("❌ Save Error:", err);
+      console.error("Save Error:", err);
       alert(err.message || "Failed to update profile");
     } finally {
       setSaving(false);
@@ -532,49 +486,27 @@ export default function NurseProfilePage() {
     if (!profile) return;
     setSaving(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) throw new Error("No authentication token found");
 
       const updatedProfile = { ...profile, ...editedAhpraInfo };
-      const apiPayload = {
-        ...updatedProfile,
-        jobTypes: Array.isArray(updatedProfile.jobTypes)
-          ? JSON.stringify(updatedProfile.jobTypes)
-          : updatedProfile.jobTypes,
-        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
-          ? JSON.stringify(updatedProfile.preferredLocations)
-          : updatedProfile.preferredLocations,
-        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
-          ? JSON.stringify(updatedProfile.shiftPreferences)
-          : updatedProfile.shiftPreferences,
+
+      // Map to Supabase format (AHPRA fields would be stored in licenses array)
+      const supabasePayload = {
         licenses: Array.isArray(updatedProfile.licenses)
-          ? JSON.stringify(updatedProfile.licenses)
-          : updatedProfile.licenses,
-        certifications: Array.isArray(updatedProfile.certifications)
-          ? JSON.stringify(updatedProfile.certifications)
-          : updatedProfile.certifications,
+          ? updatedProfile.licenses
+          : [],
       };
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiPayload),
-        }
-      );
+      const result = await updateNurseProfile(nurseId, supabasePayload);
 
-      if (!res.ok) throw new Error("Failed to update AHPRA registration");
-      const updatedData = await res.json();
-      setProfile(updatedData);
+      if (!result) throw new Error("Failed to update AHPRA registration");
+
+      setProfile(updatedProfile);
       setEditedAhpraInfo({});
       setIsEditingAhpraReg(false);
-      // alert("AHPRA registration updated successfully!");
     } catch (err: any) {
-      console.error("❌ Save Error:", err);
+      console.error("Save Error:", err);
       alert(err.message || "Failed to update AHPRA registration");
     } finally {
       setSaving(false);
@@ -598,49 +530,27 @@ export default function NurseProfilePage() {
     if (!profile) return;
     setSaving(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) throw new Error("No authentication token found");
 
       const updatedProfile = { ...profile, ...editedCertInfo };
-      const apiPayload = {
-        ...updatedProfile,
-        jobTypes: Array.isArray(updatedProfile.jobTypes)
-          ? JSON.stringify(updatedProfile.jobTypes)
-          : updatedProfile.jobTypes,
-        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
-          ? JSON.stringify(updatedProfile.preferredLocations)
-          : updatedProfile.preferredLocations,
-        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
-          ? JSON.stringify(updatedProfile.shiftPreferences)
-          : updatedProfile.shiftPreferences,
-        licenses: Array.isArray(updatedProfile.licenses)
-          ? JSON.stringify(updatedProfile.licenses)
-          : updatedProfile.licenses,
+
+      // Map to Supabase format
+      const supabasePayload = {
         certifications: Array.isArray(updatedProfile.certifications)
-          ? JSON.stringify(updatedProfile.certifications)
-          : updatedProfile.certifications,
+          ? updatedProfile.certifications
+          : [],
       };
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiPayload),
-        }
-      );
+      const result = await updateNurseProfile(nurseId, supabasePayload);
 
-      if (!res.ok) throw new Error("Failed to update certifications");
-      const updatedData = await res.json();
-      setProfile(updatedData);
+      if (!result) throw new Error("Failed to update certifications");
+
+      setProfile(updatedProfile);
       setEditedCertInfo({});
       setIsEditingCertifications(false);
-      // alert("Certifications updated successfully!");
     } catch (err: any) {
-      console.error("❌ Save Error:", err);
+      console.error("Save Error:", err);
       alert(err.message || "Failed to update certifications");
     } finally {
       setSaving(false);
@@ -664,49 +574,37 @@ export default function NurseProfilePage() {
     if (!profile) return;
     setSaving(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) throw new Error("No authentication token found");
 
       const updatedProfile = { ...profile, ...editedWorkPrefInfo };
-      const apiPayload = {
-        ...updatedProfile,
-        jobTypes: Array.isArray(updatedProfile.jobTypes)
-          ? JSON.stringify(updatedProfile.jobTypes)
-          : updatedProfile.jobTypes,
-        preferredLocations: Array.isArray(updatedProfile.preferredLocations)
-          ? JSON.stringify(updatedProfile.preferredLocations)
-          : updatedProfile.preferredLocations,
-        shiftPreferences: Array.isArray(updatedProfile.shiftPreferences)
-          ? JSON.stringify(updatedProfile.shiftPreferences)
-          : updatedProfile.shiftPreferences,
-        licenses: Array.isArray(updatedProfile.licenses)
-          ? JSON.stringify(updatedProfile.licenses)
-          : updatedProfile.licenses,
-        certifications: Array.isArray(updatedProfile.certifications)
-          ? JSON.stringify(updatedProfile.certifications)
-          : updatedProfile.certifications,
+
+      // Map to Supabase format
+      const supabasePayload = {
+        job_types: Array.isArray(updatedProfile.jobTypes)
+          ? updatedProfile.jobTypes
+          : [],
+        preferred_locations: Array.isArray(updatedProfile.preferredLocations)
+          ? updatedProfile.preferredLocations
+          : [],
+        shift_preferences: Array.isArray(updatedProfile.shiftPreferences)
+          ? updatedProfile.shiftPreferences
+          : [],
+        start_time: updatedProfile.startTime,
+        start_date: updatedProfile.startDate,
+        job_search_status: updatedProfile.jobSearchStatus,
+        location_preference: updatedProfile.willingToRelocate,
       };
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:MeLrTB-C/edit_nurse_profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(apiPayload),
-        }
-      );
+      const result = await updateNurseProfile(nurseId, supabasePayload);
 
-      if (!res.ok) throw new Error("Failed to update work preferences");
-      const updatedData = await res.json();
-      setProfile(updatedData);
+      if (!result) throw new Error("Failed to update work preferences");
+
+      setProfile(updatedProfile);
       setEditedWorkPrefInfo({});
       setIsEditingWorkPreferences(false);
-      // alert("Work preferences updated successfully!");
     } catch (err: any) {
-      console.error("❌ Save Error:", err);
+      console.error("Save Error:", err);
       alert(err.message || "Failed to update work preferences");
     } finally {
       setSaving(false);
@@ -721,29 +619,22 @@ export default function NurseProfilePage() {
   // ==================== EDUCATION FUNCTIONALITY ====================
   const handleAddEducation = async (education: Education) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) throw new Error("No token found");
 
-      console.log("➕ Adding Education:", education);
+      console.log("Adding Education:", education);
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/add_education",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(education),
-        }
-      );
+      const newEducation = await addEducation(nurseId, {
+        institution_name: education.institution_name,
+        degree_name: education.degree_name,
+        from_year: education.from_year,
+        to_year: education.to_year,
+      });
 
-      if (!res.ok) throw new Error("Failed to add education");
-      const newEducation = await res.json();
-      console.log("✅ New Education Added:", newEducation);
+      console.log("New Education Added:", newEducation);
       return newEducation;
     } catch (err: any) {
-      console.error("❌ Add Education Error:", err);
+      console.error("Add Education Error:", err);
       alert(err.message || "Failed to add education");
       throw err;
     }
@@ -751,29 +642,23 @@ export default function NurseProfilePage() {
 
   const handleEditEducation = async (education: Education) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
+      if (!education.id) throw new Error("Education ID is required");
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Authentication token not found");
 
-      console.log("✏️ Editing Education:", education);
+      console.log("Editing Education:", education);
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/edit_education",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(education),
-        }
-      );
+      const updatedEducation = await updateEducation(token, education.id.toString(), {
+        institution_name: education.institution_name,
+        degree_name: education.degree_name,
+        from_year: education.from_year,
+        to_year: education.to_year,
+      });
 
-      if (!res.ok) throw new Error("Failed to edit education");
-      const updatedEducation = await res.json();
-      console.log("✅ Education Updated:", updatedEducation);
+      console.log("Education Updated:", updatedEducation);
       return updatedEducation;
     } catch (err: any) {
-      console.error("❌ Edit Education Error:", err);
+      console.error("Edit Education Error:", err);
       alert(err.message || "Failed to edit education");
       throw err;
     }
@@ -781,29 +666,17 @@ export default function NurseProfilePage() {
 
   const handleDeleteEducation = async (degree_name: string) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      console.log("Deleting education with degree name:", degree_name);
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Authentication token not found");
 
-      console.log("🗑️ Deleting education with degree name:", degree_name);
-
-      // Get education ID
-      const getIdRes = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/get_education_id",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ degree_name }),
-        }
+      // Find the education entry by degree name
+      const educationToDelete = educationList.find(
+        (edu) => edu.degree_name === degree_name
       );
 
-      const getIdData = await getIdRes.json();
-      const education_id = getIdData[0]?.id;
-
-      if (!education_id) {
-        console.error("❌ Education ID not found for degree:", degree_name);
+      if (!educationToDelete?.id) {
+        console.error("Education ID not found for degree:", degree_name);
         alert(
           "Could not find education ID. Make sure the degree name matches exactly."
         );
@@ -811,27 +684,14 @@ export default function NurseProfilePage() {
       }
 
       // Delete education
-      const deleteRes = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:31adG1Q0/delete_education",
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ education_id }),
-        }
-      );
-
-      if (!deleteRes.ok) throw new Error("Failed to delete education");
+      await deleteEducation(token, educationToDelete.id.toString());
 
       // Update local state
       setEducationList((prev) =>
         prev.filter((edu) => edu.degree_name !== degree_name)
       );
-      // alert(`Education "${degree_name}" deleted successfully!`);
     } catch (err: any) {
-      console.error("❌ Delete Education Error:", err);
+      console.error("Delete Education Error:", err);
       alert(err.message || "Failed to delete education");
     }
   };
@@ -839,29 +699,23 @@ export default function NurseProfilePage() {
   // ==================== WORK EXPERIENCE FUNCTIONALITY ====================
   const handleAddWorkExperience = async (experience: WorkExperience) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
+      const nurseId = getNurseIdFromToken();
+      if (!nurseId) throw new Error("No token found");
 
-      console.log("➕ Adding Work Experience:", experience);
+      console.log("Adding Work Experience:", experience);
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/add_work_experience",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(experience),
-        }
-      );
+      const newExperience = await addWorkExperience(nurseId, {
+        organization_name: experience.organization_name,
+        role_title: experience.role_title,
+        total_years_of_experience: experience.total_years_of_experience,
+        start_date: experience.start_date,
+        end_date: experience.end_date,
+      });
 
-      if (!res.ok) throw new Error("Failed to add work experience");
-      const newExperience = await res.json();
-      console.log("✅ New Work Experience Added:", newExperience);
+      console.log("New Work Experience Added:", newExperience);
       return newExperience;
     } catch (err: any) {
-      console.error("❌ Add Work Experience Error:", err);
+      console.error("Add Work Experience Error:", err);
       alert(err.message || "Failed to add work experience");
       throw err;
     }
@@ -869,29 +723,24 @@ export default function NurseProfilePage() {
 
   const handleEditWorkExperience = async (experience: WorkExperience) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
+      if (!experience.id) throw new Error("Work Experience ID is required");
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Authentication token not found");
 
-      console.log("✏️ Editing Work Experience:", experience);
+      console.log("Editing Work Experience:", experience);
 
-      const res = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/edit_work_experience",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(experience),
-        }
-      );
+      const updatedExperience = await updateWorkExperience(token, experience.id.toString(), {
+        organization_name: experience.organization_name,
+        role_title: experience.role_title,
+        total_years_of_experience: experience.total_years_of_experience,
+        start_date: experience.start_date,
+        end_date: experience.end_date,
+      });
 
-      if (!res.ok) throw new Error("Failed to edit work experience");
-      const updatedExperience = await res.json();
-      console.log("✅ Work Experience Updated:", updatedExperience);
+      console.log("Work Experience Updated:", updatedExperience);
       return updatedExperience;
     } catch (err: any) {
-      console.error("❌ Edit Work Experience Error:", err);
+      console.error("Edit Work Experience Error:", err);
       alert(err.message || "Failed to edit work experience");
       throw err;
     }
@@ -899,32 +748,12 @@ export default function NurseProfilePage() {
 
   const handleDeleteWorkExperience = async (experience: WorkExperience) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found");
+      console.log("Deleting work experience:", experience);
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Authentication token not found");
 
-      console.log("🗑️ Deleting work experience:", experience);
-
-      // Get work experience ID
-      const getIdRes = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/get_workExperience_id",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            organization_name: experience.organization_name,
-            roleTitle: experience.role_title,
-          }),
-        }
-      );
-
-      const getIdData = await getIdRes.json();
-      const work_experience_id = getIdData[0]?.id;
-
-      if (!work_experience_id) {
-        console.error("❌ Work Experience ID not found:", experience);
+      if (!experience.id) {
+        console.error("Work Experience ID not found:", experience);
         alert(
           "Could not find work experience ID. Make sure organization and role match exactly."
         );
@@ -932,26 +761,12 @@ export default function NurseProfilePage() {
       }
 
       // Delete work experience
-      const deleteRes = await fetch(
-        "https://x76o-gnx4-xrav.a2.xano.io/api:wAG4ZQ6V/work_experience",
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ work_experience_id }),
-        }
-      );
-
-      if (!deleteRes.ok) throw new Error("Failed to delete work experience");
+      await deleteWorkExperience(token, experience.id.toString());
 
       // Refresh data from server instead of manual filtering
       await fetchWorkExperiences();
-
-      // alert(`Work Experience "${experience.role_title}" deleted successfully!`);
     } catch (err: any) {
-      console.error("❌ Delete Work Experience Error:", err);
+      console.error("Delete Work Experience Error:", err);
       alert(err.message || "Failed to delete work experience");
     }
   };
