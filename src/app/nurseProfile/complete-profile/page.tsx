@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, ChevronRight, User, Award, Briefcase, MapPin, FileCheck } from "lucide-react";
@@ -34,7 +34,8 @@ const sections: Section[] = [
   { id: "visa", label: "Work Rights", icon: <FileCheck className="w-5 h-5" />, description: "Residency and visa status" },
 ];
 
-export default function CompleteProfilePage() {
+// Wrapper component to handle useSearchParams with Suspense
+function CompleteProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialSection = (searchParams.get("section") as SectionId) || null;
@@ -414,5 +415,26 @@ export default function CompleteProfilePage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-8 h-8 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main page component wrapped in Suspense
+export default function CompleteProfilePage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CompleteProfileContent />
+    </Suspense>
   );
 }
