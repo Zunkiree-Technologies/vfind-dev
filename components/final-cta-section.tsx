@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const FinalCtaSection = () => {
   return (
-    <section className="py-24 sm:py-32 bg-white">
+    <section className="py-12 sm:py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Headline - Two line style */}
         <h2 className="font-primary text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-10">

@@ -31,7 +31,7 @@ const benefits = [
 
 export const WhyVfindSection = () => {
   return (
-    <section className="py-16 sm:py-20 bg-white">
+    <section className="py-10 sm:py-16 lg:py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header - Left aligned like How It Works */}
         <div className="mb-10 sm:mb-12">

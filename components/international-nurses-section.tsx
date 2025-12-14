@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const InternationalNursesSection = () => {
   return (
-    <section className="py-24 sm:py-32 bg-gray-900 rounded-3xl mx-4 sm:mx-6 lg:mx-8 my-4">
+    <section className="py-12 sm:py-20 lg:py-28 bg-gray-900 rounded-3xl mx-4 sm:mx-6 lg:mx-8 my-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           {/* Two-line headline */}

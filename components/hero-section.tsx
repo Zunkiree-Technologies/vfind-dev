@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export const HeroSection = () => {
   return (
-    <section className="relative h-[calc(100vh-64px)] bg-white overflow-hidden">
+    <section className="relative min-h-[auto] lg:h-[calc(100vh-64px)] bg-white overflow-hidden py-12 sm:py-16 lg:py-0">
       {/* Subtle background pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] opacity-30" />
 
@@ -15,10 +15,10 @@ export const HeroSection = () => {
           {/* Left Content */}
           <div className="space-y-6">
             {/* Main Headline - Two line contrasting style */}
-            <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-extrabold leading-[1.1] tracking-[-0.02em]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold leading-[1.1] tracking-[-0.02em]">
               <span className="text-gray-900">Get Discovered.</span>
               <br />
-              <span className="text-gray-500 whitespace-nowrap">By Healthcare Employers.</span>
+              <span className="text-gray-500 sm:whitespace-nowrap">By Healthcare Employers.</span>
             </h1>
 
             {/* Subheadline */}

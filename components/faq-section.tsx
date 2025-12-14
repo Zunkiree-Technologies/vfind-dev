@@ -37,7 +37,7 @@ export const FaqSection = () => {
   };
 
   return (
-    <section className="py-16 sm:py-20 bg-[#f5f5f7]">
+    <section className="py-10 sm:py-16 lg:py-20 bg-[#f5f5f7]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
           {/* Left side - Header */}
