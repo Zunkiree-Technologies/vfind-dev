@@ -16,7 +16,7 @@ export const FinalCtaSection = () => {
         {/* CTA Button */}
         <Link
           href="/signup"
-          className="inline-flex items-center justify-center px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white text-base font-bold uppercase tracking-wider rounded-full shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+          className="inline-flex items-center justify-center px-10 py-5 bg-pink-600 hover:bg-pink-700 text-white text-base font-bold uppercase tracking-wider rounded-full shadow-lg hover:-translate-y-0.5 transition-all duration-200"
         >
           Create Free Profile
         </Link>

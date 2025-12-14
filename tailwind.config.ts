@@ -10,22 +10,22 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      // Color System (Manatal-inspired)
+      // Color System (Pink rebrand - AssessFirst inspired)
       colors: {
-        // Primary Blue
+        // Primary Pink
         primary: {
-          50: "#eff6ff",
-          100: "#dbeafe",
-          200: "#bfdbfe",
-          300: "#93c5fd",
-          400: "#60a5fa",
-          500: "#3b82f6",
-          600: "#2563eb",
-          700: "#1d4ed8",
-          800: "#1e40af",
-          900: "#1e3a8a",
-          950: "#172554",
-          DEFAULT: "#3b82f6",
+          50: "#fdf2f8",
+          100: "#fce7f3",
+          200: "#fbcfe8",
+          300: "#f9a8d4",
+          400: "#f472b6",
+          500: "#ec4899",
+          600: "#db2777",
+          700: "#be185d",
+          800: "#9d174d",
+          900: "#831843",
+          950: "#500724",
+          DEFAULT: "#ec4899",
         },
         // Secondary Indigo
         secondary: {
@@ -95,6 +95,24 @@ const config: Config = {
           400: "#22d3ee",
           500: "#06b6d4",
           DEFAULT: "#06b6d4",
+        },
+        // Accent Colors - Warmth & Conversion (v2.0)
+        accent: {
+          amber: {
+            light: "#FEF3C7",
+            DEFAULT: "#F59E0B",
+            dark: "#D97706",
+          },
+          coral: {
+            light: "#FFEDD5",
+            DEFAULT: "#F97316",
+            dark: "#EA580C",
+          },
+          teal: {
+            light: "#CCFBF1",
+            DEFAULT: "#14B8A6",
+            dark: "#0D9488",
+          },
         },
         // Border Colors
         border: {
@@ -193,8 +211,13 @@ const config: Config = {
         // Custom shadows
         card: "0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06)",
         "card-hover": "0 10px 20px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06)",
-        "primary": "0 4px 14px 0 rgba(59, 130, 246, 0.25)",
-        "primary-lg": "0 10px 25px 0 rgba(59, 130, 246, 0.3)",
+        "primary": "0 4px 14px 0 rgba(236, 72, 153, 0.25)",
+        "primary-lg": "0 10px 25px 0 rgba(236, 72, 153, 0.3)",
+        // Warm accent shadows (v2.0)
+        "amber": "0 4px 14px rgba(245, 158, 11, 0.25)",
+        "amber-lg": "0 10px 25px rgba(245, 158, 11, 0.3)",
+        "coral": "0 4px 14px rgba(249, 115, 22, 0.25)",
+        "coral-lg": "0 10px 25px rgba(249, 115, 22, 0.3)",
       },
       // Legacy font weights
       fontWeight: {

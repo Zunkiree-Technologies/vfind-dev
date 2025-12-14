@@ -40,7 +40,7 @@ export default function Navbar() {
           {/* Left: Logo */}
           <Link href="/" className="flex items-center">
             <span className="text-xl lg:text-2xl font-bold tracking-tight">
-              <span className="text-blue-600">V</span>
+              <span className="text-pink-600">V</span>
               <span className="text-gray-900">FIND</span>
             </span>
           </Link>
@@ -58,34 +58,34 @@ export default function Navbar() {
                 <div className="w-56 bg-white rounded-xl shadow-xl border border-gray-100 p-2 overflow-hidden">
                   <Link
                     href="/signup"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <UserPlus className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <UserPlus className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       Create Profile
                     </span>
                   </Link>
                   <Link
                     href="/joblist"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <Search className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <Search className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       Browse Jobs
                     </span>
                   </Link>
                   <Link
                     href="/signin"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <LogIn className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <LogIn className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       Sign In
                     </span>
                   </Link>
@@ -104,45 +104,45 @@ export default function Navbar() {
                 <div className="w-60 bg-white rounded-xl shadow-xl border border-gray-100 p-2 overflow-hidden">
                   <Link
                     href="/employerloginpage"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <LogIn className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <LogIn className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       Employer Login
                     </span>
                   </Link>
                   <Link
                     href="/foremployer"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <Building2 className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <Building2 className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       Create Account
                     </span>
                   </Link>
                   <Link
                     href="/foremployer"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <FileText className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <FileText className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       Post a Free Job
                     </span>
                   </Link>
                   <Link
                     href="/foremployer"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <Users className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <Users className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       Browse Candidates
                     </span>
                   </Link>
@@ -161,45 +161,45 @@ export default function Navbar() {
                 <div className="w-52 bg-white rounded-xl shadow-xl border border-gray-100 p-2 overflow-hidden">
                   <Link
                     href="/blogs"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <BookOpen className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <BookOpen className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       Blog
                     </span>
                   </Link>
                   <Link
                     href="/about"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <Info className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <Info className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       About Us
                     </span>
                   </Link>
                   <Link
                     href="/contact"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <Mail className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <Mail className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       Contact
                     </span>
                   </Link>
                   <Link
                     href="/faq"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-blue-50 transition-colors group/item"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-pink-50 transition-colors group/item"
                   >
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 group-hover/item:bg-blue-100 transition-colors">
-                      <HelpCircle className="w-4 h-4 text-blue-600" />
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50 group-hover/item:bg-pink-100 transition-colors">
+                      <HelpCircle className="w-4 h-4 text-pink-600" />
                     </div>
-                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors">
+                    <span className="text-[14px] font-semibold text-gray-700 group-hover/item:text-pink-600 transition-colors">
                       FAQs
                     </span>
                   </Link>
@@ -229,7 +229,7 @@ export default function Navbar() {
             {/* Create Profile - Primary CTA Pill */}
             <button
               onClick={() => router.push("/signup")}
-              className="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-semibold rounded-full transition-all duration-200 hover:shadow-lg ml-2"
+              className="px-5 py-1.5 bg-pink-600 hover:bg-pink-700 text-white text-[13px] font-semibold rounded-full transition-all duration-200 hover:shadow-lg ml-2"
             >
               CREATE PROFILE
             </button>
@@ -267,21 +267,21 @@ export default function Navbar() {
               </button>
               {mobileDropdown === "nurses" && (
                 <div className="mt-2 ml-2 space-y-1 bg-gray-50 rounded-xl p-2">
-                  <Link href="/signup" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-white rounded-lg transition-colors">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50">
-                      <UserPlus className="w-4 h-4 text-blue-600" />
+                  <Link href="/signup" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-pink-600 hover:bg-white rounded-lg transition-colors">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50">
+                      <UserPlus className="w-4 h-4 text-pink-600" />
                     </div>
                     <span className="font-medium">Create Profile</span>
                   </Link>
-                  <Link href="/joblist" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-white rounded-lg transition-colors">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50">
-                      <Search className="w-4 h-4 text-blue-600" />
+                  <Link href="/joblist" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-pink-600 hover:bg-white rounded-lg transition-colors">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50">
+                      <Search className="w-4 h-4 text-pink-600" />
                     </div>
                     <span className="font-medium">Browse Jobs</span>
                   </Link>
-                  <Link href="/signin" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-white rounded-lg transition-colors">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50">
-                      <LogIn className="w-4 h-4 text-blue-600" />
+                  <Link href="/signin" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-pink-600 hover:bg-white rounded-lg transition-colors">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50">
+                      <LogIn className="w-4 h-4 text-pink-600" />
                     </div>
                     <span className="font-medium">Sign In</span>
                   </Link>
@@ -302,21 +302,21 @@ export default function Navbar() {
               </button>
               {mobileDropdown === "employers" && (
                 <div className="mt-2 ml-2 space-y-1 bg-gray-50 rounded-xl p-2">
-                  <Link href="/employerloginpage" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-white rounded-lg transition-colors">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50">
-                      <LogIn className="w-4 h-4 text-blue-600" />
+                  <Link href="/employerloginpage" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-pink-600 hover:bg-white rounded-lg transition-colors">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50">
+                      <LogIn className="w-4 h-4 text-pink-600" />
                     </div>
                     <span className="font-medium">Employer Login</span>
                   </Link>
-                  <Link href="/foremployer" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-white rounded-lg transition-colors">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50">
-                      <Building2 className="w-4 h-4 text-blue-600" />
+                  <Link href="/foremployer" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-pink-600 hover:bg-white rounded-lg transition-colors">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50">
+                      <Building2 className="w-4 h-4 text-pink-600" />
                     </div>
                     <span className="font-medium">Create Account</span>
                   </Link>
-                  <Link href="/foremployer" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-white rounded-lg transition-colors">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50">
-                      <FileText className="w-4 h-4 text-blue-600" />
+                  <Link href="/foremployer" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-pink-600 hover:bg-white rounded-lg transition-colors">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50">
+                      <FileText className="w-4 h-4 text-pink-600" />
                     </div>
                     <span className="font-medium">Post a Free Job</span>
                   </Link>
@@ -337,21 +337,21 @@ export default function Navbar() {
               </button>
               {mobileDropdown === "resources" && (
                 <div className="mt-2 ml-2 space-y-1 bg-gray-50 rounded-xl p-2">
-                  <Link href="/blogs" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-white rounded-lg transition-colors">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50">
-                      <BookOpen className="w-4 h-4 text-blue-600" />
+                  <Link href="/blogs" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-pink-600 hover:bg-white rounded-lg transition-colors">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50">
+                      <BookOpen className="w-4 h-4 text-pink-600" />
                     </div>
                     <span className="font-medium">Blog</span>
                   </Link>
-                  <Link href="/about" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-white rounded-lg transition-colors">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50">
-                      <Info className="w-4 h-4 text-blue-600" />
+                  <Link href="/about" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-pink-600 hover:bg-white rounded-lg transition-colors">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50">
+                      <Info className="w-4 h-4 text-pink-600" />
                     </div>
                     <span className="font-medium">About Us</span>
                   </Link>
-                  <Link href="/contact" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-white rounded-lg transition-colors">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-blue-50">
-                      <Mail className="w-4 h-4 text-blue-600" />
+                  <Link href="/contact" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:text-pink-600 hover:bg-white rounded-lg transition-colors">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-pink-50">
+                      <Mail className="w-4 h-4 text-pink-600" />
                     </div>
                     <span className="font-medium">Contact</span>
                   </Link>
@@ -371,13 +371,13 @@ export default function Navbar() {
             <div className="pt-4 space-y-3 border-t border-gray-100 mt-4">
               <Link
                 href="/signin"
-                className="block w-full text-center px-6 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-full hover:border-blue-600 hover:text-blue-600 transition-colors"
+                className="block w-full text-center px-6 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-full hover:border-pink-600 hover:text-pink-600 transition-colors"
               >
                 SIGN IN
               </Link>
               <button
                 onClick={() => router.push("/signup")}
-                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all duration-200"
+                className="w-full px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white font-semibold rounded-full transition-all duration-200"
               >
                 CREATE PROFILE
               </button>

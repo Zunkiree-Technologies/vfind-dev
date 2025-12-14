@@ -11,7 +11,7 @@ export default function Footer() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold tracking-tight">
-              <span className="text-blue-500">V</span>FIND
+              <span className="text-pink-500">V</span>FIND
             </span>
           </Link>
 

@@ -55,8 +55,8 @@ export const WhyVfindSection = () => {
             >
               {/* Icon */}
               <div className="mb-8">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100">
-                  <benefit.icon className="w-7 h-7 text-blue-600" strokeWidth={1.5} />
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-pink-50 border border-pink-100">
+                  <benefit.icon className="w-7 h-7 text-pink-600" strokeWidth={1.5} />
                 </div>
               </div>
 

@@ -85,7 +85,7 @@ export const HowItWorksSection = () => {
         <div className="text-center mt-12">
           <Link
             href="/signup"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-primary font-semibold rounded-full shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30 hover:-translate-y-0.5 transition-all duration-200"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-pink-600 hover:bg-pink-700 text-white font-primary font-semibold rounded-full shadow-lg shadow-pink-600/25 hover:shadow-xl hover:shadow-pink-600/30 hover:-translate-y-0.5 transition-all duration-200"
           >
             Create Your Free Profile
             <ArrowRight className="w-5 h-5" />

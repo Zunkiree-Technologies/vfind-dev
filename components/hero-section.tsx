@@ -30,7 +30,7 @@ export const HeroSection = () => {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
                 href="/signup"
-                className="inline-flex items-center justify-center px-7 py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold tracking-wider uppercase rounded-full transition-all duration-200"
+                className="inline-flex items-center justify-center px-7 py-3.5 bg-pink-600 hover:bg-pink-700 text-white text-sm font-bold tracking-wider uppercase rounded-full transition-all duration-200"
               >
                 CREATE FREE PROFILE
               </Link>

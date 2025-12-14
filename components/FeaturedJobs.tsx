@@ -63,85 +63,80 @@ export default function FeaturedJobs() {
 
   return (
     <section
-      className="py-16 md:py-20 flex items-center justify-center bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]"
+      className="py-20 md:py-28 bg-white"
       id="Featurejobs"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Header */}
-        <div className="text-center mb-12 flex justify-center items-center flex-col">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold  font-bold text-gray-900 mb-4">
-
+        <div className="text-center mb-14">
+          <span className="inline-block text-pink-600 font-semibold text-sm uppercase tracking-wider mb-3">
+            Current Opportunities
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Featured Jobs
           </h2>
-          <p className="text-gray-500 max-w-2xl mx-auto text-paragraph">
-
-            Discover your next career opportunity with Australia’s top healthcare
-            employers
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Discover your next career opportunity with Australia&apos;s top healthcare employers
           </p>
         </div>
 
         {/* Job Cards Grid */}
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
           {jobs.map((job) => (
             <div
               key={job.id}
-              className="bg-white rounded-2xl shadow-md p-6 flex flex-col hover:shadow-lg transition-shadow duration-300"
+              className="group bg-white rounded-2xl border border-gray-200 p-6 flex flex-col hover:border-pink-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
               {/* Job Header */}
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-blue-500">
+                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-pink-600 transition-colors">
                     {job.title || "Untitled Job"}
                   </h3>
-                  {/* <p className="text-gray-800 mt-1">
-                    {job.company || "Unknown Company"}
-                  </p> */}
                 </div>
-
+                <span className="px-3 py-1 bg-pink-50 text-pink-600 text-xs font-semibold rounded-full">
+                  {job.type || "Full Time"}
+                </span>
               </div>
 
               {/* Job Details */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-5 text-sm text-gray-600">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-600">
                 <p className="flex items-center gap-2">
-                  <MapPin size={16} className="text-gray-500" />{" "}
+                  <MapPin size={16} className="text-gray-400" />
                   {job.location || "Location"}
                 </p>
                 <p className="flex items-center gap-2">
-                  <DollarSign size={16} className="text-gray-500" />{" "}
+                  <DollarSign size={16} className="text-gray-400" />
                   {job.minPay && job.maxPay
                     ? `${job.minPay} - ${job.maxPay}`
                     : "Not listed"}
                 </p>
                 <p className="flex items-center gap-2">
-                  <Clock size={16} className="text-gray-500" />{" "}
+                  <Clock size={16} className="text-gray-400" />
                   {job.experienceMin && job.experienceMax
                     ? `${job.experienceMin} - ${job.experienceMax} yrs`
                     : "Experience not listed"}
                 </p>
                 <p className="flex items-center gap-2">
-                  <Briefcase size={16} className="text-gray-500" />{" "}
-                  {job.type || "Full Time"}
+                  <Briefcase size={16} className="text-gray-400" />
+                  {job.shift || "Day Shift"}
                 </p>
               </div>
 
               {/* Footer */}
-              <div className="flex justify-between items-center mt-6">
+              <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
                 <p className="text-xs text-gray-400">
                   {job.updated_at
                     ? new Date(job.updated_at).toLocaleDateString()
                     : "Recently posted"}
                 </p>
-              <button
-      onClick={() => router.push(`/nurseProfile/jobapplicationpage/${job.id}`)}
-      className="group relative flex items-center justify-center px-6 w-[140px] py-2 bg-blue-400 text-white font-medium rounded-[10px] transition-all duration-300 overflow-hidden "
-    >
-      <p className="text-sm transition-all duration-300 group-hover:-translate-x-1">
-        View Details
-      </p>
-      <span className="absolute right-3 flex items-center opacity-0 transition-all duration-300 group-hover:opacity-100">
-        <ArrowRight className="w-4 h-4" strokeWidth={3} />
-      </span>
-    </button>
+                <button
+                  onClick={() => router.push(`/nurseProfile/jobapplicationpage/${job.id}`)}
+                  className="inline-flex items-center gap-2 px-5 py-2 bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold rounded-lg transition-all duration-200"
+                >
+                  View Details
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
           ))}

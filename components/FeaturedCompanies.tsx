@@ -37,7 +37,7 @@ export const FeaturedCompanies = () => {
                                 <span className="text-orange-500">Because </span>
                                 <span className="text-gray-900">talent </span>
                                 <span className="text-pink-500">deserves </span>
-                                <span className="text-blue-500">visibility.</span>
+                                <span className="text-pink-500">visibility.</span>
                             </p>
                             <p className="font-secondary text-gray-500">
                                 From hospitals to aged care — top employers discover nurses on VFind.

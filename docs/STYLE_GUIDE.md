@@ -1,8 +1,8 @@
 # V-Find Style Guide
 
-**Inspired by:** Manatal.com
-**Version:** 1.0
-**Created:** 2025-12-12
+**Inspired by:** AssessFirst (Pink rebrand)
+**Version:** 3.0 (Pink Rebrand)
+**Updated:** 2025-12-14
 
 ---
 
@@ -27,13 +27,23 @@
 
 ## Design Philosophy
 
-V-Find follows a **clean, professional, and trustworthy** design aesthetic inspired by modern SaaS job platforms like Manatal. The design prioritizes:
+### "Approachable & Empowering" - AssessFirst-Inspired Pink Rebrand
 
-- **Clarity**: Easy-to-read typography with proper hierarchy
-- **Trust**: Professional color palette that inspires confidence
-- **Accessibility**: WCAG 2.1 AA compliant contrast ratios
-- **Consistency**: Unified spacing, colors, and component patterns
-- **Modern**: Clean lines, subtle shadows, rounded corners
+V-Find's pink rebrand creates a design that feels **warm, empowering, and approachable** for our primarily female nursing audience. Inspired by AssessFirst's vibrant pink palette.
+
+| Principle | Implementation |
+|-----------|---------------|
+| **Warmth** | Pink primary (approachable, feminine), soft gradients |
+| **Trust** | Clean typography, consistent patterns, professional layout |
+| **Clarity** | Generous whitespace, clear hierarchy, easy navigation |
+| **Conversion** | High-contrast pink CTAs, smooth micro-interactions |
+
+### Key Design Decisions
+
+- **Pink Primary**: Warm, approachable, appeals to nursing demographic
+- **Warm Accents**: Amber/coral for secondary CTAs and highlights
+- **Subtle Animations**: Smooth 200-300ms transitions, no distracting motion
+- **Consistent Radius**: `rounded-lg` (8px) for buttons, `rounded-xl` (12px) for cards
 
 ---
 
@@ -129,18 +139,50 @@ V-Find follows a **clean, professional, and trustworthy** design aesthetic inspi
 ### Primary Colors
 
 ```css
-/* Primary Blue - Main Brand Color */
---primary-50: #eff6ff;
---primary-100: #dbeafe;
---primary-200: #bfdbfe;
---primary-300: #93c5fd;
---primary-400: #60a5fa;
---primary-500: #3b82f6;   /* Main Primary */
---primary-600: #2563eb;   /* Hover State */
---primary-700: #1d4ed8;   /* Active State */
---primary-800: #1e40af;
---primary-900: #1e3a8a;
---primary-950: #172554;
+/* Primary Pink - Main Brand Color (AssessFirst-inspired) */
+--primary-50: #fdf2f8;
+--primary-100: #fce7f3;
+--primary-200: #fbcfe8;
+--primary-300: #f9a8d4;
+--primary-400: #f472b6;
+--primary-500: #ec4899;   /* Main Primary */
+--primary-600: #db2777;   /* Hover State */
+--primary-700: #be185d;   /* Active State */
+--primary-800: #9d174d;
+--primary-900: #831843;
+--primary-950: #500724;
+```
+
+### Accent Colors (Warmth & Conversion) - NEW v2.0
+
+```css
+/* Amber - High-conversion CTAs, badges, highlights */
+--accent-amber: #F59E0B;
+--accent-amber-light: #FEF3C7;
+--accent-amber-dark: #D97706;
+
+/* Coral/Orange - Urgent actions, notifications */
+--accent-coral: #F97316;
+--accent-coral-light: #FFEDD5;
+--accent-coral-dark: #EA580C;
+
+/* Teal - Success, positive indicators */
+--accent-teal: #14B8A6;
+--accent-teal-light: #CCFBF1;
+--accent-teal-dark: #0D9488;
+```
+
+### Gradients - NEW v2.0
+
+```css
+/* Hero gradient - soft, welcoming */
+--gradient-hero: linear-gradient(135deg, #EFF6FF 0%, #FEF3C7 50%, #FFFFFF 100%);
+
+/* CTA gradient - action-oriented (Pink) */
+--gradient-cta: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+
+/* Warm accent gradient - high conversion */
+--gradient-warm: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
 ```
 
 ### Secondary Colors
@@ -260,8 +302,8 @@ V-Find follows a **clean, professional, and trustworthy** design aesthetic inspi
 --text-placeholder: #9ca3af;  /* Placeholder text */
 --text-disabled: #d1d5db;     /* Disabled text */
 --text-inverse: #ffffff;      /* Text on dark backgrounds */
---text-link: #2563eb;         /* Link text */
---text-link-hover: #1d4ed8;   /* Link hover */
+--text-link: #db2777;         /* Link text (Pink) */
+--text-link-hover: #be185d;   /* Link hover */
 ```
 
 ### Border Colors
@@ -272,7 +314,7 @@ V-Find follows a **clean, professional, and trustworthy** design aesthetic inspi
 --border-default: #e5e7eb;
 --border-medium: #d1d5db;
 --border-dark: #9ca3af;
---border-focus: #3b82f6;
+--border-focus: #ec4899;
 --border-error: #ef4444;
 --border-success: #22c55e;
 ```
@@ -395,9 +437,9 @@ Based on 4px base unit (0.25rem), creating an 8-point grid system.
 --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 
-/* Colored Shadows (for elevated elements) */
---shadow-primary: 0 4px 14px 0 rgba(59, 130, 246, 0.25);
---shadow-primary-lg: 0 10px 25px 0 rgba(59, 130, 246, 0.3);
+/* Colored Shadows (for elevated elements - Pink) */
+--shadow-primary: 0 4px 14px 0 rgba(236, 72, 153, 0.25);
+--shadow-primary-lg: 0 10px 25px 0 rgba(236, 72, 153, 0.3);
 
 /* Card Shadows */
 --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -517,6 +559,28 @@ Based on 4px base unit (0.25rem), creating an 8-point grid system.
 .btn-ghost:hover {
   background: var(--gray-100);
   color: var(--gray-900);
+}
+
+/* Warm CTA Button - NEW v2.0 (High Conversion) */
+.btn-warm {
+  background: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
+  color: white;
+  border: none;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-warm:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-warm:active {
+  filter: brightness(0.95);
+  transform: translateY(0);
 }
 
 /* Danger Button */
@@ -1270,17 +1334,17 @@ module.exports = {
       },
       colors: {
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+          50: '#fdf2f8',
+          100: '#fce7f3',
+          200: '#fbcfe8',
+          300: '#f9a8d4',
+          400: '#f472b6',
+          500: '#ec4899',
+          600: '#db2777',
+          700: '#be185d',
+          800: '#9d174d',
+          900: '#831843',
+          950: '#500724',
         },
         border: {
           light: '#e9eaeb',
@@ -1296,7 +1360,7 @@ module.exports = {
       boxShadow: {
         'card': '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06)',
         'card-hover': '0 10px 20px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06)',
-        'primary': '0 4px 14px 0 rgba(59, 130, 246, 0.25)',
+        'primary': '0 4px 14px 0 rgba(236, 72, 153, 0.25)',
       },
     },
   },
@@ -1311,10 +1375,12 @@ module.exports = {
 
 | Property | Value |
 |----------|-------|
-| Primary Color | #3b82f6 |
+| Primary Color | #ec4899 (Pink) |
+| Primary Hover | #db2777 |
 | Text Primary | #111827 |
 | Text Secondary | #374151 |
 | Border Color | #e9eaeb |
+| Border Focus | #ec4899 |
 | Border Radius (buttons, inputs) | 8px |
 | Border Radius (cards) | 12px |
 | Shadow (cards) | 0 1px 3px rgba(0,0,0,0.08) |
