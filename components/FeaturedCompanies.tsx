@@ -1,68 +1,62 @@
 "use client";
 import React from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
-import { Autoplay, Pagination } from "swiper/modules";
 
-// Fake company data
+// Healthcare company names
 const companies = [
-    { id: 1, name: "Regis Healthcare", initials: "RH" },
-    { id: 2, name: "Bupa Health", initials: "BH" },
-    { id: 3, name: "Silver Chain", initials: "SC" },
-    { id: 4, name: "Healthscope", initials: "HS" },
-    { id: 5, name: "Aveo Group", initials: "AG" },
-    { id: 6, name: "Estia Health", initials: "EH" },
+    "Regis Healthcare",
+    "Bupa Health",
+    "Silver Chain",
+    "Healthscope",
+    "Estia Health",
 ];
 
 export const FeaturedCompanies = () => {
     return (
-        <section className="py-16 md:py-20 bg-white flex items-center justify-center">
+        <section className="py-16 sm:py-20 bg-[#f5f5f7]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Heading */}
-                <div className="text-center mb-12">
+                {/* Header - Two column layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-12">
+                    {/* Left side - Title */}
+                    <div>
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                            <span className="font-secondary text-sm text-gray-500">Healthcare leaders</span>
+                        </div>
+                        <h2 className="font-primary text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+                            Trusted by
+                            <br />
+                            <span className="text-gray-400">Leading Employers</span>
+                        </h2>
+                    </div>
 
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                        Featured Companies Actively Hiring
-                    </h2>
-                    <p className="text-sm sm:text-base md:text-lg text-gray-600 mt-2">
-                        Top healthcare employers looking for talented nurses
-                    </p>
+                    {/* Right side - Statement */}
+                    <div className="flex items-center">
+                        <div>
+                            <p className="font-primary text-xl sm:text-2xl font-semibold mb-3">
+                                <span className="text-orange-500">Because </span>
+                                <span className="text-gray-900">talent </span>
+                                <span className="text-pink-500">deserves </span>
+                                <span className="text-blue-500">visibility.</span>
+                            </p>
+                            <p className="font-secondary text-gray-500">
+                                From hospitals to aged care — top employers discover nurses on VFind.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Slider Wrapper */}
-                <div className="relative w-full max-w-[320px] sm:max-w-[400px] md:max-w-[700px] lg:max-w-none overflow-hidden mx-auto">
-                    <Swiper
-                        modules={[Autoplay, Pagination]}
-                        spaceBetween={30}
-                        slidesPerView={1}
-                        breakpoints={{
-                            640: { slidesPerView: 2, spaceBetween: 20 },
-                            768: { slidesPerView: 3, spaceBetween: 24 },
-                            1024: { slidesPerView: 4, spaceBetween: 30 },
-                        }}
-                        autoplay={{ delay: 2500, disableOnInteraction: false }}
-                        loop={true}
-                        pagination={{ clickable: true, el: ".custom-pagination" }}
-                        className="pb-16"
-                    >
-                        {companies.map((company) => (
-                            <SwiperSlide key={company.id}>
-                                <div className="border border-gray-200 rounded-xl p-8 h-48 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition bg-white">
-                                    {/* Circle with initials */}
-                                    <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xl font-semibold mb-4">
-                                        {company.initials}
-                                    </div>
-                                    <p className="text-gray-900 font-medium text-lg">
-                                        {company.name}
-                                    </p>
-                                </div>
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-
-                    {/* Custom Pagination */}
-                    <div className="custom-pagination flex justify-center mt-10"></div>
+                {/* Company logos in cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {companies.map((company, index) => (
+                        <div
+                            key={index}
+                            className="bg-white rounded-2xl py-8 px-6 flex items-center justify-center"
+                        >
+                            <span className="font-primary text-base sm:text-lg font-bold text-gray-400 text-center">
+                                {company}
+                            </span>
+                        </div>
+                    ))}
                 </div>
             </div>
         </section>

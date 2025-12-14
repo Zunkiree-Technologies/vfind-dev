@@ -107,6 +107,17 @@
   --transition-normal: 200ms;
   --transition-slow: 300ms;
 
+  /* Gradients (v2.0) */
+  --gradient-hero: linear-gradient(135deg, #EFF6FF 0%, #FEF3C7 50%, #FFFFFF 100%);
+  --gradient-cta: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  --gradient-warm: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
+
+  /* Colored Shadows (v2.0) */
+  --shadow-primary: 0 4px 14px rgba(59, 130, 246, 0.25);
+  --shadow-primary-lg: 0 10px 25px rgba(59, 130, 246, 0.3);
+  --shadow-amber: 0 4px 14px rgba(245, 158, 11, 0.25);
+  --shadow-amber-lg: 0 10px 25px rgba(245, 158, 11, 0.3);
+
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -302,4 +313,22 @@ button {
 
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
+}
+
+/* Logo strip marquee animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }
