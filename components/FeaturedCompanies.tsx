@@ -58,7 +58,7 @@ export const FeaturedCompanies = () => {
                                 alt={company.name}
                                 width={120}
                                 height={40}
-                                className="object-contain max-h-10 w-auto grayscale hover:grayscale-0 transition-all duration-300"
+                                className="object-contain max-h-10 w-auto"
                             />
                         </div>
                     ))}
