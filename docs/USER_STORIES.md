@@ -102,31 +102,35 @@ This document outlines the user stories, personas, and feature requirements for 
 
 ## Nurse User Stories
 
-### Registration & Onboarding
+### Registration & Onboarding (Progressive Signup Flow)
+
+**Overview:** The signup flow uses a progressive profiling approach - quick account creation first, then profile completion in the dashboard. This maximizes conversion by capturing email early.
 
 | ID | User Story | Priority | Status |
 |----|------------|----------|--------|
-| N-001 | As a nurse, I want to register with my email and password so that I can create an account | High | Implemented |
-| N-002 | As a nurse, I want to sign up with Google so that I can register quickly | High | Implemented |
-| N-003 | As a nurse, I want to specify my job type preferences (RN, EN, etc.) so that I see relevant jobs | High | Implemented |
-| N-004 | As a nurse, I want to indicate my shift preferences so that I find jobs matching my availability | High | Implemented |
-| N-005 | As a nurse, I want to specify when I can start so that employers know my availability | High | Implemented |
-| N-006 | As a nurse, I want to indicate my job search status so that employers understand my urgency | Medium | Implemented |
-| N-007 | As a nurse, I want to enter my qualifications so that I'm matched with appropriate jobs | High | Implemented |
-| N-008 | As a nurse, I want to add my work experience so that employers can see my background | High | Implemented |
-| N-009 | As a nurse, I want to select preferred work locations so that I find jobs near me | High | Implemented |
-| N-010 | As a nurse, I want to list my certifications so that I'm matched with jobs requiring them | High | Implemented |
-| N-011 | As a nurse, I want to specify my residency/visa status so that employers know my work rights | High | Implemented |
-| N-012 | As a nurse, I want a step-by-step registration so that I don't feel overwhelmed | Medium | Implemented |
+| N-001 | As a nurse, I want to register with my email, name, and password so that I can quickly create an account | High | Implemented |
+| N-002 | As a nurse, I want to sign up with Google so that I can register with one click | High | Implemented |
+| N-003 | As a nurse, I want to see a welcome page after signup so that I feel welcomed | Medium | Implemented |
+| N-004 | As a nurse, I want to see my profile completion progress so that I know what's missing | High | Implemented |
+| N-005 | As a nurse, I want to complete my profile in sections so that I can do it at my own pace | High | Implemented |
+| N-006 | As a nurse, I want to specify my job type preferences (RN, EN, etc.) so that I see relevant jobs | High | Implemented |
+| N-007 | As a nurse, I want to indicate my shift preferences so that I find jobs matching my availability | High | Implemented |
+| N-008 | As a nurse, I want to specify when I can start so that employers know my availability | High | Implemented |
+| N-009 | As a nurse, I want to indicate my job search status so that employers understand my urgency | Medium | Implemented |
+| N-010 | As a nurse, I want to enter my qualifications so that I'm matched with appropriate jobs | High | Implemented |
+| N-011 | As a nurse, I want to add my work experience so that employers can see my background | High | Implemented |
+| N-012 | As a nurse, I want to select preferred work locations so that I find jobs near me | High | Implemented |
+| N-013 | As a nurse, I want to list my certifications so that I'm matched with jobs requiring them | High | Implemented |
+| N-014 | As a nurse, I want to specify my residency/visa status so that employers know my work rights | High | Implemented |
 
 ### Authentication
 
 | ID | User Story | Priority | Status |
 |----|------------|----------|--------|
-| N-013 | As a nurse, I want to log in with my email and password so that I can access my account | High | Implemented |
-| N-014 | As a nurse, I want to reset my password if I forget it so that I can regain access | High | Implemented |
-| N-015 | As a nurse, I want to stay logged in across sessions so that I don't have to log in every time | Medium | Implemented |
-| N-016 | As a nurse, I want to log out securely so that my account is protected on shared devices | High | Implemented |
+| N-015 | As a nurse, I want to log in with my email and password so that I can access my account | High | Implemented |
+| N-016 | As a nurse, I want to reset my password if I forget it so that I can regain access | High | Implemented |
+| N-017 | As a nurse, I want to stay logged in across sessions so that I don't have to log in every time | Medium | Implemented |
+| N-018 | As a nurse, I want to log out securely so that my account is protected on shared devices | High | Implemented |
 
 ### Job Discovery
 
@@ -259,9 +263,11 @@ This document outlines the user stories, personas, and feature requirements for 
 
 | Feature | Must Have | Should Have | Nice to Have |
 |---------|-----------|-------------|--------------|
-| Email Registration | X | | |
+| Quick Email Registration (3 fields) | X | | |
 | Google OAuth | X | | |
-| 10-Step Signup Wizard | X | | |
+| Welcome Page After Signup | | X | |
+| Profile Completion Widget | X | | |
+| Progressive Profile Builder | X | | |
 | Job Search | X | | |
 | Job Filters | X | | |
 | One-Click Apply | X | | |
@@ -309,11 +315,11 @@ This document outlines the user stories, personas, and feature requirements for 
 
 ## User Journey Maps
 
-### Nurse Registration Journey
+### Nurse Registration Journey (Progressive Signup)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    NURSE REGISTRATION JOURNEY                    │
+│            NURSE REGISTRATION JOURNEY (PROGRESSIVE)              │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  AWARENESS                                                       │
@@ -325,37 +331,51 @@ This document outlines the user stories, personas, and feature requirements for 
 │  ├── Views featured jobs                                         │
 │  └── Decides to sign up                                          │
 │                                                                  │
-│  REGISTRATION                                                    │
+│  QUICK REGISTRATION (< 60 seconds)                               │
 │  ├── Clicks "Find Jobs" / "Sign Up"                              │
-│  ├── Step 1: Selects job types interested in                     │
-│  ├── Step 2: Chooses shift preferences                           │
-│  ├── Step 3: Indicates start availability                        │
-│  ├── Step 4: Describes job search status                         │
-│  ├── Step 5: Selects qualifications                              │
-│  ├── Step 6: Adds work experience                                │
-│  ├── Step 7: Sets location preferences                           │
-│  ├── Step 8: Lists certifications                                │
-│  ├── Step 9: Provides visa/residency info                        │
-│  └── Step 10: Enters contact details & password                  │
+│  ├── Option A: Clicks "Sign up with Google" (1-click)            │
+│  └── Option B: Enters Full Name, Email, Password                 │
+│      ├── Accepts Terms & Privacy Policy                          │
+│      └── Clicks "Create Account"                                 │
 │                                                                  │
-│  ACTIVATION                                                      │
-│  ├── Submits registration                                        │
-│  ├── Sees success message                                        │
-│  └── Redirected to login                                         │
+│  WELCOME & ONBOARDING                                            │
+│  ├── Sees welcome celebration page                               │
+│  ├── "Yay, [Name]! Welcome aboard!"                              │
+│  ├── Option: "Complete My Profile" (recommended)                 │
+│  └── Option: "Skip for now" → Dashboard                          │
+│                                                                  │
+│  PROGRESSIVE PROFILE COMPLETION (In Dashboard)                   │
+│  ├── Sees Profile Completion Widget (0% → 100%)                  │
+│  ├── Completes sections at own pace:                             │
+│  │   ├── Basic Info (phone, postcode, location)                  │
+│  │   ├── Qualifications (RN/EN, experience)                      │
+│  │   ├── Work Preferences (job types, shifts, start date)        │
+│  │   ├── Location (preferred work areas)                         │
+│  │   ├── Certifications (held certifications)                    │
+│  │   └── Work Rights (visa/residency status)                     │
+│  └── Progress saves automatically between sessions               │
 │                                                                  │
 │  ENGAGEMENT                                                      │
-│  ├── Logs in to dashboard                                        │
-│  ├── Browses recommended jobs                                    │
-│  ├── Applies to first job                                        │
+│  ├── Browses jobs immediately after signup                       │
+│  ├── Prompted to complete profile when applying                  │
+│  ├── Applies to jobs with one click                              │
 │  └── Saves interesting positions                                 │
 │                                                                  │
 │  RETENTION                                                       │
 │  ├── Returns to check application status                         │
 │  ├── Updates profile as needed                                   │
+│  ├── Receives job match notifications                            │
 │  └── Continues applying to jobs                                  │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+**Key Benefits of Progressive Signup:**
+- Email captured immediately (enables recovery of abandoned signups)
+- Users can browse jobs within 60 seconds
+- Lower friction = higher conversion rates
+- Profile completion is gamified with progress bar
+- Users complete profile when motivated (e.g., when applying to jobs)
 
 ### Employer Hiring Journey
 
@@ -410,21 +430,43 @@ This document outlines the user stories, personas, and feature requirements for 
 
 ## Acceptance Criteria Examples
 
-### N-001: Nurse Email Registration
+### N-001: Quick Nurse Registration
 
 **Given** I am a new nurse visitor
-**When** I complete the 10-step registration form with valid information
+**When** I fill in Full Name, Email, Password and accept terms
+**And** I click "Create Account"
 **Then** my account should be created
-**And** I should see a success message
-**And** I should be redirected to the login page
+**And** I should be redirected to the Welcome page
+**And** I should see "Yay, [FirstName]! Welcome aboard!"
 
 **Validation Rules:**
 - Email must be unique and valid format
-- Phone must be 8 digits
 - Full name must include first and last name
-- Password must meet minimum requirements
+- Password must be at least 6 characters
 - Terms must be accepted
-- Postcode must be 4 digits
+
+---
+
+### N-004: Profile Completion Widget
+
+**Given** I am a logged-in nurse with incomplete profile
+**When** I view my dashboard
+**Then** I should see a Profile Completion Widget
+**And** It should show my completion percentage (0-100%)
+**And** It should list sections with their completion status
+**And** I should be able to click on incomplete sections to add information
+
+---
+
+### N-005: Progressive Profile Builder
+
+**Given** I am a logged-in nurse completing my profile
+**When** I click on a profile section (e.g., "Qualifications")
+**Then** I should see the section form
+**And** I should be able to fill in the required fields
+**And** I should be able to save and continue
+**And** My progress should be saved automatically
+**And** The completion percentage should update
 
 ---
 
@@ -464,5 +506,7 @@ This document outlines the user stories, personas, and feature requirements for 
 
 ---
 
-**Document Version:** 1.0
+**Document Version:** 2.0
 **Last Updated:** December 2025
+**Change Log:**
+- v2.0: Updated nurse signup flow from 10-step wizard to progressive signup (quick registration + profile completion in dashboard)

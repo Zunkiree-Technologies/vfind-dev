@@ -1,36 +1,115 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-import { FormDataType } from "./types/FormTypes";
-import { CertificationsStep } from "./components/CertificationsStep";
-import { ContactPasswordStep } from "./components/ContactPasswordStep";
-import { JobSearchStatusStep } from "./components/JobSearchStatusStep";
-import { JobTypesStep } from "./components/JobTypesStep";
-import { LocationPreferenceStep } from "./components/LocationPreferenceStep";
-import { QualificationStep } from "./components/QualificationStep";
-import { ResidencyVisaStep } from "./components/ResidencyVisaStep";
-import { StartTimeStep } from "./components/StartTimeStep";
-import { WorkingInHealthcareStep } from "./components/WorkingInHealthcareStep";
-import { ShiftPreferenceStep } from "./components/ShiftPreferanceStep";
-import Navbar from "../../../components/navbar";
-import Footer from "../../../components/footer-section";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { registerNurse } from "@/lib/supabase-auth";
+import { useAuth } from "@/contexts/AuthContext";
 
-export default function NurseSignup() {
-    const router = useRouter();
-    const totalSteps = 10;
-    const [currentStep, setCurrentStep] = useState(1);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState<FormDataType>({
+export default function SignupPage() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
+  const { login } = useAuth();
+
+  // Validation functions
+  const validateFullName = (name: string) => {
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2) return false;
+    const nameParts = trimmedName.split(' ').filter(part => part.length > 0);
+    if (nameParts.length < 2) return false;
+    const nameRegex = /^[a-zA-Z\s\-']+$/;
+    return nameRegex.test(trimmedName);
+  };
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
+  };
+
+  // Google Sign-Up (TODO: Implement with Supabase OAuth)
+  const signupWithGoogle = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      setError("Google Sign-Up coming soon. Please use email/password.");
+    } catch (err) {
+      console.error("Google signup error:", err);
+      setError("Google signup failed. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    // Validation
+    if (!validateFullName(fullName)) {
+      setError("Please enter your full name (first and last name).");
+      setLoading(false);
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError("Password must be at least 6 characters long.");
+      setLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+
+    if (!termsAccepted) {
+      setError("Please accept the Terms & Privacy Policy.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Generate unique placeholder values to avoid database constraint violations
+      // These will be replaced when user completes their profile
+      const timestamp = Date.now();
+      const uniquePhone = `PENDING_${timestamp}`; // Unique placeholder for phone
+
+      // Register with minimal data - profile will be completed later
+      const result = await registerNurse({
+        email,
+        password,
+        fullName,
+        phone: uniquePhone, // Unique placeholder - will be updated during profile completion
+        postcode: "0000", // Placeholder postcode
+        currentResidentialLocation: "Not specified", // Placeholder location
         jobTypes: "",
         openToOtherTypes: "",
+        shiftPreferences: [],
         startTime: "",
         startDate: "",
         jobSearchStatus: "",
         qualification: "",
-        shiftPreferences: [],
         otherQualification: "",
         workingInHealthcare: "",
         experience: "",
@@ -43,443 +122,278 @@ export default function NurseSignup() {
         visaDuration: "",
         workHoursRestricted: "",
         maxWorkHours: "",
-        fullName: "",
-        email: "",
-        phone: "",
-        password: "",
-        confirmPassword: "",
-        postcode: "",
-        currentResidentialLocation: "",
-        termsAccepted: false,
+        termsAccepted: true,
         visibilityStatus: "visibleToAll",
-        photoIdFile: null,
-    });
+      });
 
-    const formRef = useRef<HTMLDivElement>(null);
-
-    const handleChange = <K extends keyof FormDataType>(field: K, value: FormDataType[K]) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
-    };
-
-    const handleCheckboxChange = <K extends keyof FormDataType>(field: K, value: string) => {
-        setFormData((prev) => {
-            const values = prev[field] as unknown as string[];
-            return {
-                ...prev,
-                [field]: values.includes(value)
-                    ? values.filter((v) => v !== value)
-                    : [...values, value],
-            };
-        });
-    };
-
-    // Full name validation function
-    const validateFullName = (name: string) => {
-        const trimmedName = name.trim();
-        if (trimmedName.length < 2) return false;
-
-        // Check if it contains at least one space (first name + last name)
-        const nameParts = trimmedName.split(' ').filter(part => part.length > 0);
-        if (nameParts.length < 2) return false;
-
-        // Check if it only contains letters, spaces, hyphens, and apostrophes
-        const nameRegex = /^[a-zA-Z\s\-']+$/;
-        return nameRegex.test(trimmedName);
-    };
-
-    // Email validation function
-    const validateEmail = (email: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
-    // Phone validation function
-    const validatePhone = (phone: string) => {
-        return phone.length === 8 && /^\d+$/.test(phone);
-    };
-
-    const isStepComplete = (stepNumber: number) => {
-        switch (stepNumber) {
-            case 1:
-                return (
-                    formData.jobTypes.includes("Open to any") ||
-                    (formData.jobTypes.length >= 1 &&
-                        (formData.openToOtherTypes || formData.jobTypes.includes("Open to any")))
-                );
-            case 2:
-                return formData.shiftPreferences && formData.shiftPreferences.length > 0;
-            case 3:
-                return (
-                    formData.startTime &&
-                    (formData.startTime !== "I have a specific date in mind" || formData.startDate)
-                );
-            case 4:
-                return formData.jobSearchStatus !== "";
-            case 5:
-                return (
-                    formData.qualification &&
-                    (formData.qualification !== "Other" || formData.otherQualification)
-                );
-            case 6:
-                return (
-                    formData.workingInHealthcare &&
-                    (formData.workingInHealthcare === "No (Fresher)" ||
-                        (formData.experience && formData.organisation))
-                );
-            case 7:
-                return (
-                    formData.locationPreference &&
-                    (formData.locationPreference === "No preference, I can work anywhere" ||
-                        formData.preferredLocations.length > 0)
-                );
-            case 8:
-                return formData.certifications.length > 0;
-            case 9:
-                return (
-                    formData.residencyStatus &&
-                    (formData.residencyStatus !== "Other" || formData.visaType) &&
-                    formData.workHoursRestricted &&
-                    (formData.workHoursRestricted === "No, I can work full-time" || formData.maxWorkHours)
-                );
-            case 10:
-                return (
-                    // Full Name validation
-                    formData.fullName &&
-                    validateFullName(formData.fullName) &&
-                    // Email validation
-                    formData.email &&
-                    validateEmail(formData.email) &&
-                    // Phone validation
-                    formData.phone &&
-                    validatePhone(formData.phone) &&
-                    // Password validation
-                    formData.password &&
-                    formData.password === formData.confirmPassword &&
-                    // Terms and location
-                    formData.termsAccepted &&
-                    formData.currentResidentialLocation &&
-                    formData.postcode &&
-                    formData.postcode.length === 4
-                );
-            default:
-                return false;
-        }
-    };
-
-    const renderStep = (stepNumber: number) => {
-        const stepProps = { formData, handleChange, handleCheckboxChange };
-        switch (stepNumber) {
-            case 1:
-                return <JobTypesStep {...stepProps} />;
-            case 2:
-                return <ShiftPreferenceStep {...stepProps} />;
-            case 3:
-                return <StartTimeStep {...stepProps} />;
-            case 4:
-                return <JobSearchStatusStep {...stepProps} />;
-            case 5:
-                return <QualificationStep {...stepProps} />;
-            case 6:
-                return <WorkingInHealthcareStep {...stepProps} />;
-            case 7:
-                return <LocationPreferenceStep {...stepProps} />;
-            case 8:
-                return <CertificationsStep {...stepProps} />;
-            case 9:
-                return <ResidencyVisaStep {...stepProps} />;
-            case 10:
-                return <ContactPasswordStep formData={formData} handleChange={handleChange} />;
-            default:
-                return null;
-        }
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const getErrorMessage = (error: any, statusCode: number) => {
-        // Handle different types of errors
-        if (error?.message) {
-            // Check for specific error messages
-            if (error.message.includes("Email already exists")) {
-                return "This email is already registered. Please use a different email or try logging in.";
-            }
-            if (error.message.includes("Phone number already exists")) {
-                return "This phone number is already registered. Please use a different phone number.";
-            }
-            if (error.message.includes("validation")) {
-                return `Validation Error: ${error.message}`;
-            }
-            if (error.message.includes("required")) {
-                return `Required Field Missing: ${error.message}`;
-            }
-            return error.message;
+      if (result.success) {
+        // Save token and profile
+        if (typeof window !== "undefined") {
+          if (result.authToken) {
+            localStorage.setItem("authToken", result.authToken);
+            localStorage.setItem("token", result.authToken);
+            // Log the user in via AuthContext so they're authenticated
+            login(result.authToken, "Nurse", email);
+          }
+          if (result.data) {
+            localStorage.setItem("userProfile", JSON.stringify(result.data));
+          }
+          localStorage.setItem("email", email);
         }
 
-        // Handle different status codes
-        switch (statusCode) {
-            case 400:
-                return "Bad Request: Please check your form data and try again.";
-            case 401:
-                return "Unauthorized: Please check your credentials.";
-            case 403:
-                return "Forbidden: You don't have permission to perform this action.";
-            case 409:
-                return "Conflict: This email or phone number may already be registered.";
-            case 422:
-                return "Validation Error: Please check all required fields are filled correctly.";
-            case 500:
-                return "Server Error: Something went wrong on our end. Please try again later.";
-            case 503:
-                return "Service Unavailable: The server is temporarily unavailable. Please try again later.";
-            default:
-                return `Error ${statusCode}: An unexpected error occurred. Please try again.`;
+        // Redirect to welcome page
+        router.push("/welcome");
+      } else {
+        // Handle specific error messages
+        const errorMsg = result.error?.toLowerCase() || "";
+
+        if (errorMsg.includes("email") && (errorMsg.includes("exists") || errorMsg.includes("duplicate") || errorMsg.includes("unique"))) {
+          setError("This email is already registered. Please use a different email or try logging in.");
+        } else if (errorMsg.includes("phone") && (errorMsg.includes("exists") || errorMsg.includes("duplicate") || errorMsg.includes("unique"))) {
+          setError("Registration failed. Please try again.");
+        } else if (errorMsg.includes("duplicate key") || errorMsg.includes("unique constraint")) {
+          setError("This account may already exist. Please try logging in instead.");
+        } else {
+          setError(result.error || "Registration failed. Please try again.");
         }
-    };
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      const errorMessage = err instanceof Error ? err.message : "";
 
-    const handleSubmit = async () => {
-        setIsSubmitting(true);
+      if (errorMessage.includes("duplicate key") || errorMessage.includes("unique constraint")) {
+        setError("This account may already exist. Please try logging in instead.");
+      } else {
+        setError("Network error. Please check your connection and try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        try {
-            // Validate all steps before submit
-            for (let step = 1; step <= totalSteps; step++) {
-                if (!isStepComplete(step)) {
-                    const stepElement = document.getElementById(`step-${step}`);
-                    if (stepElement) {
-                        stepElement.scrollIntoView({ behavior: "smooth", block: "center" });
-                    }
-                    alert(`Please complete all required fields in step ${step}.`);
-                    setIsSubmitting(false);
-                    return;
-                }
-            }
+  const isFormValid =
+    validateFullName(fullName) &&
+    validateEmail(email) &&
+    validatePassword(password) &&
+    password === confirmPassword &&
+    termsAccepted;
 
-            console.log('Submitting form data to Supabase...');
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-orange-50 relative overflow-hidden flex items-center justify-center px-4 py-8">
+      {/* Decorative Background Blobs */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-pink-200/70 to-pink-300/50 rounded-full blur-3xl -translate-x-1/3 -translate-y-1/3" />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-orange-100/60 to-amber-100/40 rounded-full blur-3xl translate-x-1/4 -translate-y-1/4" />
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-tl from-pink-100/50 to-rose-100/40 rounded-full blur-3xl translate-x-1/4 translate-y-1/4" />
+      <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] bg-gradient-to-tr from-orange-100/40 to-pink-100/30 rounded-full blur-2xl translate-y-1/3" />
 
-            // Use Supabase registration
-            const result = await registerNurse({
-                email: formData.email,
-                password: formData.password,
-                fullName: formData.fullName,
-                phone: formData.phone,
-                postcode: formData.postcode,
-                currentResidentialLocation: formData.currentResidentialLocation,
-                jobTypes: formData.jobTypes,
-                openToOtherTypes: formData.openToOtherTypes,
-                shiftPreferences: formData.shiftPreferences,
-                startTime: formData.startTime,
-                startDate: formData.startDate,
-                jobSearchStatus: formData.jobSearchStatus,
-                qualification: formData.qualification,
-                otherQualification: formData.otherQualification,
-                workingInHealthcare: formData.workingInHealthcare,
-                experience: formData.experience,
-                organisation: formData.organisation,
-                locationPreference: formData.locationPreference,
-                preferredLocations: formData.preferredLocations,
-                certifications: formData.certifications,
-                residencyStatus: formData.residencyStatus,
-                visaType: formData.visaType,
-                visaDuration: formData.visaDuration,
-                workHoursRestricted: formData.workHoursRestricted,
-                maxWorkHours: formData.maxWorkHours,
-                termsAccepted: formData.termsAccepted,
-                visibilityStatus: formData.visibilityStatus,
-            });
+      {/* Signup Card */}
+      <div className="relative z-10 w-full max-w-[480px] bg-white rounded-[2rem] shadow-sm border border-gray-100 px-10 py-10 sm:px-12 sm:py-12">
 
-            console.log('Registration result:', result);
-
-            if (result.success) {
-                console.log('Signup successful!');
-                // Save token and profile, then redirect
-                if (typeof window !== "undefined") {
-                    if (result.authToken) {
-                        localStorage.setItem("authToken", result.authToken);
-                    }
-                    if (result.data) {
-                        localStorage.setItem("userProfile", JSON.stringify(result.data));
-                    }
-
-                    // Show congratulations message
-                    alert("Congratulations! Your account has been created successfully!");
-
-                    // Small delay to let user read the message before redirect
-                    setTimeout(() => {
-                        router.push("/signin");
-                    }, 1000);
-                }
-            } else {
-                // Handle error responses
-                const errorMessage = getErrorMessage({ message: result.error }, 400);
-                console.error('Signup failed:', errorMessage);
-                alert(`Registration failed: ${errorMessage}`);
-            }
-
-        } catch (err) {
-            console.error('Network/Fetch error:', err);
-            let errorMessage = "Network error. Please check your connection and try again.";
-
-            if (err instanceof TypeError && err.message.includes("fetch")) {
-                errorMessage = "Unable to connect to the server. Please check your internet connection.";
-            } else if (err instanceof Error) {
-                errorMessage = `Network Error: ${err.message}`;
-            }
-
-            alert(errorMessage);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="sticky top-0 z-50 bg-white shadow-sm">
-                <Navbar />
+        {/* Circular Logo with Gradient Ring */}
+        <div className="flex justify-center mb-6">
+          <div className="relative">
+            <div className="absolute inset-0 w-[88px] h-[88px] -m-1 rounded-full border-2 border-orange-200/60"></div>
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-400 via-pink-500 to-orange-400 p-[3px]">
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-pink-100 to-orange-50 flex items-center justify-center">
+                <span className="text-transparent bg-clip-text bg-gradient-to-br from-pink-500 to-orange-500 font-bold text-3xl">V</span>
+              </div>
             </div>
-
-            {/* Mobile Login Link - Only visible on mobile */}
-            <div className="block lg:hidden px-4 py-3 text-center text-sm text-gray-600">
-                Already have an account?
-                <button onClick={() => router.push("/signin")} className="text-[#4A90E2] font-medium ml-1">
-                    Login
-                </button>
-            </div>
-
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-start justify-center gap-10 py-6 lg:py-10">
-                {/* Left Side - Static Card - Hidden on mobile */}
-
-                <div className="flex flex-col items-center sticky top-24">
-                    {/* Main Box */}
-                    <div className="hidden lg:flex w-[435px] rounded-lg shadow-md flex-col justify-center items-center text-center text-gray-800 bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)] p-8">
-
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                            On registering, you can
-                        </h2>
-
-                        <ul className="text-[#474D6A] font-[14px] text-sm flex flex-col items-start justify-center gap-5">
-                            {[
-                                "Build your profile and let recruiters find you.",
-                                "Get job posting delivered right to your email.",
-                                "Find a job and grow your career with Vfind.",
-                            ].map((text, i) => (
-                                <li
-                                    key={i}
-                                    className="flex items-center gap-3 text-[14px] leading-[18px] text-[#474D6A]"
-                                >
-                                    <span className="flex items-center justify-center w-[20px] h-[20px]">
-                                        <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                                    </span>
-                                    <span className="flex-1 text-left">{text}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Login Below the Box */}
-                    <div className="hidden lg:block text-center mt-6 text-sm text-gray-600">
-                        Already have an account?
-                        <button
-                            onClick={() => router.push("/signin")}
-                            className="text-[#4A90E2] font-medium ml-1"
-                        >
-                            Login
-                        </button>
-                    </div>
-                </div>
-
-                {/* Right Side - Form - Responsive */}
-                <div className="w-full max-w-[779px]">
-                    {/* Step Progress Bar */}
-                    <div className="flex justify-between p-2 lg:p-4">
-                        {[...Array(totalSteps)].map((_, index) => {
-                            const stepNumber = index + 1;
-                            return (
-                                <div
-                                    key={stepNumber}
-                                    className={`flex-1 h-1.5 lg:h-2 mx-0.5 lg:mx-1 rounded-full ${currentStep > stepNumber
-                                        ? "bg-green-600"
-                                        : currentStep === stepNumber
-                                            ? "bg-blue-500"
-                                            : "bg-gray-300"
-                                        }`}
-                                />
-                            );
-                        })}
-                    </div>
-
-                    <div
-                        className="w-full rounded-lg shadow-md flex flex-col bg-white max-h-[calc(100vh-200px)] overflow-y-auto"
-                        ref={formRef}
-                    >
-                        <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 flex-grow">
-                            {[...Array(currentStep)].map((_, i) => {
-                                const stepNumber = i + 1;
-                                return (
-                                    <div key={stepNumber} id={`step-${stepNumber}`} className="p-2 lg:p-4  rounded bg-white">
-                                        {renderStep(stepNumber)}
-                                    </div>
-                                );
-                            })}
-
-                            {/* Navigation Buttons */}
-                            <div className="flex justify-end pt-4 pb-2 lg:pt-6 lg:pb-4 border-t border-gray-200 sticky bottom-0 bg-white">
-                                {currentStep < totalSteps && (
-                                    <button
-                                        onClick={() => {
-                                            setCurrentStep((prev) => prev + 1);
-                                            // Scroll within the form container only
-                                            setTimeout(() => {
-                                                const nextStep = currentStep + 1;
-                                                const nextStepElement = document.getElementById(`step-${nextStep}`);
-                                                if (nextStepElement && formRef.current) {
-                                                    // Calculate the position relative to the form container
-                                                    const containerTop = formRef.current.offsetTop;
-                                                    const elementTop = nextStepElement.offsetTop;
-                                                    const scrollPosition = elementTop - containerTop;
-
-                                                    // Scroll within the form container
-                                                    formRef.current.scrollTo({
-                                                        top: scrollPosition,
-                                                        behavior: "smooth"
-                                                    });
-                                                }
-                                            }, 100);
-                                        }}
-                                        disabled={!isStepComplete(currentStep)}
-                                        className={`group px-4 lg:px-4 py-2 lg:py-2 rounded text-white text-sm lg:text-base transition-all duration-300 flex items-center justify-center overflow-hidden ${isStepComplete(currentStep)
-                                                ? "bg-[#61A6FA]"
-                                                : "bg-gray-400 cursor-not-allowed"
-                                            }`}
-                                    >
-                                        <span className="flex items-center gap-2">
-                                            <span className="transition-all duration-300 group-hover:-translate-x-1">
-                                                Next
-                                            </span>
-                                            {isStepComplete(currentStep) && (
-                                                <ArrowRight
-                                                    className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                                                    strokeWidth={3}
-                                                />
-                                            )}
-                                        </span>
-                                    </button>
-                                )}
-                                {currentStep === totalSteps && (
-                                    <button
-                                        onClick={handleSubmit}
-                                        disabled={!isStepComplete(currentStep) || isSubmitting}
-                                        className={`px-4 lg:px-4 py-2 lg:py-2 rounded text-white text-sm lg:text-base ${isStepComplete(currentStep) && !isSubmitting
-                                            ? "bg-blue-400 hover:bg-blue-500"
-                                            : "bg-gray-400 cursor-not-allowed"
-                                            } transition-colors`}
-                                    >
-                                        {isSubmitting ? "Submitting..." : "Submit"}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <Footer />
+          </div>
         </div>
-    );
+
+        {/* Heading */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl sm:text-[26px] font-bold text-gray-900 mb-2">
+            Join VFind<span className="text-orange-400">.</span>
+          </h1>
+          <p className="text-gray-500 text-[15px]">
+            Your nursing career starts here
+          </p>
+        </div>
+
+        {/* Google Sign Up Button */}
+        <div className="space-y-4 mb-6">
+          <button
+            onClick={signupWithGoogle}
+            disabled={loading}
+            className="w-full h-14 border border-gray-200 bg-white text-gray-700 rounded-full font-medium hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-3 shadow-sm"
+          >
+            <Image
+              src="/icons/google.png"
+              alt="Google"
+              width={22}
+              height={22}
+            />
+            <span className="text-[15px]">Sign up with Google</span>
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex-1 h-px bg-gray-200"></div>
+          <span className="text-gray-400 text-sm">or</span>
+          <div className="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl">
+            <p className="text-red-600 text-sm text-center">{error}</p>
+          </div>
+        )}
+
+        {/* Signup Form */}
+        <form onSubmit={handleSignup} className="space-y-5">
+          {/* Full Name Field */}
+          <div>
+            <label className="block text-gray-700 font-medium text-sm mb-2">
+              Full name*
+            </label>
+            <input
+              type="text"
+              className="w-full h-14 px-5 border border-gray-200 rounded-full bg-white text-gray-900 text-[15px] placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:border-blue-300 focus:bg-blue-50/50 focus:ring-4 focus:ring-blue-100/50"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Enter your full name"
+              required
+            />
+            {fullName && !validateFullName(fullName) && (
+              <p className="text-orange-500 text-xs mt-1">Please include first and last name</p>
+            )}
+          </div>
+
+          {/* Email Field */}
+          <div>
+            <label className="block text-gray-700 font-medium text-sm mb-2">
+              Email address*
+            </label>
+            <input
+              type="email"
+              className="w-full h-14 px-5 border border-gray-200 rounded-full bg-white text-gray-900 text-[15px] placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:border-blue-300 focus:bg-blue-50/50 focus:ring-4 focus:ring-blue-100/50"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          {/* Password Field */}
+          <div>
+            <label className="block text-gray-700 font-medium text-sm mb-2">
+              Password*
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="w-full h-14 px-5 pr-14 border border-gray-200 rounded-full bg-white text-gray-900 text-[15px] placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:border-blue-300 focus:bg-blue-50/50 focus:ring-4 focus:ring-blue-100/50"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            {password && !validatePassword(password) && (
+              <p className="text-orange-500 text-xs mt-1">Password must be at least 6 characters</p>
+            )}
+          </div>
+
+          {/* Confirm Password Field */}
+          <div>
+            <label className="block text-gray-700 font-medium text-sm mb-2">
+              Confirm password*
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                className="w-full h-14 px-5 pr-14 border border-gray-200 rounded-full bg-white text-gray-900 text-[15px] placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:border-blue-300 focus:bg-blue-50/50 focus:ring-4 focus:ring-blue-100/50"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            {confirmPassword && password !== confirmPassword && (
+              <p className="text-orange-500 text-xs mt-1">Passwords do not match</p>
+            )}
+          </div>
+
+          {/* Terms Checkbox */}
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="w-5 h-5 mt-0.5 rounded border-gray-300 text-pink-500 focus:ring-pink-500 cursor-pointer"
+            />
+            <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer">
+              I accept the{" "}
+              <Link href="/terms" className="text-pink-500 hover:text-pink-600 font-medium">
+                Terms & Conditions
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-pink-500 hover:text-pink-600 font-medium">
+                Privacy Policy
+              </Link>
+            </label>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading || !isFormValid}
+            className="w-full h-14 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white rounded-full font-semibold text-[15px] transition-all duration-200 shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Creating account..." : "Create Account"}
+          </button>
+        </form>
+
+        {/* Login Link */}
+        <p className="text-center mt-6 text-gray-500 text-[15px]">
+          Already have an account?{" "}
+          <Link
+            href="/signin"
+            className="text-pink-500 hover:text-pink-600 font-semibold transition-colors"
+          >
+            Log in
+          </Link>
+        </p>
+
+        {/* Help Link */}
+        <div className="text-center mt-6 pt-6 border-t border-gray-100">
+          <p className="text-gray-400 text-sm">
+            Your data is safe with VFind.{" "}
+            <Link
+              href="/privacy"
+              className="text-pink-500 hover:text-pink-600 font-medium transition-colors"
+            >
+              Privacy Policy
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }

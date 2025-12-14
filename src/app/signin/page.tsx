@@ -2,9 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Navbar from "../../../components/navbar";
-import { ArrowRight, CheckCircle } from "lucide-react";
-import Footer from "../../../components/footer-section";
+import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { loginNurse } from "@/lib/supabase-auth";
 
@@ -23,8 +22,6 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError("");
-
-      // Google OAuth will be implemented with Supabase OAuth
       setError("Google Sign-In coming soon. Please use email/password.");
     } catch (err) {
       console.error("Google login error:", err);
@@ -48,10 +45,7 @@ export default function LoginPage() {
       }
 
       if (result.authToken) {
-        // Use AuthContext login to update state and store cookies
         login(result.authToken, "Nurse", email);
-
-        // Keep localStorage for backward compatibility (optional)
         localStorage.setItem("token", result.authToken);
         localStorage.setItem("email", email);
       }
@@ -66,172 +60,162 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-fit ">
-      <Navbar />
-      <div className="flex items-center justify-center min-h-fit py-10  px-4 mt-10">
-        {/* Flex container with responsive behavior */}
-        <div className="flex flex-col md:flex-col lg:flex-row gap-6 max-w-5xl w-full">
-          {/* "New to VFind" Section (Now on the Left) */}
-          <div
-            className="hidden md:flex flex-col justify-between w-full lg:w-[627px] lg:h-[480px] p-10 rounded-2xl shadow-md 
-        order-2 lg:order-1
-bg-[linear-gradient(to_top,#BEDCFD_0%,#E5F1FF_40%,#FCFEFF_100%)]
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-orange-50 relative overflow-hidden flex items-center justify-center px-4 py-8">
+      {/* Decorative Background Blobs - Larger and more prominent */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-gradient-to-br from-pink-200/70 to-pink-300/50 rounded-full blur-3xl -translate-x-1/3 -translate-y-1/3" />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-orange-100/60 to-amber-100/40 rounded-full blur-3xl translate-x-1/4 -translate-y-1/4" />
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-gradient-to-tl from-pink-100/50 to-rose-100/40 rounded-full blur-3xl translate-x-1/4 translate-y-1/4" />
+      <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] bg-gradient-to-tr from-orange-100/40 to-pink-100/30 rounded-full blur-2xl translate-y-1/3" />
 
-"
-          >
-            <div className="mt-10 ml-10">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                New to VFind?
-              </h2>
-              <ul className="space-y-3 text-[#474D6A] font-weight-medium text-sm  ">
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-[480px] bg-white rounded-[2rem] shadow-sm border border-gray-100 px-10 py-10 sm:px-12 sm:py-12">
 
-                <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
-                  <span className=" font-regular text-[14px]  text-black " >One click apply using VFind profile.</span>
-                </li>
-
-                <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
-                  <span className=" font-regular text-[14px]  text-black "  > Get relevant job recommendations.</span>
-                </li>
-                <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
-                  <span className=" font-regular text-[14px]  text-black "  >  Showcase profile to top companies and consultants.</span>
-                </li>
-                <li className="flex items-start gap-4 mt-5">
-                  <CheckCircle className="w-6 h-6 text-blue-400 flex-shrink-0  rounded-full" />
-                  <span className=" font-regular text-[14px]  text-black " >  Get connection request from top companies.</span>
-                </li>
-
-              </ul>
-              <button
-                onClick={() => router.push("/signup")}
-                className="group mt-6 h-[38px] w-[225px] text-white bg-[#61A6FA] rounded-[8px] shadow transition-all duration-300
-                 overflow-hidden flex items-center justify-center"
-              >
-                <span className="flex items-center gap-2">
-                  <span className="transition-all duration-300 group-hover:-translate-x-1">
-                    Register for Free
-                  </span>
-                  <ArrowRight
-                    className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                    strokeWidth={3}
-                  />
-                </span>
-              </button>
-            </div>
-
-          </div>
-
-          {/* Login Section (Now on the Right) */}
-          <div className="border-1 border-gray-300 lg:order-1 w-full lg:w-[448px] h-auto lg:h-[477px] bg-white shadow-md rounded-2xl p-10">
-
-
-            <h2 className="text-xl sm:text-[22px] font-medium text-[#121224] ">
-              Sign In to Your Nurse Account
-            </h2>
-
-            {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-            {success && (
-              <p className="text-green-500 text-sm mb-3">{success}</p>
-            )}
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div>
-                <label className="block text-gray-700 font-medium text-sm mt-3 ">
-                  Email Address{" "}
-                </label>
-                <input
-                  type="email"
-                  className="w-full p-3 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#717B9E] h-[40] w-[328]"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                />
+        {/* Circular Logo with Gradient Ring and Outer Glow */}
+        <div className="flex justify-center mb-6">
+          <div className="relative">
+            {/* Outer golden glow ring */}
+            <div className="absolute inset-0 w-[88px] h-[88px] -m-1 rounded-full border-2 border-orange-200/60"></div>
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-400 via-pink-500 to-orange-400 p-[3px]">
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-pink-100 to-orange-50 flex items-center justify-center">
+                <span className="text-transparent bg-clip-text bg-gradient-to-br from-pink-500 to-orange-500 font-bold text-3xl">V</span>
               </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium text-sm">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className="w-full p-3 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#717B9E] h-[40] w-[328]"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 px-3 flex items-center text-[#4A90E2] "
-                  >
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
-                </div>
-                <a
-                  href="/forgot_password_nurse"
-                  className="text-sm text-[#4A90E2] hover:underline float-right mt-2 font-medium"
-                >
-                  Forgot password?
-                </a>
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group w-full sm:w-[328px] h-[40px] bg-[#61A6FA] text-white rounded-lg font-medium transition-all duration-300 mt-12 mx-auto block overflow-hidden flex items-center justify-center"
-              >
-                  <span className="transition-all duration-300 group-hover:-translate-x-1">
-                    {loading ? "Logging in..." : "Login"}
-                  </span>
-                  {!loading && (
-                    <ArrowRight
-                      className="w-4 h-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                      strokeWidth={3}
-                    />
-                  )}
-              </button>
-
-            </form>
-
-            <div className="my-4 flex items-center">
-              <div className="flex-1 h-px bg-gray-300"></div>
-              <span className="px-3 text-gray-500 text-sm">Or</span>
-              <div className="flex-1 h-px bg-gray-300"></div>
-            </div>
-            <div>
-              <button
-                onClick={loginWithGoogle}
-                className="w-full sm:w-[328px] h-[40px] border border-gray-300 bg-white text-[#717B9E] rounded-lg font-medium hover:bg-gray-100 transition flex items-center justify-center gap-2 mx-auto"
-              >
-                <Image
-                  src="/icons/google.png"
-                  alt="Google Icon"
-                  width={20}
-                  height={20}
-                />
-                <span>Sign in with Google</span>
-              </button>
-
-            </div>
-            <div className="block text-center mt-4 text-sm text-gray-600">
-              Don’t have an account?
-              <button
-                onClick={() => router.push("/signup")}
-                className="text-[#4A90E2] font-medium ml-1"
-              >
-                Sign up
-              </button>
             </div>
           </div>
         </div>
-      </div>
-      <div className="bg-[#1F3C88] ">
-        <Footer />
-      </div>
 
+        {/* Welcome Heading - with colored period */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl sm:text-[26px] font-bold text-gray-900 mb-2">
+            Welcome to VFind<span className="text-orange-400">.</span>
+          </h1>
+          <p className="text-gray-500 text-[15px]">
+            Your nursing career starts here
+          </p>
+        </div>
+
+        {/* Social Login Buttons - Pill shaped, taller */}
+        <div className="space-y-4 mb-6">
+          <button
+            onClick={loginWithGoogle}
+            disabled={loading}
+            className="w-full h-14 border border-gray-200 bg-white text-gray-700 rounded-full font-medium hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-3 shadow-sm"
+          >
+            <Image
+              src="/icons/google.png"
+              alt="Google"
+              width={22}
+              height={22}
+            />
+            <span className="text-[15px]">Log in with Google</span>
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex-1 h-px bg-gray-200"></div>
+          <span className="text-gray-400 text-sm">or</span>
+          <div className="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        {/* Error/Success Messages */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl">
+            <p className="text-red-600 text-sm text-center">{error}</p>
+          </div>
+        )}
+        {success && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-2xl">
+            <p className="text-green-600 text-sm text-center">{success}</p>
+          </div>
+        )}
+
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className="space-y-5">
+          {/* Email Field */}
+          <div>
+            <label className="block text-gray-700 font-medium text-sm mb-2">
+              Email address*
+            </label>
+            <input
+              type="email"
+              className="w-full h-14 px-5 border border-gray-200 rounded-full bg-white text-gray-900 text-[15px] placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:border-blue-300 focus:bg-blue-50/50 focus:ring-4 focus:ring-blue-100/50"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          {/* Password Field */}
+          <div>
+            <label className="block text-gray-700 font-medium text-sm mb-2">
+              Password*
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="w-full h-14 px-5 pr-14 border border-gray-200 rounded-full bg-white text-gray-900 text-[15px] placeholder:text-gray-400 transition-all duration-200 focus:outline-none focus:border-blue-300 focus:bg-blue-50/50 focus:ring-4 focus:ring-blue-100/50"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            <div className="flex justify-end mt-2">
+              <Link
+                href="/forgot_password_nurse"
+                className="text-sm text-pink-500 hover:text-pink-600 font-medium transition-colors"
+              >
+                Trouble logging in?
+              </Link>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-14 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white rounded-full font-semibold text-[15px] transition-all duration-200 shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Logging in..." : "Log in"}
+          </button>
+        </form>
+
+        {/* Sign Up Link */}
+        <p className="text-center mt-6 text-gray-500 text-[15px]">
+          New to VFind?{" "}
+          <Link
+            href="/signup"
+            className="text-pink-500 hover:text-pink-600 font-semibold transition-colors"
+          >
+            Join us
+          </Link>
+        </p>
+
+        {/* Help Link */}
+        <div className="text-center mt-6 pt-6 border-t border-gray-100">
+          <p className="text-gray-400 text-sm">
+            Need help?{" "}
+            <Link
+              href="/contact"
+              className="text-pink-500 hover:text-pink-600 font-medium transition-colors"
+            >
+              Contact support
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
