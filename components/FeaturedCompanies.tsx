@@ -1,13 +1,14 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 
-// Healthcare company names
+// Healthcare companies with logos
 const companies = [
-    "Regis Healthcare",
-    "Bupa Health",
-    "Silver Chain",
-    "Healthscope",
-    "Estia Health",
+    { name: "Regis Healthcare", logo: "/assets/logos/regis.svg" },
+    { name: "Bupa Health", logo: "/assets/logos/bupa.svg" },
+    { name: "Silver Chain", logo: "/assets/logos/silverchain.png" },
+    { name: "Healthscope", logo: "/assets/logos/healthscope.jpg" },
+    { name: "Estia Health", logo: "/assets/logos/estia.svg" },
 ];
 
 export const FeaturedCompanies = () => {
@@ -50,11 +51,15 @@ export const FeaturedCompanies = () => {
                     {companies.map((company, index) => (
                         <div
                             key={index}
-                            className="bg-white rounded-2xl py-8 px-6 flex items-center justify-center"
+                            className="bg-white rounded-2xl py-6 px-4 flex items-center justify-center h-24"
                         >
-                            <span className="font-primary text-base sm:text-lg font-bold text-gray-400 text-center">
-                                {company}
-                            </span>
+                            <Image
+                                src={company.logo}
+                                alt={company.name}
+                                width={120}
+                                height={40}
+                                className="object-contain max-h-10 w-auto grayscale hover:grayscale-0 transition-all duration-300"
+                            />
                         </div>
                     ))}
                 </div>
